@@ -167,6 +167,10 @@ export interface CourseCardDto {
   lessonCount: number
   estimatedMinutes: number | null
   tags: string[]
+  /** Lowest one-time price, for catalog cards. Null when nothing sells the course. */
+  price: { amountMinor: number; compareAtMinor: number | null; currency: string } | null
+  /** Anyone signed in may enrol for free. */
+  enrolmentOpen: boolean
 }
 /** `previewHref` is set only for free previews: a page anyone may open without signing in. */
 export interface LessonDto { id: string; title: string; type: string; durationSeconds: number | null; isPreview: boolean; previewHref?: string }

@@ -17,6 +17,7 @@
   --color-tint-3: var(--tint-3);
   --color-tint-4: var(--tint-4);
   --color-deep: var(--tone-deep);
+  --color-sidebar: var(--tone-sidebar);
   --color-grey: var(--tone-grey);
   --color-mute: var(--tone-mute);
   --color-field: var(--tone-field);
@@ -36,6 +37,7 @@
   --tint-3: #F9D9CF;
   --tint-4: #E1DDF2;
   --tone-deep: color-mix(in srgb, var(--color-primary) 68%, #000);
+  --tone-sidebar: color-mix(in srgb, var(--color-primary) 36%, #000);
   --tone-grey: color-mix(in srgb, var(--color-fg) 78%, var(--color-bg));
   --tone-mute: color-mix(in srgb, var(--color-fg) 60%, var(--color-bg));
   --tone-field: color-mix(in srgb, var(--color-fg) 45%, var(--color-bg));

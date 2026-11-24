@@ -1,6 +1,6 @@
 import { requireAccess } from '@/lib/dal'
 import { money } from '@/lib/money'
-import { buttonQuiet } from '@/lib/ui'
+import { buttonQuiet, pageTitle, sectionTitle } from '@/lib/ui'
 import { setCouponActive } from './actions'
 import { CouponCreateForm } from './form'
 
@@ -16,16 +16,16 @@ export default async function Coupons() {
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">Coupons</h1>
-      <p className="mt-2 text-fg/70">Learners enter a code at checkout. A coupon never changes a price you set; it applies to one order.</p>
+      <h1 className={pageTitle}>Coupons</h1>
+      <p className="mt-2 text-grey">Learners enter a code at checkout. A coupon never changes a price you set; it applies to one order.</p>
 
       <section className="mt-8">
-        <h2 className="mb-4 text-xl font-semibold">New coupon</h2>
+        <h2 className={sectionTitle + " mb-4"}>New coupon</h2>
         <CouponCreateForm />
       </section>
 
       <section className="mt-12">
-        <h2 className="mb-4 text-xl font-semibold">Your coupons</h2>
+        <h2 className={sectionTitle + " mb-4"}>Your coupons</h2>
         {data?.length ? (
           <ul className="border-t border-border">
             {data.map((c) => {
@@ -34,22 +34,22 @@ export default async function Coupons() {
               return (
                 <li key={c.id} className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-border py-3">
                   <div>
-                    <p className="font-medium"><span data-testid="coupon-code">{c.code}</span> <span className="font-normal text-fg/65">{off}</span></p>
-                    <p className="text-sm text-fg/65">
+                    <p className="font-medium"><span data-testid="coupon-code">{c.code}</span> <span className="font-normal text-mute">{off}</span></p>
+                    <p className="text-sm text-mute">
                       Used {c.redeemed_count}{c.max_redemptions ? ` of ${c.max_redemptions}` : ''} · {c.per_member_limit} per learner
                       {c.max_discount_minor ? ` · up to ${money(c.max_discount_minor)}` : ''}{c.min_order_minor ? ` · from ${money(c.min_order_minor)}` : ''}
                       {c.ends_at ? ` · ${expired ? 'ended' : 'until'} ${new Date(c.ends_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
                     </p>
                   </div>
                   <form action={setCouponActive.bind(null, c.id, !c.is_active)} className="flex items-center gap-3">
-                    <span className="text-sm text-fg/65">{c.is_active ? (expired ? 'Expired' : 'Active') : 'Off'}</span>
+                    <span className="text-sm text-mute">{c.is_active ? (expired ? 'Expired' : 'Active') : 'Off'}</span>
                     <button className={buttonQuiet}>{c.is_active ? 'Turn off' : 'Turn on'}</button>
                   </form>
                 </li>
               )
             })}
           </ul>
-        ) : <p className="text-fg/70">No coupons yet.</p>}
+        ) : <p className="text-grey">No coupons yet.</p>}
       </section>
     </>
   )

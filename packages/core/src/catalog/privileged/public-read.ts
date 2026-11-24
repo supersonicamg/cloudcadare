@@ -18,6 +18,10 @@ export interface PublicCourseCard {
   lessonCount: number
   estimatedMinutes: number | null
   tags: string[]
+  /** Lowest active one-time price, for the catalog card. Null: no product sells it (free enrolment or not for sale). */
+  price: { amountMinor: number; compareAtMinor: number | null; currency: string } | null
+  /** Anyone signed in may enrol for free. */
+  enrolmentOpen: boolean
 }
 
 export interface PublicLesson {
@@ -52,21 +56,20 @@ export interface PublicOffer {
 
 export interface PublicCourse extends PublicCourseCard {
   offer: PublicOffer | null
-  /** Staff switched "anyone signed in can enrol for free" on. Says nothing about whether a product sells it. */
-  enrolmentOpen: boolean
   outcomes: string[]
   requirements: string[]
   sections: PublicSection[]
 }
 
-const CARD = 'id, slug, kind, title, subtitle, summary, level, delivery_mode, lesson_count, estimated_minutes, tags'
+const CARD = 'id, slug, kind, title, subtitle, summary, level, delivery_mode, lesson_count, estimated_minutes, tags, settings'
 
 const toCard = (r: {
   id: string; slug: string; kind: string; title: string; subtitle: string | null; summary: string | null
-  level: string; delivery_mode: string; lesson_count: number; estimated_minutes: number | null; tags: string[]
-}): PublicCourseCard => ({
+  level: string; delivery_mode: string; lesson_count: number; estimated_minutes: number | null; tags: string[]; settings?: unknown
+}, price: PublicCourseCard['price'] = null): PublicCourseCard => ({
   id: r.id, slug: r.slug, kind: r.kind, title: r.title, subtitle: r.subtitle, summary: r.summary, level: r.level,
   deliveryMode: r.delivery_mode, lessonCount: r.lesson_count, estimatedMinutes: r.estimated_minutes, tags: r.tags,
+  price, enrolmentOpen: ((r.settings ?? {}) as { enrolment?: string }).enrolment === 'open',
 })
 
 export async function getPublishedCourses(tenantId: string): Promise<PublicCourseCard[]> {
@@ -76,7 +79,35 @@ export async function getPublishedCourses(tenantId: string): Promise<PublicCours
     .eq('tenant_id', tenantId).eq('status', 'published').eq('visibility', 'public').is('deleted_at', null)
     .order('sort_order').order('published_at', { ascending: false }).limit(200)
   if (error) throw new Error(`catalog read failed: ${error.message}`)
-  return (data ?? []).map(toCard)
+  const prices = await getCardPrices(tenantId, (data ?? []).map((c) => c.id))
+  return (data ?? []).map((c) => toCard(c, prices.get(c.id) ?? null))
+}
+
+/** Lowest active one-time price of the published products that sell each course, in three queries for the whole page. */
+async function getCardPrices(tenantId: string, courseIds: string[]) {
+  const out = new Map<string, NonNullable<PublicCourseCard['price']>>()
+  if (!courseIds.length) return out
+  const db = createPrivilegedDb(getPlane(null))
+  const { data: items } = await db.from('product_items').select('product_id, course_id').eq('tenant_id', tenantId).in('course_id', courseIds)
+  const productIds = [...new Set((items ?? []).map((i) => i.product_id))]
+  if (!productIds.length) return out
+  const [{ data: products }, { data: prices }] = await Promise.all([
+    db.from('products').select('id').eq('tenant_id', tenantId).in('id', productIds).eq('status', 'published').neq('visibility', 'private').is('deleted_at', null),
+    db.from('prices').select('product_id, amount_minor, compare_at_minor, currency')
+      .eq('tenant_id', tenantId).in('product_id', productIds).eq('is_active', true).eq('billing_type', 'one_time').order('amount_minor'),
+  ])
+  const live = new Set((products ?? []).map((p) => p.id))
+  const cheapest = new Map<string, NonNullable<PublicCourseCard['price']>>()
+  for (const p of prices ?? []) {
+    if (live.has(p.product_id) && !cheapest.has(p.product_id)) cheapest.set(p.product_id, { amountMinor: p.amount_minor, compareAtMinor: p.compare_at_minor, currency: p.currency })
+  }
+  for (const i of items ?? []) {
+    if (!i.course_id) continue
+    const p = cheapest.get(i.product_id)
+    const cur = out.get(i.course_id)
+    if (p && (!cur || p.amountMinor < cur.amountMinor)) out.set(i.course_id, p)
+  }
+  return out
 }
 
 export async function getPublicCourse(tenantId: string, slug: string): Promise<PublicCourse | null> {
@@ -110,8 +141,8 @@ export async function getPublicCourse(tenantId: string, slug: string): Promise<P
     const parent = s.parentId ? byId.get(s.parentId) : undefined
     ;(parent ? parent.children : roots).push(s)
   }
-  const settings = (c.settings ?? {}) as { enrolment?: string }
-  return { ...toCard(c), offer, enrolmentOpen: settings.enrolment === 'open', outcomes: c.outcomes, requirements: c.requirements, sections: roots }
+  const priced = offer && { amountMinor: offer.amountMinor, compareAtMinor: offer.compareAtMinor, currency: offer.currency }
+  return { ...toCard(c, priced), offer, outcomes: c.outcomes, requirements: c.requirements, sections: roots }
 }
 
 /** The product (one course, one-time price) that currently sells this course, if any. Cheapest active price wins. */

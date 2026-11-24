@@ -1,5 +1,5 @@
 import { requireAccess } from '@/lib/dal'
-import { buttonQuiet } from '@/lib/ui'
+import { buttonQuiet, pageTitle, sectionTitle } from '@/lib/ui'
 import { revokeAccess } from './actions'
 import { GrantForm } from './grant-form'
 
@@ -19,14 +19,14 @@ export default async function Enrolments() {
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">Enrolments</h1>
+      <h1 className={pageTitle}>Enrolments</h1>
       <section className="mt-8">
-        <h2 className="mb-4 text-xl font-semibold">Give someone access</h2>
-        {courses.data?.length ? <GrantForm courses={courses.data} /> : <p className="text-fg/70">Create a course first.</p>}
+        <h2 className={sectionTitle + " mb-4"}>Give someone access</h2>
+        {courses.data?.length ? <GrantForm courses={courses.data} /> : <p className="text-grey">Create a course first.</p>}
       </section>
 
       <section className="mt-14">
-        <h2 className="mb-2 text-xl font-semibold">Who has access</h2>
+        <h2 className={sectionTitle + " mb-2"}>Who has access</h2>
         {rows.data?.length ? (
           <ul className="border-t border-border">
             {rows.data.map((e) => {
@@ -34,8 +34,8 @@ export default async function Enrolments() {
               return (
                 <li key={e.id} className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border py-3">
                   <div>
-                    <p className="font-medium">{m?.display_name} <span className="font-normal text-fg/60">{m?.email}</span></p>
-                    <p className="text-sm text-fg/65">
+                    <p className="font-medium">{m?.display_name} <span className="font-normal text-mute">{m?.email}</span></p>
+                    <p className="text-sm text-mute">
                       {c?.title} · {e.status === 'completed' ? 'Completed' : `${Math.round(Number(e.progress_pct))}%`} · {SOURCE[e.source] ?? e.source}
                     </p>
                   </div>
@@ -44,7 +44,7 @@ export default async function Enrolments() {
               )
             })}
           </ul>
-        ) : <p className="text-fg/70">No one is enrolled yet.</p>}
+        ) : <p className="text-grey">No one is enrolled yet.</p>}
       </section>
     </>
   )

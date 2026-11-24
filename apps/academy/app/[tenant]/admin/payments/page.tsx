@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 import { fakeGatewayEnabled } from '@educore/core/commerce'
 import { requireAccess } from '@/lib/dal'
 import { GatewayForm } from './form'
+import { pageTitle, sectionTitle } from '@/lib/ui'
 
 export const metadata = { title: 'Payments' }
 
@@ -16,8 +17,8 @@ export default async function Payments() {
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">Payments</h1>
-      <p className="mt-2 max-w-2xl text-fg/70">
+      <h1 className={pageTitle}>Payments</h1>
+      <p className="mt-2 max-w-2xl text-grey">
         Learners pay into your own Razorpay account, not ours. Add its keys here. Start in test mode and switch to live once a test payment works.
       </p>
       {fakeGatewayEnabled() && (
@@ -27,7 +28,7 @@ export default async function Payments() {
       )}
 
       <section className="mt-10">
-        <h2 className="mb-4 text-xl font-semibold">Razorpay account</h2>
+        <h2 className={sectionTitle + " mb-4"}>Razorpay account</h2>
         <GatewayForm mode={(acc?.mode as 'test' | 'live') ?? 'test'} keyId={acc?.public_key ?? ''} hasSecret={Boolean(acc?.secret_vault_id)} hasWebhookSecret={Boolean(acc?.webhook_secret_vault_id)} />
       </section>
 

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { can, holds, requireAccess } from '@/lib/dal'
 import { money } from '@/lib/money'
 import { RefundForm } from '../refund-form'
+import { sectionTitle } from '@/lib/ui'
 
 export const metadata = { title: 'Order' }
 
@@ -32,9 +33,9 @@ export default async function OrderDetail({ params }: PageProps<'/[tenant]/admin
 
   return (
     <>
-      <Link href="/admin/orders" className="text-sm text-fg/65 hover:text-fg">&larr; Orders</Link>
+      <Link href="/admin/orders" className="text-sm text-mute hover:text-fg">&larr; Orders</Link>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight">Order {o.order_no}</h1>
-      <p className="mt-1 text-fg/70">{m?.display_name} · {m?.email} · placed {when(o.placed_at)}</p>
+      <p className="mt-1 text-grey">{m?.display_name} · {m?.email} · placed {when(o.placed_at)}</p>
 
       <section className="mt-8 border-t border-border pt-5">
         <ul className="space-y-1">
@@ -42,7 +43,7 @@ export default async function OrderDetail({ params }: PageProps<'/[tenant]/admin
         </ul>
         <dl className="mt-4 space-y-1 text-[15px]">
           {o.discount_minor > 0 && <div className="flex justify-between"><dt>Coupon discount</dt><dd>&minus;{money(o.discount_minor, o.currency)}</dd></div>}
-          {o.tax_minor > 0 && <div className="flex justify-between text-fg/70"><dt>Includes tax</dt><dd>{money(o.tax_minor, o.currency)}</dd></div>}
+          {o.tax_minor > 0 && <div className="flex justify-between text-grey"><dt>Includes tax</dt><dd>{money(o.tax_minor, o.currency)}</dd></div>}
           <div className="flex justify-between text-lg font-semibold"><dt>Total</dt><dd data-testid="order-total">{money(o.total_minor, o.currency)}</dd></div>
           <div className="flex justify-between"><dt>Status</dt><dd data-testid="order-status">{STATUS[o.status] ?? o.status}</dd></div>
         </dl>
@@ -54,7 +55,7 @@ export default async function OrderDetail({ params }: PageProps<'/[tenant]/admin
           <ul className="border-t border-border">
             {pays.data.map((p) => (
               <li key={p.id} className="flex flex-wrap justify-between gap-x-6 border-b border-border py-2.5 text-[15px]">
-                <span>{p.gateway_payment_id ?? 'Waiting for payment'} <span className="text-fg/60">{p.method ?? ''}</span></span>
+                <span>{p.gateway_payment_id ?? 'Waiting for payment'} <span className="text-mute">{p.method ?? ''}</span></span>
                 <span>{money(p.amount_minor, o.currency)} · {p.status.replace('_', ' ')}{p.failure_reason ? ` (${p.failure_reason})` : ''}</span>
               </li>
             ))}
@@ -68,7 +69,7 @@ export default async function OrderDetail({ params }: PageProps<'/[tenant]/admin
           <ul className="border-t border-border">
             {refunds.data.map((r) => (
               <li key={r.id} className="flex flex-wrap justify-between gap-x-6 border-b border-border py-2.5 text-[15px]">
-                <span>{r.reason ?? 'No reason given'} <span className="text-fg/60">{when(r.processed_at ?? r.created_at)}</span></span>
+                <span>{r.reason ?? 'No reason given'} <span className="text-mute">{when(r.processed_at ?? r.created_at)}</span></span>
                 <span data-testid="refund-row">{money(r.amount_minor, o.currency)} · {r.status}</span>
               </li>
             ))}
@@ -77,17 +78,17 @@ export default async function OrderDetail({ params }: PageProps<'/[tenant]/admin
       )}
 
       {!!docs.data?.length && (
-        <p className="mt-8 text-sm text-fg/70">{docs.data.map((d) => `${d.kind.replace('_', ' ')} ${d.invoice_no}`).join(' · ')}</p>
+        <p className="mt-8 text-sm text-grey">{docs.data.map((d) => `${d.kind.replace('_', ' ')} ${d.invoice_no}`).join(' · ')}</p>
       )}
 
       {refundable && (
         <section className="mt-12 border-t border-border pt-8">
-          <h2 className="mb-4 text-xl font-semibold">Refund</h2>
+          <h2 className={sectionTitle + " mb-4"}>Refund</h2>
           {can(a, 'refund.manage') ? (
             <RefundForm orderId={o.id} left={money(left, o.currency)} />
           ) : holds(a, 'refund.manage') ? (
             <p><Link href={`/admin/mfa?next=${encodeURIComponent(`/admin/orders/${o.id}`)}`} className="text-primary underline">Verify your authenticator code</Link> to issue refunds.</p>
-          ) : <p className="text-fg/70">You do not have permission to issue refunds.</p>}
+          ) : <p className="text-grey">You do not have permission to issue refunds.</p>}
         </section>
       )}
     </>

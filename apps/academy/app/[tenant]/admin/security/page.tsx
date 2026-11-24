@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { requireAccess } from '@/lib/dal'
 import { safeAdminNext } from '@/lib/admin-next'
 import { EnrolForm } from './enrol-form'
+import { pageTitle, sectionTitle } from '@/lib/ui'
 
 export const metadata = { title: 'Security' }
 
@@ -15,17 +16,17 @@ export default async function Security({ searchParams }: PageProps<'/[tenant]/ad
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">Security</h1>
-      <p className="mt-2 max-w-2xl text-fg/70">
+      <h1 className={pageTitle}>Security</h1>
+      <p className="mt-2 max-w-2xl text-grey">
         Some actions need a second check with an authenticator app: changing prices, connecting a payment account, granting or removing a learner&rsquo;s access and editing roles.
       </p>
 
       <section className="mt-10">
-        <h2 className="mb-4 text-xl font-semibold">Authenticator app</h2>
+        <h2 className={sectionTitle + " mb-4"}>Authenticator app</h2>
         {enrolled ? (
           <div className="max-w-xl space-y-3">
             <p>Two-step check is <span className="font-medium">on</span> for your account.</p>
-            <p className="text-fg/70">{verified ? 'This sign-in is already verified.' : 'This sign-in is not verified yet. It will ask for a code when you open one of those pages.'}</p>
+            <p className="text-grey">{verified ? 'This sign-in is already verified.' : 'This sign-in is not verified yet. It will ask for a code when you open one of those pages.'}</p>
             {!verified && <Link href={`/admin/mfa?next=${encodeURIComponent(next)}`} className="inline-block text-primary underline">Verify now</Link>}
           </div>
         ) : (

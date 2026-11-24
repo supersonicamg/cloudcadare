@@ -31,9 +31,9 @@ export default async function EditLesson({ params }: PageProps<'/[tenant]/admin/
 
   return (
     <>
-      <Link href={`/admin/courses/${id}`} className="text-sm text-fg/65 hover:text-fg">&larr; Back to the course</Link>
+      <Link href={`/admin/courses/${id}`} className="text-sm text-mute hover:text-fg">&larr; Back to the course</Link>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight">{l.title}</h1>
-      <p className="mt-1 text-fg/65">{{ video: 'Video', article: 'Reading', external_link: 'Link', pdf: 'PDF', download: 'Download', quiz: 'Quiz' }[l.type] ?? l.type} lesson</p>
+      <p className="mt-1 text-mute">{{ video: 'Video', article: 'Reading', external_link: 'Link', pdf: 'PDF', download: 'Download', quiz: 'Quiz' }[l.type] ?? l.type} lesson</p>
       <div className="mt-8">
         <LessonForm courseId={id} lessonId={lessonId} v={{
           title: l.title, summary: l.summary, type: l.type, minutes: l.duration_seconds ? Math.round(l.duration_seconds / 60) : null,

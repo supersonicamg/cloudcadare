@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { requireAccess } from '@/lib/dal'
 import { safeAdminNext } from '@/lib/admin-next'
 import { VerifyForm } from './verify-form'
+import { pageTitle } from '@/lib/ui'
 
 export const metadata = { title: 'Confirm it is you' }
 
@@ -15,8 +16,8 @@ export default async function Mfa({ searchParams }: PageProps<'/[tenant]/admin/m
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">Confirm it is you</h1>
-      <p className="mt-2 mb-8 max-w-xl text-fg/70">This page changes money or access, so we need a code from your authenticator app first.</p>
+      <h1 className={pageTitle}>Confirm it is you</h1>
+      <p className="mt-2 mb-8 max-w-xl text-grey">This page changes money or access, so we need a code from your authenticator app first.</p>
       <VerifyForm next={next} />
     </>
   )

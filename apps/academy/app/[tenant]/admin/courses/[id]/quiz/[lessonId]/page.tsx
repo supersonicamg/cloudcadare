@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { requireAccess } from '@/lib/dal'
 import { removeQuestion } from '../actions'
 import { QuestionForm, QuizSettingsForm, type QuestionValues } from './forms'
+import { sectionTitle } from '@/lib/ui'
 
 export const metadata = { title: 'Quiz' }
 
@@ -52,12 +53,12 @@ export default async function QuizEditor({ params, searchParams }: PageProps<'/[
 
   return (
     <>
-      <Link href={`/admin/courses/${id}`} className="text-sm text-fg/65 hover:text-fg">&larr; Back to the course</Link>
+      <Link href={`/admin/courses/${id}`} className="text-sm text-mute hover:text-fg">&larr; Back to the course</Link>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight">{test.data.title}</h1>
-      <p className="mt-1 text-fg/65">Quiz · {questions.length} {questions.length === 1 ? 'question' : 'questions'} · {Number(test.data.total_marks)} marks{test.data.pass_marks ? ` · pass at ${Number(test.data.pass_marks)}` : ''}</p>
+      <p className="mt-1 text-mute">Quiz · {questions.length} {questions.length === 1 ? 'question' : 'questions'} · {Number(test.data.total_marks)} marks{test.data.pass_marks ? ` · pass at ${Number(test.data.pass_marks)}` : ''}</p>
 
       <section className="mt-10">
-        <h2 className="mb-4 text-xl font-semibold">Settings</h2>
+        <h2 className={sectionTitle + " mb-4"}>Settings</h2>
         <QuizSettingsForm courseId={id} lessonId={lessonId} testId={testId} v={{
           title: test.data.title, instructions: ((test.data.instructions ?? {}) as { text?: string } | null)?.text ?? '',
           passPct: settings.pass_pct ?? null, minutes: test.data.duration_seconds ? Math.round(test.data.duration_seconds / 60) : null,
@@ -67,18 +68,18 @@ export default async function QuizEditor({ params, searchParams }: PageProps<'/[
 
       <section className="mt-14">
         <h2 className="mb-1 text-xl font-semibold">Questions</h2>
-        <p className="mb-4 text-fg/70">Learners see these in this order{test.data.shuffle_questions ? ' (shuffled)' : ''}. Learners who already took the quiz keep their result if you change a question.</p>
+        <p className="mb-4 text-grey">Learners see these in this order{test.data.shuffle_questions ? ' (shuffled)' : ''}. Learners who already took the quiz keep their result if you change a question.</p>
         {questions.length > 0 && (
           <ol className="border-t border-border">
             {questions.map((q, i) => (
               <li key={q.id} className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border py-3">
                 <div>
-                  <p className="font-medium"><span className="mr-2 text-fg/60">{i + 1}.</span>{((q.stem ?? {}) as { text?: string }).text}</p>
-                  <p className="text-sm text-fg/65">{TYPE[q.type] ?? q.type} · {Number(q.default_marks)} {Number(q.default_marks) === 1 ? 'mark' : 'marks'}</p>
+                  <p className="font-medium"><span className="mr-2 text-mute">{i + 1}.</span>{((q.stem ?? {}) as { text?: string }).text}</p>
+                  <p className="text-sm text-mute">{TYPE[q.type] ?? q.type} · {Number(q.default_marks)} {Number(q.default_marks) === 1 ? 'mark' : 'marks'}</p>
                 </div>
                 <span className="flex items-baseline gap-4 text-sm">
                   <Link href={`/admin/courses/${id}/quiz/${lessonId}?q=${q.id}#question-form`} className="text-primary hover:underline">Edit</Link>
-                  <form action={removeQuestion.bind(null, id, lessonId, testId, q.id)}><button className="text-fg/60 hover:text-danger hover:underline">Remove</button></form>
+                  <form action={removeQuestion.bind(null, id, lessonId, testId, q.id)}><button className="text-mute hover:text-danger hover:underline">Remove</button></form>
                 </span>
               </li>
             ))}
@@ -87,25 +88,25 @@ export default async function QuizEditor({ params, searchParams }: PageProps<'/[
         <div id="question-form" className="mt-8">
           <h3 className="mb-3 font-medium">{edit ? 'Edit question' : 'Add a question'}</h3>
           <QuestionForm key={edit?.id ?? 'new'} courseId={id} lessonId={lessonId} testId={testId} v={edit} />
-          {edit && <p className="mt-3 text-sm"><Link href={`/admin/courses/${id}/quiz/${lessonId}`} className="text-fg/65 underline hover:text-fg">Cancel and add a new question instead</Link></p>}
+          {edit && <p className="mt-3 text-sm"><Link href={`/admin/courses/${id}/quiz/${lessonId}`} className="text-mute underline hover:text-fg">Cancel and add a new question instead</Link></p>}
         </div>
       </section>
 
       <section className="mt-14">
-        <h2 className="mb-4 text-xl font-semibold">Results</h2>
+        <h2 className={sectionTitle + " mb-4"}>Results</h2>
         {attempts.data?.length ? (
           <ul className="border-t border-border">
             {attempts.data.map((t) => {
               const m = one(t.tenant_members)
               return (
                 <li key={t.id} className="flex flex-wrap items-baseline justify-between gap-x-6 border-b border-border py-2.5 text-[15px]">
-                  <span>{m?.display_name} <span className="text-fg/60">{m?.email} · attempt {t.attempt_no}</span></span>
+                  <span>{m?.display_name} <span className="text-mute">{m?.email} · attempt {t.attempt_no}</span></span>
                   <span data-testid="attempt-row">{t.score === null ? 'Not graded' : `${Number(t.score)} of ${Number(t.max_score)} · ${Math.round(Number(t.percentage))}%`}{t.is_passed === null ? '' : t.is_passed ? ' · passed' : ' · not passed'}</span>
                 </li>
               )
             })}
           </ul>
-        ) : <p className="text-fg/70">Nobody has taken this quiz yet.</p>}
+        ) : <p className="text-grey">Nobody has taken this quiz yet.</p>}
       </section>
     </>
   )

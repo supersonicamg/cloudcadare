@@ -34,3 +34,27 @@ export const banner = {
 export const bannerClass = (tone: 'ok' | 'bad' | 'info') => `${banner.base} ${banner[tone]}`
 /** Heavy rule above a list, as in the mockups. */
 export const ruleTop = 'border-t-2 border-fg'
+
+// ---- Staff admin (same tokens, denser than the learner pages)
+/** Title row: heading on the left, the page's one filled action on the right. Wraps on phones. */
+export const pageHead = 'mb-8 flex flex-wrap items-start justify-between gap-x-6 gap-y-4'
+export const pageTitle = 'font-heading text-[clamp(28px,3vw,38px)] font-extrabold leading-[1.05] tracking-[-0.035em]'
+export const pageLead = 'mt-2 max-w-2xl text-[17px] leading-relaxed text-grey'
+/** Row of big numbers between two heavy rules. */
+export const statRow = 'grid border-y-2 border-fg'
+/** Section heading inside an admin page. */
+export const sectionTitle = 'font-heading text-2xl font-bold tracking-tight'
+/** Small filled action (the only one on its view). */
+export const buttonSm =
+  'inline-flex h-11 items-center justify-center gap-2 rounded-[10px] bg-primary px-[18px] text-[15px] font-semibold text-primary-fg hover:bg-deep disabled:opacity-60'
+/** Small outline action. */
+export const buttonOutline =
+  'inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border-2 border-fg px-[18px] text-[15px] font-semibold hover:bg-muted disabled:opacity-60'
+/** Compact field for staff forms and filters. */
+export const inputSm =
+  'h-11 w-full rounded-[10px] border-2 border-field bg-white px-3.5 text-[15px] outline-none focus:border-primary focus:ring-4 focus:ring-accent/55'
+/** Table head and cell styles; wrap the table in `tableWrap` so wide tables scroll instead of breaking the page. */
+export const tableWrap = 'overflow-x-auto'
+export const th = 'border-b border-border px-3 py-2.5 text-left text-[13px] font-bold tracking-normal text-mute first:pl-0 last:pr-0'
+export const td = 'border-b border-border px-3 py-3.5 align-middle first:pl-0 last:pr-0'
+export const statusTone = { draft: 'info', review: 'info', published: 'ok', archived: 'quiet' } as const

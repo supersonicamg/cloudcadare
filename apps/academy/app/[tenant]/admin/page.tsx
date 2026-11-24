@@ -52,9 +52,9 @@ export default async function AdminHome() {
         </div>
       </div>
 
-      <dl className={`${statRow} grid-cols-2 lg:grid-cols-4`}>
+      <dl className={`${statRow} grid-cols-2 gap-x-6 lg:grid-cols-4 lg:gap-x-0`}>
         {stats.map((s) => (
-          <div key={s.label} className="border-fg/15 px-1 py-5 first:pl-0 sm:px-5 lg:border-l lg:first:border-l-0">
+          <div key={s.label} className="border-fg/15 py-5 lg:border-l lg:pl-5 lg:first:border-l-0 lg:first:pl-0">
             <dd className="font-heading text-[34px] font-extrabold leading-none tracking-tight">{s.value}</dd>
             <dt className="mt-2 text-[15px] font-semibold">{s.label}</dt>
             <dd className="text-sm text-mute">{s.note}</dd>

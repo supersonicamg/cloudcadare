@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export type NavItem = { href: string; label: string }
 
@@ -12,8 +12,6 @@ const isActive = (path: string, href: string) => (href === '/admin' ? path === '
 export function AdminNav({ items, brand, who, role }: { items: NavItem[]; brand: string; who: string; role: string }) {
   const path = usePathname()
   const [open, setOpen] = useState(false)
-  // Close the menu after every navigation.
-  useEffect(() => setOpen(false), [path])
   const current = items.find((i) => isActive(path, i.href))
 
   const links = (
@@ -24,6 +22,7 @@ export function AdminNav({ items, brand, who, role }: { items: NavItem[]; brand:
           <li key={i.href}>
             <Link
               href={i.href}
+              onClick={() => setOpen(false)}
               aria-current={on ? 'page' : undefined}
               className={`block rounded-xl border-l-4 px-3.5 py-2.5 text-[15px] font-semibold ${
                 on ? 'border-accent bg-white/12 text-white' : 'border-transparent text-white/70 hover:bg-white/8 hover:text-white'

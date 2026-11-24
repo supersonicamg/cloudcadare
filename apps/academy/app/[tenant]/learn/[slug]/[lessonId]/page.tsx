@@ -165,8 +165,14 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
                         next={next ? `/learn/${slug}/${next.id}` : null} />
                     : null}
                 </div>
-                {next ? <Link href={`/learn/${slug}/${next.id}`} className={`${buttonLg} max-sm:w-full`}>Next: {next.title} <span aria-hidden="true">→</span></Link>
-                  : <Link href={`/learn/${slug}`} className={`${buttonLg} max-sm:w-full`}>Back to the course <span aria-hidden="true">→</span></Link>}
+                {/* One filled action per view: on a quiz that is not passed yet, "Start the quiz" is the filled one. */}
+                {lock ? (
+                  // Locked: the way forward is the lesson that unlocks this one, not the next locked lesson.
+                  <Link href={blocker ? `/learn/${slug}/${blocker.id}` : `/learn/${slug}`} className={`${buttonLg} max-sm:w-full`}>
+                    {blocker ? `Go to ${blocker.title}` : 'Back to the course'} <span aria-hidden="true">→</span>
+                  </Link>
+                ) : next ? <Link href={`/learn/${slug}/${next.id}`} className={`${lesson.type === 'quiz' && !progress.completed ? buttonLine : buttonLg} max-sm:w-full`}>Next: {next.title} <span aria-hidden="true">→</span></Link>
+                  : <Link href={`/learn/${slug}`} className={`${lesson.type === 'quiz' && !progress.completed ? buttonLine : buttonLg} max-sm:w-full`}>Back to the course <span aria-hidden="true">→</span></Link>}
               </nav>
             )}
           </main>

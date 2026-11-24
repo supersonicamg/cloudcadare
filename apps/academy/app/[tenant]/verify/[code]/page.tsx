@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { getCertificateByCode } from '@educore/core/catalog'
 import { Icon } from '@educore/ui/marks'
 import { getShell } from '@/lib/shell'
@@ -12,8 +11,8 @@ export const metadata: Metadata = { title: 'Verify a certificate', robots: { ind
 export default async function Verify({ params }: PageProps<'/[tenant]/verify/[code]'>) {
   const { code } = await params
   const { bundle, theme, brand, nav, account, site } = await getShell()
-  if (!/^[A-Za-z0-9]{12}$/.test(code)) notFound()
-  const c = await getCertificateByCode(bundle.tenant.id, code.toUpperCase())
+  // A mistyped code is a normal case here: answer "not found" with the form, not a 404.
+  const c = /^[A-Za-z0-9]{12}$/.test(code) ? await getCertificateByCode(bundle.tenant.id, code.toUpperCase()) : null
 
   const fmt = c && new Date(c.issuedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
   const band = 'flex items-center gap-4 rounded-[18px] px-[22px] py-5 text-[22px] font-bold tracking-[-0.02em]'

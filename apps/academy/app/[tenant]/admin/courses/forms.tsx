@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import { useKeepForm } from '@/lib/use-keep-form'
-import { button, buttonQuiet, hint, input, label } from '@/lib/ui'
+import { button, buttonQuiet, buttonSm, hint, input, inputSm, label } from '@/lib/ui'
 import { addLesson, addSection, createCourse, setCoursePrice, updateCourse, type FormState } from './actions'
 
 const KINDS = [
@@ -15,20 +15,21 @@ function Status({ s }: { s: FormState }) {
   return null
 }
 
+/** Quick add: a title and a type on one row. Creates a draft and opens it for editing. */
 export function CreateCourseForm() {
   const [s, action, pending] = useActionState<FormState, FormData>(createCourse, {})
   return (
-    <form action={action} className="grid max-w-xl gap-4">
-      <div>
+    <form action={action} className="flex flex-wrap items-end gap-x-4 gap-y-3">
+      <div className="min-w-56 flex-[2_1_16rem]">
         <label htmlFor="title" className={label}>Title</label>
-        <input id="title" name="title" required className={input} />
+        <input id="title" name="title" required className={inputSm} />
       </div>
-      <div>
+      <div className="min-w-44 flex-[1_1_11rem]">
         <label htmlFor="kind" className={label}>Type</label>
-        <select id="kind" name="kind" className={input}>{KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+        <select id="kind" name="kind" className={inputSm}>{KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
       </div>
-      <Status s={s} />
-      <div><button className={button} disabled={pending}>{pending ? 'Creating…' : 'Create draft'}</button></div>
+      <button className={buttonSm} disabled={pending}>{pending ? 'Creating…' : 'Create draft'}</button>
+      <div className="basis-full empty:hidden"><Status s={s} /></div>
     </form>
   )
 }

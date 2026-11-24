@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { can, requireAccess } from '@/lib/dal'
-import { buttonOutline, buttonSm, chipClass, inputSm, pageHead, pageTitle, statusTone, td, th, tableWrap } from '@/lib/ui'
+import { buttonOutline, chipClass, inputSm, pageHead, pageTitle, statusTone, td, th, tableWrap } from '@/lib/ui'
 import { CreateCourseForm } from './forms'
 
 export const metadata = { title: 'Courses' }
@@ -39,16 +39,14 @@ export default async function AdminCourses({ searchParams }: PageProps<'/[tenant
     <>
       <div className={pageHead}>
         <h1 className={pageTitle}>Courses</h1>
-        {manage && (
-          <details className="group relative">
-            <summary className={`${buttonSm} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>New course</summary>
-            <div className="absolute right-0 z-10 mt-2 w-[min(26rem,calc(100vw-2.5rem))] rounded-2xl border border-border bg-white p-5 shadow-lg">
-              <h2 className="mb-3 text-lg font-bold">New course</h2>
-              <CreateCourseForm />
-            </div>
-          </details>
-        )}
       </div>
+
+      {manage && (
+        <section aria-labelledby="new-course" className="mb-10 rounded-2xl bg-white p-5">
+          <h2 id="new-course" className="mb-3 text-lg font-bold">New course</h2>
+          <CreateCourseForm />
+        </section>
+      )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         <nav aria-label="Filter by status" className="flex flex-wrap gap-x-5 text-[15px] font-semibold">

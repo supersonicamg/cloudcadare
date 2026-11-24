@@ -142,9 +142,9 @@ test.describe.serial('selling a course', () => {
     // a fresh sign-in: orders need no two-step check
     await signIn(page, OWNER, '/admin/orders')
     await expect(page.getByRole('heading', { name: 'Orders' })).toBeVisible()
-    const paid = page.getByRole('listitem').filter({ hasText: `buyer-${stamp}@example.com` })
+    const paid = page.getByRole('row').filter({ hasText: `buyer-${stamp}@example.com` })
     await expect(paid).toContainText('Paid')
     await expect(paid).toContainText('₹1,180')
-    await expect(page.getByRole('listitem').filter({ hasText: `short-${stamp}@example.com` })).toContainText('Awaiting payment')
+    await expect(page.getByRole('row').filter({ hasText: `short-${stamp}@example.com` })).toContainText('Awaiting payment')
   })
 })

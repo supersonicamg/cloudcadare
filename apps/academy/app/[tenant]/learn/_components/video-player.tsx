@@ -38,6 +38,8 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
   const tracker = useProgressTracker(lessonId, completed, tracked)
   const videoRef = useRef<HTMLVideoElement>(null)
   const ytRef = useRef<HTMLDivElement>(null)
+  // Whichever player is mounted fills this in, so the tab-switch handler below can pause it.
+  const pauseRef = useRef<(() => void) | null>(null)
   // On a lesson page the notes panel reads the time from here and can jump to a moment (plan/16 §6.4).
   const stage = useOptionalStage()
   const register = stage?.register
@@ -53,11 +55,22 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
     return () => { v.removeEventListener('loadedmetadata', meta); register(null) }
   }, [playback, register, setDuration])
 
+  // Switching to another browser tab (or minimising the window) pauses the video. Picture-in-picture is left alone
+  // because the learner chose to keep watching it.
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === 'hidden' && !document.pictureInPictureElement) pauseRef.current?.()
+    }
+    document.addEventListener('visibilitychange', onHide)
+    return () => document.removeEventListener('visibilitychange', onHide)
+  }, [])
+
   // HTML5 video: a direct file or an HLS stream (Safari plays HLS natively; everything else uses hls.js).
   useEffect(() => {
     const v = videoRef.current
     if (!v || playback.kind === 'youtube') return
     let hls: { destroy(): void } | undefined
+    pauseRef.current = () => v.pause()
     const seek = () => { if (startAt > 5) v.currentTime = startAt }
     v.addEventListener('loadedmetadata', seek, { once: true })
     if (playback.kind === 'hls' && !v.canPlayType('application/vnd.apple.mpegurl')) {
@@ -79,6 +92,7 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
     return () => {
       v.removeEventListener('play', on); v.removeEventListener('pause', off); v.removeEventListener('ended', off); v.removeEventListener('timeupdate', time)
       hls?.destroy()
+      pauseRef.current = null
     }
   }, [playback, startAt, tracker])
 
@@ -99,6 +113,7 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
           onReady: () => {
             if (!player) return
             const p = player
+            pauseRef.current = () => p.pauseVideo()
             register?.({ time: () => p.getCurrentTime(), duration: () => p.getDuration() || 0, seek: (s) => { p.seekTo(s, true); p.playVideo() }, pause: () => p.pauseVideo() })
             const d = p.getDuration()
             if (d > 0) setDuration?.(d)
@@ -117,7 +132,7 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
         },
       })
     })
-    return () => { cancelled = true; clearInterval(poll); register?.(null); player?.destroy() }
+    return () => { cancelled = true; clearInterval(poll); pauseRef.current = null; register?.(null); player?.destroy() }
   }, [playback, startAt, tracker, register, setDuration])
 
   if (playback.kind === 'youtube') {

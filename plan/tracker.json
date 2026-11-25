@@ -93,12 +93,12 @@
     {
       "id": "B1",
       "group": "B · Learn",
-      "title": "My learning",
+      "title": "My learning, now the Dashboard (see LE1)",
       "status": "todo",
       "kind": "restyle",
       "route": "/learn",
       "code": "apps/academy/app/[tenant]/learn/",
-      "mockup": "plan/mockups-learner-flows/flow-learn.html#home",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#enrolled",
       "phase": "1"
     },
     {
@@ -2072,12 +2072,12 @@
     {
       "id": "LB1",
       "group": "Learner flows (plan/16)",
-      "title": "My learning",
+      "title": "My learning (to be replaced by the Dashboard, LE1)",
       "status": "done",
       "kind": "build",
       "route": "/learn",
       "code": "apps/academy/app/[tenant]/learn/",
-      "mockup": "plan/mockups-learner-flows/flow-learn.html#home",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#enrolled",
       "note": "",
       "phase": "1"
     },
@@ -2259,6 +2259,83 @@
       "code": "apps/academy/app/[tenant]/admin/payments/",
       "mockup": "plan/mockups-learner-flows/flow-admin.html#settings",
       "note": "",
+      "phase": "1"
+    },
+    {
+      "id": "LE1",
+      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "title": "Dashboard: current batch learner (progress, course overview, study material)",
+      "status": "todo",
+      "kind": "new",
+      "route": "/dashboard",
+      "code": "apps/academy/app/[tenant]/dashboard/",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#enrolled",
+      "phase": "1"
+    },
+    {
+      "id": "LE2",
+      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "title": "Dashboard: just joined the current batch",
+      "status": "todo",
+      "kind": "new",
+      "route": "/dashboard?joined=1",
+      "code": "apps/academy/app/[tenant]/dashboard/",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#claimed",
+      "phase": "1"
+    },
+    {
+      "id": "LE3",
+      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "title": "Dashboard: joined the next batch, before it starts",
+      "status": "todo",
+      "kind": "new",
+      "route": "/dashboard",
+      "code": "apps/academy/app/[tenant]/dashboard/",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#upcoming",
+      "phase": "1"
+    },
+    {
+      "id": "LE4",
+      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "title": "Dashboard: on the current batch list, \"Join my batch now\"",
+      "status": "todo",
+      "kind": "new",
+      "route": "/dashboard",
+      "code": "apps/academy/app/[tenant]/dashboard/",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#existing",
+      "phase": "1"
+    },
+    {
+      "id": "LE5",
+      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "title": "Dashboard: not on a list, join the next batch",
+      "status": "todo",
+      "kind": "new",
+      "route": "/dashboard",
+      "code": "apps/academy/app/[tenant]/dashboard/",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#new",
+      "phase": "1"
+    },
+    {
+      "id": "LE6",
+      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "title": "Dashboard: UPI payment being checked",
+      "status": "todo",
+      "kind": "new",
+      "route": "/dashboard",
+      "code": "apps/academy/app/[tenant]/dashboard/",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#pending",
+      "phase": "1"
+    },
+    {
+      "id": "LE7",
+      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "title": "Navbar and routing: Dashboard label, logo to /dashboard, log out to /",
+      "status": "todo",
+      "kind": "restyle",
+      "route": "(all)",
+      "code": "apps/academy/lib/shell.ts",
+      "mockup": "plan/mockups-learner-flows/flow-dashboard.html#routing",
       "phase": "1"
     }
   ]

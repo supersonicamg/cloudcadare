@@ -9,124 +9,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="flows.css">
 <!--
-  Flow B: what a paid learner sees (2026-11-25). Learner home, course material (videos, live class recordings,
+  Flow B: what a paid learner sees (2026-11-25). Course material (videos, live class recordings,
   PDFs, images), live classes + recordings, the player with timestamped notes and bookmarks, the PDF and image
-  viewers with notes, and "My notes".
+  viewers with notes, and "My notes". The learner home (B1, "My learning") was replaced by the Dashboard, flow-dashboard.html (flow E).
   The learner here is in month 2 of CEAP. Months 3 and 4 are locked until their week (unlock_rule: relative days).
   PLACEHOLDER DATA: titles, trainer names, durations, dates, counts and every photo are invented; stock photos stand in for real class recordings.
 -->
 </head>
 <body>
 <script src="sprite.js"></script>
-
-<!-- B1 · Learner home -->
-<section class="screen" id="home" hidden>
-<div class="frame">
-<div class="logic"><div class="cols"><div>
-  <h2>My learning · <code>/learn</code></h2>
-  <ul>
-    <li><b>Job:</b> resume where you left off. One filled button: "Resume lesson".</li>
-    <li>Reading order: Continue card → the climb as <b>your</b> progress → next live class and latest recordings → your latest notes.</li>
-    <li><b>Continue card</b> = <code>enrollments.last_lesson_id</code> with its saved position (<code>lesson_progress</code>). If nothing started: "Start with lesson 1".</li>
-    <li>The climb reuses the guide's component: done months tick (pale), the current month is dark, later months are grey with "Unlocks 7 Dec". Clicking a month shows its numbers; "Open course material" goes to the list.</li>
-    <li>If the learner has <b>no active enrolment</b> this page shows the order status instead: "awaiting payment" → checkout, "pending review" → waiting page. Never an empty dashboard.</li>
-  </ul></div><div>
-  <h2>Data</h2>
-  <ul>
-    <li>Progress: <code>enrollments.progress_pct, lessons_completed, lessons_total</code>.</li>
-    <li>Next live class: <code>live_sessions</code> where <code>status = 'scheduled'</code> for the learner's batch, soonest first. The join link shows only from 10 minutes before the start.</li>
-    <li>Latest recordings: completed sessions with <code>recording_media_id</code>, newest first (3).</li>
-    <li>Notes: <code>lesson_notes</code> for this member, newest 3.</li>
-  </ul></div></div></div>
-<div class="page">
-  <div data-hdr="in" data-active="home"></div>
-  <main>
-    <section class="s tight" aria-labelledby="h-home">
-      <div class="wrap" style="display:grid;gap:24px">
-        <div style="display:grid;gap:14px">
-          <h1 class="h2" id="h-home">Welcome back, <span class="c">Rohit</span></h1>
-          <ul class="ffacts">
-            <li><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg>Month 2 of 4 · Week 7</li>
-            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>36 of 86 lessons done</li>
-            <li><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Next live class: Tue 1 Dec, 7 pm</li>
-          </ul>
-        </div>
-        <div class="cont">
-          <div class="thumb">
-            <!-- stock placeholder for a real class recording frame -->
-            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=75" alt="Frame from the recording of live class 14">
-            <span class="pbtn"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span><span class="dur">1:32:08</span><span class="wp"><i style="width:62%"></i></span>
-          </div>
-          <div class="meta">
-            <span class="kick">Continue · Month 2 · Live class 14</span>
-            <h2 class="t">Tagging and cost allocation</h2>
-            <p class="sub">Karthik Rao · 35 minutes left · 2 notes</p>
-            <div class="bar-p" aria-label="62% watched"><i style="width:62%"></i></div>
-          </div>
-          <a class="btn btn-brand" href="#player" data-go="player">Resume lesson <span class="ar" aria-hidden="true">→</span></a>
-        </div>
-      </div>
-    </section>
-
-    <section class="s s-mist" aria-labelledby="h-climb">
-      <div class="wrap">
-        <div class="sh">
-          <div><h2 class="h2" id="h-climb">Where you are in CEAP</h2><p class="lead">Month 2 of 4. Months 3 and 4 open on their week.</p></div>
-          <a class="tlink" href="#material" data-go="material">Open course material <span class="ar" aria-hidden="true">→</span></a>
-        </div>
-        <div class="climb" role="tablist" aria-label="Your months">
-          <button class="step done" role="tab" aria-selected="false"><span class="top"><span class="mn">01</span><span class="tick"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span><span class="wks">Weeks 1–4</span></span><span class="h3">Three clouds, one architecture</span><span class="st">Done · 22 of 22</span></button>
-          <button class="step" role="tab" aria-selected="true"><span class="top"><span class="mn">02</span><span class="wks">Weeks 5–8</span></span><span class="h3">FinOps and cloud costs</span><span class="st">14 of 22 lessons</span></button>
-          <button class="step lockd" role="tab" aria-selected="false"><span class="top"><span class="mn">03</span><span class="wks">Weeks 9–12</span></span><span class="h3">Automate and ship</span><span class="st">Unlocks 7 Dec</span></button>
-          <button class="step lockd" role="tab" aria-selected="false"><span class="goal"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg>Cloud architect</span><span class="top"><span class="mn">04</span><span class="wks">Weeks 13–16</span></span><span class="h3">Design, defend, get hired</span><span class="st">Unlocks 4 Jan</span></button>
-        </div>
-        <div class="mdetail" role="tabpanel">
-          <div class="md-copy">
-            <span class="wk">Month 2 of 4 · Weeks 5–8</span>
-            <h3 class="h3" style="font-size:clamp(24px,2.4cqi,32px);letter-spacing:-0.03em">FinOps and cloud costs</h3>
-            <p class="out"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg><span><b>By week 8</b> you can find the waste in a cloud bill and show finance what it saves.</span></p>
-            <dl class="stats3"><div><dd>14/22</dd><dt>Lessons done</dt></div><div><dd>2</dd><dt>Labs left</dt></div><div><dd>9</dd><dt>Notes taken</dt></div></dl>
-          </div>
-          <div style="display:grid;gap:10px">
-            <b style="font-size:14px;color:var(--brand)">Up next in month 2</b>
-            <a class="mrow" style="padding:10px 12px;border:0;border-radius:12px;background:#F7F7F4" href="#"><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-video"/></svg></span><span class="tt"><b>Budgets and alerts</b><span>Video · 26 min</span></span><span></span><span class="sd"><span class="chip new">New</span></span></a>
-            <a class="mrow" style="padding:10px 12px;border:0;border-radius:12px;background:#F7F7F4" href="#"><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-pdf"/></svg></span><span class="tt"><b>Tag audit checklist</b><span>PDF · 4 pages</span></span><span></span><span class="sd"><span class="chip new">New</span></span></a>
-            <a class="mrow" style="padding:10px 12px;border:0;border-radius:12px;background:#F7F7F4" href="#"><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-lab"/></svg></span><span class="tt"><b>Lab 7: find the waste in a bill</b><span>Lab · about 45 min</span></span><span></span><span class="sd"></span></a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="s" aria-labelledby="h-live">
-      <div class="wrap">
-        <div class="sh"><h2 class="h2" id="h-live">Live classes</h2><a class="tlink" href="#live" data-go="live">All live classes and recordings <span class="ar" aria-hidden="true">→</span></a></div>
-        <div class="up">
-          <div class="dateb"><b>01</b><span>Tue · Dec</span></div>
-          <div><span class="chip ok" style="margin-bottom:8px">Next live class</span><h3 class="t">Budgets, alerts and showback reports</h3>
-            <div class="m"><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>7:00 to 9:00 pm</span><span><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Karthik Rao</span><span><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg>WhatsApp reminder at 6:30 pm</span></div></div>
-          <div style="display:grid;gap:6px;justify-items:end"><a class="btn btn-line btn-sm" href="#"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Add to calendar</a><span class="small">Join link opens at 6:50 pm</span></div>
-        </div>
-        <h3 class="h3" style="margin:32px 0 16px">Latest recordings</h3>
-        <div class="rgrid" data-rec="3"></div>
-      </div>
-    </section>
-
-    <section class="s s-alt" aria-labelledby="h-notes">
-      <div class="wrap">
-        <div class="sh"><h2 class="h2" id="h-notes">Your latest notes</h2><a class="tlink" href="#notes" data-go="notes">All my notes <span class="ar" aria-hidden="true">→</span></a></div>
-        <div class="split75">
-          <div style="display:grid;gap:12px" data-lastnotes></div>
-          <aside class="card pad" style="display:grid;gap:16px;align-content:start">
-            <div style="display:flex;align-items:center;gap:14px"><img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=160&h=160&crop=faces&q=75" alt="" width="56" height="56" style="width:56px;height:56px;border-radius:50%;object-fit:cover"><div><b style="display:block;font-size:18px;letter-spacing:-0.02em">Stuck on a lab?</b><span class="small">Ananya or your mentor replies within 15 minutes.</span></div></div>
-            <a class="btn btn-line" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Message on WhatsApp</a>
-          </aside>
-        </div>
-      </div>
-    </section>
-  </main>
-  <div data-foot></div>
-</div></div>
-</section>
 
 <!-- B2 · Course material -->
 <section class="screen" id="material" hidden>
@@ -545,8 +436,7 @@
   }).join('');
 })();
 window.FLOW = { title: 'Learning flow', screens: [
-  { id: 'home', label: 'My learning', group: 'Learner' },
-  { id: 'material', label: 'Course material' },
+  { id: 'material', label: 'Course material', group: 'Learner' },
   { id: 'live', label: 'Live classes' },
   { id: 'notes', label: 'My notes' },
   { id: 'player', label: 'Recording player + notes', group: 'Viewers' },

@@ -5,7 +5,7 @@ import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import type { Database, Json } from '@educore/db/types'
-import { FILE_RULES, checkFile, createUploadTarget, isFileLessonType, mimeForExt, parseVideoSource, removeFile, safeFilename, statUpload, type UploadTarget } from '@educore/core/media'
+import { checkFile, createUploadTarget, isFileLessonType, isTeamsRecordingLink, mimeForExt, parseVideoSource, removeFile, safeFilename, statUpload, uploadRule, type UploadTarget, type UploadType } from '@educore/core/media'
 import { isEnabled } from '@educore/features'
 import { ActionDenied, MfaRequired, can, requireActionAccess, type Access } from '@/lib/dal'
 
@@ -140,7 +140,7 @@ export async function deleteSection(sectionId: string, _form: FormData): Promise
 }
 
 // Types the learner side can play today. Quizzes are added from the Quizzes screen.
-const LESSON_TYPES = ['video', 'article', 'external_link', 'pdf', 'download', 'quiz'] as const
+const LESSON_TYPES = ['video', 'live', 'article', 'external_link', 'pdf', 'download', 'quiz'] as const
 
 export async function addLesson(courseId: string, sectionId: string, _s: FormState, form: FormData): Promise<FormState> {
   const parsed = z.object({
@@ -211,6 +211,7 @@ export async function updateLesson(courseId: string, lessonId: string, _s: FormS
       is_preview: form.get('is_preview') === 'on',
     }
     let replacedAsset: string | null = null
+    let replacedFile: string | null = null
 
     // Drip: "open N days after the learner enrolled". Only academies with the feature can change it.
     if (isEnabled(a.bundle.features, 'learning.drip')) {
@@ -230,6 +231,25 @@ export async function updateLesson(courseId: string, lessonId: string, _s: FormS
       const url = z.url({ protocol: /^https$/ }).max(2000).safeParse(String(form.get('external_url') ?? '').trim())
       if (!url.success) return { error: 'Enter a link that starts with https://' }
       patch.external_url = url.data
+    } else if (lesson.type === 'live') {
+      // A class recording is either the uploaded Teams video (the upload form attaches it) or a Teams link typed here.
+      const link = String(form.get('recording_url') ?? '').trim()
+      if (link) {
+        if (link.length > 2000 || !isTeamsRecordingLink(link)) return { error: 'Paste the https share link from Microsoft Teams, Stream, SharePoint or OneDrive.' }
+        // It replaces any uploaded video, so it needs the same rights as adding one.
+        if (!isEnabled(a.bundle.features, 'content.video') || !can(a, 'content.upload')) return { error: 'You do not have permission to add videos.' }
+        patch.external_url = link
+        patch.completion_rule = { type: 'view' } // the video is not in our player, so opening it counts
+        patch.media_asset_id = null
+        replacedAsset = lesson.media_asset_id
+        if (replacedAsset) {
+          const { data: old } = await a.db.from('media_assets').select('storage_path').eq('id', replacedAsset).maybeSingle()
+          replacedFile = old?.storage_path ?? null
+        }
+      } else if (!lesson.media_asset_id) {
+        patch.external_url = null
+        patch.completion_rule = { type: 'auto' }
+      }
     } else if (lesson.type === 'video') {
       const value = String(form.get('video_value') ?? '').trim()
       if (value) {
@@ -252,6 +272,7 @@ export async function updateLesson(courseId: string, lessonId: string, _s: FormS
     const { error } = await a.db.from('lessons').update(patch).eq('id', lessonId)
     if (error) return { error: message(error) }
     if (replacedAsset) await a.db.from('media_assets').update({ deleted_at: new Date().toISOString(), status: 'deleted' }).eq('id', replacedAsset)
+    if (replacedFile) await removeFile(replacedFile)
     done(a)
     return { saved: true }
   } catch (e) {
@@ -378,17 +399,20 @@ export async function moveLesson(courseId: string, lessonId: string, dir: 'up' |
 export type UploadPrep = { error: string } | { target: UploadTarget }
 
 const FILE_ERRORS = {
-  type: (t: 'pdf' | 'download') => `That kind of file is not allowed here. Use ${FILE_RULES[t].label} (${FILE_RULES[t].exts.join(', ')}).`,
-  size: (t: 'pdf' | 'download') => `That file is too large. The limit is ${Math.round(FILE_RULES[t].maxBytes / 1024 / 1024)} MB.`,
+  type: (t: UploadType) => `That kind of file is not allowed here. Use ${uploadRule(t).label} (${uploadRule(t).exts.join(', ')}).`,
+  size: (t: UploadType) => `That file is too large. The limit is ${Math.round(uploadRule(t).maxBytes / 1024 / 1024)} MB.`,
   empty: () => 'That file is empty.',
 }
 
 async function fileLesson(courseId: string, lessonId: string) {
   const a = await requireActionAccess({ permission: 'content.upload', feature: 'core.media' })
   const { data: lesson } = await a.db.from('lessons').select('id, type, media_asset_id').eq('id', lessonId).eq('course_id', courseId).is('deleted_at', null).maybeSingle()
-  if (!lesson || !isFileLessonType(lesson.type)) return null
-  if (!isEnabled(a.bundle.features, lesson.type === 'pdf' ? 'content.documents' : 'content.downloads')) return null
-  return { a, lesson, type: lesson.type }
+  if (!lesson) return null
+  const type: UploadType | null = lesson.type === 'live' ? 'recording' : isFileLessonType(lesson.type) ? lesson.type : null
+  if (!type) return null
+  const feature = type === 'recording' ? 'content.video' : type === 'pdf' ? 'content.documents' : 'content.downloads'
+  if (!isEnabled(a.bundle.features, feature)) return null
+  return { a, lesson, type }
 }
 
 /** Step 1 of an upload: check the file's name and size and hand the browser a one-time upload address. */
@@ -416,7 +440,7 @@ export async function finishFileUpload(courseId: string, lessonId: string, path:
     if (!check.ok) { await removeFile(String(path)); return { error: FILE_ERRORS[check.reason](ctx.type) } }
 
     const { data: asset, error } = await a.db.from('media_assets').insert({
-      tenant_id: a.bundle.tenant.id, kind: 'document', provider: 'supabase', title: safeFilename(String(originalName)), status: 'ready',
+      tenant_id: a.bundle.tenant.id, kind: ctx.type === 'recording' ? 'video' : 'document', provider: 'supabase', title: safeFilename(String(originalName)), status: 'ready',
       storage_bucket: 'course-media', storage_path: path, mime_type: mimeForExt(check.ext), size_bytes: stat.size, uploaded_by: a.memberId,
     }).select('id').single()
     if (error) { await removeFile(String(path)); return { error: message(error) } }
@@ -424,7 +448,9 @@ export async function finishFileUpload(courseId: string, lessonId: string, path:
     const { data: old } = ctx.lesson.media_asset_id
       ? await a.db.from('media_assets').select('id, storage_path').eq('id', ctx.lesson.media_asset_id).maybeSingle()
       : { data: null }
-    const { error: upErr } = await a.db.from('lessons').update({ media_asset_id: asset.id }).eq('id', lessonId)
+    const { error: upErr } = await a.db.from('lessons').update(ctx.type === 'recording'
+      ? { media_asset_id: asset.id, external_url: null, completion_rule: { type: 'watch_pct', pct: 90 } }
+      : { media_asset_id: asset.id }).eq('id', lessonId)
     if (upErr) return { error: message(upErr) }
     if (old) {
       await a.db.from('media_assets').update({ deleted_at: new Date().toISOString(), status: 'deleted' }).eq('id', old.id)

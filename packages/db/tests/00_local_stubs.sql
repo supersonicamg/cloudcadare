@@ -19,3 +19,20 @@ grant all on storage.buckets, storage.objects to postgres, service_role;
 grant select, insert, update, delete on storage.objects to authenticated;
 alter table storage.objects owner to postgres;
 alter table storage.buckets owner to postgres;
+
+-- The Auth service creates auth.sessions; migration 27 reads it. Minimal stand-in with the columns used.
+create table if not exists auth.sessions (
+  id uuid primary key default gen_random_uuid(), user_id uuid, user_agent text,
+  created_at timestamptz default now(), updated_at timestamptz default now(),
+  refreshed_at timestamp, not_after timestamptz
+);
+grant all on auth.sessions to postgres;
+create or replace function auth.jwt() returns jsonb language sql stable as $$
+  select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb
+$$;
+grant execute on function auth.jwt() to postgres, authenticated, anon, service_role;
+-- The image's auth.uid() predates request.jwt.claims; the hosted project reads either. The SQL tests set the claims JSON.
+create or replace function auth.uid() returns uuid language sql stable as $$
+  select coalesce(nullif(current_setting('request.jwt.claim.sub', true), ''),
+                  nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')::uuid
+$$;

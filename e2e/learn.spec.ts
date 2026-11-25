@@ -134,7 +134,7 @@ test.describe.serial('free enrolment and learning', () => {
   })
 
   test('a learner cannot reach a course they are not enrolled in', async ({ page }) => {
-    await signIn(page, `learner-${stamp}@example.com`, '/learn')
+    await signIn(page, `learner-${stamp}@example.com`, '/dashboard')
     expect((await page.goto(`/learn/${closedSlug}`))?.status()).toBe(404)
   })
 

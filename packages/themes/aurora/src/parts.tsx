@@ -41,9 +41,9 @@ function Wordmark({ name }: { name: string }) {
   return m ? <span>{m[1]}<span className="c2">{m[2]}</span></span> : <span>{name}</span>
 }
 
-export function Brand({ brand }: { brand: BrandInfo }) {
+export function Brand({ brand, href }: { brand: BrandInfo; href?: string }) {
   return (
-    <Link className="brand" href="/" aria-label={`${brand.name} home`}>
+    <Link className="brand" href={href ?? '/'} aria-label={href ? `${brand.name}: your dashboard` : `${brand.name} home`}>
       {brand.logoUrl
         // eslint-disable-next-line @next/next/no-img-element
         ? <img className="brand-img" src={brand.logoUrl} alt={brand.name} />

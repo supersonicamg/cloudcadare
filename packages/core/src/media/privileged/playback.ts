@@ -1,6 +1,7 @@
 import 'server-only'
 import { getPlane } from '@educore/auth'
 import { createPrivilegedDb } from '@educore/auth/privileged'
+import { FILE_BUCKET } from '../files'
 import { isDirectVideoUrl, youtubeId } from '../source'
 import { muxSigningFromEnv, signMuxToken } from '../mux'
 
@@ -17,7 +18,7 @@ export type Playback =
 export async function resolvePlayback(tenantId: string, mediaAssetId: string): Promise<Playback> {
   const db = createPrivilegedDb(getPlane(null))
   const { data: a, error } = await db
-    .from('media_assets').select('provider, playback_id, status, metadata')
+    .from('media_assets').select('provider, playback_id, status, metadata, storage_bucket, storage_path, mime_type')
     .eq('tenant_id', tenantId).eq('id', mediaAssetId).is('deleted_at', null).maybeSingle()
   if (error) throw new Error(`media read failed: ${error.message}`)
   if (!a || a.status !== 'ready') return { kind: 'unavailable', reason: 'not_ready' }
@@ -40,6 +41,12 @@ export async function resolvePlayback(tenantId: string, mediaAssetId: string): P
       const signing = muxSigningFromEnv()
       if (!signing) return { kind: 'unavailable', reason: 'not_configured' }
       return { kind: 'hls', src: `${base}?token=${signMuxToken(a.playback_id, signing)}` }
+    }
+    case 'supabase': {
+      // An uploaded class recording. The link lasts long enough to watch a two-hour class with pauses.
+      if (a.storage_bucket !== FILE_BUCKET || !a.storage_path || !a.mime_type?.startsWith('video/')) return { kind: 'unavailable', reason: 'unsupported' }
+      const { data: signed, error: signError } = await db.storage.from(FILE_BUCKET).createSignedUrl(a.storage_path, 4 * 60 * 60)
+      return signError || !signed ? { kind: 'unavailable', reason: 'not_ready' } : { kind: 'file', src: signed.signedUrl }
     }
     default:
       return { kind: 'unavailable', reason: 'unsupported' }

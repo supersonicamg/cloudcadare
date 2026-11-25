@@ -49,6 +49,8 @@ export interface ViewerInfo {
   menu: Array<NavItem & { icon?: string }>
   /** POST target that ends this device's session. */
   logoutHref: string
+  /** Set on the home page only: an outline button to the dashboard beside the account button. */
+  homeButton?: NavItem
 }
 
 export interface SiteLayoutProps {

@@ -27,6 +27,7 @@ begin
     (u2, 'review-other@example.com', 'authenticated', 'authenticated', '{}');
   insert into public.tenant_members (tenant_id, user_id, display_name, email, email_verified_at) values (t, u1, 'Buyer', 'review-buyer@example.com', now()) returning id into m1;
   insert into public.tenant_members (tenant_id, user_id, display_name, email, email_verified_at) values (t, u2, 'Other', 'review-other@example.com', now()) returning id into m2;
+  update public.tenant_members set email_verified_at = coalesce(email_verified_at, now()) where id = sm;  -- a fresh database's staff never confirmed an email
   insert into public.orders (tenant_id, order_no, member_id, status, total_minor, subtotal_minor) values (t, 'CC-SQL-R00001', m1, 'awaiting_payment', 4999900, 4999900) returning id into o1;
   insert into public.orders (tenant_id, order_no, member_id, status, total_minor, subtotal_minor) values (t, 'CC-SQL-R00002', sm, 'awaiting_payment', 4999900, 4999900) returning id into o2;
   insert into public.orders (tenant_id, order_no, member_id, status, total_minor, subtotal_minor) values (t, 'CC-SQL-R00003', m2, 'awaiting_payment', 4999900, 4999900) returning id into o3;

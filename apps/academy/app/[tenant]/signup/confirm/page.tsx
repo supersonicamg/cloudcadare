@@ -20,7 +20,7 @@ async function Body({ searchParams }: { searchParams: PageProps<'/[tenant]/signu
   const next = safeNext((await searchParams).next)
   const a = await requireMember(`/signup/confirm?next=${encodeURIComponent(next)}`)
   const { data: m } = await a.db.from('tenant_members').select('email, email_verified_at').eq('id', a.memberId).single()
-  if (m?.email_verified_at) redirect(next)
+  if (m?.email_verified_at) redirect(next === '/' ? '/dashboard' : next)
   const email = m?.email ?? ''
   return (
     <div className="flex flex-col gap-[22px]">

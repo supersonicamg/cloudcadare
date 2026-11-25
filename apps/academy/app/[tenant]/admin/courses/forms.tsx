@@ -105,7 +105,7 @@ export function AddLessonForm({ courseId, sectionId, quizzes = false }: { course
       <div className="min-w-48 flex-1"><label className={label}>Lesson title<input name="title" required className={`${input} mt-1 font-normal`} /></label></div>
       <div><label className={label}>Type
         <select name="type" className={`${input} mt-1 font-normal`}>
-          {[['video', 'Video'], ['article', 'Reading'], ['external_link', 'Link'], ['pdf', 'PDF'], ['download', 'Download'], ...(quizzes ? [['quiz', 'Quiz']] : [])].map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+          {[['video', 'Video'], ['live', 'Class recording'], ['article', 'Reading'], ['external_link', 'Link'], ['pdf', 'PDF'], ['download', 'Download'], ...(quizzes ? [['quiz', 'Quiz']] : [])].map(([k, l]) => <option key={k} value={k}>{l}</option>)}
         </select></label></div>
       <div className="w-24"><label className={label}>Minutes<input name="minutes" inputMode="numeric" className={`${input} mt-1 font-normal`} /></label></div>
       <label className="flex items-center gap-2 pb-2 text-sm"><input type="checkbox" name="is_preview" /> Free preview</label>

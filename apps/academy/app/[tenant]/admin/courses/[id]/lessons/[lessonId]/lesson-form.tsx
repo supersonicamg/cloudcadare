@@ -50,6 +50,21 @@ export function LessonForm({ courseId, lessonId, v }: { courseId: string; lesson
         </fieldset>
       )}
 
+      {v.type === 'live' && (
+        <fieldset className="grid gap-4 rounded-[var(--radius)] border border-border p-4">
+          <legend className="px-1 text-sm font-medium">Class recording</legend>
+          <p className="text-sm">{v.currentFile ? <>Uploaded video: <span className="font-medium" data-testid="current-file">{v.currentFile}</span></> : v.externalUrl ? 'Using a Teams link.' : 'No recording yet. Learners see “Recording on its way”.'}</p>
+          <div className="grid gap-2">
+            <p className={label}>Upload the Teams video (recommended)</p>
+            <p className={hint}>Plays inside the academy, so learners get notes, bookmarks and progress.</p>
+            {v.canUpload ? <FileUpload courseId={courseId} lessonId={lessonId} type="recording" /> : <p className={hint}>Your role or plan cannot upload videos.</p>}
+          </div>
+          <div className="border-t border-border pt-4"><label htmlFor="recording_url" className={label}>Or paste a Teams link</label>
+            <input key={v.externalUrl} id="recording_url" name="recording_url" type="url" defaultValue={v.externalUrl} placeholder="https://teams.microsoft.com/…" className={input} />
+            <p className={hint}>Opens in Microsoft Teams. No notes or progress. Saving a link removes the uploaded video. Check that learners outside your organisation can open it.</p></div>
+        </fieldset>
+      )}
+
       {(v.type === 'pdf' || v.type === 'download') && (
         <fieldset className="grid gap-3 rounded-[var(--radius)] border border-border p-4">
           <legend className="px-1 text-sm font-medium">{v.type === 'pdf' ? 'PDF' : 'File'}</legend>

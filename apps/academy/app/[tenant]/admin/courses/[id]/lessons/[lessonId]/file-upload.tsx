@@ -2,12 +2,12 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { FILE_RULES } from '@educore/core/media/files'
+import { uploadRule, type UploadType } from '@educore/core/media/files'
 import { button, hint } from '@/lib/ui'
 import { finishFileUpload, prepareFileUpload } from '../../../actions'
 
 /** Uploads straight from the browser to storage through a one-time address; the server only checks and records it. */
-export function FileUpload({ courseId, lessonId, type }: { courseId: string; lessonId: string; type: 'pdf' | 'download' }) {
+export function FileUpload({ courseId, lessonId, type }: { courseId: string; lessonId: string; type: UploadType }) {
   const router = useRouter()
   const input = useRef<HTMLInputElement>(null)
   const [state, setState] = useState<{ busy?: boolean; error?: string; done?: boolean }>({})
@@ -34,16 +34,16 @@ export function FileUpload({ courseId, lessonId, type }: { courseId: string; les
     }
   }
 
-  const rule = FILE_RULES[type]
+  const rule = uploadRule(type)
   return (
     <div className="grid gap-3">
       <input ref={input} type="file" aria-label="File to upload" accept={rule.exts.map((e) => `.${e}`).join(',')} className="text-sm" />
       <div className="flex items-center gap-4">
-        <button type="button" className={button} disabled={state.busy} onClick={send}>{state.busy ? 'Uploading…' : 'Upload file'}</button>
+        <button type="button" className={button} disabled={state.busy} onClick={send}>{state.busy ? 'Uploading…' : type === 'recording' ? 'Upload video' : 'Upload file'}</button>
         {state.done && <span className="text-sm text-success">Uploaded.</span>}
       </div>
       {state.error && <p role="alert" className="text-sm text-danger">{state.error}</p>}
-      <p className={hint}>Up to {Math.round(rule.maxBytes / 1024 / 1024)} MB. Allowed: {rule.exts.join(', ')}.</p>
+      <p className={hint}>Up to {Math.round(rule.maxBytes / 1024 / 1024)} MB. Allowed: {rule.exts.join(', ')}.{type === 'recording' && ' Keep this page open until it says Uploaded. A bigger recording can stay in Teams: paste its link instead.'}</p>
     </div>
   )
 }

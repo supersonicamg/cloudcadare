@@ -103,7 +103,7 @@ begin
   exception when insufficient_privilege then raise notice 'ok: RLS (learner none, staff yes, anon denied)'; end;
   reset role;
 
-  -- verify_email_code claims as part of confirming
+  -- confirming the email only reports the match; the learner presses the button to claim (plan/16 §12)
   perform set_config('request.jwt.claims', json_build_object('sub', staff, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   perform public.add_to_learner_list(t, course, null, now() + interval '1 year', '[{"email":"late.joiner@example.com"}]'::jsonb);
   declare u4 uuid := gen_random_uuid(); m4 uuid; c text; v jsonb;
@@ -112,8 +112,31 @@ begin
     insert into public.tenant_members (tenant_id, user_id, display_name, email) values (t, u4, 'Late', 'late.joiner@example.com') returning id into m4;
     c := public.issue_email_code(m4) ->> 'code';
     perform set_config('request.jwt.claims', json_build_object('sub', u4, 'role', 'authenticated')::text, true);
+    if public.my_list_match(t) is not null then raise exception 'an unconfirmed email must see no match'; end if;
     v := public.verify_email_code(t, c);
-    if v ->> 'status' <> 'verified' or v ->> 'claim' <> 'claimed' then raise exception 'confirming must claim: %', v; end if;
-    raise notice 'ok: confirming the email claims the list row';
+    if v ->> 'status' <> 'verified' or v ->> 'claim' <> 'listed' then raise exception 'confirming must report the match: %', v; end if;
+    if exists (select 1 from public.enrollments where member_id = m4) then raise exception 'confirming must not enrol'; end if;
+    if public.my_list_match(t) ->> 'course_id' <> course::text then raise exception 'match must name the course'; end if;
+    if public.claim_my_list_access(t) <> 'claimed' then raise exception 'the button must claim'; end if;
+    if public.claim_my_list_access(t) = 'claimed' then raise exception 'a second press must not claim again'; end if;
+    select count(*) into n from public.enrollments where member_id = m4 and course_id = course;
+    if n <> 1 then raise exception 'one enrolment expected, got %', n; end if;
+    if public.my_list_match(t) is not null then raise exception 'nothing left to claim'; end if;
+    perform set_config('request.jwt.claims', json_build_object('sub', u2, 'role', 'authenticated')::text, true);
+    if public.my_list_match(t) is not null then raise exception 'another learner must see no match'; end if;
+    raise notice 'ok: confirm reports the match, the button claims it once';
+  end;
+
+  -- joining a batch that is already running counts from the batch's start date
+  declare u5 uuid := gen_random_uuid(); m5 uuid; b uuid;
+  begin
+    insert into public.batches (tenant_id, code, name, status, start_date) values (t, 'SQL-RUN', 'SQL running batch', 'ongoing', current_date - 40) returning id into b;
+    perform set_config('request.jwt.claims', json_build_object('sub', staff, 'role', 'authenticated', 'aal', 'aal2')::text, true);
+    perform public.add_to_learner_list(t, course, b, now() + interval '1 year', '[{"email":"mid.batch@example.com"}]'::jsonb);
+    insert into auth.users (id, email, aud, role, raw_user_meta_data) values (u5, 'mid.batch@example.com', 'authenticated', 'authenticated', '{}');
+    insert into public.tenant_members (tenant_id, user_id, display_name, email, email_verified_at) values (t, u5, 'Mid', 'mid.batch@example.com', now()) returning id into m5;
+    if private.claim_whitelist(m5) <> 'claimed' then raise exception 'mid-batch learner must claim'; end if;
+    if (select (started_at at time zone 'Asia/Kolkata')::date from public.enrollments where member_id = m5) <> current_date - 40 then raise exception 'must start with the batch'; end if;
+    raise notice 'ok: joining a running batch counts from its start';
   end;
 end $$;

@@ -75,7 +75,7 @@ test.describe.serial('coupons, receipts and refunds', () => {
 
     await page.waitForLoadState('networkidle') // the page is re-rendered right after the coupon action; wait for that to settle
     await page.getByRole('button', { name: 'Pay ₹1,062' }).click()
-    await page.waitForURL(/\/learn(\?|$)/)
+    await page.waitForURL(/\/dashboard(\?|$)/)
     await expect(page.getByRole('heading', { name: title })).toBeVisible()
 
     await page.goto('/account/payments')
@@ -103,7 +103,7 @@ test.describe.serial('coupons, receipts and refunds', () => {
     await expect(page.getByTestId('order-total')).toHaveText('₹0')
     await expect(page.getByRole('button', { name: /^Pay/ })).toHaveCount(0)
     await page.getByRole('button', { name: 'Enrol for free' }).first().click()
-    await page.waitForURL(/\/learn(\?|$)/)
+    await page.waitForURL(/\/dashboard(\?|$)/)
     await expect(page.getByRole('heading', { name: title })).toBeVisible()
   })
 
@@ -120,7 +120,7 @@ test.describe.serial('coupons, receipts and refunds', () => {
     await page.reload()
     await expect(page.getByText('Your last payment attempt did not go through: Card declined')).toBeVisible()
     await page.getByRole('button', { name: 'Pay ₹1,180' }).click()
-    await page.waitForURL(/\/learn(\?|$)/)
+    await page.waitForURL(/\/dashboard(\?|$)/)
     await expect(page.getByRole('heading', { name: title })).toBeVisible()
   })
 
@@ -144,7 +144,7 @@ test.describe.serial('coupons, receipts and refunds', () => {
     // the learner still has the course after a partial refund
     const learner = await browser.newContext({ baseURL })
     const lp = await learner.newPage()
-    await signIn(lp, buyer, '/learn')
+    await signIn(lp, buyer, '/dashboard')
     await expect(lp.getByRole('heading', { name: title })).toBeVisible()
 
     await page.getByLabel('Amount (₹)').fill('')

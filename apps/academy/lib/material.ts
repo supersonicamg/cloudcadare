@@ -17,6 +17,10 @@ export interface MaterialLesson extends LearnLesson {
   isNew: boolean
   noteCount: number
   publishedAt: string | null
+  /** Class recordings only: an uploaded video plays here, a Teams link opens in Teams, 'none' is still on its way. */
+  recording: 'upload' | 'link' | 'none' | null
+  /** Drip rule: the lesson opens this many days after the start. Null: open from the start. */
+  dripDays: number | null
 }
 export interface MaterialMonth { id: string; label: string | null; title: string; lessons: MaterialLesson[]; done: number }
 export interface Material { course: LearnCourse; months: MaterialMonth[]; all: MaterialLesson[]; notes: Note[]; noteCounts: Map<string, number> }
@@ -32,22 +36,26 @@ export async function getMaterial(a: Access, slug: string, nowMs: number): Promi
   const course = await getLearnCourse(a, slug)
   if (!course) return null
   const [meta, progress, notes] = await Promise.all([
-    a.db.from('lessons').select('id, published_at').eq('course_id', course.enrollment.course.id).eq('is_published', true).is('deleted_at', null),
+    a.db.from('lessons').select('id, published_at, media_asset_id, external_url, unlock_rule').eq('course_id', course.enrollment.course.id).eq('is_published', true).is('deleted_at', null),
     a.db.from('lesson_progress').select('lesson_id, progress_pct').eq('enrollment_id', course.enrollment.id),
     getAllNotes(a),
   ])
-  const published = new Map((meta.data ?? []).map((l) => [l.id, l.published_at]))
+  const extra = new Map((meta.data ?? []).map((l) => [l.id, l]))
   const pct = new Map((progress.data ?? []).map((p) => [p.lesson_id, Number(p.progress_pct)]))
   const noteCounts = countByLesson(notes)
   const fresh = nowMs - NEW_DAYS * 86_400_000
 
   const months: MaterialMonth[] = course.sections.map((s) => {
     const lessons = flatten(s).map<MaterialLesson>((l) => {
-      const at = published.get(l.id) ?? null
+      const x = extra.get(l.id)
+      const at = x?.published_at ?? null
+      const rule = (x?.unlock_rule ?? {}) as { type?: string; days?: number }
       const opened = pct.has(l.id) || l.done
       return {
         ...l, monthId: s.id, pct: l.done ? 100 : Math.round(pct.get(l.id) ?? 0), opened,
         isNew: Boolean(at) && new Date(at!).getTime() > fresh && !opened, noteCount: noteCounts.get(l.id) ?? 0, publishedAt: at,
+        recording: l.type !== 'live' ? null : x?.media_asset_id ? 'upload' : x?.external_url ? 'link' : 'none',
+        dripDays: rule.type === 'days_after_enrolment' ? Number(rule.days ?? 0) : null,
       }
     })
     return { id: s.id, label: s.label, title: s.title, lessons, done: lessons.filter((l) => l.done).length }

@@ -11,8 +11,11 @@ import { getLeadCourseSlug } from '@/lib/learn'
 const initialsOf = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('') || '?'
 
-/** Everything a public page needs to wrap itself in the academy's theme. */
-export async function getShell() {
+/**
+ * Everything a public page needs to wrap itself in the academy's theme. `home`: the home page keeps the marketing links
+ * for a signed-in person and offers "Dashboard" beside their account button (plan/16 §12).
+ */
+export async function getShell(opts: { home?: boolean } = {}) {
   const bundle = await requireTenantBundle()
   const theme = getTheme(bundle.branding.themeKey)
   const brand = brandInfo(bundle.branding, platformName(), await getCurrentYear())
@@ -29,19 +32,22 @@ export async function getShell() {
   let account: { label: string; href: string; viewer?: ViewerInfo } = { label: aurora ? 'Log in' : 'Sign in', href: '/login' }
 
   if (access) {
-    // Signed in (plan/16 §7): the learner's own links in the bar, everything about the person in the account menu.
+    // Signed in (plan/16 §7, §12): the learner's own links in the bar, everything about the person in the account menu.
     // Course material and Live classes belong to a course, so they appear once the learner has one.
     const slug = await getLeadCourseSlug(access)
-    nav = [
-      { label: 'My learning', href: '/learn' },
-      ...(slug ? [{ label: 'Course material', href: `/learn/${slug}/material` }, { label: 'Live classes', href: `/learn/${slug}/live` }] : []),
-      ...(slug && isEnabled(f, 'learning.notes') ? [{ label: 'My notes', href: '/learn/notes' }] : []),
+    const learner: NavItem[] = [
+      { label: 'Dashboard', href: '/dashboard' },
+      ...(slug
+        ? [{ label: 'Course material', href: `/learn/${slug}/material` }, { label: 'Live classes', href: `/learn/${slug}/live` }, ...(isEnabled(f, 'learning.notes') ? [{ label: 'My notes', href: '/learn/notes' }] : [])]
+        : isEnabled(f, 'catalog.courses') ? [{ label: 'Program', href: '/courses' }] : []),
     ]
+    if (!opts.home) nav = learner
     const name = access.memberName || viewer.fullName || viewer.email || 'You'
     account = {
-      label: 'My learning',
-      href: '/learn',
+      label: 'Dashboard',
+      href: '/dashboard',
       viewer: {
+        ...(opts.home ? { homeButton: { label: 'Dashboard', href: '/dashboard' } } : {}),
         name,
         email: viewer.email,
         initials: initialsOf(name),

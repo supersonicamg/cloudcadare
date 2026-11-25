@@ -7,7 +7,7 @@ import { resolveTenantFromHost } from '@/lib/dal'
 // start and closes at the end, and attendance is recorded once. Only then is the person sent to the meeting link.
 
 const noStore = { 'Cache-Control': 'private, no-store' }
-const back = (request: Request, why: string) => new Response(null, { status: 303, headers: { Location: `${new URL(request.url).origin}/learn?live=${why}`, ...noStore } })
+const back = (request: Request, why: string) => new Response(null, { status: 303, headers: { Location: `${new URL(request.url).origin}/dashboard?live=${why}`, ...noStore } })
 
 export async function GET(request: Request, { params }: RouteContext<'/[tenant]/api/live/[sessionId]/join'>) {
   const { sessionId } = await params
@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: RouteContext<'/[tenant]/
   if (!bundle) return new Response('Not found', { status: 404, headers: noStore })
   const db = createServerDb(getPlane(bundle.tenant.planeId), await cookies())
   const { data: claims } = await db.auth.getClaims()
-  if (!claims?.claims) return new Response(null, { status: 303, headers: { Location: `${new URL(request.url).origin}/login?next=${encodeURIComponent('/learn')}`, ...noStore } })
+  if (!claims?.claims) return new Response(null, { status: 303, headers: { Location: `${new URL(request.url).origin}/login?next=${encodeURIComponent('/dashboard')}`, ...noStore } })
 
   const { data, error } = await db.rpc('join_live_session', { p_session: sessionId })
   if (error || !data) {

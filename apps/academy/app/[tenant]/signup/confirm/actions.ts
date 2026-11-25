@@ -37,7 +37,7 @@ export async function resendCode(_prev: ConfirmState, _form: FormData): Promise<
       case 'sent': return { resent: true, retryIn: 60 }
       case 'too_soon': return { retryIn: r.retryIn }
       case 'too_many': return { error: 'You have asked for several codes. Wait an hour, or message us on WhatsApp.' }
-      case 'already_verified': return { done: '/' }
+      case 'already_verified': return { done: '/dashboard' }
       default: return { error: 'We could not send the email. Message us on WhatsApp and we will help.' }
     }
   } catch (e) {
@@ -47,11 +47,9 @@ export async function resendCode(_prev: ConfirmState, _form: FormData): Promise<
 }
 
 /**
- * Where a learner goes once the email is confirmed (plan/16 §4.3): on the learner list -> "Welcome back"; already
- * enrolled -> their course; anyone else -> where they were heading (the checkout takes over from there).
+ * Where a learner goes once the email is confirmed (plan/16 §12): on the learner list -> the dashboard, which offers
+ * "Join my batch now"; anyone else -> where they were heading, or the dashboard.
  */
 function afterConfirmed(claim: string | undefined, next: string) {
-  if (claim === 'claimed') return '/welcome-back'
-  if (claim === 'already_enrolled') return next === '/' ? '/learn' : next
-  return next
+  return claim === 'listed' || next === '/' ? '/dashboard' : next
 }

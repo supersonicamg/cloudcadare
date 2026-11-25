@@ -10,7 +10,7 @@ export const metadata = { title: 'Learner list' }
 
 /*
  * D2 · Learner list (whitelist).
- * 1. One job: record who already has access, so they get it without paying once they confirm their email.
+ * 1. One job: record who already has access, so they can join without paying once they confirm their email.
  * 2. One main action: "Add to list" (the only filled button).
  * 3. Reading order: title + one line -> text tabs with counts (not pills) -> the list, name first and status last
  *    (dominant, widest column) -> the add panel beside it (stone, narrower).
@@ -58,7 +58,7 @@ export default async function LearnerList(props: PageProps<'/[tenant]/admin/lear
     <>
       <div className="grid gap-2">
         <h1 className={pageTitle}>Learner list</h1>
-        <p className={pageLead}>Emails on this list get their course without paying, once they confirm their email.</p>
+        <p className={pageLead}>Emails on this list can join their course without paying: after confirming their email they press “Join my batch now” on their dashboard.</p>
       </div>
 
       <div className="mt-8 grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">

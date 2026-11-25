@@ -124,7 +124,7 @@ test.describe.serial('files, previews, ordering and unlock rules', () => {
   test('a learner is held to the order, can download, and unlocks the next lesson by finishing one', async ({ page }) => {
     await signIn(page, `ordered-${stamp}@example.com`, `/courses/${slug}`)
     await page.getByRole('button', { name: 'Enrol for free' }).first().click()
-    await page.waitForURL(/\/learn/)
+    await page.waitForURL(/\/(dashboard|learn)/)
     await page.goto(`/learn/${slug}`)
     const locked = page.locator('[data-locked]').filter({ visible: true })
     await expect(locked).toHaveCount(5) // everything after Alpha

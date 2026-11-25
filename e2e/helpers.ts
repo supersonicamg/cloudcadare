@@ -50,10 +50,12 @@ export async function signIn(page: Page, email: string, next = '/') {
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
   await page.getByRole('button', { name: 'Log in', exact: true }).click()
-  await page.waitForURL((u) => u.pathname === next || u.pathname === '/signup/confirm')
+  // With no `next`, logging in lands on the dashboard (plan/16 §12).
+  const landing = next === '/' ? '/dashboard' : next
+  await page.waitForURL((u) => u.pathname === landing || u.pathname === '/signup/confirm')
   if (new URL(page.url()).pathname === '/signup/confirm') {
     await confirmEmail(page, email)
-    await page.waitForURL((u) => u.pathname === next)
+    await page.waitForURL((u) => u.pathname === landing)
   }
 }
 

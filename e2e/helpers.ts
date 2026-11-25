@@ -115,6 +115,44 @@ export async function enableMfa(page: Page, secretOut: { current?: string } = {}
   return secret
 }
 
+/** Creates the account through the real sign-up page and types the emailed code. Lands on the page chosen by the server. */
+export async function signUpAndConfirm(page: Page, email: string, name = 'E2e Learner', whatsapp = '98765 43210') {
+  await page.goto('/signup')
+  await page.getByLabel('Full name').fill(name)
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('WhatsApp number').fill(whatsapp)
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
+  await page.getByRole('button', { name: 'Create account' }).click()
+  await page.waitForURL((u) => u.pathname === '/signup/confirm')
+  await confirmEmail(page, email)
+}
+
+/**
+ * Test setup only: gives an existing academy member the owner role through the service key. This is how the e2e suite
+ * gets a throwaway staff account on a dev project WITHOUT touching the real owner's password or authenticator.
+ */
+export async function grantOwnerRole(email: string) {
+  const { base, headers } = authAdmin()
+  const rest = (path: string, init?: RequestInit) => fetch(`${base}/rest/v1/${path}`, { ...init, headers: { ...headers, Prefer: 'return=representation' } })
+  const [member] = (await (await rest(`tenant_members?select=id,tenant_id&email=eq.${encodeURIComponent(email)}&limit=1`)).json()) as { id: string; tenant_id: string }[]
+  if (!member) throw new Error(`no member with email ${email}`)
+  const [role] = (await (await rest(`roles?select=id&tenant_id=eq.${member.tenant_id}&key=eq.owner&limit=1`)).json()) as { id: string }[]
+  if (!role) throw new Error('no owner role in this academy')
+  const res = await rest('member_roles?on_conflict=member_id,role_id,scope_type,scope_id', {
+    method: 'POST', headers: { ...headers, Prefer: 'resolution=ignore-duplicates,return=minimal' },
+    body: JSON.stringify({ tenant_id: member.tenant_id, member_id: member.id, role_id: role.id, scope_type: 'tenant' }),
+  })
+  if (!res.ok && res.status !== 409) throw new Error(`could not grant the owner role: ${res.status} ${await res.text()}`)
+}
+
+/** A throwaway staff account (owner role) at aal2 in this browser context. Never uses the real owner's account. */
+export async function staffWithMfa(page: Page, email = process.env.E2E_STAFF_EMAIL ?? 'e2e-staff@example.com') {
+  await resetMfa(email)
+  await signIn(page, email, '/')
+  await grantOwnerRole(email)
+  await enableMfa(page)
+}
+
 // ---------------------------------------------------------------------------- owner shortcuts
 
 /** A fresh sign-in as the owner with the two-step check done in this same browser context (each test gets its own). */
@@ -124,6 +162,24 @@ export async function ownerWithMfa(page: Page, owner: string, next = '/admin') {
   const secret = await enableMfa(page)
   if (next !== '/admin') await page.goto(next)
   return secret
+}
+
+/** Creates a published course with one reading lesson and no price. Staff must be at aal2. */
+export async function createPublishedCourse(page: Page, title: string) {
+  await page.goto('/admin/courses')
+  await page.getByLabel('Title').fill(title)
+  await page.getByRole('button', { name: 'Create draft' }).click()
+  await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  await page.waitForLoadState('networkidle')
+  await page.getByLabel('New section').fill('Start here')
+  await page.getByRole('button', { name: 'Add section' }).click()
+  await expect(page.getByRole('heading', { name: /Start here/ })).toBeVisible()
+  await page.getByLabel('Lesson title').fill('First reading')
+  await page.getByLabel('Type').selectOption({ label: 'Reading' })
+  await page.getByRole('button', { name: 'Add lesson' }).click()
+  await expect(page.getByRole('link', { name: 'First reading' })).toBeVisible()
+  await page.getByRole('button', { name: 'Publish' }).click()
+  await expect(page.getByText('Published', { exact: true })).toBeVisible()
 }
 
 /** Creates a published course with one reading lesson and a price (₹, GST included). Owner must be at aal2. */

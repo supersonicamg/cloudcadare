@@ -61,7 +61,14 @@ async function destination({ db, tenantId }: Connection, tenant: { planeId: stri
     db.from('enrollments').select('id').eq('member_id', memberId).in('status', ['active', 'paused', 'completed']).limit(1),
     db.from('member_roles').select('member_id').eq('member_id', memberId).limit(1),
   ])
-  if (m.data?.email_verified_at || enrolled.data?.length || roles.data?.length) return next
+  if (roles.data?.length) return next
+  if (m.data?.email_verified_at) {
+    // Already confirmed: check the learner list again, so a row added after they signed up still works.
+    if (enrolled.data?.length) return next
+    const { data: claim } = await db.rpc('claim_my_list_access', { p_tenant_id: tenantId })
+    return claim === 'claimed' ? '/welcome-back' : next
+  }
+  if (enrolled.data?.length) return next
   await sendEmailCode({ memberId, tenantId, planeId: tenant.planeId }).catch((e) => console.error('email code failed:', e))
   return confirmPath(next)
 }

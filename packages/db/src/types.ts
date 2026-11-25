@@ -1693,6 +1693,33 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"access_whitelist": {
+                  Row: {
+                    "added_by": string,"batch_id": string | null,"claimed_at": string | null,"claimed_by": string | null,"course_id": string,"created_at": string,"email_norm": string,"enrollment_id": string | null,"expires_at": string | null,"full_name": string | null,"id": string,"note": string | null,"status": string,"tenant_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "added_by": string,"batch_id"?: string | null,"claimed_at"?: string | null,"claimed_by"?: string | null,"course_id": string,"created_at"?: string,"email_norm": string,"enrollment_id"?: string | null,"expires_at"?: string | null,"full_name"?: string | null,"id"?: string,"note"?: string | null,"status"?: string,"tenant_id": string
+                  }
+                  Update: {
+                    "added_by"?: string,"batch_id"?: string | null,"claimed_at"?: string | null,"claimed_by"?: string | null,"course_id"?: string,"created_at"?: string,"email_norm"?: string,"enrollment_id"?: string | null,"expires_at"?: string | null,"full_name"?: string | null,"id"?: string,"note"?: string | null,"status"?: string,"tenant_id"?: string
+                  }
+                  Relationships: [
+{
+      foreignKeyName: "access_whitelist_tenant_id_course_id_fkey"
+      columns: ["tenant_id","course_id"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["tenant_id","id"]
+    },
+{
+      foreignKeyName: "access_whitelist_tenant_id_batch_id_fkey"
+      columns: ["tenant_id","batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["tenant_id","id"]
+    }
+                  ]
                 },"notification_preferences": {
                   Row: {
                     "channel": string,"enabled": boolean,"event_key": string,"member_id": string,"tenant_id": string
@@ -2874,6 +2901,18 @@ isOneToOne: false
                            },
 "verify_email_code":
 { Args: { "p_code": string,"p_tenant_id": string }; Returns: Json
+                           },
+"add_to_learner_list":
+{ Args: { "p_batch_id": string | null,"p_course_id": string,"p_entries": Json,"p_expires": string | null,"p_tenant_id": string }; Returns: Json
+                           },
+"remove_from_learner_list":
+{ Args: { "p_id": string }; Returns: string
+                           },
+"extend_learner_list_entry":
+{ Args: { "p_expires": string,"p_id": string }; Returns: string
+                           },
+"claim_my_list_access":
+{ Args: { "p_tenant_id": string }; Returns: string
                            },
 "my_access":
 { Args: { "p_tenant_id": string }; Returns: Json

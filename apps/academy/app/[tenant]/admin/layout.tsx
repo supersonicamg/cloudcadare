@@ -16,6 +16,7 @@ export default async function AdminLayout({ children }: LayoutProps<'/[tenant]/a
     { href: '/admin', label: 'Overview', show: true },
     { href: '/admin/courses', label: 'Courses', show: isEnabled(f, 'catalog.courses') && (can(a, 'course.manage') || can(a, 'course.view_all')) },
     { href: '/admin/enrolments', label: 'Enrolments', show: isEnabled(f, 'catalog.courses') && holds(a, 'enrollment.manage') },
+    { href: '/admin/learner-list', label: 'Learner list', show: isEnabled(f, 'catalog.courses') && holds(a, 'enrollment.manage') },
     { href: '/admin/orders', label: 'Orders', show: isEnabled(f, 'commerce.checkout') && can(a, 'order.view') },
     { href: '/admin/coupons', label: 'Coupons', show: isEnabled(f, 'commerce.coupons') && can(a, 'coupon.manage') },
     { href: '/admin/certificates', label: 'Certificates', show: isEnabled(f, 'learning.certificates') && can(a, 'certificate.manage') },

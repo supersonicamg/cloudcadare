@@ -16,9 +16,9 @@ export async function verifyCode(_prev: ConfirmState, form: FormData): Promise<C
     const a = await requireMemberAction()
     const { data, error } = await a.db.rpc('verify_email_code', { p_tenant_id: a.bundle.tenant.id, p_code: code })
     if (error) return { error: 'We could not check the code. Try again in a minute.' }
-    const r = data as { status: string; attempts_left?: number }
+    const r = data as { status: string; attempts_left?: number; claim?: string }
     switch (r.status) {
-      case 'verified': return { done: await afterConfirmed(safeNext(form.get('next'))) }
+      case 'verified': return { done: afterConfirmed(r.claim, safeNext(form.get('next'))) }
       case 'wrong': return { error: r.attempts_left ? `That code is not right. You have ${r.attempts_left} ${r.attempts_left === 1 ? 'try' : 'tries'} left.` : 'That code is not right. Ask for a new one.' }
       case 'locked': return { error: 'Too many wrong tries. Ask for a new code.' }
       default: return { error: 'That code has run out. Ask for a new one.' }
@@ -46,7 +46,12 @@ export async function resendCode(_prev: ConfirmState, _form: FormData): Promise<
   }
 }
 
-/** Where a learner goes once the email is confirmed. Extended by the learner-list step (plan/16 §4.3). */
-async function afterConfirmed(next: string) {
+/**
+ * Where a learner goes once the email is confirmed (plan/16 §4.3): on the learner list -> "Welcome back"; already
+ * enrolled -> their course; anyone else -> where they were heading (the checkout takes over from there).
+ */
+function afterConfirmed(claim: string | undefined, next: string) {
+  if (claim === 'claimed') return '/welcome-back'
+  if (claim === 'already_enrolled') return next === '/' ? '/learn' : next
   return next
 }

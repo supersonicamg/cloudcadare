@@ -70,6 +70,10 @@ async function handle(ev: OutboxEvent, sender: EmailSender | null, origin: (slug
     const { data: c } = await d.from('certificates').select('title, verification_code').eq('id', ev.aggregate_id).maybeSingle()
     if (!c) return 'skipped'
     mail = { tenantId: ev.tenant_id, memberId, eventKey: 'certificate.issued', vars: { ...common, 'course.title': c.title, 'links.certificate': `${base}/certificates/${ev.aggregate_id}`, 'links.verify': `${base}/verify/${c.verification_code}` } }
+  } else if (ev.event_type === 'whitelist.claimed') {
+    const { data: e } = await d.from('enrollments').select('courses(title)').eq('id', ev.aggregate_id).maybeSingle()
+    const course = Array.isArray(e?.courses) ? e?.courses[0] : e?.courses
+    mail = { tenantId: ev.tenant_id, memberId, eventKey: 'whitelist.claimed', vars: { ...common, 'course.title': course?.title ?? 'your course' } }
   }
   if (!mail) return 'skipped'
   return sendTemplated(mail, sender)

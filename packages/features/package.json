@@ -1,0 +1,21 @@
+{
+  "name": "@educore/features",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./react": "./src/react.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": { "react": "19.3.0" },
+  "devDependencies": {
+    "@educore/config": "workspace:*",
+    "@types/react": "^19",
+    "typescript": "^5",
+    "vitest": "^3"
+  }
+}

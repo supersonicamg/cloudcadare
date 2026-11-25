@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudCadre Homepage (aurora theme)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ================= Preview chrome (not part of the design) ================= */
+:root { --stage: #E4E1DA; --chrome: #FFFFFF; --chrome-ink: #1B1D21; --chrome-mute: #676B72; --chrome-line: #D3CFC6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --stage: #16171A; --chrome: #1F2125; --chrome-ink: #ECEDEF; --chrome-mute: #9A9EA6; --chrome-line: #34373D; } }
+:root[data-theme="dark"] { --stage: #16171A; --chrome: #1F2125; --chrome-ink: #ECEDEF; --chrome-mute: #9A9EA6; --chrome-line: #34373D; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--stage); color: var(--chrome-ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.toolbar { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 10px 16px; background: var(--chrome); border-bottom: 1px solid var(--chrome-line); }
+.tb-title { font-size: 14px; font-weight: 600; }
+.tb-group { display: flex; align-items: center; gap: 8px; }
+.tb-lab { font-size: 13px; color: var(--chrome-mute); }
+.seg { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 8px; background: var(--stage); }
+.seg button { font: inherit; font-size: 13px; color: var(--chrome-ink); background: transparent; border: 0; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--chrome); outline: 1px solid var(--chrome-line); font-weight: 600; }
+.tb-note { flex-basis: 100%; font-size: 13px; line-height: 1.45; color: var(--chrome-mute); }
+.tb-note b { color: var(--chrome-ink); font-weight: 600; }
+.stage { padding: 20px 16px 64px; }
+
+/* ================= Design tokens =================
+   Type scale (desktop): h1 82 · h2 48 · h3 22–26 · lead 21 · body 17 · small 14. Two type pairings, switchable.
+   Spacing: 8-point scale. Gaps inside a group are always smaller than gaps between groups.
+   Buying is the one filled action per view. WhatsApp is the outline action. A sample download is a text link.
+   No prices, dates or batches anywhere on this page. */
+.frame { container-type: inline-size; max-width: 1440px; margin: 0 auto; overflow: clip; border-radius: 4px;
+  background: var(--bg); color: var(--ink); font-family: var(--f-text); -webkit-font-smoothing: antialiased;
+  --grey: #46504F; --mute: #66706F; --line: #DCD8CD; --wa: #25D366; }
+.frame.is-mobile { max-width: 390px; }
+.frame[data-t="a"] { --f-display: "Schibsted Grotesk", system-ui, sans-serif; --f-text: "Schibsted Grotesk", system-ui, sans-serif; --ls: -0.042em; --wt: 800; }
+.frame[data-t="b"] { --f-display: "Bricolage Grotesque", system-ui, sans-serif; --f-text: "Instrument Sans", system-ui, sans-serif; --ls: -0.03em; --wt: 800; }
+.frame[data-p="teal"] { --brand: #0F5C56; --deep: #0A3F3B; --accent: #FFC845; --t1: #D3EBE2; --t2: #FFE8BF; --t3: #F9D9CF; --t4: #E1DDF2; --bg: #F7F4EC; --ink: #10201F; --link: #0F5C56; }
+.frame[data-p="navy"] { --brand: #1E2F66; --deep: #131E47; --accent: #F2B94B; --t1: #D9E2F6; --t2: #FFE8BF; --t3: #F7D8D8; --t4: #E1E6D5; --bg: #F6F4EE; --ink: #111827; --link: #1E2F66; }
+.frame[data-p="clay"] { --brand: #2C323C; --deep: #1B2028; --accent: #F3B58C; --t1: #E7E2D6; --t2: #F8DFC9; --t3: #D8E6DF; --t4: #E4DEEF; --bg: #F8F5F0; --ink: #171A1F; --link: #B0441A; }
+.frame a { color: inherit; text-decoration: none; }
+.frame button { font-family: inherit; }
+.frame :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.frame img { display: block; }
+.frame svg { flex: none; }
+
+.page { --gut: clamp(20px, 5.5cqi, 80px); }
+.wrap { padding-inline: var(--gut); }
+.h1, .h2, .h3, .big, .lpa b { font-family: var(--f-display); }
+.h1 { font-size: clamp(42px, 5.6cqi, 82px); font-weight: var(--wt); line-height: 0.98; letter-spacing: var(--ls); text-wrap: balance; }
+.h2 { font-size: clamp(30px, 3.3cqi, 48px); font-weight: 750; line-height: 1.05; letter-spacing: calc(var(--ls) * .9); text-wrap: balance; }
+.h3 { font-size: 22px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+.lead { max-width: 30em; font-size: clamp(18px, 1.45cqi, 21px); line-height: 1.5; color: var(--grey); }
+.body { font-size: 17px; line-height: 1.55; color: var(--grey); }
+.small { font-size: 14px; line-height: 1.45; color: var(--mute); }
+.kicker { font-size: 16px; font-weight: 650; color: var(--link); }
+.u { background: linear-gradient(transparent 64%, var(--accent) 64% 92%, transparent 92%); }
+.ar { font-family: system-ui, "Segoe UI", sans-serif; font-weight: 400; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 56px; padding: 0 28px; border-radius: 12px; font-size: 17px; font-weight: 650; white-space: nowrap; border: 0; cursor: pointer; }
+.btn-sm { height: 44px; padding: 0 18px; font-size: 15px; border-radius: 10px; }
+.btn-brand { background: var(--brand); color: #fff !important; }
+.btn-brand:hover { background: var(--deep); }
+.btn-accent { background: var(--accent); color: var(--ink) !important; }
+.btn-line { box-shadow: inset 0 0 0 2px var(--ink); color: var(--ink) !important; }
+.btn-line-w { box-shadow: inset 0 0 0 2px rgba(255,255,255,.7); color: #fff !important; }
+.tlink { font-size: 17px; font-weight: 650; color: var(--link); white-space: nowrap; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 16px; }
+.wa { width: 22px; height: 22px; fill: var(--wa); }
+.wa-ink { fill: currentColor; }
+.sample { display: inline-flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; color: var(--link); }
+.sample svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sample span { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; }
+.sec { padding-block: clamp(64px, 8cqi, 120px); }
+.sec-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px 40px; margin-bottom: clamp(32px, 4cqi, 56px); }
+.sec-head .lead { margin-top: 14px; }
+.band-white { background: #fff; }
+.photo { width: 100%; height: 100%; object-fit: cover; background: var(--t1); }
+.tick { position: relative; padding-left: 28px; }
+.tick::before { content: ""; position: absolute; left: 0; top: .28em; width: 17px; height: 17px; border-radius: 50%; background: var(--brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.3l2.2 2.2 4.8-4.8' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/17px no-repeat; }
+.checks { display: flex; flex-wrap: wrap; gap: 10px 28px; font-size: 16px; font-weight: 550; color: var(--grey); list-style: none; }
+
+.swap-in { animation: swapIn .22s ease-out; }
+@keyframes swapIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .swap-in { animation: none; } }
+/* "Show block names" overlay: each section is one CMS block in the real build */
+.frame.show-blocks [data-block] { position: relative; outline: 2px dashed var(--accent); outline-offset: -2px; }
+.frame.show-blocks [data-block]::before { content: attr(data-block); position: absolute; z-index: 20; top: 8px; left: 8px; padding: 3px 9px; border-radius: 6px; background: var(--ink); color: #fff; font: 600 12px/1.4 system-ui, sans-serif; }
+
+/* ================= Top bar + nav ================= */
+.ann { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 14px; padding: 10px var(--gut); background: var(--accent); color: var(--ink); font-size: 15px; font-weight: 600; text-align: center; }
+.ann a { display: inline-flex; align-items: center; gap: 8px; text-decoration: underline; text-underline-offset: 3px; }
+.ann .wa { width: 18px; height: 18px; fill: var(--ink); }
+.nav { display: flex; align-items: center; height: 80px; gap: clamp(24px, 3.2cqi, 44px); }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-size: 23px; font-weight: 750; letter-spacing: -0.03em; white-space: nowrap; }
+.logo { flex: none; width: 34px; height: 34px; }
+.links { display: flex; gap: clamp(20px, 2.3cqi, 34px); font-size: 16px; font-weight: 550; }
+.links .dd::after { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 0 3px 8px; border-right: 1.8px solid currentColor; border-bottom: 1.8px solid currentColor; transform: rotate(45deg); }
+.nav-end { display: flex; align-items: center; gap: 24px; margin-left: auto; font-size: 16px; font-weight: 550; white-space: nowrap; }
+.menu { display: none; margin-left: auto; padding: 9px 16px; border: 2px solid currentColor; border-radius: 10px; font-size: 15px; font-weight: 650; }
+
+/* ================= Hero: one layout, two image frames ================= */
+.ha-in { display: grid; grid-template-columns: 7fr 5fr; align-items: center; gap: 40px clamp(40px, 5cqi, 88px); padding-block: clamp(36px, 4.5cqi, 72px) clamp(56px, 6cqi, 96px); }
+.rating { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; }
+.stars { display: flex; gap: 2px; }
+.stars svg { width: 20px; height: 20px; fill: var(--accent); stroke: var(--ink); stroke-width: 1.3; stroke-linejoin: round; }
+.copy { display: flex; flex-direction: column; align-items: flex-start; gap: 26px; }
+.copy .c { color: var(--brand); }
+.ha-media { position: relative; justify-self: end; width: min(100%, 520px); padding: 0 22px 22px 0; }
+.ha-back { position: absolute; inset: 22px 0 0 22px; background: var(--accent); }
+.ha-photo { position: relative; background: var(--t1); aspect-ratio: 4 / 5; }
+.shape { overflow: hidden; }
+.ha-tag { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 12px; padding: 18px 26px; background: var(--deep); color: #fff; font-size: 16px; font-weight: 600; }
+.ha-tag a { color: var(--accent); white-space: nowrap; }
+/* Frame A: arch */
+.page[data-h="a"] .shape { border-radius: 50% 50% 28px 28px / 34% 34% 28px 28px; }
+.page[data-h="a"] .ha-photo img { object-position: 58% 50%; }
+/* Frame B: slanted panel (clip path is defined in the SVG sprite) */
+.page[data-h="b"] .ha-in { grid-template-columns: 6fr 6fr; }
+.page[data-h="b"] .ha-media { width: min(100%, 660px); }
+.page[data-h="b"] .h1 { font-size: clamp(40px, 4.8cqi, 70px); }
+.page[data-h="b"] .shape { clip-path: url(#slant); }
+.page[data-h="b"] .ha-photo { aspect-ratio: 1.18 / 1; }
+.page[data-h="b"] .ha-photo img { object-position: 60% 38%; }
+.page[data-h="b"] .ha-tag { padding-left: 15%; }
+
+/* ================= Tools and platforms strip ================= */
+.tools { background: #fff; border-block: 1px solid var(--line); }
+.tools-in { display: grid; grid-template-columns: 3fr 9fr; align-items: center; gap: 24px clamp(32px, 4cqi, 64px); padding-block: 36px; }
+.tools-title { font-family: var(--f-display); font-size: 20px; font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
+.tool-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 16px; }
+.tool { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 14px; font-weight: 550; color: var(--mute); }
+.tool svg { width: 52px; height: 52px; }
+
+/* ================= Courses ================= */
+.paths { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.path { display: flex; flex-direction: column; gap: 8px; padding: clamp(24px, 2.4cqi, 36px); border-radius: 28px; background: var(--tint); }
+.tiles { display: flex; gap: 10px; margin-bottom: 14px; }
+.tile { display: grid; place-items: center; width: 68px; height: 68px; border-radius: 18px; background: #fff; }
+.tile svg { width: 44px; height: 44px; }
+.path .h3 { font-size: 26px; letter-spacing: -0.03em; }
+.path .body { color: #3C4746; font-size: 16px; }
+.crs { margin-top: 18px; border-top: 2px solid var(--ink); }
+.crs a { display: grid; grid-template-columns: 1fr auto auto; gap: 8px 18px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(16,32,31,.2); font-size: 17px; font-weight: 650; letter-spacing: -0.015em; }
+.crs a:last-child { border-bottom: 0; padding-bottom: 0; }
+.crs small { font-size: 14px; font-weight: 500; color: #3C4746; }
+.crs i { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #fff; font-style: normal; font-size: 16px; }
+.crs a:hover i { background: var(--brand); }
+
+/* ================= Placements ================= */
+.pl-stats { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 2px solid var(--ink); margin-bottom: clamp(28px, 3cqi, 44px); }
+.pl-stats > div { padding: 26px 24px; border-left: 1px solid var(--line); }
+.pl-stats > div:first-child { padding-left: 0; border-left: 0; }
+.big { font-size: clamp(34px, 3.6cqi, 54px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; }
+.pl-stats .small { margin-top: 6px; font-size: 15px; }
+.pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.pc { display: flex; flex-direction: column; gap: 18px; padding: 26px; border-radius: 24px; background: #fff; border: 1px solid var(--line); }
+.pc-top { display: flex; align-items: center; gap: 14px; }
+.pc-top img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+.pc-top b { display: block; font-size: 18px; letter-spacing: -0.015em; }
+.pc-top span { display: block; margin-top: 2px; font-size: 14px; line-height: 1.4; color: var(--mute); }
+.lpa { display: flex; align-items: baseline; gap: 8px; padding-top: 18px; border-top: 1px solid var(--line); }
+.lpa b { font-size: 52px; font-weight: 800; letter-spacing: -0.05em; line-height: .9; }
+.lpa span { font-size: 18px; font-weight: 700; color: var(--link); }
+.job { display: flex; align-items: center; gap: 12px; margin-top: -6px; }
+.mono { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 12px; background: var(--m, var(--t1)); font-family: var(--f-display); font-size: 20px; font-weight: 800; }
+.job b { display: block; font-size: 17px; letter-spacing: -0.015em; }
+.job span { font-size: 14px; color: var(--mute); }
+.pc-quote { font-size: 16px; line-height: 1.55; color: var(--grey); }
+.pc-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); }
+.chip { padding: 5px 11px; border-radius: 8px; background: var(--t1); font-size: 14px; font-weight: 600; }
+.pc-foot .stars svg { width: 16px; height: 16px; }
+
+/* ================= What you get: two designs ================= */
+.v-ga, .v-gb { display: none; }
+.page[data-g="a"] .v-ga, .page[data-g="b"] .v-gb { display: block; }
+/* A · benefits list + sample course outline */
+.wg-in { display: grid; grid-template-columns: 5fr 7fr; gap: 40px clamp(40px, 5cqi, 88px); align-items: start; }
+.wg-list { margin-top: 32px; border-top: 2px solid var(--ink); list-style: none; }
+.wg-list li { display: grid; grid-template-columns: 52px 1fr; gap: 4px 18px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.wg-ico { grid-row: 1 / 3; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: var(--tint); }
+.wg-ico svg { width: 26px; height: 26px; fill: none; stroke: var(--ink); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.wg-list b { font-size: 19px; letter-spacing: -0.02em; }
+.wg-list span { font-size: 16px; line-height: 1.45; color: var(--grey); }
+.outline { padding: clamp(22px, 2.6cqi, 36px); border-radius: 28px; background: #fff; border: 1px solid var(--line); }
+.ol-head { display: flex; align-items: center; gap: 16px; padding-bottom: 20px; border-bottom: 2px solid var(--ink); }
+.ol-head .tile { width: 60px; height: 60px; background: var(--t2); }
+.ol-head b { display: block; font-family: var(--f-display); font-size: 24px; letter-spacing: -0.03em; }
+.ol-head span { font-size: 15px; color: var(--mute); }
+.ol-row { display: grid; grid-template-columns: 40px 1fr auto; gap: 4px 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.ol-n { font-family: var(--f-display); font-size: 20px; font-weight: 800; color: var(--link); }
+.ol-row b { font-size: 17px; letter-spacing: -0.015em; }
+.ol-row .meta { font-size: 14px; color: var(--mute); white-space: nowrap; }
+.ol-row.cap { margin: 8px -14px 0; padding: 18px 14px; border: 0; border-radius: 16px; background: var(--t2); }
+.ol-row.cap .ol-n { color: var(--ink); }
+.ol-row.cap .meta { font-weight: 650; color: var(--ink); }
+.ol-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; padding-top: 22px; }
+/* B · four-stage path */
+.path-band { background: var(--t2); }
+.jr { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px clamp(20px, 2.4cqi, 36px); }
+.jr::before { content: ""; position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: var(--ink); }
+.jr-col { position: relative; display: flex; flex-direction: column; gap: 10px; padding-top: 48px; }
+.jr-col::before { content: ""; position: absolute; top: 0; left: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 7px var(--t2); }
+.jr-col:last-child::before { background: var(--brand); }
+.jr-col .kicker { font-size: 15px; }
+.jr-col .h3 { font-size: 25px; letter-spacing: -0.03em; }
+.jr-col p { font-size: 16px; line-height: 1.5; color: #3C4746; }
+.leave { margin-top: auto; min-height: 96px; padding: 14px 16px; border-radius: 14px; background: #fff; font-size: 15px; font-weight: 650; line-height: 1.35; }
+.leave small { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 500; color: var(--mute); }
+
+/* ================= Trainers ================= */
+.trainers { background: var(--t1); }
+.t-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.tr { display: flex; flex-direction: column; gap: 16px; }
+.tr-img { aspect-ratio: 4 / 4.6; border-radius: 24px; overflow: hidden; background: #fff; }
+.tr-img img { object-position: 50% 22%; }
+.tr b { display: block; font-size: 21px; letter-spacing: -0.02em; }
+.tr span { display: block; margin-top: 3px; font-size: 15px; line-height: 1.45; color: #3C4746; }
+
+/* ================= FAQ ================= */
+.faq-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 32px clamp(40px, 6cqi, 96px); }
+details { border-bottom: 1px solid var(--line); }
+details:first-child { border-top: 2px solid var(--ink); }
+summary { display: flex; justify-content: space-between; gap: 24px; padding: 24px 0; font-size: 20px; font-weight: 650; letter-spacing: -0.02em; cursor: pointer; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--t1); font-size: 22px; font-weight: 500; line-height: 1; }
+details[open] summary::after { content: "–"; background: var(--accent); }
+details p { padding: 0 56px 26px 0; font-size: 17px; line-height: 1.6; color: var(--grey); }
+
+/* ================= Final CTA + footer ================= */
+.cta { background: var(--deep); color: #fff; }
+.cta-in { display: grid; grid-template-columns: 6fr 5fr; align-items: center; gap: 36px clamp(40px, 5cqi, 88px); padding-block: clamp(56px, 7cqi, 104px); }
+.cta .h2 { font-size: clamp(32px, 3.9cqi, 56px); }
+.cta p { margin: 18px 0 30px; max-width: 28em; font-size: 19px; line-height: 1.5; color: rgba(255,255,255,.82); }
+.cta .sample { margin-top: 24px; color: #fff; }
+.cta-photo { aspect-ratio: 5 / 4; border-radius: 28px; overflow: hidden; background: var(--brand); }
+.foot { background: var(--ink); color: #C7CCCB; }
+.foot-in { display: grid; grid-template-columns: 4fr repeat(3, 2fr); gap: 36px; padding-block: 64px 44px; }
+.foot .brand { color: #fff; }
+.foot h4 { margin-bottom: 16px; font-size: 15px; font-weight: 650; color: #fff; }
+.foot ul { display: grid; gap: 11px; list-style: none; font-size: 16px; }
+.foot ul a { display: inline-flex; align-items: center; gap: 8px; }
+.foot ul a:hover { color: #fff; }
+.foot .about { margin-top: 16px; max-width: 24em; font-size: 16px; line-height: 1.55; }
+.foot-base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding-block: 24px 36px; border-top: 1px solid rgba(255,255,255,.14); font-size: 14px; color: #8D9594; }
+
+/* ================= WhatsApp button that follows the page ================= */
+.fab-wrap { position: sticky; bottom: 20px; height: 0; z-index: 30; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.fab-wrap.on { opacity: 1; pointer-events: auto; }
+.fab { position: absolute; right: 20px; bottom: 0; display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 22px 0 16px; border-radius: 99px; background: var(--wa); color: #06311A !important; font-size: 16px; font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,.22); }
+.fab .wa { width: 28px; height: 28px; fill: #fff; }
+
+/* ================= Mid and small widths (container queries, so the Mobile toggle works too) ================= */
+@container (max-width: 1180px) {
+  .tool-row { grid-template-columns: repeat(4, 1fr); gap: 20px 12px; }
+  .tools-in { grid-template-columns: 1fr; }
+  .pgrid { grid-template-columns: 1fr 1fr; }
+}
+@container (max-width: 860px) {
+  .links, .nav-end { display: none; }
+  .h1 { font-size: 38px; }
+  .menu { display: block; }
+  .nav { height: 68px; }
+  .ha-in, .page[data-h="b"] .ha-in { grid-template-columns: 1fr; padding-top: 28px; }
+  .ha-media, .page[data-h="b"] .ha-media { justify-self: stretch; width: auto; }
+  .paths { grid-template-columns: 1fr; }
+  .pl-stats { grid-template-columns: 1fr 1fr; }
+  .pl-stats > div { padding: 20px 14px; border-left: 0; border-top: 1px solid var(--line); }
+  .pl-stats > div:nth-child(-n+2) { border-top: 0; }
+  .pl-stats > div:nth-child(odd) { padding-left: 0; }
+  .pgrid { grid-template-columns: 1fr; }
+  .wg-in { grid-template-columns: 1fr; }
+  .ol-row { grid-template-columns: 32px 1fr; }
+  .ol-row .meta { grid-column: 2; white-space: normal; }
+  .jr { grid-template-columns: 1fr; padding-left: 44px; gap: 36px; }
+  .jr::before { left: 11px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
+  .jr-col { padding-top: 0; }
+  .jr-col::before { left: -44px; top: 2px; }
+  .t-grid { grid-template-columns: 1fr 1fr; }
+  .faq-grid, .cta-in { grid-template-columns: 1fr; }
+  .foot-in { grid-template-columns: 1fr 1fr; }
+  .foot-in > :first-child { grid-column: 1 / -1; }
+  .fab { padding: 0 16px; }
+  .fab span { display: none; }
+}
+@container (max-width: 520px) {
+  .crs a { grid-template-columns: 1fr auto; }
+  .crs a small { grid-column: 1; grid-row: 2; }
+  .crs a i { grid-column: 2; grid-row: 1 / 3; }
+}
+</style>
+</head>
+<body>
+
+<!-- Logo + icon library. Platform logos are the real marks (Devicon, MIT; WhatsApp from Simple Icons, CC0), trademarks of their owners. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <clipPath id="slant" clipPathUnits="objectBoundingBox"><path d="M0.175,0 L0.955,0 Q1,0 1,0.055 L1,0.945 Q1,1 0.955,1 L0.045,1 Q0,1 0.00715,0.945 L0.1229,0.055 Q0.13,0 0.175,0 Z"/></clipPath>
+    <symbol id="star" viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></symbol>
+    <symbol id="logo" viewBox="0 0 34 34">
+      <rect width="34" height="34" rx="9" fill="var(--brand)"/>
+      <path class="lg-a" d="M9.5 22.5a5 5 0 0 1 .9-9.9 6.5 6.5 0 0 1 12.4-.9 5.4 5.4 0 0 1 1.7 10.8z" fill="var(--accent)"/>
+    </symbol>
+    <!-- Placeholder mark: replace with the official FinOps Foundation logo -->
+    <symbol id="lg-finops" viewBox="0 0 128 128">
+      <circle cx="64" cy="64" r="56" fill="var(--brand)"/>
+      <path d="M64 14a50 50 0 0 1 44 26" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round"/>
+      <text x="64" y="87" text-anchor="middle" font-size="68" font-weight="800" fill="#fff" font-family="system-ui, sans-serif">₹</text>
+    </symbol>
+    <symbol id="lg-aws" viewBox="0 0 128 128"><path fill="#252f3e" d="M36.379 53.64c0 1.56.168 2.825.465 3.75.336.926.758 1.938 1.347 3.032.207.336.293.672.293.969 0 .418-.254.84-.8 1.261l-2.653 1.77c-.379.25-.758.379-1.093.379-.422 0-.844-.211-1.266-.59a13.28 13.28 0 0 1-1.516-1.98 34.153 34.153 0 0 1-1.304-2.485c-3.282 3.875-7.41 5.813-12.38 5.813-3.535 0-6.355-1.012-8.421-3.032-2.063-2.023-3.114-4.718-3.114-8.086 0-3.578 1.262-6.484 3.833-8.671 2.566-2.192 5.976-3.286 10.316-3.286 1.43 0 2.902.125 4.46.336 1.56.211 3.161.547 4.845.926v-3.074c0-3.2-.676-5.43-1.98-6.734C26.061 32.633 23.788 32 20.546 32c-1.473 0-2.988.168-4.547.547a33.416 33.416 0 0 0-4.547 1.433c-.676.293-1.18.461-1.473.547-.296.082-.507.125-.675.125-.59 0-.883-.422-.883-1.304v-2.063c0-.676.082-1.18.293-1.476.21-.293.59-.586 1.18-.883 1.472-.758 3.242-1.39 5.304-1.895 2.063-.547 4.254-.8 6.57-.8 5.008 0 8.672 1.136 11.032 3.41 2.316 2.273 3.492 5.726 3.492 10.359v13.64Zm-17.094 6.403c1.387 0 2.82-.254 4.336-.758 1.516-.508 2.863-1.433 4-2.695.672-.8 1.18-1.684 1.43-2.695.254-1.012.422-2.23.422-3.665v-1.765a34.401 34.401 0 0 0-3.871-.719 31.816 31.816 0 0 0-3.961-.25c-2.82 0-4.883.547-6.274 1.684-1.387 1.136-2.062 2.734-2.062 4.84 0 1.98.504 3.453 1.558 4.464 1.012 1.051 2.485 1.559 4.422 1.559Zm33.809 4.547c-.758 0-1.262-.125-1.598-.422-.34-.254-.633-.84-.887-1.64L40.715 29.98c-.25-.843-.38-1.39-.38-1.687 0-.672.337-1.05 1.013-1.05h4.125c.8 0 1.347.124 1.644.421.336.25.59.84.84 1.64l7.074 27.876 6.57-27.875c.208-.84.462-1.39.797-1.64.34-.255.93-.423 1.688-.423h3.367c.8 0 1.348.125 1.684.422.336.25.633.84.8 1.64l6.653 28.212 7.285-28.211c.25-.84.547-1.39.84-1.64.336-.255.887-.423 1.644-.423h3.914c.676 0 1.055.336 1.055 1.051 0 .21-.043.422-.086.676-.043.254-.125.59-.293 1.05L80.801 62.57c-.254.84-.547 1.387-.887 1.64-.336.255-.883.423-1.598.423h-3.62c-.801 0-1.348-.13-1.684-.422-.34-.297-.633-.844-.801-1.684l-6.527-27.16-6.485 27.117c-.21.844-.46 1.391-.8 1.684-.337.297-.926.422-1.684.422Zm54.105 1.137c-2.187 0-4.379-.254-6.484-.758-2.106-.504-3.746-1.055-4.84-1.684-.676-.379-1.137-.8-1.305-1.18a2.919 2.919 0 0 1-.254-1.18v-2.148c0-.882.336-1.304.97-1.304.25 0 .503.043.757.129.25.082.629.25 1.05.418a23.102 23.102 0 0 0 4.634 1.476c1.683.336 3.324.504 5.011.504 2.653 0 4.715-.465 6.145-1.39 1.433-.926 2.191-2.274 2.191-4 0-1.18-.379-2.145-1.136-2.946-.758-.8-2.192-1.516-4.254-2.191l-6.106-1.895c-3.074-.969-5.348-2.398-6.734-4.293-1.39-1.855-2.106-3.918-2.106-6.105 0-1.77.38-3.328 1.137-4.676a10.829 10.829 0 0 1 3.031-3.453c1.262-.965 2.696-1.684 4.38-2.188 1.683-.504 3.452-.715 5.304-.715.926 0 1.894.043 2.82.168.969.125 1.852.293 2.738.461.84.211 1.641.422 2.399.676.758.254 1.348.504 1.77.758.59.336 1.011.672 1.261 1.05.254.34.379.802.379 1.391v1.98c0 .884-.336 1.348-.969 1.348-.336 0-.883-.171-1.597-.507-2.403-1.094-5.098-1.641-8.086-1.641-2.399 0-4.293.379-5.598 1.18-1.309.797-1.98 2.02-1.98 3.746 0 1.18.421 2.191 1.261 2.988.844.8 2.403 1.602 4.633 2.316l5.98 1.895c3.032.969 5.22 2.316 6.524 4.043 1.305 1.727 1.938 3.707 1.938 5.895 0 1.812-.38 3.453-1.094 4.882-.758 1.434-1.77 2.696-3.074 3.707-1.305 1.051-2.864 1.809-4.672 2.36-1.895.586-3.875.883-6.024.883Zm0 0"/>
+	<path fill="#f90" d="M118 73.348c-4.432.063-9.664 1.052-13.621 3.832-1.223.883-1.012 2.062.336 1.894 4.508-.547 14.44-1.726 16.21.547 1.77 2.23-1.976 11.62-3.663 15.79-.504 1.26.59 1.769 1.726.8 7.41-6.231 9.348-19.242 7.832-21.137-.757-.925-4.388-1.79-8.82-1.726zM1.63 75.859c-.927.116-1.347 1.236-.368 2.121 16.508 14.902 38.359 23.872 62.613 23.872 17.305 0 37.43-5.43 51.281-15.66 2.273-1.688.297-4.254-2.02-3.204-15.534 6.57-32.421 9.77-47.788 9.77-22.778 0-44.8-6.273-62.653-16.633-.39-.231-.755-.304-1.064-.266z"/></symbol>
+    <symbol id="lg-azure" viewBox="0 0 128 128"><defs><linearGradient id="azure-original-a" x1="60.919" y1="9.602" x2="18.667" y2="134.423" gradientUnits="userSpaceOnUse"><stop stop-color="#114A8B"/><stop offset="1" stop-color="#0669BC"/></linearGradient><linearGradient id="azure-original-b" x1="74.117" y1="67.772" x2="64.344" y2="71.076" gradientUnits="userSpaceOnUse"><stop stop-opacity=".3"/><stop offset=".071" stop-opacity=".2"/><stop offset=".321" stop-opacity=".1"/><stop offset=".623" stop-opacity=".05"/><stop offset="1" stop-opacity="0"/></linearGradient><linearGradient id="azure-original-c" x1="68.742" y1="5.961" x2="115.122" y2="129.525" gradientUnits="userSpaceOnUse"><stop stop-color="#3CCBF4"/><stop offset="1" stop-color="#2892DF"/></linearGradient></defs><path d="M46.09.002h40.685L44.541 125.137a6.485 6.485 0 01-6.146 4.413H6.733a6.482 6.482 0 01-5.262-2.699 6.474 6.474 0 01-.876-5.848L39.944 4.414A6.488 6.488 0 0146.09 0z" fill="url(#azure-original-a)" transform="translate(.587 4.468) scale(.91904)"/><path d="M97.28 81.607H37.987a2.743 2.743 0 00-1.874 4.751l38.1 35.562a5.991 5.991 0 004.087 1.61h33.574z" fill="#0078d4"/><path d="M46.09.002A6.434 6.434 0 0039.93 4.5L.644 120.897a6.469 6.469 0 006.106 8.653h32.48a6.942 6.942 0 005.328-4.531l7.834-23.089 27.985 26.101a6.618 6.618 0 004.165 1.519h36.396l-15.963-45.616-46.533.011L86.922.002z" fill="url(#azure-original-b)" transform="translate(.587 4.468) scale(.91904)"/><path d="M98.055 4.408A6.476 6.476 0 0091.917.002H46.575a6.478 6.478 0 016.137 4.406l39.35 116.594a6.476 6.476 0 01-6.137 8.55h45.344a6.48 6.48 0 006.136-8.55z" fill="url(#azure-original-c)" transform="translate(.587 4.468) scale(.91904)"/></symbol>
+    <symbol id="lg-kubernetes" viewBox="0 0 128 128"><path fill="#326ce5" d="M63.556 1.912a8.51 8.44 0 0 0-3.26.826L15.795 24a8.51 8.44 0 0 0-4.604 5.725L.214 77.485a8.51 8.44 0 0 0 1.155 6.47 8.51 8.44 0 0 0 .484.672l30.8 38.296a8.51 8.44 0 0 0 6.653 3.176l49.394-.012a8.51 8.44 0 0 0 6.653-3.17l30.789-38.301a8.51 8.44 0 0 0 1.645-7.142l-10.996-47.76a8.51 8.44 0 0 0-4.604-5.726L67.682 2.738a8.51 8.44 0 0 0-4.126-.826z"/><path fill="#fff" d="M63.975 18.143v.01c-1.472.014-2.664 1.336-2.664 2.972 0 .028.005.052.005.074-.002.222-.012.49-.005.684.035.946.24 1.668.365 2.535.17 1.42.215 2.547.224 3.687l.036-.164a40.909 40.909 0 0 0-.118-2.394c.139 1.228.24 2.364.186 3.392-.015-.325-.061-.677-.066-.982l-.036.164c.003.347.096.79.069 1.123-.061.29-.291.495-.467.742l-.025.121c.173-.227.354-.444.46-.699-.134.423-.42.796-.707 1.094.08-.124.146-.262.24-.385l.026-.12c-.145.203-.227.457-.385.61l-.006.006-.064 1.12a34.702 34.702 0 0 0-4.797.736 34.279 34.279 0 0 0-17.398 9.935c-.296-.202-.8-.56-.95-.672l-.005-.005-.01.002c-.478.064-.95.207-1.57-.153-1.187-.8-2.271-1.907-3.584-3.24-.601-.637-1.037-1.246-1.754-1.861-.163-.141-.41-.33-.592-.473a3.193 3.193 0 0 0-1.87-.705c-.825-.028-1.62.294-2.14.947-.925 1.16-.628 2.933.658 3.96l.04.026c.174.143.39.326.552.446.762.561 1.457.849 2.21 1.293 1.594.984 2.91 1.798 3.956 2.779.402.427.474 1.19.53 1.525v.008l.847.754c-4.561 6.874-6.675 15.36-5.432 24.006l-1.103.324-.004.006c-.295.381-.712.972-1.135 1.147-1.366.43-2.908.588-4.77.783-.872.073-1.626.031-2.556.207-.205.04-.49.112-.713.164l-.023.006-.04.011c-1.58.383-2.6 1.837-2.27 3.272.327 1.435 1.873 2.306 3.464 1.963l.039-.006h.002c.02-.005.038-.015.05-.018.22-.048.496-.101.69-.154.913-.245 1.574-.603 2.393-.916 1.76-.632 3.218-1.16 4.637-1.365.582-.046 1.204.362 1.517.537l.008.004 1.152-.197c2.674 8.274 8.266 14.96 15.346 19.162l-.48 1.152.003.01c.174.45.364 1.057.237 1.492-.516 1.336-1.4 2.749-2.408 4.326-.488.728-.99 1.295-1.43 2.131-.107.201-.24.507-.342.717-.69 1.475-.184 3.177 1.143 3.816 1.335.643 2.99-.036 3.707-1.513l.007-.008v-.01c.1-.207.242-.478.329-.674.378-.866.505-1.607.77-2.441h-.003c.706-1.773 1.094-3.627 2.059-4.778.26-.31.688-.432 1.136-.552l.01-.004.6-1.084a34.436 34.436 0 0 0 24.556.062c.172.303.478.865.563 1.01l.004.006.008.004c.458.149.948.223 1.35.816.722 1.237 1.218 2.703 1.822 4.475.265.832.397 1.575.775 2.441.087.2.23.475.33.684.715 1.482 2.375 2.163 3.713 1.52 1.326-.64 1.832-2.34 1.143-3.815-.102-.21-.243-.518-.348-.719-.441-.836-.943-1.397-1.43-2.125-1.01-1.577-1.843-2.885-2.36-4.222-.213-.685.036-1.104.206-1.555l.006-.014-.01-.01a.834.834 0 0 1-.09-.168 6.23 6.23 0 0 1-.12-.29c-.08-.21-.16-.442-.224-.596 7.358-4.35 12.786-11.285 15.34-19.295.347.054.93.155 1.12.193l.01.002.009-.004c.402-.265.76-.606 1.475-.549 1.419.205 2.876.734 4.638 1.366.817.312 1.479.677 2.393.921.194.052.47.101.69.149.012.003.029.012.05.017h.002l.04.004c1.59.341 3.137-.528 3.464-1.963.327-1.435-.691-2.888-2.272-3.269-.227-.052-.551-.141-.775-.184-.93-.176-1.683-.132-2.557-.205-1.86-.195-3.402-.353-4.77-.783-.547-.213-.942-.872-1.138-1.148l-.006-.006-1.066-.31a34.42 34.42 0 0 0-.56-12.425 34.497 34.497 0 0 0-4.983-11.525c.278-.252.785-.701.932-.836l.007-.006v-.01c.044-.48.006-.97.495-1.494 1.045-.98 2.364-1.797 3.957-2.779.754-.444 1.454-.731 2.214-1.293.174-.128.408-.328.588-.473 1.286-1.026 1.584-2.798.658-3.959-.925-1.16-2.718-1.267-4.003-.242-.182.145-.43.332-.594.473-.717.618-1.16 1.226-1.76 1.863-1.313 1.335-2.398 2.446-3.586 3.246-.507.294-1.258.193-1.603.172h-.008l-1.004.719c-5.775-6.048-13.63-9.916-22.09-10.672a63.543 63.543 0 0 1-.064-1.174v-.008l-.006-.006c-.35-.333-.76-.61-.864-1.318v-.002c-.115-1.428.077-2.967.3-4.824.125-.867.332-1.59.366-2.535.009-.216-.005-.527-.005-.758 0-1.645-1.203-2.982-2.688-2.982zm-3.514 13.7a34.663 34.663 0 0 0-3.59.552 34.618 34.618 0 0 1 3.59-.551zm-4.781.823a34.262 34.262 0 0 0-3.711 1.133 34.208 34.208 0 0 1 3.71-1.133zm-4.825 1.564a34.262 34.262 0 0 0-3.496 1.666 34.216 34.216 0 0 1 3.496-1.666zM28.8 35.377c.142.02.28.048.418.086a3.168 3.168 0 0 0-.418-.086zm.943.283c.132.064.259.137.38.219a3.168 3.168 0 0 0-.38-.219zm16.549.848a34.262 34.262 0 0 0-3.176 2.14 34.228 34.228 0 0 1 3.176-2.14zm14.346 2.344-.787 13.93-.057.029-.002.013c-.002.05-.014.095-.02.143a2.348 2.348 0 0 1-.263.857c-.038.07-.076.141-.121.207a2.348 2.348 0 0 1-.69.662c-.07.045-.147.08-.222.118a2.348 2.348 0 0 1-.873.226c-.045.003-.088.014-.133.014-.05 0-.094-.022-.143-.026a2.334 2.334 0 0 1-.943-.304c-.045-.026-.094-.041-.137-.069l-.006.022.004-.022c-.044-.027-.102-.016-.144-.047l-.012-.01-.022.014-11.421-8.097c.093-.091.192-.174.287-.264a27.438 27.438 0 0 1 3.23-2.635c.237-.165.473-.332.715-.49a27.438 27.438 0 0 1 3.816-2.078c.24-.107.487-.204.73-.305a27.438 27.438 0 0 1 4.044-1.312c.12-.03.238-.067.36-.094.576-.13 1.162-.206 1.745-.299l.006-.025a28.076 28.076 0 0 1 .004 0l-.006.025c.355-.056.704-.14 1.06-.183zm6.726.002c.197.024.39.068.586.097a27.668 27.668 0 0 1 3.16.656c.412.111.82.23 1.225.36a27.668 27.668 0 0 1 3.033 1.168c.375.17.745.348 1.112.535a27.668 27.668 0 0 1 2.83 1.662c.344.23.68.47 1.015.717a27.668 27.668 0 0 1 2.496 2.074c.144.134.297.257.438.395l-11.346 8.044-.04-.015-.01.008c-.045.032-.094.045-.14.074a2.35 2.35 0 0 1-.882.334c-.077.012-.153.03-.23.033a2.35 2.35 0 0 1-.99-.176 2.34 2.34 0 0 1-.265-.127 2.35 2.35 0 0 1-.746-.65c-.05-.069-.088-.146-.13-.22a2.35 2.35 0 0 1-.288-.887c-.006-.055-.026-.103-.03-.159v-.011l-.011-.006zm-25.238.576a34.262 34.262 0 0 0-2.81 2.576 34.228 34.228 0 0 1 2.81-2.576zm50.916 8.14a34.483 34.483 0 0 1 1.522 2.594 34.478 34.478 0 0 0-1.522-2.594zm1.994 3.508c.488.993.927 2.01 1.317 3.045a34.478 34.478 0 0 0-1.317-3.045zm-54.576.69 10.43 9.328-.012.056.01.008c.94.817 1.07 2.23.293 3.203-.028.035-.068.057-.098.09a2.348 2.348 0 0 1-.986.65c-.043.015-.078.043-.121.055l-.014.002-.012.047-13.367 3.86c-.02-.185-.02-.37-.037-.555a27.432 27.432 0 0 1-.092-3.344c.013-.387.033-.773.063-1.158a27.432 27.432 0 0 1 .457-3.307c.08-.407.173-.812.273-1.215a27.432 27.432 0 0 1 .99-3.162c.14-.37.29-.734.448-1.097a27.432 27.432 0 0 1 1.51-2.987c.09-.156.17-.32.265-.474zm47.002.007c.097.158.176.324.27.483a27.774 27.774 0 0 1 1.53 3.01c.15.346.298.694.434 1.046a27.774 27.774 0 0 1 1.04 3.288c.045.175.104.346.144.523.69 3.002.86 5.999.578 8.896l-13.434-3.87-.011-.057-.014-.004c-.045-.012-.084-.034-.127-.049a2.35 2.35 0 0 1-.79-.455c-.058-.052-.116-.103-.17-.16a2.35 2.35 0 0 1-.491-.824c-.027-.078-.044-.158-.063-.239a2.35 2.35 0 0 1-.03-.892c.009-.049.01-.096.02-.145.01-.045.038-.084.05-.129a2.329 2.329 0 0 1 .599-.996c.034-.033.054-.076.09-.107l.01-.01-.006-.03 10.37-9.279zm9.228 3.305c.332.965.619 1.945.864 2.938a34.478 34.478 0 0 0-.864-2.938zm-34.824 6.752h4.262l2.65 3.314-.95 4.133-3.83 1.84-3.837-1.848-.953-4.132zm13.727 11.395c.18-.01.357.008.533.04l.014.003.023-.03 13.828 2.338c-.064.18-.147.351-.215.53a27.466 27.466 0 0 1-1.36 3.011c-.19.363-.386.721-.593 1.074a27.466 27.466 0 0 1-1.853 2.768c-.243.32-.492.633-.748.941a27.466 27.466 0 0 1-2.29 2.432c-.29.274-.588.54-.892.8a27.466 27.466 0 0 1-2.64 2.012c-.16.107-.31.225-.471.329l-5.365-12.967.015-.022-.004-.011c-.02-.045-.026-.092-.043-.137a2.351 2.351 0 0 1-.135-.889c.004-.081.006-.162.018-.242a2.351 2.351 0 0 1 .334-.89c.045-.072.098-.137.15-.204a2.351 2.351 0 0 1 .68-.578c.043-.024.079-.055.123-.076.289-.139.59-.218.89-.232zm-23.31.056.013.002c.03 0 .06.008.092.01a2.349 2.349 0 0 1 1.226.445c.07.05.133.101.196.158a2.349 2.349 0 0 1 .689 1.106c.008.03.022.059.03.09.11.479.065.98-.13 1.431l-.005.012.04.05-5.31 12.837c-.155-.1-.3-.212-.451-.315a27.58 27.58 0 0 1-2.64-2.011 27.508 27.508 0 0 1-.891-.803 27.58 27.58 0 0 1-2.272-2.408c-.26-.312-.513-.629-.76-.951a27.58 27.58 0 0 1-1.82-2.704 27.294 27.294 0 0 1-.627-1.123 27.58 27.58 0 0 1-1.346-2.947c-.07-.181-.154-.356-.22-.539l13.707-2.326.023.03.014-.005c.147-.027.294-.04.443-.039zm2.304 1.994a2.326 2.326 0 0 1 .02.344 2.286 2.286 0 0 0-.02-.344zm-.008.703a2.326 2.326 0 0 1-.1.4c.046-.13.077-.264.1-.4zm9.334 2.944c.058-.002.114.013.172.015a2.32 2.32 0 0 1 .752.159c.054.021.112.03.164.056v.002a2.31 2.31 0 0 1 1.043.99l.006.012h.053l6.757 12.213c-.276.092-.557.173-.836.256a28.056 28.056 0 0 1-.996.277c-.283.074-.564.15-.85.215-.124.029-.25.046-.376.072a27.542 27.542 0 0 1-4.18.561c-.28.016-.558.035-.838.043a27.542 27.542 0 0 1-4.32-.223c-.28-.036-.56-.085-.838-.13a27.542 27.542 0 0 1-4.055-.975c-.127-.041-.257-.072-.384-.115l6.742-12.188h.01l.007-.012c.026-.048.065-.085.094-.13a2.351 2.351 0 0 1 .606-.647c.083-.06.168-.115.26-.164a2.351 2.351 0 0 1 .85-.262c.054-.005.103-.023.157-.025zM52.297 98.69a34.413 34.413 0 0 0 3.758 1.137 34.352 34.352 0 0 1-3.758-1.137zm23.385.09c-1.07.381-2.156.709-3.258.983a34.56 34.56 0 0 0 3.258-.983zm-4.575 1.281a34.399 34.399 0 0 1-3.718.563 34.413 34.413 0 0 0 3.718-.563zm-13.937.016a34.413 34.413 0 0 0 3.898.572 34.358 34.358 0 0 1-3.898-.572zm8.91.649a34.36 34.36 0 0 1-3.851.005 34.413 34.413 0 0 0 3.85-.005z"/></symbol>
+    <symbol id="lg-docker" viewBox="0 0 128 128"><path fill-rule="evenodd" clip-rule="evenodd" fill="#3A4D54" d="M73.8 50.8h11.3v11.5h5.7c2.6 0 5.3-.5 7.8-1.3 1.2-.4 2.6-1 3.8-1.7-1.6-2.1-2.4-4.7-2.6-7.3-.3-3.5.4-8.1 2.8-10.8l1.2-1.4 1.4 1.1c3.6 2.9 6.5 6.8 7.1 11.4 4.3-1.3 9.3-1 13.1 1.2l1.5.9-.8 1.6c-3.2 6.2-9.9 8.2-16.4 7.8-9.8 24.3-31 35.8-56.8 35.8-13.3 0-25.5-5-32.5-16.8l-.1-.2-1-2.1c-2.4-5.2-3.1-10.9-2.6-16.6l.2-1.7h9.6V50.8h11.3V39.6h22.5V28.3h13.5v22.5z"/><path fill="#00AADA" d="M110.4 55.1c.8-5.9-3.6-10.5-6.4-12.7-3.1 3.6-3.6 13.2 1.3 17.2-2.8 2.4-8.5 4.7-14.5 4.7H18.6c-.6 6.2.5 11.9 3 16.8l.8 1.5c.5.9 1.1 1.7 1.7 2.6 3 .2 5.7.3 8.2.2 4.9-.1 8.9-.7 12-1.7.5-.2.9.1 1.1.5.2.5-.1.9-.5 1.1-.4.1-.8.3-1.3.4-2.4.7-5 1.1-8.3 1.3h-.6c-1.3.1-2.7.1-4.2.1-1.6 0-3.1 0-4.9-.1 6 6.8 15.4 10.8 27.2 10.8 25 0 46.2-11.1 55.5-35.9 6.7.7 13.1-1 16-6.7-4.5-2.7-10.5-1.8-13.9-.1z"/><path fill="#28B8EB" d="M110.4 55.1c.8-5.9-3.6-10.5-6.4-12.7-3.1 3.6-3.6 13.2 1.3 17.2-2.8 2.4-8.5 4.7-14.5 4.7h-68c-.3 9.5 3.2 16.7 9.5 21 4.9-.1 8.9-.7 12-1.7.5-.2.9.1 1.1.5.2.5-.1.9-.5 1.1-.4.1-.8.3-1.3.4-2.4.7-5.2 1.2-8.5 1.4l-.1-.1c8.5 4.4 20.8 4.3 35-1.1 15.8-6.1 30.6-17.7 40.9-30.9-.2.1-.4.1-.5.2z"/><path fill="#028BB8" d="M18.7 71.8c.4 3.3 1.4 6.4 2.9 9.3l.8 1.5c.5.9 1.1 1.7 1.7 2.6 3 .2 5.7.3 8.2.2 4.9-.1 8.9-.7 12-1.7.5-.2.9.1 1.1.5.2.5-.1.9-.5 1.1-.4.1-.8.3-1.3.4-2.4.7-5.2 1.2-8.5 1.4h-.4c-1.3.1-2.7.1-4.1.1-1.6 0-3.2 0-4.9-.1 6 6.8 15.5 10.8 27.3 10.8 21.4 0 40-8.1 50.8-26H18.7v-.1z"/><path fill="#019BC6" d="M23.5 71.8c1.3 5.8 4.3 10.4 8.8 13.5 4.9-.1 8.9-.7 12-1.7.5-.2.9.1 1.1.5.2.5-.1.9-.5 1.1-.4.1-.8.3-1.3.4-2.4.7-5.2 1.2-8.6 1.4 8.5 4.4 20.8 4.3 34.9-1.1 8.5-3.3 16.8-8.2 24.2-14.1H23.5z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#00ACD3" d="M28.4 52.7h9.8v9.8h-9.8v-9.8zm.8.8h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm3-12h9.8v9.8h-9.8v-9.8zm.9.8h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#23C2EE" d="M39.6 52.7h9.8v9.8h-9.8v-9.8zm.9.8h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#00ACD3" d="M50.9 52.7h9.8v9.8h-9.8v-9.8zm.8.8h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#23C2EE" d="M50.9 41.5h9.8v9.8h-9.8v-9.8zm.8.8h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm3.1 10.4H72v9.8h-9.8v-9.8zm.8.8h.8v8.1H63v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#00ACD3" d="M62.2 41.5H72v9.8h-9.8v-9.8zm.8.8h.8v8.1H63v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#23C2EE" d="M62.2 30.2H72V40h-9.8v-9.8zm.8.8h.8v8.1H63V31zm1.5 0h.8v8.1h-.8V31zm1.4 0h.8v8.1h-.8V31zm1.5 0h.8v8.1h-.8V31zm1.5 0h.8v8.1h-.8V31zm1.5 0h.8v8.1h-.8V31z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#00ACD3" d="M73.5 52.7h9.8v9.8h-9.8v-9.8zm.8.8h.8v8.1h-.8v-8.1zm1.4 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1zm1.5 0h.8v8.1h-.8v-8.1z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#D4EEF1" d="M48.8 78.3c1.5 0 2.7 1.2 2.7 2.7 0 1.5-1.2 2.7-2.7 2.7-1.5 0-2.7-1.2-2.7-2.7 0-1.5 1.2-2.7 2.7-2.7"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#3A4D54" d="M48.8 79.1c.2 0 .5 0 .7.1-.2.1-.4.4-.4.7 0 .4.4.8.8.8.3 0 .6-.2.7-.4.1.2.1.5.1.7 0 1.1-.9 1.9-1.9 1.9-1.1 0-1.9-.9-1.9-1.9 0-1 .8-1.9 1.9-1.9M1.1 72.8h125.4c-2.7-.7-8.6-1.6-7.7-5.2-5 5.7-16.9 4-20 1.2-3.4 4.9-23 3-24.3-.8-4.2 5-17.3 5-21.5 0-1.4 3.8-21 5.7-24.3.8-3 2.8-15 4.5-20-1.2 1.1 3.5-4.9 4.5-7.6 5.2"/><path fill="#BFDBE0" d="M56 97.8c-6.7-3.2-10.3-7.5-12.4-12.2-2.5.7-5.5 1.2-8.9 1.4-1.3.1-2.7.1-4.1.1-1.7 0-3.4 0-5.2-.1 6 6 13.6 10.7 27.5 10.8H56z"/><path fill="#D4EEF1" d="M46.1 89.9c-.9-1.3-1.8-2.8-2.5-4.3-2.5.7-5.5 1.2-8.9 1.4 2.3 1.2 5.7 2.4 11.4 2.9z"/></symbol>
+    <symbol id="lg-terraform" viewBox="0 0 128 128"><g fill-rule="evenodd"><path d="M77.941 44.5v36.836L46.324 62.918V26.082zm0 0" fill="#5c4ee5"/><path d="M81.41 81.336l31.633-18.418V26.082L81.41 44.5zm0 0" fill="#4040b2"/><path d="M11.242 42.36L42.86 60.776V23.941L11.242 5.523zm0 0M77.941 85.375L46.324 66.957v36.82l31.617 18.418zm0 0" fill="#5c4ee5"/></g></symbol>
+    <symbol id="lg-github" viewBox="0 0 128 128"><g fill="#181616"><path fill-rule="evenodd" clip-rule="evenodd" d="M64 5.103c-33.347 0-60.388 27.035-60.388 60.388 0 26.682 17.303 49.317 41.297 57.303 3.017.56 4.125-1.31 4.125-2.905 0-1.44-.056-6.197-.082-11.243-16.8 3.653-20.345-7.125-20.345-7.125-2.747-6.98-6.705-8.836-6.705-8.836-5.48-3.748.413-3.67.413-3.67 6.063.425 9.257 6.223 9.257 6.223 5.386 9.23 14.127 6.562 17.573 5.02.542-3.903 2.107-6.568 3.834-8.076-13.413-1.525-27.514-6.704-27.514-29.843 0-6.593 2.36-11.98 6.223-16.21-.628-1.52-2.695-7.662.584-15.98 0 0 5.07-1.623 16.61 6.19C53.7 35 58.867 34.327 64 34.304c5.13.023 10.3.694 15.127 2.033 11.526-7.813 16.59-6.19 16.59-6.19 3.287 8.317 1.22 14.46.593 15.98 3.872 4.23 6.215 9.617 6.215 16.21 0 23.194-14.127 28.3-27.574 29.796 2.167 1.874 4.097 5.55 4.097 11.183 0 8.08-.07 14.583-.07 16.572 0 1.607 1.088 3.49 4.148 2.897 23.98-7.994 41.263-30.622 41.263-57.294C124.388 32.14 97.35 5.104 64 5.104z"/><path d="M26.484 91.806c-.133.3-.605.39-1.035.185-.44-.196-.685-.605-.543-.906.13-.31.603-.395 1.04-.188.44.197.69.61.537.91zm2.446 2.729c-.287.267-.85.143-1.232-.28-.396-.42-.47-.983-.177-1.254.298-.266.844-.14 1.24.28.394.426.472.984.17 1.255zM31.312 98.012c-.37.258-.976.017-1.35-.52-.37-.538-.37-1.183.01-1.44.373-.258.97-.025 1.35.507.368.545.368 1.19-.01 1.452zm3.261 3.361c-.33.365-1.036.267-1.552-.23-.527-.487-.674-1.18-.343-1.544.336-.366 1.045-.264 1.564.23.527.486.686 1.18.333 1.543zm4.5 1.951c-.147.473-.825.688-1.51.486-.683-.207-1.13-.76-.99-1.238.14-.477.823-.7 1.512-.485.683.206 1.13.756.988 1.237zm4.943.361c.017.498-.563.91-1.28.92-.723.017-1.308-.387-1.315-.877 0-.503.568-.91 1.29-.924.717-.013 1.306.387 1.306.88zm4.598-.782c.086.485-.413.984-1.126 1.117-.7.13-1.35-.172-1.44-.653-.086-.498.422-.997 1.122-1.126.714-.123 1.354.17 1.444.663zm0 0"/></g></symbol>
+    <symbol id="lg-python" viewBox="0 0 128 128"><linearGradient id="python-original-a" gradientUnits="userSpaceOnUse" x1="70.252" y1="1237.476" x2="170.659" y2="1151.089" gradientTransform="matrix(.563 0 0 -.568 -29.215 707.817)"><stop offset="0" stop-color="#5A9FD4"/><stop offset="1" stop-color="#306998"/></linearGradient><linearGradient id="python-original-b" gradientUnits="userSpaceOnUse" x1="209.474" y1="1098.811" x2="173.62" y2="1149.537" gradientTransform="matrix(.563 0 0 -.568 -29.215 707.817)"><stop offset="0" stop-color="#FFD43B"/><stop offset="1" stop-color="#FFE873"/></linearGradient><path fill="url(#python-original-a)" d="M63.391 1.988c-4.222.02-8.252.379-11.8 1.007-10.45 1.846-12.346 5.71-12.346 12.837v9.411h24.693v3.137H29.977c-7.176 0-13.46 4.313-15.426 12.521-2.268 9.405-2.368 15.275 0 25.096 1.755 7.311 5.947 12.519 13.124 12.519h8.491V67.234c0-8.151 7.051-15.34 15.426-15.34h24.665c6.866 0 12.346-5.654 12.346-12.548V15.833c0-6.693-5.646-11.72-12.346-12.837-4.244-.706-8.645-1.027-12.866-1.008zM50.037 9.557c2.55 0 4.634 2.117 4.634 4.721 0 2.593-2.083 4.69-4.634 4.69-2.56 0-4.633-2.097-4.633-4.69-.001-2.604 2.073-4.721 4.633-4.721z" transform="translate(0 10.26)"/><path fill="url(#python-original-b)" d="M91.682 28.38v10.966c0 8.5-7.208 15.655-15.426 15.655H51.591c-6.756 0-12.346 5.783-12.346 12.549v23.515c0 6.691 5.818 10.628 12.346 12.547 7.816 2.297 15.312 2.713 24.665 0 6.216-1.801 12.346-5.423 12.346-12.547v-9.412H63.938v-3.138h37.012c7.176 0 9.852-5.005 12.348-12.519 2.578-7.735 2.467-15.174 0-25.096-1.774-7.145-5.161-12.521-12.348-12.521h-9.268zM77.809 87.927c2.561 0 4.634 2.097 4.634 4.692 0 2.602-2.074 4.719-4.634 4.719-2.55 0-4.633-2.117-4.633-4.719 0-2.595 2.083-4.692 4.633-4.692z" transform="translate(0 10.26)"/><radialGradient id="python-original-c" cx="1825.678" cy="444.45" r="26.743" gradientTransform="matrix(0 -.24 -1.055 0 532.979 557.576)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#B8B8B8" stop-opacity=".498"/><stop offset="1" stop-color="#7F7F7F" stop-opacity="0"/></radialGradient><path opacity=".444" fill="url(#python-original-c)" d="M97.309 119.597c0 3.543-14.816 6.416-33.091 6.416-18.276 0-33.092-2.873-33.092-6.416 0-3.544 14.815-6.417 33.092-6.417 18.275 0 33.091 2.872 33.091 6.417z"/></symbol>
+    <symbol id="lg-whatsapp" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="toolbar">
+  <div class="tb-title">CloudCadre · aurora homepage</div>
+  <div class="tb-group"><span class="tb-lab">Hero image frame</span>
+    <div class="seg" role="group" aria-label="Hero image frame">
+      <button type="button" data-k="h" data-v="a">A · Arch</button>
+      <button type="button" data-k="h" data-v="b">B · Slanted panel</button>
+    </div></div>
+  <div class="tb-group"><span class="tb-lab">What you get</span>
+    <div class="seg" role="group" aria-label="What you get section">
+      <button type="button" data-k="g" data-v="a">A · Inside a course</button>
+      <button type="button" data-k="g" data-v="b">B · Your path</button>
+    </div></div>
+  <div class="tb-group"><span class="tb-lab">Palette</span>
+    <div class="seg" role="group" aria-label="Palette">
+      <button type="button" data-k="p" data-v="teal">Teal</button>
+      <button type="button" data-k="p" data-v="navy">Navy</button>
+      <button type="button" data-k="p" data-v="clay">Charcoal + clay</button>
+    </div></div>
+  <div class="tb-group"><span class="tb-lab">Type</span>
+    <div class="seg" role="group" aria-label="Type pairing">
+      <button type="button" data-k="t" data-v="a">Schibsted</button>
+      <button type="button" data-k="t" data-v="b">Bricolage + Instrument</button>
+    </div></div>
+  <div class="tb-group"><span class="tb-lab">View</span>
+    <div class="seg" role="group" aria-label="Viewport">
+      <button type="button" data-k="w" data-v="desktop">Desktop</button>
+      <button type="button" data-k="w" data-v="mobile">Mobile</button>
+    </div>
+    <div class="seg"><button type="button" id="blk" aria-pressed="false">Show block names</button></div></div>
+  <p class="tb-note" id="note"></p>
+</header>
+
+<main class="stage">
+<div class="frame" id="frame" data-p="teal" data-t="a">
+<div class="page" id="page" data-h="a">
+
+  <div class="ann" data-block="announcement_bar"><span>Questions before you buy?</span><a href="#"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Chat with a counsellor on WhatsApp&nbsp;<span class="ar">→</span></a></div>
+
+  <div class="top">
+    <nav class="nav wrap" data-block="header">
+      <a class="brand" href="#"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg>CloudCadre</a>
+      <div class="links"><a class="dd" href="#courses">Courses</a><a href="#placements">Placements</a><a href="#trainers">Trainers</a><a href="#">Free sample</a></div>
+      <div class="nav-end"><a href="#">Log in</a><a class="btn btn-sm btn-line" href="#"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Chat on WhatsApp</a></div>
+      <a class="menu" href="#">Menu</a>
+    </nav>
+  </div>
+
+  <!-- ===== Hero. The photo frame is the only thing that changes between A and B ===== -->
+  <section data-block="hero" aria-label="Hero">
+    <div class="wrap ha-in">
+      <div class="copy">
+        <div class="rating"><div class="stars" aria-hidden="true"><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg></div>4.8 from 1,200+ learner reviews</div>
+        <h1 class="h1">Learn cloud from<br><span class="c">engineers who<br><span class="u">run it.</span></span></h1>
+        <p class="lead">Courses on AWS, Azure, DevOps and FinOps taught by working engineers, with hands-on labs and a real project that goes on your CV.</p>
+        <div class="actions"><a class="btn btn-brand" href="#courses">Explore courses&nbsp;<span class="ar">→</span></a><a class="btn btn-line" href="#"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Chat on WhatsApp</a></div>
+        <a class="sample" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg><span>Not ready yet? Download a free sample lesson</span></a>
+        <ul class="checks"><li class="tick">Hands-on labs and projects</li><li class="tick">Certificate on completion</li><li class="tick">Placement support</li></ul>
+      </div>
+      <div class="ha-media">
+        <div class="ha-back shape"></div>
+        <div class="ha-photo shape">
+          <img class="photo" src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=75" alt="Learners working through a cloud lab together on a laptop">
+          <div class="ha-tag"><span>Taught by working engineers</span><a href="#trainers">Meet the trainers&nbsp;<span class="ar">→</span></a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Platforms ===== -->
+  <section class="tools" data-block="partner_logos">
+    <div class="wrap tools-in">
+      <p class="tools-title">Hands-on practice on the platforms employers hire for</p>
+      <div class="tool-row">
+        <div class="tool"><svg viewBox="0 0 128 128" role="img" aria-label="AWS"><use href="#lg-aws"/></svg>AWS</div>
+        <div class="tool"><svg viewBox="0 0 128 128" role="img" aria-label="Microsoft Azure"><use href="#lg-azure"/></svg>Azure</div>
+        <div class="tool"><svg viewBox="0 0 128 128" role="img" aria-label="Kubernetes"><use href="#lg-kubernetes"/></svg>Kubernetes</div>
+        <div class="tool"><svg viewBox="0 0 128 128" role="img" aria-label="Docker"><use href="#lg-docker"/></svg>Docker</div>
+        <div class="tool"><svg viewBox="0 0 128 128" role="img" aria-label="Terraform"><use href="#lg-terraform"/></svg>Terraform</div>
+        <div class="tool"><svg viewBox="0 0 128 128" role="img" aria-label="GitHub"><use href="#lg-github"/></svg>GitHub</div>
+        <div class="tool"><svg viewBox="0 0 128 128" role="img" aria-label="Python"><use href="#lg-python"/></svg>Python</div>
+        <div class="tool"><svg viewBox="0 0 128 128" role="img" aria-label="FinOps"><use href="#lg-finops"/></svg>FinOps</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Courses ===== -->
+  <section class="sec wrap" id="courses" data-block="course_grid">
+    <div class="sec-head">
+      <div><h2 class="h2">Choose your cloud career path</h2><p class="lead">Buy a course online and start today. Not sure which one fits? Ask us on WhatsApp.</p></div>
+      <a class="tlink" href="#" style="display:inline-flex;align-items:center;gap:10px"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Ask a counsellor</a>
+    </div>
+    <div class="paths">
+      <article class="path" style="--tint: var(--t2)">
+        <div class="tiles"><span class="tile"><svg viewBox="0 0 128 128" role="img" aria-label="AWS"><use href="#lg-aws"/></svg></span></div>
+        <h3 class="h3">Amazon Web Services</h3><p class="body">The most-asked-for cloud skill in job listings. Start with architecture, then specialise.</p>
+        <div class="crs"><a href="#"><span>AWS Solutions Architect</span><small>12 weeks</small><i>→</i></a><a href="#"><span>DevOps on AWS</span><small>16 weeks</small><i>→</i></a></div>
+      </article>
+      <article class="path" style="--tint: var(--t1)">
+        <div class="tiles"><span class="tile"><svg viewBox="0 0 128 128" role="img" aria-label="Microsoft Azure"><use href="#lg-azure"/></svg></span></div>
+        <h3 class="h3">Microsoft Azure</h3><p class="body">For teams that run on Microsoft. Identity, networking and administration, exam-ready.</p>
+        <div class="crs"><a href="#"><span>Azure Administrator (AZ&#8209;104)</span><small>10 weeks</small><i>→</i></a><a href="#"><span>Azure Fundamentals (AZ&#8209;900)</span><small>4 weeks</small><i>→</i></a></div>
+      </article>
+      <article class="path" style="--tint: var(--t4)">
+        <div class="tiles"><span class="tile"><svg viewBox="0 0 128 128" role="img" aria-label="Kubernetes"><use href="#lg-kubernetes"/></svg></span><span class="tile"><svg viewBox="0 0 128 128" role="img" aria-label="Terraform"><use href="#lg-terraform"/></svg></span><span class="tile"><svg viewBox="0 0 128 128" role="img" aria-label="Docker"><use href="#lg-docker"/></svg></span></div>
+        <h3 class="h3">DevOps and Kubernetes</h3><p class="body">Ship code safely: pipelines, containers, clusters and infrastructure as code.</p>
+        <div class="crs"><a href="#"><span>Kubernetes Administrator (CKA)</span><small>8 weeks</small><i>→</i></a><a href="#"><span>Terraform and CI/CD</span><small>6 weeks</small><i>→</i></a></div>
+      </article>
+      <article class="path" style="--tint: var(--t3)">
+        <div class="tiles"><span class="tile"><svg viewBox="0 0 128 128" role="img" aria-label="FinOps"><use href="#lg-finops"/></svg></span></div>
+        <h3 class="h3">FinOps and GreenOps</h3><p class="body">Cut cloud bills and carbon, and explain both to finance and leadership.</p>
+        <div class="crs"><a href="#"><span>FinOps Practitioner</span><small>6 weeks</small><i>→</i></a><a href="#"><span>GreenOps and Sustainable Cloud</span><small>4 weeks</small><i>→</i></a></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===== Placements ===== -->
+  <section class="sec wrap" id="placements" data-block="showcase · placements" style="padding-top:0">
+    <div class="sec-head">
+      <div><h2 class="h2">Where our last batch works now</h2><p class="lead">Real roles, real packages, and what they said about the course.</p></div>
+      <a class="tlink" href="#">See all placements&nbsp;<span class="ar">→</span></a>
+    </div>
+    <div class="pl-stats">
+      <div><span class="big">₹14 LPA</span><p class="small">Highest package</p></div>
+      <div><span class="big">₹8.2 LPA</span><p class="small">Average package</p></div>
+      <div><span class="big">420+</span><p class="small">Learners placed</p></div>
+      <div><span class="big">60+</span><p class="small">Hiring companies</p></div>
+    </div>
+    <div class="pgrid">
+      <article class="pc">
+        <div class="pc-top"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=70" alt="" style="object-position:50% 25%"><div><b>Priya D.</b><span>B.Tech Electronics<br>Earlier: support engineer</span></div></div>
+        <div class="lpa"><b>9.5</b><span>LPA</span></div>
+        <div class="job"><span class="mono" style="--m:var(--t2)">L</span><div><b>Cloud Engineer</b><span>Lumina Systems · Pune</span></div></div>
+        <p class="pc-quote">“I had watched cloud videos for a year and got nowhere. The labs and the mentor reviews are what finally made it click.”</p>
+        <div class="pc-foot"><span class="chip">AWS Solutions Architect</span><div class="stars" aria-label="5 out of 5"><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg></div></div>
+      </article>
+      <article class="pc">
+        <div class="pc-top"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&h=200&q=70" alt="" style="object-position:50% 18%"><div><b>Rohan P.</b><span>BCA<br>Earlier: fresher</span></div></div>
+        <div class="lpa"><b>7.2</b><span>LPA</span></div>
+        <div class="job"><span class="mono" style="--m:var(--t1)">O</span><div><b>DevOps Engineer</b><span>Orbit Payments · Bengaluru</span></div></div>
+        <p class="pc-quote">“The CI/CD project is what I walked interviewers through. Two of them asked to see the repository.”</p>
+        <div class="pc-foot"><span class="chip">DevOps on AWS</span><div class="stars" aria-label="5 out of 5"><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg></div></div>
+      </article>
+      <article class="pc">
+        <div class="pc-top"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&h=200&q=70" alt="" style="object-position:50% 30%"><div><b>Sneha K.</b><span>B.Sc Computer Science<br>Earlier: sysadmin</span></div></div>
+        <div class="lpa"><b>11</b><span>LPA</span></div>
+        <div class="job"><span class="mono" style="--m:var(--t4)">B</span><div><b>Solutions Architect</b><span>Brightwave Cloud · Hyderabad</span></div></div>
+        <p class="pc-quote">“I moved from managing servers to designing them. The capstone review is what I talked about in every interview.”</p>
+        <div class="pc-foot"><span class="chip">AWS Solutions Architect</span><div class="stars" aria-label="5 out of 5"><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg></div></div>
+      </article>
+      <article class="pc">
+        <div class="pc-top"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&h=200&q=70" alt="" style="object-position:50% 30%"><div><b>Aditya M.</b><span>B.Com Accounting<br>Earlier: accountant</span></div></div>
+        <div class="lpa"><b>8</b><span>LPA</span></div>
+        <div class="job"><span class="mono" style="--m:var(--t3)">Z</span><div><b>FinOps Analyst</b><span>Zenith Retail Tech · Mumbai</span></div></div>
+        <p class="pc-quote">“I came from accounting. Six weeks in, I was reading cloud bills like I used to read ledgers.”</p>
+        <div class="pc-foot"><span class="chip">FinOps Practitioner</span><div class="stars" aria-label="5 out of 5"><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg></div></div>
+      </article>
+      <article class="pc">
+        <div class="pc-top"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&h=200&q=70" alt="" style="object-position:50% 25%"><div><b>Divya S.</b><span>B.Tech IT<br>Earlier: fresher</span></div></div>
+        <div class="lpa"><b>6.8</b><span>LPA</span></div>
+        <div class="job"><span class="mono" style="--m:var(--t2)">K</span><div><b>Azure Administrator</b><span>Kestrel Bank Technology · Chennai</span></div></div>
+        <p class="pc-quote">“Clear teaching and lots of practice. I cleared AZ&#8209;104 on my first attempt and had the offer within a month.”</p>
+        <div class="pc-foot"><span class="chip">Azure Administrator</span><div class="stars" aria-label="4 out of 5"><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg style="opacity:.3"><use href="#star"/></svg></div></div>
+      </article>
+      <article class="pc">
+        <div class="pc-top"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&h=200&q=70" alt="" style="object-position:50% 25%"><div><b>Imran A.</b><span>B.E. Computer Science<br>Earlier: developer</span></div></div>
+        <div class="lpa"><b>14</b><span>LPA</span></div>
+        <div class="job"><span class="mono" style="--m:var(--t1)">N</span><div><b>Platform Engineer</b><span>Northfield Logistics · Pune</span></div></div>
+        <p class="pc-quote">“The cluster labs were hard in the right way. I could answer every Kubernetes question in the interview.”</p>
+        <div class="pc-foot"><span class="chip">Kubernetes (CKA)</span><div class="stars" aria-label="5 out of 5"><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg><svg><use href="#star"/></svg></div></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===== What you get · A: benefits list + sample outline ===== -->
+  <section class="v-ga sec wrap" style="padding-top:0" data-block="timeline · course outline">
+    <div class="wg-in">
+      <div>
+        <h2 class="h2">What you get with every course</h2>
+        <p class="lead" style="margin-top:14px">You always know what you will learn, who is teaching it and what you will have built by the end.</p>
+        <ul class="wg-list">
+          <li style="--tint: var(--t2)"><span class="wg-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5l5 2.5-5 2.5z"/></svg></span><b>Expert-taught lessons</b><span>Taught by engineers who have run it in production. Pick up any time.</span></li>
+          <li style="--tint: var(--t1)"><span class="wg-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 10l3 2-3 2M12 15h5"/></svg></span><b>Hands-on labs</b><span>Build on a real cloud account. Mentors review your work.</span></li>
+          <li style="--tint: var(--t4)"><span class="wg-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 5h11l-2 4 2 4H6"/></svg></span><b>A capstone project</b><span>Design and defend a production-style system for your CV.</span></li>
+          <li style="--tint: var(--t3)"><span class="wg-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg></span><b>Placement support</b><span>CV reviews, mock interviews and introductions to hiring companies.</span></li>
+        </ul>
+      </div>
+      <div class="outline">
+        <div class="ol-head"><span class="tile"><svg viewBox="0 0 128 128" role="img" aria-label="AWS"><use href="#lg-aws"/></svg></span><div><b>Inside AWS Solutions Architect</b><span>12 weeks · 40 lessons · 14 labs · 1 capstone</span></div></div>
+        <div class="ol-row"><span class="ol-n">01</span><b>Cloud and networking foundations</b><span class="meta">8 lessons · 3 labs</span></div>
+        <div class="ol-row"><span class="ol-n">02</span><b>Compute, storage and databases</b><span class="meta">10 lessons · 4 labs</span></div>
+        <div class="ol-row"><span class="ol-n">03</span><b>Security and identity</b><span class="meta">7 lessons · 2 labs</span></div>
+        <div class="ol-row"><span class="ol-n">04</span><b>High availability and scaling</b><span class="meta">9 lessons · 3 labs</span></div>
+        <div class="ol-row"><span class="ol-n">05</span><b>Cost and operations</b><span class="meta">6 lessons · 2 labs</span></div>
+        <div class="ol-row cap"><span class="ol-n">06</span><b>Capstone: design and defend a production system</b><span class="meta">Project</span></div>
+        <div class="ol-foot"><a class="sample" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg><span>Download a free sample lesson</span></a><a class="tlink" href="#courses">See all courses&nbsp;<span class="ar">→</span></a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== What you get · B: four-stage path ===== -->
+  <section class="v-gb path-band" data-block="timeline · path"><div class="wrap sec">
+    <div class="sec-head"><div><h2 class="h2">What you get with every course</h2><p class="lead">Four stages, and something real to show at the end of each one.</p></div><a class="tlink" href="#courses">Explore courses&nbsp;<span class="ar">→</span></a></div>
+    <div class="jr">
+      <div class="jr-col"><span class="kicker">Learn</span><h3 class="h3">You understand how it works</h3><p>Focused lessons from engineers who have run these systems in production, so you learn what matters, not trivia.</p><div class="leave"><small>You leave with</small>A clear mental model of the platform</div></div>
+      <div class="jr-col"><span class="kicker">Practise</span><h3 class="h3">You build it yourself</h3><p>Labs on a real cloud account from week one. Mentors review your work; nothing is auto-ticked.</p><div class="leave"><small>You leave with</small>A working environment you built</div></div>
+      <div class="jr-col"><span class="kicker">Build</span><h3 class="h3">You prove it on a real project</h3><p>A capstone: design and defend a production-style system, then get your certificate.</p><div class="leave"><small>You leave with</small>A portfolio project and a certificate</div></div>
+      <div class="jr-col"><span class="kicker">Get hired</span><h3 class="h3">You are ready for interviews</h3><p>CV reviews, mock interviews with working engineers, and introductions to companies that hire our learners.</p><div class="leave"><small>You leave with</small>A sharper CV and interview practice</div></div>
+    </div>
+  </div></section>
+
+  <!-- ===== Trainers ===== -->
+  <section class="trainers" id="trainers" data-block="faculty_strip"><div class="wrap sec">
+    <div class="sec-head"><div><h2 class="h2">Taught by people who do this for a living</h2><p class="lead">Every trainer works in the field today, and has run what they teach.</p></div><a class="tlink" href="#">Meet all trainers&nbsp;<span class="ar">→</span></a></div>
+    <div class="t-grid">
+      <div class="tr"><div class="tr-img"><img class="photo" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=700&q=75" alt="Trainer portrait"></div><div><b>Arjun R.</b><span>AWS and DevOps · 9 years running AWS platforms in fintech</span></div></div>
+      <div class="tr"><div class="tr-img"><img class="photo" src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=700&q=75" alt="Trainer portrait"></div><div><b>Meera I.</b><span>Azure · 7 years on enterprise Azure migrations</span></div></div>
+      <div class="tr"><div class="tr-img"><img class="photo" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=700&q=75" alt="Trainer portrait"></div><div><b>Karan S.</b><span>Kubernetes and Terraform · 8 years in platform engineering</span></div></div>
+      <div class="tr"><div class="tr-img"><img class="photo" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=700&q=75" alt="Trainer portrait"></div><div><b>Nisha K.</b><span>FinOps and GreenOps · 6 years in cloud cost teams</span></div></div>
+    </div>
+  </div></section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="band-white" data-block="faq"><div class="wrap sec faq-grid">
+    <div><h2 class="h2">Questions people ask before buying</h2><p class="lead" style="margin-top:14px">Not here? Message us on WhatsApp and a counsellor replies the same day.</p><div class="actions" style="margin-top:24px"><a class="btn btn-line btn-sm" href="#"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Chat on WhatsApp</a></div></div>
+    <div>
+      <details open><summary>Do I need an IT background?</summary><p>No. Foundation courses start from Linux and networking basics. If you come from a non-IT job, begin with a foundation course and move on from there.</p></details>
+      <details><summary>Can I try a course before I buy it?</summary><p>Yes. Download the free sample lesson to see how we teach, or ask a counsellor on WhatsApp to walk you through the syllabus.</p></details>
+      <details><summary>How do I pay, and can I use instalments?</summary><p>Pay online by UPI, card or net banking. Instalments are available on every course.</p></details>
+      <details><summary>Do I get a certificate?</summary><p>Yes, a certificate on completion that employers can verify online. Exam fees for AWS and Azure are paid to the exam provider; we prepare you with practice tests.</p></details>
+      <details><summary>Do you guarantee a job?</summary><p>No, and be wary of anyone who does. We give you the skills, a portfolio project, mock interviews and introductions; the hiring decision is the company's.</p></details>
+    </div>
+  </div></section>
+
+  <!-- ===== Final CTA ===== -->
+  <section class="cta" data-block="cta_banner"><div class="wrap cta-in">
+    <div><h2 class="h2">Ready to start? Buy a course today, or ask us anything on WhatsApp.</h2><p>Pick a path, pay online and begin the same day. A counsellor is one message away if you want help choosing.</p>
+      <div class="actions"><a class="btn btn-accent" href="#courses">Explore courses</a><a class="btn btn-line-w" href="#"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Chat on WhatsApp</a></div>
+      <a class="sample" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg><span>Download a free sample lesson</span></a></div>
+    <div class="cta-photo"><img class="photo" src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1000&q=75" alt="A study group talking through a problem around a laptop"></div>
+  </div></section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="foot" data-block="footer"><div class="wrap">
+    <div class="foot-in">
+      <div><a class="brand" href="#"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg>CloudCadre</a><p class="about">Online training in cloud, DevOps and FinOps, taught by working engineers.</p></div>
+      <div><h4>Courses</h4><ul><li><a href="#">AWS Solutions Architect</a></li><li><a href="#">Azure Administrator</a></li><li><a href="#">DevOps on AWS</a></li><li><a href="#">FinOps Practitioner</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Trainers</a></li><li><a href="#">Placements</a></li><li><a href="#">Free sample lesson</a></li></ul></div>
+      <div><h4>Help</h4><ul><li><a href="#"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp"/></svg>+91 98765 43210</a></li><li><a href="#">Refund policy</a></li><li><a href="#">Contact</a></li><li><a href="#">Log in</a></li></ul></div>
+    </div>
+    <div class="foot-base"><span>© 2026 CloudCadre. All rights reserved. AWS, Azure, Kubernetes and other marks belong to their owners.</span><span><a href="#">Privacy</a> · <a href="#">Terms</a></span></div>
+  </div></footer>
+
+  <div class="fab-wrap"><a class="fab" href="#" aria-label="Chat on WhatsApp"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp"/></svg><span>Chat with us</span></a></div>
+
+</div>
+</div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var frame = $("frame"), page = $("page");
+  var state = { h: "a", g: "a", p: "teal", t: "a", w: "desktop" };
+  var VALID = { h: ["a","b"], g: ["a","b"], p: ["teal","navy","clay"], t: ["a","b"], w: ["desktop","mobile"] };
+  var NOTES = {
+    h: {
+      a: "<b>Frame A · Arch.</b> Soft arched top on a yellow offset arch. Friendly and warm.",
+      b: "<b>Frame B · Slanted panel.</b> A leaning panel with rounded corners on a yellow offset, like your reference. More energetic and more \"tech\". Same photo, copy and layout as A."
+    },
+    g: {
+      a: "<b>What you get A · Inside a course.</b> Four benefits as a plain list, next to a real sample outline (modules, lessons, labs, capstone). It shows what a course actually contains, so it sells harder. The outline is built from the course data, so it stays true.",
+      b: "<b>What you get B · Your path.</b> Four stages left to right, each ending in something you leave with. Lighter and easier to scan, but says less about the course itself."
+    },
+    p: { teal: "<b>Teal.</b> Deep teal with one yellow accent. Calm and trustworthy.", navy: "<b>Navy.</b> More corporate.", clay: "<b>Charcoal + clay.</b> Neutral and editorial, with a warm accent." },
+    t: { a: "<b>Schibsted Grotesk</b> for everything. One family, tight and modern.", b: "<b>Bricolage Grotesque</b> for headings with <b>Instrument Sans</b> for reading. More personality in headlines." }
+  };
+  var DISCLAIMER = " Photos are Unsplash placeholders. Names, companies, packages, numbers and reviews are invented. The FinOps mark is a placeholder; the other platform logos are the real ones.";
+
+  function apply(key, notify) {
+    var v = state[key];
+    if (key === "p" || key === "t") frame.dataset[key] = v;
+    else if (key === "w") frame.classList.toggle("is-mobile", v === "mobile");
+    else page.dataset[key] = v;
+    document.querySelectorAll('[data-k="' + key + '"]').forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === v)); });
+    if (NOTES[key] && notify) {
+      $("note").innerHTML = NOTES[key][v] + DISCLAIMER;
+      page.classList.remove("swap-in"); void page.offsetWidth; page.classList.add("swap-in");
+    }
+    try { history.replaceState(null, "", "#" + ["h","g","p","t"].map(function (k) { return k + "=" + state[k]; }).join("&")); } catch (e) {}
+  }
+  document.querySelectorAll("[data-k]").forEach(function (b) {
+    b.addEventListener("click", function () { state[b.dataset.k] = b.dataset.v; apply(b.dataset.k, true); });
+  });
+  $("blk").addEventListener("click", function () {
+    var on = !frame.classList.contains("show-blocks");
+    frame.classList.toggle("show-blocks", on);
+    this.setAttribute("aria-pressed", String(on));
+  });
+  document.addEventListener("click", function (e) { if (e.target.closest("a[href='#']")) e.preventDefault(); });
+
+  // WhatsApp button appears once the visitor scrolls past the hero
+  var fab = document.querySelector(".fab-wrap");
+  function fabCheck() { fab.classList.toggle("on", window.scrollY > 700); }
+  window.addEventListener("scroll", fabCheck, { passive: true }); fabCheck();
+
+  // Initial state from the URL hash, e.g. #h=b&p=navy&t=b
+  (location.hash || "").replace("#", "").split("&").forEach(function (kv) {
+    var p = kv.split("=");
+    if (VALID[p[0]] && VALID[p[0]].indexOf(p[1]) > -1) state[p[0]] = p[1];
+  });
+  Object.keys(state).forEach(function (k) { apply(k, false); });
+  $("note").innerHTML = NOTES.h[state.h] + DISCLAIMER;
+})();
+</script>
+</body>
+</html>

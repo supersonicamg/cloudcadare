@@ -1,0 +1,36 @@
+{
+  "name": "@educore/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./accounts": "./src/accounts/index.ts",
+    "./licensing": "./src/licensing/index.ts",
+    "./tenants": "./src/tenants/index.ts",
+    "./domains": "./src/domains/index.ts",
+    "./catalog": "./src/catalog/index.ts",
+    "./media": "./src/media/index.ts",
+    "./media/files": "./src/media/files.ts",
+    "./commerce": "./src/commerce/index.ts",
+    "./notifications": "./src/notifications/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@educore/auth": "workspace:*",
+    "@educore/db": "workspace:*",
+    "@educore/features": "workspace:*",
+    "@educore/tenancy": "workspace:*",
+    "server-only": "^0.0.1",
+    "zod": "^4",
+    "@educore/integrations": "workspace:*"
+  },
+  "devDependencies": {
+    "@educore/config": "workspace:*",
+    "@types/node": "^20",
+    "typescript": "^5",
+    "vitest": "^3"
+  }
+}

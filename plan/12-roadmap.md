@@ -7,7 +7,7 @@ The order is chosen so that **CloudCadre goes live early on the real multi-tenan
 - Monorepo (Turborepo, pnpm), packages skeleton, lint boundaries, CI pipeline.
 - Supabase projects (local, staging, prod). Migrations from `plan/database` into `packages/db`. pgTAP + lint gates green.
 - `proxy.ts` host resolution (Redis), `app/[tenant]` root with root params, tenancy, auth and features packages, design tokens → CSS variables, `default` theme shell.
-- Auth: phone/email OTP, auth bridge, staff MFA.
+- Auth: email + password (ADR-13), auth bridge, staff MFA.
 - Console skeleton: platform login, distributor and tenant list, license key creation, redemption flow at `start.`, provisioning (pooled, local sync).
 - Observability baseline (Sentry, logs with tenant tags).
 

@@ -1,0 +1,18 @@
+{
+  "name": "@educore/tenancy",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./host": "./src/host.ts",
+    "./privileged/load-tenant": "./src/privileged/load-tenant.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run" },
+  "dependencies": {
+    "@educore/auth": "workspace:*",
+    "@educore/features": "workspace:*",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": { "@educore/config": "workspace:*", "@types/node": "^20", "typescript": "^5", "vitest": "^3" }
+}

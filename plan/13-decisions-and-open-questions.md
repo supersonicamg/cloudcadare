@@ -16,9 +16,10 @@
 | ADR-10 | **Transactional outbox** for side effects | Direct calls in actions; DB triggers calling HTTP (`pg_net`) | No lost or phantom notifications; retries; decoupled modules | — |
 | ADR-11 | **Supabase + Next.js on Vercel**, Mumbai region | AWS-native (RDS + Cognito + ECS); Firebase | Fastest path with RLS, Auth, Storage and Realtime in one; Vercel custom domains. The core is portable (OpenNext/AWS) if needed | Cost or compliance demands |
 | ADR-12 | **Each academy is the merchant of record** (own Razorpay/Stripe) | Platform collects and pays out (Route/Connect Express) | Avoids marketplace/PA licensing, payout liability and GST complexity for the platform | If offering a marketplace |
-| ADR-13 | **Phone OTP first** for learners | Passwords first | Indian user expectations; no shared passwords across academies in a pooled identity pool | — |
+| ADR-13 | **Email + password** (changed 2026-11-25, owner): sign-up asks for name, email, WhatsApp number and password; sign-in uses email and password. Nothing is verified, and no auth mail is sent | Email or phone codes; Google | There is no SMTP server, and no SMS provider | When mail (or SMS) is available: confirm email addresses and add self-serve password reset |
 | ADR-14 | **Text + CHECK enums**, JSONB only for configs and content | Postgres enum types; EAV | Easy evolution; relational where queried | — |
 | ADR-15 | **Snapshots** (orders, invoices, papers, certificates) | Live references | History must not change | — |
+| ADR-16 | **One cloud Supabase project per client (dedicated plane is the default); app on Vercel first, then the owner's VPS** (2026-11-25, owner's decision) | Pooled plane for everyone; local Supabase for dev and test | The owner creates and holds each client's project, bills hosting to the client, and does not want to run a database. Details: [14](14-delivery-and-hosting.md) | First client goes live, or Supabase cost per client stops working |
 
 ## B. Known trade-offs & mitigations
 
@@ -69,6 +70,6 @@
 1. Platform brand name and base domain (replace `yourplatform.app` in `99_seed_catalog.sql`).
 2. Will you work with resellers in year 1, or platform-only? (Phase 4 scope.)
 3. Platform pricing in INR, and whether self-serve trials (no key) are offered.
-4. Hosting preference: Vercel (recommended for custom domains) vs AWS/Cloudflare (cost or credit reasons)?
+4. ~~Hosting preference~~ **Decided 2026-11-25:** Vercel first, then the owner's VPS; Supabase cloud, one project per client. See [14](14-delivery-and-hosting.md).
 5. Support model and SLAs per plan.
 6. Which second vertical to target first (NEET/JEE vs K-12 vs UPSC), so the Phase 3 order can be fixed.

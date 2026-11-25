@@ -22,6 +22,8 @@ This folder is the planning package. No application code has been written yet; t
 | 11 | [DevOps & quality](11-devops-quality.md) | Environments, CI/CD, migrations across many DBs, testing, observability, DR |
 | 12 | [Roadmap](12-roadmap.md) | Phased delivery with exit criteria, CloudCadre MVP first |
 | 13 | [Decisions & open questions](13-decisions-and-open-questions.md) | ADR log + questions to ask the client |
+| 14 | [Delivery and hosting](14-delivery-and-hosting.md) | One Supabase project per client, Vercel then the owner's VPS, per-client checklist |
+| 15 | [Design and UX guide](15-design-and-ux-guide.md) | **Read before any UI work.** CloudCadre look and feel: banned tropes, surfaces, colour, type, components, diagrams, page recipes. Reference build: `mockups/homepage-v9.html` |
 | DB | [database/](database/README.md) | **Executable SQL** (15 migrations, ~5k lines), smoke tests, lints |
 
 ## The design in one page
@@ -63,7 +65,7 @@ This folder is the planning package. No application code has been written yet; t
 5. **One flexible content model.** A course is a nestable tree of sections (Phase › Month › Week) containing typed lessons. `courses.kind` covers courses, study-material packs, test series and live programs, so one model fits cloud academies, NEET coaching and PDF sellers alike.
 6. **Headless core, swappable skins.** Business logic lives in packages. Each frontend is a skin chosen from four levels: design tokens, CMS blocks, theme packages, or a fully custom app (multi-zones).
 7. **Events over coupling.** State changes write to a transactional outbox. Notifications, badges, webhooks, analytics and search all react asynchronously.
-8. **India-first, global-ready.** Supported from day one: INR/GST, Razorpay, DLT SMS, WhatsApp, phone OTP, the DPDP Act (incl. minors), Mumbai region and Hindi/regional locales.
+8. **India-first, global-ready.** Supported from day one: INR/GST, Razorpay, DLT SMS, WhatsApp, phone OTP (deferred for now, ADR-13), the DPDP Act (incl. minors), Mumbai region and Hindi/regional locales.
 
 ## Database status (verified)
 

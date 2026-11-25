@@ -1,0 +1,109 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import type { Playback } from '@educore/core/media'
+import { useProgressTracker } from './use-progress'
+
+type Playable = Exclude<Playback, { kind: 'unavailable' }>
+
+// Minimal slice of the YouTube IFrame API that we use.
+interface YTPlayer { getCurrentTime(): number; getDuration(): number; destroy(): void }
+interface YTApi {
+  Player: new (el: HTMLElement, o: {
+    videoId: string
+    playerVars: Record<string, string | number>
+    events: { onStateChange(e: { data: number }): void; onReady(): void }
+  }) => YTPlayer
+}
+declare global { interface Window { YT?: YTApi; onYouTubeIframeAPIReady?: () => void } }
+
+let ytReady: Promise<YTApi> | null = null
+function loadYouTube(): Promise<YTApi> {
+  if (window.YT?.Player) return Promise.resolve(window.YT)
+  ytReady ??= new Promise((resolve) => {
+    window.onYouTubeIframeAPIReady = () => resolve(window.YT!)
+    const s = document.createElement('script')
+    s.src = 'https://www.youtube.com/iframe_api'
+    document.head.appendChild(s)
+  })
+  return ytReady
+}
+
+export function VideoPlayer({ playback, lessonId, startAt, completed, title, tracked = true }: {
+  playback: Playable; lessonId: string; startAt: number; completed: boolean; title: string
+  /** False on public free previews: nothing is reported until the person enrols. */
+  tracked?: boolean
+}) {
+  const tracker = useProgressTracker(lessonId, completed, tracked)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const ytRef = useRef<HTMLDivElement>(null)
+
+  // HTML5 video: a direct file or an HLS stream (Safari plays HLS natively; everything else uses hls.js).
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v || playback.kind === 'youtube') return
+    let hls: { destroy(): void } | undefined
+    const seek = () => { if (startAt > 5) v.currentTime = startAt }
+    v.addEventListener('loadedmetadata', seek, { once: true })
+    if (playback.kind === 'hls' && !v.canPlayType('application/vnd.apple.mpegurl')) {
+      void import('hls.js').then(({ default: Hls }) => {
+        if (!Hls.isSupported()) return
+        const h = new Hls()
+        h.loadSource(playback.src)
+        h.attachMedia(v)
+        hls = h
+      })
+    } else {
+      v.src = playback.src
+    }
+    const t = tracker
+    const on = () => t.setPlaying(true)
+    const off = () => { t.update(v.currentTime, v.duration); t.setPlaying(false) }
+    const time = () => t.update(v.currentTime, v.duration)
+    v.addEventListener('play', on); v.addEventListener('pause', off); v.addEventListener('ended', off); v.addEventListener('timeupdate', time)
+    return () => {
+      v.removeEventListener('play', on); v.removeEventListener('pause', off); v.removeEventListener('ended', off); v.removeEventListener('timeupdate', time)
+      hls?.destroy()
+    }
+  }, [playback, startAt, tracker])
+
+  // YouTube: the IFrame API reports state and position, which is how we get watch percentage.
+  useEffect(() => {
+    if (playback.kind !== 'youtube' || !ytRef.current) return
+    let player: YTPlayer | undefined
+    let poll: ReturnType<typeof setInterval> | undefined
+    let cancelled = false
+    const mount = document.createElement('div')
+    ytRef.current.appendChild(mount)
+    void loadYouTube().then((YT) => {
+      if (cancelled) return
+      player = new YT.Player(mount, {
+        videoId: playback.videoId,
+        playerVars: { rel: 0, modestbranding: 1, playsinline: 1, ...(startAt > 5 ? { start: Math.floor(startAt) } : {}) },
+        events: {
+          onReady: () => {},
+          onStateChange: ({ data }) => {
+            const t = tracker
+            clearInterval(poll)
+            if (data === 1) { // playing
+              t.setPlaying(true)
+              poll = setInterval(() => player && t.update(player.getCurrentTime(), player.getDuration()), 1000)
+            } else {
+              if (player) t.update(player.getCurrentTime(), player.getDuration())
+              t.setPlaying(false)
+            }
+          },
+        },
+      })
+    })
+    return () => { cancelled = true; clearInterval(poll); player?.destroy() }
+  }, [playback, startAt, tracker])
+
+  if (playback.kind === 'youtube') {
+    return <div ref={ytRef} className="aspect-video w-full overflow-hidden rounded-[18px] bg-deep [&_iframe]:size-full" aria-label={title} />
+  }
+  return (
+    <video ref={videoRef} controls playsInline preload="metadata" aria-label={title}
+      className="aspect-video w-full rounded-[18px] bg-deep" />
+  )
+}

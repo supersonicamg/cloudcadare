@@ -7,3 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## UI work
+
+Before building or changing any screen, read [`plan/15-design-and-ux-guide.md`](plan/15-design-and-ux-guide.md) and open its reference build, `plan/mockups/homepage-v9.html`. Visual decisions there are final; where older mockups disagree on visuals, the guide wins.

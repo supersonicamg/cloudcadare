@@ -22,8 +22,9 @@
 
 | Method | Default | Notes |
 |---|---|---|
-| Phone OTP (SMS via MSG91 DLT, or WhatsApp OTP) | ✓ learners (India) | Send SMS Hook → our function → MSG91 (DLT template). Rate limit: 3 per 10 min per phone, 10 per hour per IP |
-| Email OTP / magic link | ✓ | Through the auth bridge for custom domains (see [03 §4](03-distribution-and-tenancy.md)) |
+| **Email + password** (the only method built; ADR-13) | ✓ everyone | Minimum 8 characters. Email and WhatsApp number are **not verified** (no mail server), so check who someone is before granting access or resetting a password (`scripts/set-password.mjs`) |
+| Phone OTP (SMS via MSG91 DLT, or WhatsApp OTP) | Deferred (ADR-13) | Send SMS Hook → our function → MSG91 (DLT template). Rate limit: 3 per 10 min per phone, 10 per hour per IP |
+| Email OTP / magic link | Deferred: needs a mail server (ADR-13) | Through the auth bridge for custom domains (see [03 §4](03-distribution-and-tenancy.md)) |
 | Google / Apple / Microsoft OAuth | optional per tenant | Through the auth bridge |
 | Email + password | optional | Leaked-password protection on; minimum length 10 |
 | SAML / OIDC SSO | `integrations.sso` | Corporate training customers |

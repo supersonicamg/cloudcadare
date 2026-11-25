@@ -1,0 +1,1 @@
+{ "extends": "@educore/config/tsconfig.base.json", "include": ["src"] }

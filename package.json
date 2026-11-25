@@ -1,26 +1,29 @@
 {
-  "name": "cloudcadre",
-  "version": "0.1.0",
+  "name": "educore",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.19.0"
   },
-  "dependencies": {
-    "next": "16.4.6",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:academy": "turbo run dev --filter=@educore/academy",
+    "dev:console": "turbo run dev --filter=@educore/console",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:test": "./packages/db/tests/run_local.sh",
+    "gen:catalogs": "node packages/db/scripts/gen-catalogs.mjs",
+    "db:start": "cd packages/db && DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase start",
+    "db:stop": "cd packages/db && DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase stop",
+    "db:types": "cd packages/db && DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase gen types typescript --local --schema public > src/types.ts",
+    "mail:sink": "node packages/db/scripts/smtp-sink.mjs",
+    "e2e": "playwright test",
+    "track": "node scripts/track.mjs"
   },
   "devDependencies": {
-    "@tailwindcss/turbopack": "4.3.3",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.4.6",
-    "tailwindcss": "4.3.3",
-    "typescript": "^5"
+    "@playwright/test": "^1.65.1",
+    "turbo": "^2.11.13"
   }
 }

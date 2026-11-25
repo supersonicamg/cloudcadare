@@ -1,0 +1,54 @@
+/* Maps Tailwind utilities (bg-primary, text-fg …) to the tenant CSS variables emitted by tokensToCss().
+   Imported once by each app's globals.css, after `@import "tailwindcss"`. */
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-primary-fg: var(--color-primary-fg);
+  --color-accent: var(--color-accent);
+  --color-bg: var(--color-bg);
+  --color-fg: var(--color-fg);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --radius-theme: var(--radius);
+  --color-tint-1: var(--tint-1);
+  --color-tint-2: var(--tint-2);
+  --color-tint-3: var(--tint-3);
+  --color-tint-4: var(--tint-4);
+  --color-deep: var(--tone-deep);
+  --color-grey: var(--tone-grey);
+  --color-mute: var(--tone-mute);
+  --color-field: var(--tone-field);
+  --color-ok-bg: var(--tone-ok-bg);
+  --color-ok-ink: var(--tone-ok-ink);
+  --color-danger-ink: var(--tone-danger-ink);
+  --color-danger-bg: var(--tone-danger-bg);
+  --font-heading: var(--font-heading, var(--font-fallback));
+  --font-body: var(--font-body, var(--font-fallback));
+}
+
+:root {
+  /* Derived from the academy's own colours, so the branding editor still restyles every page.
+     The two warm tints are fixed. */
+  --tint-1: color-mix(in oklab, var(--color-primary) 22%, #fff);
+  --tint-2: color-mix(in oklab, var(--color-accent) 30%, #fff);
+  --tint-3: #F9D9CF;
+  --tint-4: #E1DDF2;
+  --tone-deep: color-mix(in srgb, var(--color-primary) 68%, #000);
+  --tone-grey: color-mix(in srgb, var(--color-fg) 78%, var(--color-bg));
+  --tone-mute: color-mix(in srgb, var(--color-fg) 60%, var(--color-bg));
+  --tone-field: color-mix(in srgb, var(--color-fg) 45%, var(--color-bg));
+  --tone-ok-ink: color-mix(in srgb, var(--color-success) 78%, #000);
+  --tone-danger-ink: color-mix(in srgb, var(--color-danger) 78%, #000);
+  --tone-ok-bg: color-mix(in srgb, var(--color-success) 14%, #fff);
+  --tone-danger-bg: color-mix(in srgb, var(--color-danger) 12%, #fff);
+  --font-fallback: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body, var(--font-fallback));
+  -webkit-font-smoothing: antialiased;
+}

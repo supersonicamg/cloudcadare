@@ -1,0 +1,12 @@
+{
+  "name": "@educore/integrations",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./payments": "./src/payments/index.ts",
+    "./email": "./src/email/index.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run" },
+  "devDependencies": { "@educore/config": "workspace:*", "@types/node": "^20", "typescript": "^5", "vitest": "^3" }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "@educore/academy",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@educore/auth": "workspace:*",
+    "@educore/core": "workspace:*",
+    "@educore/db": "workspace:*",
+    "@educore/features": "workspace:*",
+    "@educore/integrations": "workspace:*",
+    "@educore/permissions": "workspace:*",
+    "@educore/tenancy": "workspace:*",
+    "@educore/theme-aurora": "workspace:*",
+    "@educore/theme-default": "workspace:*",
+    "@educore/ui": "workspace:*",
+    "hls.js": "^1.7.4",
+    "next": "16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-markdown": "^10.1.0",
+    "server-only": "^0.0.1",
+    "zod": "^4"
+  },
+  "devDependencies": {
+    "@educore/config": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5"
+  }
+}

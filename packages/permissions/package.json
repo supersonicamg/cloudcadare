@@ -1,0 +1,10 @@
+{
+  "name": "@educore/permissions",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run" },
+  "dependencies": { "@educore/features": "workspace:*" },
+  "devDependencies": { "@educore/config": "workspace:*", "typescript": "^5", "vitest": "^3" }
+}

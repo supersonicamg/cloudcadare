@@ -1,7 +1,7 @@
 # HANDOFF: where this project stands
 
-> For the next session (human or AI). Read this first, then [README.md](README.md).
-> Last updated: 2026-11-23
+> For the next session (human or AI). Read [../PROGRESS.md](../PROGRESS.md) first (implementation log, updated every session), then this file and [README.md](README.md).
+> Last updated: 2026-11-24 (session 3)
 
 ## 1. Status
 
@@ -9,15 +9,15 @@
 |---|---|
 | Planning docs (`plan/01…13`) | ✅ Complete (vision, architecture, tenancy, toggles, frontend customization, modules, security, data, integrations, API/events, devops, roadmap, decisions) |
 | Database SQL (`plan/database/*.sql`, 15 migrations) | ✅ Written **and verified** on Supabase Postgres 17.11 via `plan/database/tests/run_local.sh`: smoke test passes, 7 lints at 0 findings |
-| App code | ❌ Not started. The repo root is still the default Next.js 16.4.6 scaffold (`app/`, `package.json`) |
-| Git | ❌ The `plan/` folder is **not committed yet** (branch `main`, only the initial commit). Commit it first: `git checkout -b plan/initial && git add plan && git commit` |
+| App code | 🟡 Phase 0 in progress: monorepo, packages, `apps/academy`, `apps/console` exist. See [../PROGRESS.md](../PROGRESS.md) for the exact state |
+| Git | `plan/` is committed on `plan/initial`. The Phase 0 implementation is **not committed yet** |
 | Client answers | ❌ Pending: see [13 §C/§D](13-decisions-and-open-questions.md) |
 
 ## 2. Decisions the owner still has to make (they block some work)
 
 1. Platform brand name and base domain. The placeholders are **EduCore** and `yourplatform.app`; the domain is in `database/99_seed_catalog.sql` (`platform_settings.base_domain`).
 2. Resellers in year 1, or platform-only? This decides how early Phase 4 is needed.
-3. Hosting: Vercel (recommended) vs AWS/Cloudflare.
+3. ~~Hosting~~ **Decided 2026-11-25:** Vercel first, then the owner's VPS; one cloud Supabase project per client, no local Supabase for testing. Read [14-delivery-and-hosting.md](14-delivery-and-hosting.md).
 4. The second vertical after cloud training (NEET/JEE, K-12 or UPSC).
 5. CloudCadre specifics (19 questions in doc 13 §C): Razorpay/GST, video volume and DRM, Zoom/Meet, labs provider, domain, brand assets, whether any learners are under 18, content migration.
 
@@ -30,7 +30,7 @@
 3. Turn `tests/smoke_test.sql` into pgTAP tests. Add `tests/lint.sql` as a CI gate.
 4. Build the packages: `tenancy` (host → tenant via Redis, `getTenantContext`), `auth` (supabase clients: user-scoped vs privileged), `features` (`isEnabled`/`requireFeature`), `permissions` (`can`), `ui` (tokens → CSS variables, Tailwind v4, shadcn).
 5. Add `proxy.ts` (Next 16's name for middleware), an `app/[tenant]/layout.tsx` root that uses `next/root-params`, and the `default` theme shell.
-6. Auth: phone/email OTP, the auth bridge for custom domains, staff MFA.
+6. Auth: email + password (ADR-13), the auth bridge for custom domains, staff MFA.
 7. Console skeleton plus the license-key flow at `start.` (`control.redeem_license` → `control.provision_local`).
 8. CI pipeline and Sentry.
 

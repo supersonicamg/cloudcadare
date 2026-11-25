@@ -24,6 +24,7 @@ This folder is the planning package. No application code has been written yet; t
 | 13 | [Decisions & open questions](13-decisions-and-open-questions.md) | ADR log + questions to ask the client |
 | 14 | [Delivery and hosting](14-delivery-and-hosting.md) | One Supabase project per client, Vercel then the owner's VPS, per-client checklist |
 | 15 | [Design and UX guide](15-design-and-ux-guide.md) | **Read before any UI work.** CloudCadre look and feel: banned tropes, surfaces, colour, type, components, diagrams, page recipes. Reference build: `mockups/homepage-v9.html` |
+| 16 | [Learner flows: logic and rules](16-learner-flows-logic.md) | Join, UPI payment, whitelist, course material with notes, account, admin verification. Mockups: `mockups-learner-flows/flows-index.html` (open this one) |
 | DB | [database/](database/README.md) | **Executable SQL** (15 migrations, ~5k lines), smoke tests, lints |
 
 ## The design in one page

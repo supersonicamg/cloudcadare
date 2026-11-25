@@ -1,4 +1,4 @@
-// Generated from plan/mockups/aurora-homepage.html. Platform marks are the real logos (Devicon, MIT;
+// Generated from the aurora home mockup (now plan/mockups/homepage-v9.html). Platform marks are the real logos (Devicon, MIT;
 // WhatsApp from Simple Icons, CC0), trademarks of their owners. The FinOps mark is a PLACEHOLDER: replace it
 // with the official FinOps Foundation logo before launch. Static markup, never built from user input.
 export const SPRITE = `<clipPath id="slant" clipPathUnits="objectBoundingBox"><path d="M0.175,0 L0.955,0 Q1,0 1,0.055 L1,0.945 Q1,1 0.955,1 L0.045,1 Q0,1 0.00715,0.945 L0.1229,0.055 Q0.13,0 0.175,0 Z"/></clipPath>

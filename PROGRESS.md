@@ -1,6 +1,7 @@
 # PROGRESS: implementation log
 
 > **Next agent: read this first**, then [plan/HANDOFF.md](plan/HANDOFF.md) (product decisions, rules) and [AGENTS.md](AGENTS.md) (Next.js 16 differs from your training data; read `apps/academy/node_modules/next/dist/docs/` before writing Next code).
+> **Mockups (single source, 2026-11-25):** `plan/mockups/homepage-v9.html` and `plan/mockups-learner-flows/`. Every other old mockup was deleted from the tree; the log below mentions them by name, read them with `git show 642c215:plan/mockups/<file>`. Branches: everything lives on `main`.
 > Update this file at the end of every session: tick boxes, add to the log, keep "Next up" accurate.
 > **Screens to build are tracked in `plan/tracker.json`:** run `node scripts/track.mjs` to see only the open ones, `node scripts/track.mjs next` for the next one, and `node scripts/track.mjs done E1` after it is built and checked. Do not keep a second list here. The default view is the earliest unfinished phase (`phase 2`, `open` show the rest). Mockups: `plan/mockups/aurora-flows*.html` (six files, 154 screens; start at `plan/mockups/index.html`, which lists every route; `-phase1`, `-phase2`, `-later`, `-pages` added 2026-11-25).
 > Last updated: 2026-11-25 (session 11: aurora home page rebuilt from homepage-v9 per plan/15; session 10 before it: email + password sign-up and sign-in; flow E staff screens not started)

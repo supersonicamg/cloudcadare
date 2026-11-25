@@ -2,8 +2,8 @@
 
 > **Who this is for:** any AI agent or developer building a CloudCadre screen.
 > Read it fully before any UI work. It is the single source of truth for how CloudCadre looks, reads and behaves.
-> Where an older mockup (`plan/mockups/aurora-*.html`) disagrees with this guide on **visuals**, this guide wins.
-> Those older mockups are still the reference for **structure** (which screens exist, what is on them, which states they need).
+> **Mockups on disk (the only two places):** `plan/mockups/homepage-v9.html` (the visual reference) and `plan/mockups-learner-flows/` (24 screens: join, learn, account, admin; logic in `plan/16-learner-flows-logic.md`).
+> The older mockups (`aurora-flows*.html`, `homepage-v2` to `v8` and others) were deleted from the tree on 2026-11-25. Screens that are not redrawn yet point at them in `plan/tracker.json`; read one with `git show 642c215:plan/mockups/aurora-flows.html`. Where one disagrees with this guide on **visuals**, this guide wins; they are only a hint for **structure** (which screens exist, what is on them, which states they need).
 
 **Reference build:** [`plan/mockups/homepage-v9.html`](mockups/homepage-v9.html). Open it in a browser.
 Its toolbar has **Phone width** (real phone layout via container queries) and **Design notes** (the reasoning per section).
@@ -380,7 +380,7 @@ Diagrams are **built in code (SVG), never generated images.** Generated images c
 
 ## 14. How to build a new screen (the process)
 
-1. **Find the screen's structure** in the older mockups (`plan/mockups/aurora-flows*.html`, `index.html`) and `node scripts/track.mjs`.
+1. **Find the screen's structure** with `node scripts/track.mjs` (its `mockup` field). Groups A to D are in `plan/mockups-learner-flows/`; older items point at deleted files in git history (see the note at the top of this guide).
 2. **Write the brief** (in your head or a comment):
    - the screen's **one job**;
    - its **one filled action**;

@@ -5,7 +5,7 @@ import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import type { Database, Json } from '@educore/db/types'
-import { checkFile, checkServerVideo, createUploadTarget, isFileLessonType, isTeamsRecordingLink, mimeForExt, parseVideoSource, removeFile, safeFilename, statUpload, uploadRule, videoServerFromEnv, type UploadTarget, type UploadType } from '@educore/core/media'
+import { checkFile, checkServerVideo, createUploadTarget, extOf, isFileLessonType, isTeamsRecordingLink, mimeForExt, parseVideoSource, removeFile, safeFilename, statUpload, titleFromFileName, uploadRule, videoServerFromEnv, type UploadTarget, type UploadType } from '@educore/core/media'
 import { isEnabled } from '@educore/features'
 import { ActionDenied, MfaRequired, can, requireActionAccess, type Access } from '@/lib/dal'
 
@@ -216,6 +216,38 @@ export async function addLesson(courseId: string, sectionId: string, _s: FormSta
     }
     done(a)
     return { saved: true }
+  } catch (e) {
+    return { error: message(e) }
+  }
+}
+
+/**
+ * For "upload several files": one lesson per file, named after it. A PDF becomes a PDF lesson (shown in the page), any
+ * other allowed file a "file to download" lesson, so nobody has to choose a type. A lesson a failed try left empty is used again.
+ */
+export async function createFileLesson(courseId: string, sectionId: string, fileName: string): Promise<{ error: string } | { lessonId: string; type: 'pdf' | 'download' }> {
+  if (!z.uuid().safeParse(courseId).success || !z.uuid().safeParse(sectionId).success) return { error: 'That was not accepted. Refresh the page and try again.' }
+  try {
+    await requireActionAccess({ permission: 'course.manage', feature: 'catalog.courses' })
+    const a = await requireActionAccess({ permission: 'content.upload', feature: 'core.media' })
+    const type = extOf(String(fileName)) === 'pdf' ? 'pdf' : 'download'
+    if (!isEnabled(a.bundle.features, type === 'pdf' ? 'content.documents' : 'content.downloads')) return { error: 'Your plan does not include this kind of file.' }
+    const { data: section } = await a.db.from('course_sections').select('id').eq('id', sectionId).eq('course_id', courseId).is('deleted_at', null).maybeSingle()
+    if (!section) return { error: 'That month was not found.' }
+    const named = titleFromFileName(String(fileName))
+    const title = named === 'New video' ? 'New file' : named
+    const { data: empty } = await a.db.from('lessons').select('id').eq('section_id', sectionId).eq('type', type).eq('title', title)
+      .is('media_asset_id', null).is('deleted_at', null).limit(1).maybeSingle()
+    if (empty) return { lessonId: empty.id, type }
+    const { data: last } = await a.db.from('lessons').select('position').eq('section_id', sectionId).is('deleted_at', null)
+      .order('position', { ascending: false }).limit(1).maybeSingle()
+    const { data, error } = await a.db.from('lessons').insert({
+      tenant_id: a.bundle.tenant.id, course_id: courseId, section_id: sectionId, title, type, position: (last?.position ?? 0) + 1,
+      is_published: true, published_at: new Date().toISOString(),
+    }).select('id').single()
+    if (error) return { error: message(error) }
+    done(a)
+    return { lessonId: data.id, type }
   } catch (e) {
     return { error: message(e) }
   }

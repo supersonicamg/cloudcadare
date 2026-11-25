@@ -7,6 +7,7 @@ import type { Access } from '@/lib/dal'
 import type { getShell } from '@/lib/shell'
 import { AccountMenu } from './account-menu'
 import './lx.css'
+import './learner-home.css'
 
 /*
  * The learner's app frame. Every signed-in learning screen (Home, Lessons, Live classes, Notes) sits inside it, so the
@@ -14,6 +15,8 @@ import './lx.css'
  * The marketing header and footer do not appear here. Names are the plainest words: Home, Lessons, Live classes, Notes.
  */
 export type LearnerTab = 'home' | 'lessons' | 'live' | 'notes'
+/** A focus screen (a lesson, a quiz): no sidebar, a slim bar with the way back, where you are, and how far along. */
+export interface Focus { backHref: string; backLabel: string; where?: string; progress?: { pct: number; label: string } }
 type Shell = Awaited<ReturnType<typeof getShell>>
 
 const initialsOf = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('') || '?'
@@ -35,7 +38,7 @@ function Brand({ brand }: { brand: Shell['brand'] }) {
   )
 }
 
-export async function LearnerShell({ a, shell, active, wide = false, children }: { a: Access; shell: Shell; active: LearnerTab | null; wide?: boolean; children: ReactNode }) {
+export async function LearnerShell({ a, shell, active, wide = false, focus, children }: { a: Access; shell: Shell; active: LearnerTab | null; wide?: boolean; focus?: Focus; children: ReactNode }) {
   const { theme, brand, account, bundle } = shell
   const slug = await getLeadCourseSlug(a)
   const notes = isEnabled(bundle.features, 'learning.notes')
@@ -45,9 +48,9 @@ export async function LearnerShell({ a, shell, active, wide = false, children }:
   const tabs: Array<{ key: LearnerTab; label: string; href: string; icon: IconName }> = [
     { key: 'home', label: 'Home', href: '/dashboard', icon: 'home' },
     ...(slug ? [
-      { key: 'lessons' as const, label: 'Lessons', href: `/learn/${slug}/material`, icon: 'book' as const },
+      { key: 'lessons' as const, label: 'My course', href: `/learn/${slug}/material`, icon: 'book' as const },
       { key: 'live' as const, label: 'Live classes', href: `/learn/${slug}/live`, icon: 'live' as const },
-      ...(notes ? [{ key: 'notes' as const, label: 'Notes', href: '/learn/notes', icon: 'note' as const }] : []),
+      ...(notes ? [{ key: 'notes' as const, label: 'My notes', href: '/learn/notes', icon: 'note' as const }] : []),
     ] : []),
   ]
   const v = account.viewer
@@ -57,6 +60,31 @@ export async function LearnerShell({ a, shell, active, wide = false, children }:
   const menuTop = v && (
     <AccountMenu name={v.name} email={v.email} initials={v.initials || initialsOf(v.name)} items={v.menu} logoutHref={v.logoutHref} whatsapp={whatsapp} opens="down" />
   )
+
+  if (focus) {
+    return (
+      <theme.FocusLayout brand={brand}>
+        <div className="lx lx-focus">
+          <a href="#main" className="lx-skip">Skip to content</a>
+          <header className="lx-ftop">
+            <Link href={focus.backHref} className="lx-fback"><Icon name="back" /><span>{focus.backLabel}</span></Link>
+            <div className="lx-fwhere">{focus.where && <p>{focus.where}</p>}</div>
+            {focus.progress && (
+              <p className="lx-fprog">
+                <span className="lx-bar" role="progressbar" aria-valuenow={Math.round(focus.progress.pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Course progress"><i style={{ width: `${Math.max(0, Math.min(100, focus.progress.pct))}%` }} /></span>
+                <span>{focus.progress.label}</span>
+              </p>
+            )}
+            <div className="lx-fright">
+              {whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="lx-fhelp" aria-label="Stuck? Message us on WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp" /></svg><span>Need help?</span></a>}
+              {menuTop}
+            </div>
+          </header>
+          <main id="main" className="lx-fmain">{children}</main>
+        </div>
+      </theme.FocusLayout>
+    )
+  }
 
   return (
     <theme.FocusLayout brand={brand}>

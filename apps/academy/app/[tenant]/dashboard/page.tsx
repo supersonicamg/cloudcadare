@@ -47,7 +47,7 @@ export default async function Dashboard({ searchParams }: PageProps<'/[tenant]/d
       {lead && d ? (
         d.startsIn > 0 && d.batch?.startDate
           ? <UpcomingHome d={d} lead={lead} first={first} />
-          : <EnrolledHome d={d} lead={lead} first={first} joined={sp.joined === '1'} others={enrollments.filter((e) => e !== lead)} />
+          : <EnrolledHome d={d} lead={lead} first={first} joined={sp.joined === '1'} others={enrollments.filter((e) => e !== lead)} goal={home?.program?.goal} />
       ) : (
         <div className="ld">
           <NoCourseDashboard s={await getJoinState(a)} first={first} whatsapp={whatsapp} checkout={isEnabled(bundle.features, 'commerce.checkout')} syllabusHref={home?.syllabusHref} goal={home?.program?.goal} />

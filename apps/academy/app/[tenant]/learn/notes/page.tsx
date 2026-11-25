@@ -12,7 +12,7 @@ import { getShell } from '@/lib/shell'
 import { buttonOutline } from '@/lib/ui'
 import { LearnerShell } from '../../_components/learner-shell'
 
-export const metadata: Metadata = { title: 'Notes' }
+export const metadata: Metadata = { title: 'My notes' }
 
 /*
  * Notes. One job: find a note again. No filled button; "Download as PDF" is an outline button.
@@ -35,7 +35,7 @@ export default async function Notes({ searchParams }: PageProps<'/[tenant]/learn
     <LearnerShell a={a} shell={shell} active="notes">
       <header className="lx-head">
         <div>
-          <h1 className="lx-h1">Notes</h1>
+          <h1 className="lx-h1">My notes</h1>
           <p className="lx-lede">{r.counts.all ? `${r.counts.all} ${r.counts.all === 1 ? 'note' : 'notes'} from ${r.lessons} ${r.lessons === 1 ? 'lesson' : 'lessons'}. Only you can see them.` : 'Notes, bookmarks and highlights you make in a lesson are kept here. Only you can see them.'}</p>
         </div>
         {r.counts.all > 0 && <Link href="/learn/notes/print" target="_blank" className={`${buttonOutline} max-[720px]:w-full`}><Icon name="print" className="lx-i" />Download as PDF</Link>}
@@ -64,7 +64,7 @@ export default async function Notes({ searchParams }: PageProps<'/[tenant]/learn
         r.counts.all === 0 ? (
           <section className="lx-empty">
             <b>No notes yet</b>
-            <p>Open a lesson and press <strong>N</strong> while it plays, or use the notes tab beside the video. Your notes, bookmarks and highlights will show up here, and each one takes you back to the exact minute.</p>
+            <p>Open a lesson and press <strong>N</strong> while it plays, or write one under the video. Your notes, bookmarks and highlights will show up here, and each one takes you back to the exact minute.</p>
           </section>
         ) : (
           <section className="lx-empty"><b>No note matches</b>{filtering && <Link href="/learn/notes" className="lx-link">Clear the search</Link>}</section>

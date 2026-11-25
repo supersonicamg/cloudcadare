@@ -8,7 +8,7 @@ import { useProgressTracker } from './use-progress'
 type Playable = Exclude<Playback, { kind: 'unavailable' }>
 
 // Minimal slice of the YouTube IFrame API that we use.
-interface YTPlayer { getCurrentTime(): number; getDuration(): number; destroy(): void; seekTo(s: number, allowSeekAhead: boolean): void; playVideo(): void; pauseVideo(): void }
+interface YTPlayer { getCurrentTime(): number; getDuration(): number; destroy(): void; seekTo(s: number, allowSeekAhead: boolean): void; playVideo(): void; pauseVideo(): void; setPlaybackRate(r: number): void }
 interface YTApi {
   Player: new (el: HTMLElement, o: {
     videoId: string
@@ -48,7 +48,10 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
   useEffect(() => {
     const v = videoRef.current
     if (!v || playback.kind === 'youtube' || !register) return
-    register({ time: () => v.currentTime, duration: () => (Number.isFinite(v.duration) ? v.duration : 0), seek: (s) => { v.currentTime = s; void v.play().catch(() => {}) }, pause: () => v.pause() })
+    register({ time: () => v.currentTime, duration: () => (Number.isFinite(v.duration) ? v.duration : 0), seek: (s) => { v.currentTime = s; void v.play().catch(() => {}) }, pause: () => v.pause(),
+      skip: (d) => { v.currentTime = Math.max(0, Math.min(Number.isFinite(v.duration) ? v.duration : Infinity, v.currentTime + d)) },
+      setRate: (r) => { v.playbackRate = r },
+    })
     const meta = () => { if (Number.isFinite(v.duration)) setDuration?.(v.duration) }
     v.addEventListener('loadedmetadata', meta)
     meta()
@@ -114,7 +117,10 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
             if (!player) return
             const p = player
             pauseRef.current = () => p.pauseVideo()
-            register?.({ time: () => p.getCurrentTime(), duration: () => p.getDuration() || 0, seek: (s) => { p.seekTo(s, true); p.playVideo() }, pause: () => p.pauseVideo() })
+            register?.({ time: () => p.getCurrentTime(), duration: () => p.getDuration() || 0, seek: (s) => { p.seekTo(s, true); p.playVideo() }, pause: () => p.pauseVideo(),
+              skip: (d) => p.seekTo(Math.max(0, p.getCurrentTime() + d), true),
+              setRate: (r) => p.setPlaybackRate(r),
+            })
             const d = p.getDuration()
             if (d > 0) setDuration?.(d)
           },

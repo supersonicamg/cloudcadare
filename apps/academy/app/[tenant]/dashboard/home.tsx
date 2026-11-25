@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import type { CSSProperties } from 'react'
 import { Icon, type IconName } from '@educore/ui/marks'
 import type { Enrolled } from '@/lib/dashboard'
 import { KIND } from '@/lib/dashboard'
@@ -8,38 +7,57 @@ import type { MyEnrollment } from '@/lib/learn'
 import { isOpenNow } from '@/lib/live'
 import { buttonLg, buttonOutline } from '@/lib/ui'
 import { NextClassCard } from '../_components/live'
+import { MonthClimb, type ClimbLesson, type ClimbMonth } from './month-climb'
 
-const ICON: Record<string, IconName> = { video: 'video', live: 'live', pdf: 'doc', document: 'doc', image: 'image', article: 'doc', quiz: 'quiz', test: 'quiz', download: 'down', external_link: 'link', lab: 'lab' }
+const ICON: Record<string, IconName> = { video: 'video', live: 'live', pdf: 'doc', document: 'doc', image: 'image', article: 'book', quiz: 'quiz', test: 'quiz', download: 'down', external_link: 'link', lab: 'lab' }
+
+/** "Good morning" for a clock in India. */
+function greeting(now: number) {
+  const h = new Date(now + 5.5 * 3_600_000).getUTCHours()
+  return h < 5 ? 'Hello' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Hello'
+}
+
+/** What the climb shows for each month: the next few lessons, in reading order, open ones first. */
+function climbMonths(d: Enrolled): ClimbMonth[] {
+  return d.m.months.map((mo, i) => {
+    const info = d.months[i]!
+    const todo = mo.lessons.filter((l) => !l.done)
+    const ordered = [...todo.filter((l) => !l.lock), ...todo.filter((l) => l.lock)]
+    const next = ordered.slice(0, 4).map<ClimbLesson>((l) => ({
+      id: l.id, title: l.title, icon: ICON[l.type] ?? 'doc', kind: KIND[l.type] ?? 'Lesson',
+      state: l.lock ? 'locked' : l.pct > 0 ? 'half' : 'todo',
+      fact: l.lock ? (l.lock.unlocksAt ? `Opens ${new Date(l.lock.unlocksAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : 'Finish earlier ones') : l.pct > 0 ? `${l.pct}% done` : l.isNew ? 'New' : l.durationSeconds ? `${Math.max(1, Math.round(l.durationSeconds / 60))} min` : '',
+    }))
+    return { id: mo.id, number: info.number, title: info.title, done: info.done, total: info.total, state: info.state, opensOn: info.opensOn, next, more: Math.max(0, mo.lessons.length - next.length) }
+  })
+}
 
 /**
- * Home, for a learner whose batch is running. It answers four questions, in this order:
- *   1. What do I do now?         -> "Continue where you left off" (the one filled button; "Join" takes over while a class is open)
- *   2. When is my next class?    -> the next live class
- *   3. How am I doing?           -> progress against the batch, then the four months
- *   4. What else is due?         -> this week's list
- * Everything else lives on its own page (Lessons, Live classes, Notes), one tap away in the sidebar.
+ * Home, for a learner whose batch is running. It answers three questions, in this order, and nothing else:
+ *   1. What do I do now?        -> the Continue card (the one filled button; "Join" takes over while a class is open)
+ *   2. When is my next class?   -> the next live class
+ *   3. Where am I in the course? -> the climb: four months, the one I am in open, what is next in it
+ * Everything else (every lesson, class recordings, notes) is one tap away in the menu.
  */
-export function EnrolledHome({ d, lead, first, joined, others }: { d: Enrolled; lead: MyEnrollment; first: string; joined: boolean; others: MyEnrollment[] }) {
+export function EnrolledHome({ d, lead, first, joined, others, goal }: { d: Enrolled; lead: MyEnrollment; first: string; joined: boolean; others: MyEnrollment[]; goal?: string }) {
   const { resume, upcoming, months } = d
   const base = `/learn/${lead.course.slug}`
   const finished = lead.status === 'completed'
   const started = lead.lessonsCompleted > 0 || (resume?.pct ?? 0) > 0
   const next = upcoming[0]
   const classOn = next ? isOpenNow(next, d.now) : false
-  const month = months[d.currentMonth]
   const pct = Math.round(lead.progressPct)
   const behind = d.released === null ? null : d.released - lead.lessonsCompleted
-  const batchAt = d.released === null || !lead.lessonsTotal ? null : Math.min(100, (d.released / lead.lessonsTotal) * 100)
-  const doneInWeek = d.week.items.filter((i) => i.state === 'done').length
   const minutesLeft = resume?.durationSeconds && resume.pct > 0 ? Math.max(1, Math.round((resume.durationSeconds * (1 - resume.pct / 100)) / 60)) : null
   const resumeIcon: IconName = resume ? (resume.type === 'video' || resume.type === 'live' ? 'play' : ICON[resume.type] ?? 'doc') : 'play'
+  const resumeMonth = resume ? d.m.months.findIndex((mo) => mo.lessons.some((l) => l.id === resume.id)) : -1
 
   return (
     <>
       <header className="lx-head">
         <div>
-          <h1 className="lx-h1">{joined ? 'Welcome' : 'Hi'}, {first}</h1>
-          <p className="lx-lede">{[d.batch?.name ?? lead.course.title, month ? `Month ${d.currentMonth + 1} of ${months.length}` : null].filter(Boolean).join(' · ')}</p>
+          <h1 className="lx-h1">{joined ? 'Welcome' : greeting(d.now)}, {first}</h1>
+          <p className="lx-lede">{[d.batch?.name ?? lead.course.title, months.length ? `Month ${d.currentMonth + 1} of ${months.length}` : null].filter(Boolean).join(' · ')}</p>
         </div>
       </header>
 
@@ -49,20 +67,20 @@ export function EnrolledHome({ d, lead, first, joined, others }: { d: Enrolled; 
 
       <div className="lx-two">
         {resume ? (
-          <section className="lx-card lx-resume" aria-labelledby="resume-h">
-            <div>
-              <p className="lx-k" id="resume-h">{finished ? 'Review' : started ? 'Continue where you left off' : 'Start here'}</p>
-              <div className="lx-resume-body">
-                <span className="lx-ico"><Icon name={resumeIcon} className={resumeIcon === 'play' ? 'fill' : undefined} /></span>
-                <div className="min-w-0">
-                  <h2>{resume.title}</h2>
-                  <p className="lx-meta">{[KIND[resume.type] ?? 'Lesson', minutesLeft ? `${minutesLeft} min left` : resume.durationSeconds ? `${Math.max(1, Math.round(resume.durationSeconds / 60))} min` : null].filter(Boolean).join(' · ')}</p>
-                </div>
-              </div>
+          <section className="lx-cont" aria-labelledby="resume-h">
+            <div className={`lx-cont-pic${resume.type === 'video' || resume.type === 'live' ? ' play' : ''}`} aria-hidden="true">
+              <span className="m">{resumeMonth >= 0 ? `Month ${resumeMonth + 1}` : 'Lesson'}</span>
+              <span className="b"><Icon name={resumeIcon} className={resumeIcon === 'play' ? 'fill' : undefined} /></span>
+              {resume.pct > 0 && !resume.done && <span className="w"><i style={{ width: `${resume.pct}%` }} /></span>}
             </div>
-            <div className="grid gap-4">
-              {resume.pct > 0 && !resume.done && (
-                <div className="lx-pct"><div className="lx-bar" role="progressbar" aria-valuenow={resume.pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${resume.title} progress`}><i style={{ width: `${resume.pct}%` }} /></div><span aria-hidden="true">{resume.pct}% watched</span></div>
+            <div className="lx-cont-body">
+              <p className="lx-k" id="resume-h">{finished ? 'Review' : started ? 'Continue where you left off' : 'Start here'}</p>
+              <h2>{resume.title}</h2>
+              <p className="lx-meta">{[KIND[resume.type] ?? 'Lesson', minutesLeft ? `${minutesLeft} min left` : resume.durationSeconds ? `${Math.max(1, Math.round(resume.durationSeconds / 60))} min` : null].filter(Boolean).join(' · ')}</p>
+              {behind !== null && !finished && (
+                <p className="lx-pacechip">
+                  {behind <= 2 ? <><Icon name="check" className="lx-i" />You are on track with your batch.</> : <><Icon name="info" className="lx-i" />You are {behind} lessons behind your batch. This one helps you catch up.</>}
+                </p>
               )}
               <Link href={`${base}/${resume.id}`} className={`${classOn ? buttonOutline : buttonLg} max-[720px]:w-full`}>{finished ? 'Review from the start' : started ? 'Resume lesson' : 'Start learning'}<Icon name="chev" className="lx-i" /></Link>
             </div>
@@ -78,55 +96,15 @@ export function EnrolledHome({ d, lead, first, joined, others }: { d: Enrolled; 
         )}
       </div>
 
-      <div className="lx-two">
-        <section className="lx-card" aria-labelledby="prog-h">
-          <h2 className="sr-only" id="prog-h">Your progress</h2>
-          <div className="lx-prog-top"><span className="lx-big">{pct}<small>%</small></span><p><b>of {courseAbbr(lead.course.title)} done</b>{lead.lessonsCompleted} of {lead.lessonsTotal} lessons</p></div>
-          <div className={batchAt === null ? 'mt-5' : 'lx-pace'}>
-            <div className="lx-bar" style={{ height: 10, borderRadius: 5 }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={batchAt === null ? 'Course progress' : `You have done ${lead.lessonsCompleted} lessons; ${d.released} are open to your batch`}><i style={{ width: `${pct}%` }} /></div>
-            {batchAt !== null && <span className="mk" style={{ left: `${batchAt}%`, '--shift': batchAt > 85 ? '-100%' : batchAt < 15 ? '0%' : '-50%' } as CSSProperties} aria-hidden="true"><span>Batch: lesson {d.released}</span></span>}
+      {months.length > 0 && (
+        <section className="lx-sec" aria-labelledby="climb-h">
+          <div className="lx-sec-h">
+            <h2 className="lx-h2" id="climb-h">Your {months.length} months</h2>
+            <span className="lx-meta"><b>{pct}%</b> of {courseAbbr(lead.course.title)} done · {lead.lessonsCompleted} of {lead.lessonsTotal} lessons</span>
           </div>
-          {behind !== null && (
-            <p className="lx-pacenote">{behind <= 2 ? <b>You are on track with your batch.</b> : <><b>{behind} lessons behind the batch.</b>{resume ? ` Finish “${resume.title}” next to catch up.` : ''}</>}</p>
-          )}
-          {d.stats.length > 0 && (
-            <dl className="lx-stats" style={{ '--n': Math.min(d.stats.length, 4) } as CSSProperties}>
-              {d.stats.map((s) => <div key={s.label}><dt>{s.label}</dt><dd>{s.value}</dd></div>)}
-            </dl>
-          )}
-          {months.length > 0 && (
-            <ol className="lx-months" aria-label="Progress by month">
-              {months.map((mo, i) => (
-                <li key={mo.id} className={mo.state === 'now' ? 'now' : undefined}>
-                  <Link href={`${base}/material?month=${mo.id}`}>
-                    <span className="n">{mo.number}</span>
-                    <span className="min-w-0"><span className="t">{mo.title}</span><span className="lx-bar thin" style={{ display: 'block' }} aria-hidden="true"><i style={{ width: `${mo.total ? (mo.done / mo.total) * 100 : 0}%` }} /></span></span>
-                    <span className="c">{mo.state === 'locked' ? (mo.opensOn ? `Opens ${mo.opensOn}` : 'Locked') : `${mo.done} of ${mo.total}`}<span className="sr-only">, month {i + 1}</span></span>
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          )}
+          <MonthClimb months={climbMonths(d)} slug={lead.course.slug} goal={goal} label="Months of the program" />
         </section>
-
-        {d.week.items.length > 0 && (
-          <section className="lx-card" aria-labelledby="week-h">
-            <div className="lx-sec-h" style={{ paddingBottom: 12 }}>
-              <h2 className="lx-h2" id="week-h">{d.week.title}</h2>
-              <span className="lx-meta">{doneInWeek > 0 ? `${doneInWeek} of ${d.week.items.length} done` : d.week.range}</span>
-            </div>
-            <ul className="lx-todo">
-              {d.week.items.map((i) => (
-                <li key={i.key} className={i.state === 'done' ? 'dn' : undefined}>
-                  <span className={`lx-st${i.state === 'done' ? ' ok' : i.state === 'half' ? ' half' : ''}`}>{i.state === 'done' && <Icon name="check" />}<span className="sr-only">{i.state === 'done' ? 'Done' : i.state === 'half' ? 'Started' : 'To do'}</span></span>
-                  <span><b>{i.title}</b><span className="d">{i.detail}</span></span>
-                  {i.href ? <Link href={i.href} className="lx-link" aria-label={`${i.action}: ${i.title}`}>{i.action}</Link> : <span />}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-      </div>
+      )}
 
       {others.length > 0 && (
         <section className="lx-sec" aria-labelledby="other-h">

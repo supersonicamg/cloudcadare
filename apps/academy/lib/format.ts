@@ -30,7 +30,9 @@ export const count = (n: number) => new Intl.NumberFormat('en-IN').format(n)
 export const nowMs = () => Date.now()
 
 /** "CloudCadre Elite Architect Program" -> "CEAP". A short name for a tag or a button; the full title when it is already short. */
-export function courseAbbr(title: string) {
+export function courseAbbr(full: string) {
+  // A note in brackets after the name ("Cloud Foundations (batch 2)") is not part of the short name.
+  const title = full.replace(/\s*[(\[].*$/, '').trim() || full
   if (title.length <= 14) return title
   const a = title.split(/\s+/).map((w) => w[0]?.toUpperCase() ?? '').join('')
   return a.length >= 2 && a.length <= 6 ? a : title

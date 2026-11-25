@@ -22,7 +22,7 @@ export function LessonList({ slug, sections, currentId }: { slug: string; sectio
         return (
           <details key={s.id} open={i === (open >= 0 ? open : 0)}>
             <summary>
-              <span className="n">{s.label ?? String(i + 1).padStart(2, '0')}</span>
+              <span className="n">{String(i + 1).padStart(2, '0')}</span>
               <span className="t">{s.title}</span>
               <span className="c">{done} of {all.length}</span>
             </summary>

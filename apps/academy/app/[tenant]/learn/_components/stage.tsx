@@ -10,7 +10,12 @@ import { deleteNote, saveNote } from '../notes-actions'
  * client parts talk to each other while the page itself stays a server component.
  */
 
-export interface PlayerHandle { time(): number; duration(): number; seek(seconds: number): void; pause(): void }
+export interface PlayerHandle {
+  time(): number; duration(): number; seek(seconds: number): void; pause(): void
+  /** Jump forward (positive) or back (negative) by some seconds. */
+  skip(delta: number): void
+  setRate(rate: number): void
+}
 export type NoteMode = 'time' | 'page' | 'none'
 
 interface Stage {
@@ -24,10 +29,24 @@ interface Stage {
   register(h: PlayerHandle | null): void
   /** Where the player is now, in seconds (0 when there is no player). Call it from handlers, not while rendering. */
   time(): number
+  /** The page the PDF reader is showing (it follows the scroll). */
   page: number
-  /** Changing `jump` makes the PDF frame reload at that page, even when the page number did not change. */
+  pageCount: number
+  setPageCount(n: number): void
+  /** Changing `jumpTick` makes the PDF reader scroll to `page`, even when the page number did not change. */
   jumpTick: number
   setPage(n: number): void
+  /** Asks the reader to scroll to a page. */
+  goTo(n: number): void
+  /** The panel beside the lesson is a sheet on a phone: which tab it is showing, or null when closed. */
+  sheet: 'list' | 'notes' | null
+  setSheet(v: 'list' | 'notes' | null): void
+  /** Moves the cursor to the note box (and pauses the video). */
+  focusNote(): void
+  /** Player controls for the toolbar under the video. */
+  skip(delta: number): void
+  setRate(rate: number): void
+  seekTo(seconds: number): void
   /** The note box registers itself so that the N key can focus it. */
   setBox(el: HTMLTextAreaElement | null): void
   add(kind: NoteKind, body: string, at: { seconds: number | null; page: number | null }): Promise<string | null>
@@ -57,7 +76,9 @@ export function StageProvider({ lessonId, mode, enabled, initialNotes, startPage
   const [notes, setNotes] = useState<Note[]>(initialNotes)
   const [duration, setDuration] = useState(0)
   const [page, setPageState] = useState(startPage)
-  const [jumpTick, setJumpTick] = useState(0)
+  const [pageCount, setPageCount] = useState(0)
+  const [sheet, setSheet] = useState<'list' | 'notes' | null>(null)
+  const [jumpTick, setJumpTick] = useState(startPage > 1 ? 1 : 0)
   const [undo, setUndo] = useState<Note | null>(null)
   const player = useRef<PlayerHandle | null>(null)
   const boxRef = useRef<HTMLTextAreaElement | null>(null)
@@ -106,10 +127,22 @@ export function StageProvider({ lessonId, mode, enabled, initialNotes, startPage
     setUndo(null)
   }, [])
 
+  const goTo = useCallback((n: number) => { setPage(n); setJumpTick((t) => t + 1) }, [setPage])
+
   const jump = useCallback((n: Note) => {
     if (n.positionSeconds !== null) { player.current?.seek(n.positionSeconds); return }
-    if (n.pageNo !== null) { setPage(n.pageNo); setJumpTick((t) => t + 1) }
-  }, [setPage])
+    if (n.pageNo !== null) goTo(n.pageNo)
+  }, [goTo])
+
+  const skip = useCallback((d: number) => player.current?.skip(d), [])
+  const setRate = useCallback((r: number) => player.current?.setRate(r), [])
+  const seekTo = useCallback((sec: number) => player.current?.seek(sec), [])
+
+  const focusNote = useCallback(() => {
+    player.current?.pause()
+    setSheet(null)
+    boxRef.current?.focus()
+  }, [])
 
   // Leaving the page makes a waiting delete final instead of losing the click.
   useEffect(() => () => { if (pending.current) void deleteNote(pending.current.id) }, [])
@@ -122,16 +155,23 @@ export function StageProvider({ lessonId, mode, enabled, initialNotes, startPage
       const t = e.target as HTMLElement | null
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return
       e.preventDefault()
-      player.current?.pause()
-      boxRef.current?.focus()
+      focusNote()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [enabled, mode])
+  }, [enabled, mode, focusNote])
+
+  // Escape closes the sheet on a phone.
+  useEffect(() => {
+    if (!sheet) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSheet(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [sheet])
 
   const value = useMemo<Stage>(() => ({
-    mode, enabled, lessonId, notes, duration, setDuration, register, time, page, jumpTick, setPage, setBox, add, remove, undo, undoRemove, jump,
-  }), [mode, enabled, lessonId, notes, duration, register, time, page, jumpTick, setPage, setBox, add, remove, undo, undoRemove, jump])
+    mode, enabled, lessonId, notes, duration, setDuration, register, time, page, pageCount, setPageCount, jumpTick, setPage, goTo, sheet, setSheet, focusNote, skip, setRate, seekTo, setBox, add, remove, undo, undoRemove, jump,
+  }), [mode, enabled, lessonId, notes, duration, register, time, page, pageCount, jumpTick, setPage, goTo, sheet, focusNote, skip, setRate, seekTo, setBox, add, remove, undo, undoRemove, jump])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

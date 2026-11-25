@@ -69,6 +69,17 @@ const PATHS = {
   home: <path d="M4 11.5L12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" />,
   chev: <path d="M9.5 6l6 6-6 6" />,
   book: <><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17H7.5A2.5 2.5 0 0 0 5 21.5z" /><path d="M5 19.5V4.5" /></>,
+  list: <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />,
+  close: <path d="M6 6l12 12M18 6L6 18" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
+  back10: <><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5M4.5 4.5V8H8" /><path d="M10 9.8v5M13.8 9.8h-1.6a.8.8 0 0 0-.8.8v2.8a.8.8 0 0 0 .8.8h1.6a.8.8 0 0 0 .8-.8v-2.8a.8.8 0 0 0-.8-.8z" /></>,
+  fwd10: <><path d="M19.5 12a7.5 7.5 0 1 1-2.4-5.5M19.5 4.5V8H16" /><path d="M10 9.8v5M13.8 9.8h-1.6a.8.8 0 0 0-.8.8v2.8a.8.8 0 0 0 .8.8h1.6a.8.8 0 0 0 .8-.8v-2.8a.8.8 0 0 0-.8-.8z" /></>,
+  expand: <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />,
+  arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+  pause: <path d="M8 5v14M16 5v14" />,
+  pen: <path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z M14 7l3 3" />,
+  trophy: <><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5a3.5 3.5 0 0 0 3.8 4M16 6h3.5a3.5 3.5 0 0 1-3.8 4M12 13v4M8.5 20h7M10 17h4" /></>,
 } as const
 export type IconName = keyof typeof PATHS
 

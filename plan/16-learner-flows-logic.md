@@ -1,7 +1,7 @@
 # 16 · Learner flows: logic and rules (join, learn, account, UPI, whitelist)
 
 > **Status:** design approved for **review only** (2026-11-25). Nothing here is built. The owner reviews the mockups first, then says "build".
-> **Mockups:** [`plan/mockups/flows/flows-index.html`](mockups/flows/flows-index.html) (24 screens). Every screen has a yellow **Logic notes** bar (toolbar toggle) that repeats the rules for that screen. This file is the full version and wins if they ever differ.
+> **Mockups:** [`plan/mockups-learner-flows/flows-index.html`](mockups-learner-flows/flows-index.html) (24 screens). Every screen has a yellow **Logic notes** bar (toolbar toggle) that repeats the rules for that screen. This file is the full version and wins if they ever differ.
 > **Design rules:** [15-design-and-ux-guide.md](15-design-and-ux-guide.md) and `plan/mockups/homepage-v9.html`. Visual decisions there are final.
 > **Who reads this:** whoever builds these screens. Read §1 (what the owner asked), §3 (data), §4–§5 (the two risky flows), §10 (open questions), then the screen table in §2.
 

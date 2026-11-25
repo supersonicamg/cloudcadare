@@ -2948,6 +2948,9 @@ isOneToOne: false
 "claim_my_list_access":
 { Args: { "p_tenant_id": string }; Returns: string
                            },
+"email_code_required":
+{ Args: { "p_tenant_id": string }; Returns: boolean
+                           },
 "my_list_match":
 { Args: { "p_tenant_id": string }; Returns: Json
                            },

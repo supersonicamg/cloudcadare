@@ -6,6 +6,7 @@ import { isEnabled } from '@educore/features'
 import { FAKE_KEYS, hmacHex } from '@educore/integrations/payments'
 import { Icon, Logo, platformFor } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
+import { emailCodeRequired } from '@/lib/email-code'
 import { money } from '@/lib/money'
 import { getShell } from '@/lib/shell'
 import { buttonLg, h1s, lead } from '@/lib/ui'
@@ -30,7 +31,7 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   const { orderId } = await params
   if (!z.uuid().safeParse(orderId).success) notFound()
   const a = await requireMember(`/checkout/${orderId}`)
-  const [{ theme, brand, site }, order, items, gwPay, payments, proof, settings, { data: me }] = await Promise.all([
+  const [{ theme, brand, site }, order, items, gwPay, payments, proof, settings, { data: me }, codeRequired] = await Promise.all([
     getShell(),
     a.db.from('orders').select('id, order_no, status, total_minor, tax_minor, discount_minor, coupon_id, currency').eq('id', orderId).eq('member_id', a.memberId).maybeSingle(),
     a.db.from('order_items').select('title_snapshot').eq('order_id', orderId),
@@ -39,13 +40,14 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
     a.db.from('payment_proofs').select('state').eq('order_id', orderId).eq('state', 'pending_review').maybeSingle(),
     a.db.from('tenant_settings').select('commerce').eq('tenant_id', a.bundle.tenant.id).maybeSingle(),
     a.db.from('tenant_members').select('email_verified_at').eq('id', a.memberId).single(),
+    emailCodeRequired(a.db, a.bundle.tenant.id),
   ])
   if (!order.data) notFound()
   const o = order.data
   if (o.status === 'paid') redirect(`/checkout/${orderId}/done`)
   if (proof.data) redirect(`/checkout/${orderId}/pending`)
   // Nothing is sold to an address nobody has proven (the same rule the database applies to "I have paid").
-  if (!me?.email_verified_at) redirect(`/signup/confirm?next=${encodeURIComponent(`/checkout/${orderId}`)}`)
+  if (codeRequired && !me?.email_verified_at) redirect(`/signup/confirm?next=${encodeURIComponent(`/checkout/${orderId}`)}`)
 
   const title = items.data?.map((i) => i.title_snapshot).join(', ') ?? 'Your order'
   const paid = (payments.data ?? []).filter((p) => p.status === 'captured').reduce((s, p) => s + p.amount_minor, 0)

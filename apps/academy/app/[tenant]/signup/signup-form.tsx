@@ -12,7 +12,7 @@ export function SignUpForm({ next, context }: { next: string; context?: LoginCon
       {context && <CourseContext context={context} intro="Create an account to continue with" />}
       <div>
         <h1 className={heading}>Create your account</h1>
-        <p className={lead}>Use an email you can open now. We send a code to confirm it.</p>
+        <p className={lead}>Use your own email. You will log in with it.</p>
       </div>
       <input type="hidden" name="next" value={next} />
       <Field state={state} name="name" label="Full name" autoComplete="name" maxLength={80}

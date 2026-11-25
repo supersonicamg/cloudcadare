@@ -24,6 +24,8 @@ begin
   -- remember the academy's settings, then switch UPI on for the test
   select commerce into saved from public.tenant_settings where tenant_id = t;
   update public.tenant_settings set commerce = coalesce(commerce, '{}'::jsonb) || '{"upi":{"enabled":true,"vpa":"test@okaxis","payee_name":"Test"}}'::jsonb where tenant_id = t;
+  -- the email code is required for this test, whatever the academy has switched on today (migration 36)
+  update public.tenant_settings set learning = learning - 'email_code' where tenant_id = t;
 
   -- the buyer presses "I have paid": one payment (balance) and one open proof; pressing again changes nothing
   perform set_config('request.jwt.claims', json_build_object('sub', u1, 'role', 'authenticated')::text, true);
@@ -47,6 +49,16 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', u3, 'role', 'authenticated')::text, true);
   begin perform public.submit_upi_payment(o3); raise exception 'unconfirmed email must not submit';
   exception when raise_exception then if sqlerrm <> 'email_not_confirmed' then raise; end if; raise notice 'ok: email must be confirmed first'; end;
+  -- with the switch off an unconfirmed buyer can pay, but the learner list still never matches them
+  begin
+    update public.tenant_settings set learning = learning || '{"email_code":"off"}'::jsonb where tenant_id = t;
+    if public.email_code_required(t) then raise exception 'the switch should be off'; end if;
+    perform public.submit_upi_payment(o3);
+    if public.my_list_match(t) is not null then raise exception 'an unproven email must not match the learner list'; end if;
+    if (select email_verified_at from public.tenant_members where id = m3) is not null then raise exception 'the switch must not mark the email as confirmed'; end if;
+    raise exception 'undo_switch';
+  exception when raise_exception then if sqlerrm <> 'undo_switch' then raise; end if; raise notice 'ok: code switched off lets an unconfirmed buyer pay'; end;
+  if not public.email_code_required(t) then raise exception 'the code must be required by default'; end if;
   update public.tenant_settings set commerce = commerce || '{"upi":{"enabled":false}}'::jsonb where tenant_id = t;
   update public.tenant_members set email_verified_at = now() where id = m3;
   begin perform public.submit_upi_payment(o3); raise exception 'UPI off must refuse';

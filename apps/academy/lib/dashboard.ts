@@ -1,6 +1,7 @@
 import 'server-only'
 import { cachedCourse, cachedCourses } from '@/lib/catalog'
 import type { Access } from '@/lib/dal'
+import { emailCodeRequired } from '@/lib/email-code'
 import { dateShort, nowMs, timeShort } from '@/lib/format'
 import type { MyEnrollment } from '@/lib/learn'
 import { getClassSessions, heldClasses, upcomingClasses, weekday, type ClassSession } from '@/lib/live'
@@ -170,11 +171,12 @@ export interface ListMatch { email: string; courseSlug: string; courseTitle: str
 export async function getJoinState(a: Access) {
   const now = nowMs()
   const tenantId = a.bundle.tenant.id
-  const [member, match, orderRow, courses] = await Promise.all([
+  const [member, match, orderRow, courses, codeRequired] = await Promise.all([
     a.db.from('tenant_members').select('email, email_verified_at').eq('id', a.memberId).maybeSingle(),
     a.db.rpc('my_list_match', { p_tenant_id: tenantId }),
     a.db.from('orders').select('id, status, order_no, total_minor, currency, placed_at').eq('member_id', a.memberId).in('status', ['awaiting_payment', 'partially_paid']).order('placed_at', { ascending: false }).limit(1).maybeSingle(),
     cachedCourses(tenantId),
+    emailCodeRequired(a.db, tenantId),
   ])
   // A project that has not had migration 34 yet answers with an error: then there is simply no match to show.
   if (match.error) console.error('my_list_match failed:', match.error.message)
@@ -211,7 +213,7 @@ export async function getJoinState(a: Access) {
 
   return {
     now, listed, course, courseCount: courses.length, next, runningBatch, order, proof,
-    email: member.data?.email ?? null, verified: Boolean(member.data?.email_verified_at),
+    email: member.data?.email ?? null, verified: Boolean(member.data?.email_verified_at), codeRequired,
     daysToNext: next?.startDate ? Math.ceil((istDate(next.startDate).getTime() - now) / DAY) : null,
   }
 }

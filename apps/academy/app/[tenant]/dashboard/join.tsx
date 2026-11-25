@@ -170,7 +170,8 @@ function Join(p: JoinProps) {
             <p className="ld-meta">{unpaid || rejected ? `Order ${s.order!.order_no} · ${money(s.order!.total_minor, s.order!.currency)}`
               : batch?.startDate ? `${s.runningBatch ? 'The current batch is running. ' : ''}The next one starts on ${dateShort(istDate(batch.startDate))}.` : 'Next batch dates are coming soon.'}</p>
           </div>
-          {!s.verified && <p className="ld-note"><Icon name="info" className="mt-0.5 h-5 w-5 shrink-0" /><span><b>Already one of our students?</b> <Link href="/signup/confirm?next=%2Fdashboard">Confirm your email</Link> so we can check the learner list.</span></p>}
+          {!s.verified && s.codeRequired && <p className="ld-note"><Icon name="info" className="mt-0.5 h-5 w-5 shrink-0" /><span><b>Already one of our students?</b> <Link href="/signup/confirm?next=%2Fdashboard">Confirm your email</Link> so we can check the learner list.</span></p>}
+          {!s.verified && !s.codeRequired && p.whatsapp && <p className="ld-note"><Icon name="info" className="mt-0.5 h-5 w-5 shrink-0" /><span><b>Already one of our students?</b> <a href={`${p.whatsapp}?text=${encodeURIComponent(`I am already a student. Please add my course to ${s.email}.`)}`} target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a> and we will add your course.</span></p>}
           {(unpaid || rejected) && (
             <div><Link href={rejected ? `/checkout/${s.order!.id}/pending` : `/checkout/${s.order!.id}`} className={`${buttonLg} max-[820px]:w-full`}>{rejected ? 'Fix the payment' : 'Pay now'} <Arrow /></Link></div>
           )}

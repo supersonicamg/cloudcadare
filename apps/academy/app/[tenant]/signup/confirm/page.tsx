@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { safeNext } from '@educore/core/accounts'
 import { requireMember } from '@/lib/dal'
+import { emailCodeRequired } from '@/lib/email-code'
 import { getShell } from '@/lib/shell'
 import { h1s, lead } from '@/lib/ui'
 import { ConfirmForm } from './confirm-form'
@@ -20,7 +21,7 @@ async function Body({ searchParams }: { searchParams: PageProps<'/[tenant]/signu
   const next = safeNext((await searchParams).next)
   const a = await requireMember(`/signup/confirm?next=${encodeURIComponent(next)}`)
   const { data: m } = await a.db.from('tenant_members').select('email, email_verified_at').eq('id', a.memberId).single()
-  if (m?.email_verified_at) redirect(next === '/' ? '/dashboard' : next)
+  if (m?.email_verified_at || !(await emailCodeRequired(a.db, a.bundle.tenant.id))) redirect(next === '/' ? '/dashboard' : next)
   const email = m?.email ?? ''
   return (
     <div className="flex flex-col gap-[22px]">

@@ -6,6 +6,7 @@ import { describeAuthError, parseLogin, parseSignUp, safeNext, type AccountError
 import { sendEmailCode } from '@educore/core/accounts/privileged'
 import { domainMapFromEnv, resolveHost } from '@educore/tenancy'
 import { loadTenantBundle } from '@educore/tenancy/privileged/load-tenant'
+import { emailCodeRequired } from '@/lib/email-code'
 
 // Server actions cannot read root params, so the tenant comes from the Host header via the same
 // resolver proxy.ts uses. The client never tells us which academy it is signing in to.
@@ -65,6 +66,7 @@ async function destination({ db, tenantId }: Connection, tenant: { planeId: stri
   // the dashboard shows it with "Join my batch now" (plan/16 §12).
   const home = next === '/' ? '/dashboard' : next
   if (roles.data?.length || m.data?.email_verified_at || enrolled.data?.length) return home
+  if (!(await emailCodeRequired(db, tenantId))) return home
   await sendEmailCode({ memberId, tenantId, planeId: tenant.planeId }).catch((e) => console.error('email code failed:', e))
   return confirmPath(next)
 }
@@ -85,9 +87,11 @@ export async function signUp(_prev: AuthState, form: FormData): Promise<AuthStat
   }
   const joined = await join(c, name)
   if ('error' in joined) return joined
+  const next = safeNext(form.get('next'))
+  if (!(await emailCodeRequired(c.db, c.tenantId))) return { done: next === '/' ? '/dashboard' : next }
   // Nothing is granted until the email is confirmed (plan/16 §4.1): the code goes out now, whoever the address belongs to.
   await sendEmailCode({ memberId: joined.memberId, tenantId: c.tenantId, planeId: c.planeId }).catch((e) => console.error('email code failed:', e))
-  return { done: confirmPath(safeNext(form.get('next'))) }
+  return { done: confirmPath(next) }
 }
 
 export async function signIn(_prev: AuthState, form: FormData): Promise<AuthState> {

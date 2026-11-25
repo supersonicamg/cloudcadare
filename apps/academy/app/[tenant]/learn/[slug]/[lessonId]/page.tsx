@@ -7,6 +7,7 @@ import { isEnabled } from '@educore/features'
 import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { getLearnCourse, getLessonContent, getLessonProgress } from '@/lib/learn'
+import { getLessonNotes } from '@/lib/notes'
 import { getShell } from '@/lib/shell'
 import type { LearnSection } from '@/lib/learn'
 import { buttonLg, buttonLine } from '@/lib/ui'
@@ -15,12 +16,15 @@ import { QuizOverview, type QuizOverviewData } from '../../_components/quiz-over
 import { LessonCompletion } from '../../_components/lesson-completion'
 import { Prose } from '../../_components/prose'
 import { VideoPlayer } from '../../_components/video-player'
+import { SidePanel } from '../../_components/notes-panel'
+import { StageProvider, type NoteMode } from '../../_components/stage'
+import { ImageFrame, PdfFrame, ScrubMarks } from '../../_components/stage-parts'
 
 export const metadata: Metadata = { title: 'Lesson' }
 
 export default async function LessonPage({ params, searchParams }: PageProps<'/[tenant]/learn/[slug]/[lessonId]'>) {
   const { slug, lessonId } = await params
-  const { quiz: quizNotice } = await searchParams
+  const { quiz: quizNotice, t: tParam, page: pageParam } = await searchParams
   if (!z.uuid().safeParse(lessonId).success) notFound()
   const a = await requireMember(`/learn/${slug}/${lessonId}`)
   const [{ theme, brand }, lesson, course] = await Promise.all([getShell(), getLessonContent(a, lessonId), getLearnCourse(a, slug)])
@@ -37,6 +41,10 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   }
 
   const tracked = Boolean(course)
+  // ?t=1634 opens a recording at that second, ?page=3 opens a PDF at that page (links from My notes).
+  const num = (v: string | string[] | undefined) => { const n = Number.parseInt(typeof v === 'string' ? v : '', 10); return Number.isFinite(n) && n >= 0 ? n : null }
+  const deepT = num(tParam)
+  const deepPage = num(pageParam)
   const progress = course ? await getLessonProgress(a, course.enrollment.id, lesson.id) : { completed: false, positionSeconds: 0 }
   const idx = course ? course.order.findIndex((l) => l.id === lesson.id) : -1
   const prev = course && idx > 0 ? course.order[idx - 1] : undefined
@@ -49,11 +57,17 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   const quizOn = lesson.type === 'quiz' && isEnabled(a.bundle.features, 'assess.quizzes') && Boolean(course) && !lock
   const overview = quizOn && lesson.testId ? await a.db.rpc('get_test_overview', { p_test_id: lesson.testId }) : null
 
+  const isVideo = lesson.type === 'video' || lesson.type === 'live'
+  const imageOn = lesson.type === 'image'
+  const notesFeature = isEnabled(a.bundle.features, 'learning.notes')
+  const mode: NoteMode = isVideo ? 'time' : lesson.type === 'pdf' ? 'page' : 'none'
+  const notesOn = notesFeature && tracked && !lock && lesson.type !== 'quiz'
+  const notes = notesOn ? await getLessonNotes(a, lesson.id) : []
   const videoOn = isEnabled(a.bundle.features, 'content.video')
   const fileType = isFileLessonType(lesson.type)
   const fileOn = isEnabled(a.bundle.features, lesson.type === 'pdf' ? 'content.documents' : 'content.downloads')
   const file = !lock && fileType && fileOn && lesson.mediaAssetId ? await describeFile(a.bundle.tenant.id, lesson.mediaAssetId) : null
-  const playback = !lock && lesson.type === 'video' && videoOn && lesson.mediaAssetId
+  const playback = !lock && isVideo && videoOn && lesson.mediaAssetId
     ? await resolvePlayback(a.bundle.tenant.id, lesson.mediaAssetId)
     : null
 
@@ -67,16 +81,17 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
     return null
   }
   const section = course ? sectionOf(course.sections, lesson.id) : null
-  const KIND: Record<string, string> = { video: 'Video', article: 'Reading', external_link: 'Link', pdf: 'PDF', download: 'Download', quiz: 'Quiz' }
+  const KIND: Record<string, string> = { video: 'Video', article: 'Reading', external_link: 'Link', pdf: 'PDF', download: 'Download', quiz: 'Quiz', live: 'Live class recording', image: 'Image' }
   const kind = [KIND[lesson.type] ?? lesson.type, lesson.durationSeconds ? `${Math.max(1, Math.round(lesson.durationSeconds / 60))} min` : null].filter(Boolean).join(' · ')
   const e = course?.enrollment
 
   return (
     <theme.FocusLayout brand={brand}>
+      <StageProvider lessonId={lesson.id} mode={mode} enabled={notesOn} initialNotes={notes} startPage={deepPage ?? 1}>
       <div className="flex min-h-screen flex-col">
         <div className="flex h-16 items-center gap-4 border-b border-border bg-white px-[clamp(16px,2.4vw,32px)]">
-          <Link href={course ? `/learn/${slug}` : `/courses/${slug}`} className="inline-flex items-center gap-2 text-base font-semibold text-primary">
-            <Icon name="back" /><span className="max-sm:hidden">Course</span>
+          <Link href={course ? `/learn/${slug}/${lesson.type === 'live' ? 'live' : 'material'}` : `/courses/${slug}`} className="inline-flex items-center gap-2 text-base font-semibold text-primary">
+            <Icon name="back" /><span className="max-sm:hidden">{lesson.type === 'live' ? 'Live classes' : 'Course material'}</span>
           </Link>
           <div className="min-w-0 flex-1 truncate text-base font-semibold">
             {section && <small className="block truncate text-[13px] font-medium text-mute">{section}</small>}
@@ -104,15 +119,16 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
                     : <>Finish {blocker ? <Link href={`/learn/${slug}/${blocker.id}`} className="font-semibold text-primary underline">{blocker.title}</Link> : 'the earlier lessons'} first. This course is taken in order.</>}
                 </Notice>
               ) : <>
-              {lesson.type === 'video' && (
+              {isVideo && (
                 !videoOn ? <Notice>Video lessons are not enabled for this academy.</Notice>
                 : playback && playback.kind !== 'unavailable'
-                  ? <VideoPlayer playback={playback} lessonId={lesson.id} startAt={progress.completed ? 0 : progress.positionSeconds} completed={progress.completed} title={lesson.title} />
+                  ? <VideoPlayer playback={playback} lessonId={lesson.id} startAt={deepT ?? (progress.completed ? 0 : progress.positionSeconds)} completed={progress.completed} title={lesson.title} />
                   : <Notice>{playback?.kind === 'unavailable' && playback.reason === 'not_configured'
                       ? 'This video needs signed playback, which is not configured yet. Tell your instructor.'
                       : 'The video for this lesson is not ready yet. Check back soon.'}</Notice>
               )}
               </>}
+              {isVideo && !lock && <ScrubMarks fallbackSeconds={lesson.durationSeconds} />}
             </div>
 
             <div className="mt-7 flex flex-wrap items-start justify-between gap-x-7 gap-y-4">
@@ -137,7 +153,7 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
                 : !file ? <Notice>The file for this lesson is not ready yet. Check back soon.</Notice>
                 : lesson.type === 'pdf' ? (
                   <div>
-                    <iframe src={`/api/lesson-file/${lesson.id}`} title={lesson.title} className="h-[75vh] w-full rounded-2xl border border-border" />
+                    <PdfFrame src={`/api/lesson-file/${lesson.id}`} title={lesson.title} />
                     <p className="mt-3 text-sm"><a href={`/api/lesson-file/${lesson.id}?download=1`} className="font-semibold text-primary underline">Download the PDF</a> <span className="text-mute">{file.sizeBytes ? `· ${humanSize(file.sizeBytes)}` : ''}</span></p>
                   </div>
                 ) : (
@@ -146,13 +162,14 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
                   </a>
                 )
               )}
+              {imageOn && (lesson.mediaAssetId ? <ImageFrame src={`/api/lesson-file/${lesson.id}`} alt={lesson.title} /> : <Notice>The picture for this lesson is not ready yet. Check back soon.</Notice>)}
               {lesson.type === 'quiz' && (
                 !isEnabled(a.bundle.features, 'assess.quizzes') ? <Notice>Quizzes are not enabled for this academy.</Notice>
                 : !course ? <Notice>Enrol to take this quiz.</Notice>
                 : overview?.data ? <QuizOverview slug={slug} lessonId={lesson.id} o={overview.data as unknown as QuizOverviewData} notice={typeof quizNotice === 'string' ? quizNotice : undefined} />
                 : <Notice>This quiz is not available right now.</Notice>
               )}
-              {!['video', 'article', 'external_link', 'pdf', 'download', 'quiz'].includes(lesson.type) && <Notice>This kind of lesson is not available yet.</Notice>}
+              {!['video', 'live', 'image', 'article', 'external_link', 'pdf', 'download', 'quiz'].includes(lesson.type) && <Notice>This kind of lesson is not available yet.</Notice>}
               </>}
             </div>
 
@@ -160,7 +177,7 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
               <nav className="mt-9 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6" aria-label="Lesson navigation">
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                   {prev && <Link href={`/learn/${slug}/${prev.id}`} className="text-base font-semibold text-grey hover:text-fg">&larr; {prev.title}</Link>}
-                  {lock ? null : lesson.type === 'article' || lesson.type === 'external_link' || fileType
+                  {lock ? null : lesson.type === 'article' || lesson.type === 'external_link' || fileType || imageOn
                     ? <LessonCompletion lessonId={lesson.id} rule={lesson.completionRule} completed={progress.completed} tracked={tracked}
                         next={next ? `/learn/${slug}/${next.id}` : null} />
                     : null}
@@ -179,12 +196,18 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
 
           {course && (
             <aside className="border-t border-border bg-white px-5 pb-10 pt-6 lg:border-l lg:border-t-0">
-              <h2 className="mx-1.5 mb-3 text-sm font-semibold text-mute">{course.enrollment.course.title}</h2>
-              <Curriculum slug={slug} sections={course.sections} currentId={lesson.id} compact />
+              <SidePanel
+                notesOn={notesOn}
+                classList={<>
+                  <h2 className="mx-1.5 mb-3 text-sm font-semibold text-mute">{course.enrollment.course.title}</h2>
+                  <Curriculum slug={slug} sections={course.sections} currentId={lesson.id} compact />
+                </>}
+              />
             </aside>
           )}
         </div>
       </div>
+      </StageProvider>
     </theme.FocusLayout>
   )
 }

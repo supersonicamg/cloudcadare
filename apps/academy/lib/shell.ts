@@ -6,6 +6,7 @@ import { brandInfo } from '@/lib/brand'
 import { platformName } from '@/lib/env'
 import { getAccess, getViewer, holds } from '@/lib/dal'
 import { auroraHome, auroraNav, auroraSite } from '@/lib/aurora-content'
+import { getLeadCourseSlug } from '@/lib/learn'
 
 const initialsOf = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('') || '?'
@@ -29,10 +30,12 @@ export async function getShell() {
 
   if (access) {
     // Signed in (plan/16 §7): the learner's own links in the bar, everything about the person in the account menu.
+    // Course material and Live classes belong to a course, so they appear once the learner has one.
+    const slug = await getLeadCourseSlug(access)
     nav = [
       { label: 'My learning', href: '/learn' },
-      ...(isEnabled(f, 'engage.gamification') ? [{ label: 'My progress', href: '/progress' }] : []),
-      ...(isEnabled(f, 'learning.certificates') ? [{ label: 'Certificates', href: '/certificates' }] : []),
+      ...(slug ? [{ label: 'Course material', href: `/learn/${slug}/material` }, { label: 'Live classes', href: `/learn/${slug}/live` }] : []),
+      ...(slug && isEnabled(f, 'learning.notes') ? [{ label: 'My notes', href: '/learn/notes' }] : []),
     ]
     const name = access.memberName || viewer.fullName || viewer.email || 'You'
     account = {
@@ -45,6 +48,8 @@ export async function getShell() {
         menu: [
           { label: 'Profile', href: '/account' },
           { label: 'Subscription', href: '/account/subscription' },
+          ...(isEnabled(f, 'engage.gamification') ? [{ label: 'My progress', href: '/progress' }] : []),
+          ...(isEnabled(f, 'learning.certificates') ? [{ label: 'Certificates', href: '/certificates' }] : []),
           ...(isEnabled(f, 'commerce.checkout') ? [{ label: 'Payments and receipts', href: '/account/payments' }] : []),
           { label: 'Password and devices', href: '/account/security' },
           ...(holds(access, 'member.view') ? [{ label: 'Admin panel', href: '/admin' }] : []),

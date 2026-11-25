@@ -2957,6 +2957,9 @@ isOneToOne: false
 "cancel_stale_orders":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"join_live_session":
+{ Args: { "p_session": string }; Returns: string
+                           },
 "approve_upi_payment":
 { Args: { "p_money_seen"?: boolean,"p_proof": string,"p_whatsapp_seen"?: boolean }; Returns: Json
                            },

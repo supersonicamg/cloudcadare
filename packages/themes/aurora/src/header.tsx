@@ -93,7 +93,12 @@ export function SiteHeader({ brand, nav, account, whatsapp }: { brand: BrandInfo
 
   // Signed in: the link of the page the learner is on. Signed out: the home section on screen.
   const here = (href: string) => {
-    if (viewer) return pathname === href || (href !== '/' && pathname.startsWith(`${href}/`)) ? 'page' : undefined
+    if (viewer) {
+      // Only the most specific link is marked: "My learning" (/learn) must not light up on /learn/ceap/material too.
+      const match = (h: string) => pathname === h || (h !== '/' && pathname.startsWith(`${h}/`))
+      const best = nav.filter((n) => match(n.href)).sort((x, y) => y.href.length - x.href.length)[0]
+      return best?.href === href ? 'page' : undefined
+    }
     return current && href.endsWith(`#${current}`) ? 'true' : undefined
   }
 

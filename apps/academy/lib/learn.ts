@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import type { Access } from '@/lib/dal'
 
 // Learner reads. Everything goes through the USER-SCOPED client: RLS decides what this member may see
@@ -36,6 +37,12 @@ export async function getMyEnrollments(a: Access): Promise<MyEnrollment[]> {
     }]
   })
 }
+
+/** The course the navbar links point at: the learner's most recently used live enrolment. One cheap read, once per request. */
+export const getLeadCourseSlug = cache(async (a: Access): Promise<string | null> => {
+  const mine = await getMyEnrollments(a)
+  return (mine.find((e) => e.status === 'active') ?? mine[0])?.course.slug ?? null
+})
 
 /** Why a lesson cannot be opened yet: an earlier required lesson is unfinished, or its drip date has not come. */
 export interface LessonLock { reason: 'sequential' | 'drip'; blockingLessonId: string | null; unlocksAt: string | null }

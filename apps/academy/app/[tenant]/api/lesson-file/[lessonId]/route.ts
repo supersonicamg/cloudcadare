@@ -26,7 +26,8 @@ export async function GET(request: Request, { params }: RouteContext<'/[tenant]/
     const { data: claims } = await db.auth.getClaims()
     if (!claims?.claims) return new Response('Sign in to open this file', { status: 401, headers: noStore })
     const { data: lesson } = await db.from('lessons').select('type, media_asset_id').eq('id', lessonId).eq('is_published', true).is('deleted_at', null).maybeSingle()
-    if (lesson?.media_asset_id && isFileLessonType(lesson.type)) mediaAssetId = lesson.media_asset_id
+    // Image lessons (plan/16 B6) are served the same way as PDFs: row-level security first, then a one-minute link.
+    if (lesson?.media_asset_id && (isFileLessonType(lesson.type) || lesson.type === 'image')) mediaAssetId = lesson.media_asset_id
   }
   if (!mediaAssetId) return new Response('Not found', { status: 404, headers: noStore })
 

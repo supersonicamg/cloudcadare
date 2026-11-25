@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
-export type NavItem = { href: string; label: string }
+/** `badge` is a count shown beside the label (for example payments waiting to be checked). */
+export type NavItem = { href: string; label: string; badge?: number }
 
 const isActive = (path: string, href: string) => (href === '/admin' ? path === '/admin' : path === href || path.startsWith(`${href}/`))
 
@@ -12,23 +13,30 @@ const isActive = (path: string, href: string) => (href === '/admin' ? path === '
 export function AdminNav({ items, brand, who, role }: { items: NavItem[]; brand: string; who: string; role: string }) {
   const path = usePathname()
   const [open, setOpen] = useState(false)
-  const current = items.find((i) => isActive(path, i.href))
+  // The longest matching link wins, so /admin/payments/upi lights "UPI payments" and not also "Payments".
+  const current = items.filter((i) => isActive(path, i.href)).sort((x, y) => y.href.length - x.href.length)[0]
 
   const links = (
     <ul className="grid gap-1">
       {items.map((i) => {
-        const on = isActive(path, i.href)
+        const on = i === current
         return (
           <li key={i.href}>
             <Link
               href={i.href}
               onClick={() => setOpen(false)}
               aria-current={on ? 'page' : undefined}
-              className={`block rounded-xl border-l-4 px-3.5 py-2.5 text-[15px] font-semibold ${
+              className={`flex items-center justify-between gap-2 rounded-xl border-l-4 px-3.5 py-2.5 text-[15px] font-semibold ${
                 on ? 'border-accent bg-white/12 text-white' : 'border-transparent text-white/70 hover:bg-white/8 hover:text-white'
               }`}
             >
               {i.label}
+              {i.badge ? (
+                <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-accent px-2 py-0.5 text-[13px] font-bold tabular-nums text-fg">
+                  {i.badge > 99 ? '99+' : i.badge}
+                  <span className="sr-only"> waiting</span>
+                </span>
+              ) : null}
             </Link>
           </li>
         )

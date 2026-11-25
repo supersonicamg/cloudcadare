@@ -22,14 +22,39 @@ export async function ensureUser(email: string) {
   if (!res.ok) throw new Error(`could not prepare user ${email}: ${res.status} ${await res.text()}`)
 }
 
-/** Signs in through the real login page. */
+/** The newest unused email code for an address, read with the service key (test setup only: learners can never read this table). */
+export async function latestEmailCode(email: string): Promise<string> {
+  const { base, headers } = authAdmin()
+  for (let i = 0; i < 20; i++) {
+    const res = await fetch(`${base}/rest/v1/email_verifications?select=code&email_norm=eq.${encodeURIComponent(email.toLowerCase())}&used_at=is.null&order=created_at.desc&limit=1`, { headers })
+    const rows = (await res.json()) as { code: string }[]
+    if (rows[0]) return rows[0].code
+    await new Promise((r) => setTimeout(r, 500))
+  }
+  throw new Error(`no email code for ${email}`)
+}
+
+/** Types the emailed code on the confirm page. */
+export async function confirmEmail(page: Page, email: string) {
+  await page.getByLabel('6-digit code').fill(await latestEmailCode(email))
+  await page.getByRole('button', { name: 'Confirm email' }).click()
+}
+
+/**
+ * Signs in through the real login page. A learner whose email is not confirmed yet lands on the confirm page; this
+ * types the code from the database, exactly like a learner reading it from their inbox, and carries on to `next`.
+ */
 export async function signIn(page: Page, email: string, next = '/') {
   await ensureUser(email)
   await page.goto(`/login?next=${encodeURIComponent(next)}`)
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-  await page.getByRole('button', { name: 'Sign in' }).click()
-  await page.waitForURL((u) => u.pathname === next)
+  await page.getByRole('button', { name: 'Log in', exact: true }).click()
+  await page.waitForURL((u) => u.pathname === next || u.pathname === '/signup/confirm')
+  if (new URL(page.url()).pathname === '/signup/confirm') {
+    await confirmEmail(page, email)
+    await page.waitForURL((u) => u.pathname === next)
+  }
 }
 
 // ---------------------------------------------------------------------------- two-step (TOTP)
@@ -90,6 +115,46 @@ export async function enableMfa(page: Page, secretOut: { current?: string } = {}
   return secret
 }
 
+/** Creates the account through the real sign-up page and types the emailed code. Lands on the page chosen by the server. */
+export async function signUpAndConfirm(page: Page, email: string, name = 'E2e Learner', whatsapp = '98765 43210') {
+  await page.goto('/signup')
+  await page.getByLabel('Full name').fill(name)
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('WhatsApp number').fill(whatsapp)
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
+  await page.getByRole('button', { name: 'Create account' }).click()
+  await page.waitForURL((u) => u.pathname === '/signup/confirm')
+  await confirmEmail(page, email)
+  // The confirm page ends with a hard navigation; wait for it so the next goto does not abort it.
+  await page.waitForURL((u) => u.pathname !== '/signup/confirm')
+}
+
+/**
+ * Test setup only: gives an existing academy member the owner role through the service key. This is how the e2e suite
+ * gets a throwaway staff account on a dev project WITHOUT touching the real owner's password or authenticator.
+ */
+export async function grantOwnerRole(email: string) {
+  const { base, headers } = authAdmin()
+  const rest = (path: string, init?: RequestInit) => fetch(`${base}/rest/v1/${path}`, { ...init, headers: { ...headers, Prefer: 'return=representation' } })
+  const [member] = (await (await rest(`tenant_members?select=id,tenant_id&email=eq.${encodeURIComponent(email)}&limit=1`)).json()) as { id: string; tenant_id: string }[]
+  if (!member) throw new Error(`no member with email ${email}`)
+  const [role] = (await (await rest(`roles?select=id&tenant_id=eq.${member.tenant_id}&key=eq.owner&limit=1`)).json()) as { id: string }[]
+  if (!role) throw new Error('no owner role in this academy')
+  const res = await rest('member_roles?on_conflict=member_id,role_id,scope_type,scope_id', {
+    method: 'POST', headers: { ...headers, Prefer: 'resolution=ignore-duplicates,return=minimal' },
+    body: JSON.stringify({ tenant_id: member.tenant_id, member_id: member.id, role_id: role.id, scope_type: 'tenant' }),
+  })
+  if (!res.ok && res.status !== 409) throw new Error(`could not grant the owner role: ${res.status} ${await res.text()}`)
+}
+
+/** A throwaway staff account (owner role) at aal2 in this browser context. Never uses the real owner's account. */
+export async function staffWithMfa(page: Page, email = process.env.E2E_STAFF_EMAIL ?? 'e2e-staff@example.com') {
+  await resetMfa(email)
+  await signIn(page, email, '/')
+  await grantOwnerRole(email)
+  await enableMfa(page)
+}
+
 // ---------------------------------------------------------------------------- owner shortcuts
 
 /** A fresh sign-in as the owner with the two-step check done in this same browser context (each test gets its own). */
@@ -99,6 +164,24 @@ export async function ownerWithMfa(page: Page, owner: string, next = '/admin') {
   const secret = await enableMfa(page)
   if (next !== '/admin') await page.goto(next)
   return secret
+}
+
+/** Creates a published course with one reading lesson and no price. Staff must be at aal2. */
+export async function createPublishedCourse(page: Page, title: string) {
+  await page.goto('/admin/courses')
+  await page.getByLabel('Title').fill(title)
+  await page.getByRole('button', { name: 'Create draft' }).click()
+  await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  await page.waitForLoadState('networkidle')
+  await page.getByLabel('New section').fill('Start here')
+  await page.getByRole('button', { name: 'Add section' }).click()
+  await expect(page.getByRole('heading', { name: /Start here/ })).toBeVisible()
+  await page.getByLabel('Lesson title').fill('First reading')
+  await page.getByLabel('Type').selectOption({ label: 'Reading' })
+  await page.getByRole('button', { name: 'Add lesson' }).click()
+  await expect(page.getByRole('link', { name: 'First reading' })).toBeVisible()
+  await page.getByRole('button', { name: 'Publish' }).click()
+  await expect(page.getByText('Published', { exact: true })).toBeVisible()
 }
 
 /** Creates a published course with one reading lesson and a price (₹, GST included). Owner must be at aal2. */
@@ -116,9 +199,10 @@ export async function createPaidCourse(page: Page, title: string, priceRupees: s
   await expect(page.getByRole('link', { name: 'First reading' })).toBeVisible()
   await page.getByRole('button', { name: 'Publish' }).click()
   await expect(page.getByText('Published', { exact: true })).toBeVisible()
+  await page.waitForLoadState('networkidle') // before hydration a click would submit the form as a plain GET
   await page.getByLabel('Price (₹)', { exact: true }).fill(priceRupees)
   await page.getByRole('button', { name: 'Start selling' }).click()
-  await expect(page.getByText('This course is for sale.')).toBeVisible()
+  await expect(page.getByText('This course is for sale.')).toBeVisible({ timeout: 30_000 })
 }
 
 // ---------------------------------------------------------------------------- mail

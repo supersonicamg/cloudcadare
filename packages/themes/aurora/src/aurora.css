@@ -99,7 +99,33 @@
   /* The link for the section on screen */
   .links a[aria-current="true"] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--accent); }
   .nav-end { display: flex; align-items: center; gap: 22px; margin-left: auto; font-size: 16px; font-weight: 550; white-space: nowrap; }
+  /* Focus pages (checkout): logo, the page name, one way out. No site menu, nothing to wander off to. */
+  .focus-bar { display: flex; align-items: center; gap: 14px; min-height: 72px; border-bottom: 1px solid var(--line); }
+  .focus-title { padding-left: 16px; border-left: 1px solid var(--line); font-size: 17px; font-weight: 650; color: var(--grey); }
+  .focus-note { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; font-size: 14px; font-weight: 500; color: var(--mute); }
+  .focus-exit { margin-left: auto; font-size: 15px; font-weight: 650; color: var(--link); text-decoration: underline; text-underline-offset: 4px; }
+  .focus-note + .focus-exit { margin-left: 18px; }
+  @media (max-width: 820px) { .focus-title { font-size: 16px; padding-left: 12px; } .focus-note { display: none; } .focus-bar { min-height: 64px; } .focus-exit { min-height: 44px; display: inline-flex; align-items: center; } }
   .mnav { display: none; }
+  /* Account button and menu (signed in). One quiet pill on the right; everything else lives inside it. */
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .av { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 0; }
+  .acct { position: relative; }
+  .acct-btn { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 4px 14px 4px 5px; border: 1px solid var(--line); border-radius: 99px; background: #fff; color: var(--ink); font-size: 16px; font-weight: 600; cursor: pointer; }
+  .acct-btn:hover, .acct-btn[aria-expanded="true"] { border-color: var(--ink); }
+  .acct-panel { position: absolute; right: 0; top: calc(100% + 10px); z-index: 60; width: 320px; padding: 8px; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 14px 34px rgba(20,32,31,.14); }
+  .acct-panel[hidden] { display: none; }
+  .acct-who { display: grid; gap: 2px; padding: 10px 12px 12px; }
+  .acct-who b { font-size: 17px; font-weight: 700; }
+  .acct-who span { font-size: 14px; font-weight: 500; color: var(--mute); overflow-wrap: anywhere; }
+  .acct-panel ul { display: grid; }
+  .acct-panel li > a, .acct-panel .lo button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); font-size: 16px; font-weight: 550; text-align: left; cursor: pointer; }
+  .acct-panel li > a:hover, .acct-panel .lo button:hover { background: var(--stone); }
+  .acct-panel li > a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--brand); font-weight: 700; border-radius: 0 10px 10px 0; }
+  .acct-panel .wa { width: 20px; height: 20px; }
+  .acct-sep { height: 1px; margin: 6px 12px; background: var(--line); }
+  .lo button .ic { color: var(--mute); }
+  .links a[aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--accent); font-weight: 700; }
   .menu { display: none; margin-left: auto; min-height: 44px; padding: 8px 14px; border: 2px solid var(--ink); border-radius: 10px; background: transparent; color: inherit; font-size: 15px; font-weight: 650; cursor: pointer; }
 
   /* ---------- The slanted panel (the brand shape): hero frame, sign-in art, course art ---------- */
@@ -177,6 +203,13 @@
     .mnav { position: absolute; top: 100%; left: 0; right: 0; z-index: 40; padding: 4px var(--gut) 18px; background: var(--bg); border-bottom: 1px solid var(--line); box-shadow: 0 14px 24px rgba(0,0,0,.08); font-size: 18px; font-weight: 600; }
     .mnav a:not(.btn) { display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--line); }
     .mnav .btn { margin-top: 14px; }
+    .mnav .who { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .mnav .who .av { width: 44px; height: 44px; font-size: 16px; }
+    .mnav .who b { display: block; font-size: 17px; font-weight: 700; }
+    .mnav .who div span { display: block; font-size: 14px; font-weight: 500; color: var(--mute); overflow-wrap: anywhere; }
+    .mnav a.sub { font-size: 16px; font-weight: 500; color: var(--grey); }
+    .mnav a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--brand); padding-left: 12px; font-weight: 700; }
+    .mnav .lo button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 0; border: 0; background: transparent; color: var(--ink); font-size: 17px; font-weight: 700; text-align: left; }
     .copy .actions { align-self: stretch; }
     .actions .btn { flex: 1 1 100%; }
     .cdet > summary { grid-template-columns: 30px 1fr; }

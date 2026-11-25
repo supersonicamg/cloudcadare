@@ -9,9 +9,9 @@ import type { AuthState } from './actions'
 
 export interface LoginContext { title: string; logo: LogoKey | null }
 
-export const heading = 'font-heading text-[clamp(32px,3.4vw,44px)] font-extrabold leading-[1.04] tracking-[-0.04em] text-balance'
-export const lead = 'mt-3 text-lg leading-relaxed text-grey'
-export const swapLine = 'text-base text-grey'
+export const heading = 't-title'
+export const lead = 'mt-3 t-lead'
+export const swapLine = 't-body'
 export const swapLink = 'font-semibold text-primary underline underline-offset-4'
 
 /** The /login or /signup address that keeps the page the visitor was heading to. */
@@ -40,8 +40,8 @@ export function useAuthForm(run: (state: AuthState, form: FormData) => Promise<A
 
 export function ErrorLine({ id, children }: { id?: string; children: React.ReactNode }) {
   return (
-    <p id={id} role="alert" className="flex items-start gap-2 text-[15px] font-semibold leading-snug text-danger">
-      <Icon name="info" className="mt-px h-5 w-5 shrink-0" />{children}
+    <p id={id} role="alert" className="t-label flex items-start gap-2 !text-fg">
+      <Icon name="info" className="mt-px h-5 w-5 shrink-0 text-primary" />{children}
     </p>
   )
 }
@@ -58,10 +58,10 @@ export function Field({ name, label, hint, state, type = 'text', ...rest }: Fiel
       <label htmlFor={name} className={labelClass}>{label}</label>
       <div className="relative">
         <input id={name} name={name} required type={secret && shown ? 'text' : type} aria-invalid={error ? true : undefined}
-          aria-describedby={described} className={`${inputLg} ${secret ? 'pr-20' : ''} ${error ? 'border-danger' : ''}`} {...rest} />
+          aria-describedby={described} className={`${inputLg} ${secret ? 'pr-20' : ''} ${error ? 'border-fg' : ''}`} {...rest} />
         {secret && (
           <button type="button" onClick={() => setShown((s) => !s)} aria-controls={name} aria-pressed={shown}
-            className="absolute inset-y-0 right-0 rounded-r-xl px-4 text-[15px] font-semibold text-primary">
+            className="absolute inset-y-0 right-0 min-w-[64px] rounded-r-xl px-4 t-label !text-primary">
             {shown ? 'Hide' : 'Show'}
           </button>
         )}
@@ -73,11 +73,11 @@ export function Field({ name, label, hint, state, type = 'text', ...rest }: Fiel
 
 export function CourseContext({ context, intro }: { context: LoginContext; intro: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border bg-white p-2.5 pr-3.5 text-[15px] leading-tight">
+    <div className="t-label flex items-center gap-3 rounded-2xl border border-border bg-white p-2.5 pr-3.5">
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-tint-2">
         {context.logo ? <Logo name={context.logo} className="h-7 w-7" /> : <Icon name="book" className="h-6 w-6" />}
       </span>
-      <div><span className="text-sm text-mute">{intro}</span><b className="block text-base">{context.title}</b></div>
+      <div><span className="t-small">{intro}</span><b className="t-label block !text-fg">{context.title}</b></div>
     </div>
   )
 }
@@ -87,8 +87,8 @@ export function FormError({ state }: { state: AuthState }) {
   if (!state.error || state.field) return null
   if (state.error.includes('invitation-only')) {
     return (
-      <div role="alert" className="flex items-center gap-3 rounded-2xl bg-danger-bg px-[18px] py-3.5 text-base font-medium leading-snug text-danger">
-        <Icon name="info" className="h-[22px] w-[22px] shrink-0" />
+      <div role="alert" className="t-body flex items-center gap-3 rounded-2xl bg-muted px-[18px] py-3.5 !text-fg">
+        <Icon name="info" className="h-[22px] w-[22px] shrink-0 text-primary" />
         <span>This academy is invitation-only. Ask your counsellor to add your email.</span>
       </div>
     )

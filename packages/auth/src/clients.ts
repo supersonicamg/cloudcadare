@@ -9,8 +9,13 @@ export interface CookieStore {
 }
 
 /** User-scoped client: RLS applies. Use this everywhere except the privileged folders. */
-export function createServerDb(plane: Plane, cookieStore: CookieStore) {
+/**
+ * `headers` are sent on every Auth/API call. Sign-in uses it to forward the visitor's User-Agent, so the session list
+ * ("Chrome on Android") describes the learner's device and not this server.
+ */
+export function createServerDb(plane: Plane, cookieStore: CookieStore, opts?: { headers?: Record<string, string> }) {
   return createServerClient<Database>(plane.url, plane.publishableKey, {
+    ...(opts?.headers ? { global: { headers: opts.headers } } : {}),
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (list) => {

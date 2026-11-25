@@ -2,12 +2,13 @@
 
 import { useEffect, useRef } from 'react'
 import type { Playback } from '@educore/core/media'
+import { useOptionalStage } from './stage'
 import { useProgressTracker } from './use-progress'
 
 type Playable = Exclude<Playback, { kind: 'unavailable' }>
 
 // Minimal slice of the YouTube IFrame API that we use.
-interface YTPlayer { getCurrentTime(): number; getDuration(): number; destroy(): void }
+interface YTPlayer { getCurrentTime(): number; getDuration(): number; destroy(): void; seekTo(s: number, allowSeekAhead: boolean): void; playVideo(): void; pauseVideo(): void }
 interface YTApi {
   Player: new (el: HTMLElement, o: {
     videoId: string
@@ -37,6 +38,20 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
   const tracker = useProgressTracker(lessonId, completed, tracked)
   const videoRef = useRef<HTMLVideoElement>(null)
   const ytRef = useRef<HTMLDivElement>(null)
+  // On a lesson page the notes panel reads the time from here and can jump to a moment (plan/16 §6.4).
+  const stage = useOptionalStage()
+  const register = stage?.register
+  const setDuration = stage?.setDuration
+
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v || playback.kind === 'youtube' || !register) return
+    register({ time: () => v.currentTime, duration: () => (Number.isFinite(v.duration) ? v.duration : 0), seek: (s) => { v.currentTime = s; void v.play().catch(() => {}) }, pause: () => v.pause() })
+    const meta = () => { if (Number.isFinite(v.duration)) setDuration?.(v.duration) }
+    v.addEventListener('loadedmetadata', meta)
+    meta()
+    return () => { v.removeEventListener('loadedmetadata', meta); register(null) }
+  }, [playback, register, setDuration])
 
   // HTML5 video: a direct file or an HLS stream (Safari plays HLS natively; everything else uses hls.js).
   useEffect(() => {
@@ -81,7 +96,13 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
         videoId: playback.videoId,
         playerVars: { rel: 0, modestbranding: 1, playsinline: 1, ...(startAt > 5 ? { start: Math.floor(startAt) } : {}) },
         events: {
-          onReady: () => {},
+          onReady: () => {
+            if (!player) return
+            const p = player
+            register?.({ time: () => p.getCurrentTime(), duration: () => p.getDuration() || 0, seek: (s) => { p.seekTo(s, true); p.playVideo() }, pause: () => p.pauseVideo() })
+            const d = p.getDuration()
+            if (d > 0) setDuration?.(d)
+          },
           onStateChange: ({ data }) => {
             const t = tracker
             clearInterval(poll)
@@ -96,8 +117,8 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
         },
       })
     })
-    return () => { cancelled = true; clearInterval(poll); player?.destroy() }
-  }, [playback, startAt, tracker])
+    return () => { cancelled = true; clearInterval(poll); register?.(null); player?.destroy() }
+  }, [playback, startAt, tracker, register, setDuration])
 
   if (playback.kind === 'youtube') {
     return <div ref={ytRef} className="aspect-video w-full overflow-hidden rounded-[18px] bg-deep [&_iframe]:size-full" aria-label={title} />

@@ -5,7 +5,6 @@ import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { getShell } from '@/lib/shell'
 import { h1s, h2s } from '@/lib/ui'
-import { AccountNav } from '../_components/account-nav'
 import { ProgressBar } from '../learn/_components/curriculum'
 
 export const metadata = { title: 'My progress' }
@@ -51,7 +50,6 @@ export default async function Progress({ searchParams }: PageProps<'/[tenant]/pr
   return (
     <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
       <section className="mx-auto max-w-[1000px] px-5 pb-20 pt-8 md:pt-10">
-        <AccountNav bundle={bundle} active="progress" />
         <h1 className={h1s}>My progress</h1>
 
         <div className="mt-[26px] grid items-end gap-6 rounded-[28px] bg-tint-1 p-6 md:grid-cols-[1fr_auto] md:p-10">

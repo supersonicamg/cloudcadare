@@ -1,61 +1,11 @@
 'use client'
 
 import { useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react'
-import type { BrandInfo, NavItem } from '@educore/ui/theme'
-import { A, Brand, WhatsAppIcon } from './parts'
+import { WhatsAppIcon } from './parts'
 
 function subscribeScroll(cb: () => void) {
   window.addEventListener('scroll', cb, { passive: true })
   return () => window.removeEventListener('scroll', cb)
-}
-
-/**
- * Sticky header (plan/15 §7.2): logo, section links, Log in and an outline WhatsApp button. It gets a hairline shadow
- * once the page has scrolled, and the link for the section on screen gets a yellow underline. On phones the links
- * move into a Menu dropdown. It is the direct child of the page shell, which is what lets it stay on screen.
- */
-export function SiteHeader({ brand, nav, account, whatsapp }: { brand: BrandInfo; nav: NavItem[]; account: NavItem; whatsapp: string | null }) {
-  const scrolled = useSyncExternalStore(subscribeScroll, () => window.scrollY > 8, () => false)
-  const [open, setOpen] = useState(false)
-  const [current, setCurrent] = useState<string | null>(null)
-  const close = () => setOpen(false)
-
-  // Mark the link whose section is crossing the middle of the screen. Pages without such sections mark nothing.
-  useEffect(() => {
-    const sections = document.querySelectorAll<HTMLElement>('main section[id]')
-    if (!sections.length) return
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) setCurrent(e.target.id) }),
-      { rootMargin: '-45% 0px -50% 0px' },
-    )
-    sections.forEach((s) => io.observe(s))
-    return () => io.disconnect()
-  }, [])
-
-  const here = (href: string) => (current && href.endsWith(`#${current}`) ? 'true' : undefined)
-
-  return (
-    <div className={`au bar${scrolled ? ' scrolled' : ''}`}>
-      <header className="hdr wrap">
-        <nav className="nav" aria-label="Main">
-          <Brand brand={brand} />
-          <div className="links">{nav.map((n) => <A key={n.href + n.label} href={n.href} aria-current={here(n.href)}>{n.label}</A>)}</div>
-          <div className="nav-end">
-            <A href={account.href}>{account.label}</A>
-            {whatsapp && <a className="btn btn-sm btn-line" href={whatsapp} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />WhatsApp us</a>}
-          </div>
-          <button type="button" className="menu" aria-expanded={open} aria-controls="au-mnav" onClick={() => setOpen((o) => !o)}>
-            {open ? 'Close' : 'Menu'}
-          </button>
-        </nav>
-        <div id="au-mnav" className="mnav" hidden={!open}>
-          {nav.map((n) => <A key={n.href + n.label} href={n.href} onClick={close}>{n.label}</A>)}
-          <A href={account.href} onClick={close}>{account.label}</A>
-          {whatsapp && <a className="btn btn-line" href={whatsapp} target="_blank" rel="noopener noreferrer" onClick={close}><WhatsAppIcon />WhatsApp us</a>}
-        </div>
-      </header>
-    </div>
-  )
 }
 
 // True once the hero has scrolled out of view (pages without a hero: after the first screen).

@@ -36,11 +36,26 @@ export interface SiteContent {
   disclaimer?: string
 }
 
+/**
+ * The signed-in person, for the navbar (plan/16 §7). Themes render the account menu from this; the app decides
+ * what the links are. Log out is a form POST to `logoutHref`, so it works without JavaScript.
+ */
+export interface ViewerInfo {
+  name: string
+  email?: string
+  /** Two letters for the avatar while there is no photo. */
+  initials: string
+  /** Account links above the divider: Profile, Subscription, Payments, Password and devices (+ Admin panel for staff). */
+  menu: Array<NavItem & { icon?: string }>
+  /** POST target that ends this device's session. */
+  logoutHref: string
+}
+
 export interface SiteLayoutProps {
   brand: BrandInfo
   nav: NavItem[]
-  /** Where the primary header action points (sign in, or the learner dashboard when signed in). */
-  account: { label: string; href: string }
+  /** Where the primary header action points (sign in, or the learner dashboard when signed in). `viewer` is set when signed in. */
+  account: { label: string; href: string; viewer?: ViewerInfo }
   site?: SiteContent
   children: ReactNode
 }
@@ -146,7 +161,12 @@ export interface HomeContent {
 }
 
 /** Chrome-free wrapper for focus pages (lesson player, quiz): the theme's font and colours, no site menu. */
-export interface FocusLayoutProps { brand: BrandInfo; children: ReactNode }
+export interface FocusLayoutProps {
+  brand: BrandInfo
+  children: ReactNode
+  /** Optional top bar for focus pages that need one (checkout): logo, a page name, and one way out. No site menu. */
+  bar?: { title: string; exit?: NavItem; note?: string }
+}
 
 export interface HomePageProps {
   brand: BrandInfo

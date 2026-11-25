@@ -1693,6 +1693,67 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"access_whitelist": {
+                  Row: {
+                    "added_by": string,"batch_id": string | null,"claimed_at": string | null,"claimed_by": string | null,"course_id": string,"created_at": string,"email_norm": string,"enrollment_id": string | null,"expires_at": string | null,"full_name": string | null,"id": string,"note": string | null,"status": string,"tenant_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "added_by": string,"batch_id"?: string | null,"claimed_at"?: string | null,"claimed_by"?: string | null,"course_id": string,"created_at"?: string,"email_norm": string,"enrollment_id"?: string | null,"expires_at"?: string | null,"full_name"?: string | null,"id"?: string,"note"?: string | null,"status"?: string,"tenant_id": string
+                  }
+                  Update: {
+                    "added_by"?: string,"batch_id"?: string | null,"claimed_at"?: string | null,"claimed_by"?: string | null,"course_id"?: string,"created_at"?: string,"email_norm"?: string,"enrollment_id"?: string | null,"expires_at"?: string | null,"full_name"?: string | null,"id"?: string,"note"?: string | null,"status"?: string,"tenant_id"?: string
+                  }
+                  Relationships: [
+{
+      foreignKeyName: "access_whitelist_tenant_id_course_id_fkey"
+      columns: ["tenant_id","course_id"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["tenant_id","id"]
+    },
+{
+      foreignKeyName: "access_whitelist_tenant_id_batch_id_fkey"
+      columns: ["tenant_id","batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["tenant_id","id"]
+    }
+                  ]
+                },"payment_proofs": {
+                  Row: {
+                    "amount_minor": number,"file_path": string | null,"id": string,"member_id": string,"money_seen": boolean,"order_id": string,"payment_id": string,"reject_note": string | null,"reject_reason": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"source": string,"state": string,"submitted_at": string,"tenant_id": string,"utr": string | null,"whatsapp_seen": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount_minor": number,"file_path"?: string | null,"id"?: string,"member_id": string,"money_seen"?: boolean,"order_id": string,"payment_id": string,"reject_note"?: string | null,"reject_reason"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"source"?: string,"state"?: string,"submitted_at"?: string,"tenant_id": string,"utr"?: string | null,"whatsapp_seen"?: boolean
+                  }
+                  Update: {
+                    "amount_minor"?: number,"file_path"?: string | null,"id"?: string,"member_id"?: string,"money_seen"?: boolean,"order_id"?: string,"payment_id"?: string,"reject_note"?: string | null,"reject_reason"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"source"?: string,"state"?: string,"submitted_at"?: string,"tenant_id"?: string,"utr"?: string | null,"whatsapp_seen"?: boolean
+                  }
+                  Relationships: [
+{
+      foreignKeyName: "payment_proofs_tenant_id_order_id_fkey"
+      columns: ["tenant_id","order_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["tenant_id","id"]
+    },
+{
+      foreignKeyName: "payment_proofs_tenant_id_payment_id_fkey"
+      columns: ["tenant_id","payment_id"]
+isOneToOne: false
+      referencedRelation: "payments"
+      referencedColumns: ["tenant_id","id"]
+    },
+{
+      foreignKeyName: "payment_proofs_tenant_id_member_id_fkey"
+      columns: ["tenant_id","member_id"]
+isOneToOne: false
+      referencedRelation: "tenant_members"
+      referencedColumns: ["tenant_id","id"]
+    }
+                  ]
                 },"notification_preferences": {
                   Row: {
                     "channel": string,"enabled": boolean,"event_key": string,"member_id": string,"tenant_id": string
@@ -2449,14 +2510,14 @@ isOneToOne: false
                   ]
                 },"tenant_members": {
                   Row: {
-                    "avatar_path": string | null,"branch_id": string | null,"created_at": string,"custom_fields": NonNullable<Json>,"date_of_birth": string | null,"display_name": string,"email": string | null,"gender": string | null,"id": string,"is_minor": boolean,"joined_at": string,"last_active_at": string | null,"locale": string | null,"member_code": string | null,"phone": string | null,"status": string,"tenant_id": string,"updated_at": string,"user_id": string | null
+                    "avatar_path": string | null,"branch_id": string | null,"created_at": string,"custom_fields": NonNullable<Json>,"date_of_birth": string | null,"display_name": string,"email": string | null,"email_verified_at": string | null,"gender": string | null,"id": string,"is_minor": boolean,"joined_at": string,"last_active_at": string | null,"locale": string | null,"member_code": string | null,"phone": string | null,"status": string,"tenant_id": string,"updated_at": string,"user_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "avatar_path"?: string | null,"branch_id"?: string | null,"created_at"?: string,"custom_fields"?: NonNullable<Json>,"date_of_birth"?: string | null,"display_name": string,"email"?: string | null,"gender"?: string | null,"id"?: string,"is_minor"?: boolean,"joined_at"?: string,"last_active_at"?: string | null,"locale"?: string | null,"member_code"?: string | null,"phone"?: string | null,"status"?: string,"tenant_id": string,"updated_at"?: string,"user_id"?: string | null
+                    "avatar_path"?: string | null,"branch_id"?: string | null,"created_at"?: string,"custom_fields"?: NonNullable<Json>,"date_of_birth"?: string | null,"display_name": string,"email"?: string | null,"email_verified_at"?: string | null,"gender"?: string | null,"id"?: string,"is_minor"?: boolean,"joined_at"?: string,"last_active_at"?: string | null,"locale"?: string | null,"member_code"?: string | null,"phone"?: string | null,"status"?: string,"tenant_id": string,"updated_at"?: string,"user_id"?: string | null
                   }
                   Update: {
-                    "avatar_path"?: string | null,"branch_id"?: string | null,"created_at"?: string,"custom_fields"?: NonNullable<Json>,"date_of_birth"?: string | null,"display_name"?: string,"email"?: string | null,"gender"?: string | null,"id"?: string,"is_minor"?: boolean,"joined_at"?: string,"last_active_at"?: string | null,"locale"?: string | null,"member_code"?: string | null,"phone"?: string | null,"status"?: string,"tenant_id"?: string,"updated_at"?: string,"user_id"?: string | null
+                    "avatar_path"?: string | null,"branch_id"?: string | null,"created_at"?: string,"custom_fields"?: NonNullable<Json>,"date_of_birth"?: string | null,"display_name"?: string,"email"?: string | null,"email_verified_at"?: string | null,"gender"?: string | null,"id"?: string,"is_minor"?: boolean,"joined_at"?: string,"last_active_at"?: string | null,"locale"?: string | null,"member_code"?: string | null,"phone"?: string | null,"status"?: string,"tenant_id"?: string,"updated_at"?: string,"user_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -2859,6 +2920,54 @@ isOneToOne: false
                            },
 "join_tenant":
 { Args: { "p_display_name"?: string,"p_tenant_id": string }; Returns: string
+                           },
+"update_my_profile":
+{ Args: { "p_certificate_name": string,"p_city": string,"p_display_name": string,"p_phone": string,"p_tenant_id": string }; Returns: Json
+                           },
+"my_sessions":
+{ Args: Record<PropertyKey, never>; Returns: { id: string; user_agent: string | null; created_at: string; last_seen: string; is_current: boolean }[]
+                           },
+"end_my_session":
+{ Args: { "p_session_id": string }; Returns: boolean
+                           },
+"issue_email_code":
+{ Args: { "p_member_id": string }; Returns: Json
+                           },
+"verify_email_code":
+{ Args: { "p_code": string,"p_tenant_id": string }; Returns: Json
+                           },
+"add_to_learner_list":
+{ Args: { "p_batch_id": string | null,"p_course_id": string,"p_entries": Json,"p_expires": string | null,"p_tenant_id": string }; Returns: Json
+                           },
+"remove_from_learner_list":
+{ Args: { "p_id": string }; Returns: string
+                           },
+"extend_learner_list_entry":
+{ Args: { "p_expires": string,"p_id": string }; Returns: string
+                           },
+"claim_my_list_access":
+{ Args: { "p_tenant_id": string }; Returns: string
+                           },
+"submit_upi_payment":
+{ Args: { "p_order_id": string }; Returns: Json
+                           },
+"attach_payment_proof":
+{ Args: { "p_file_path": string | null,"p_proof_id": string,"p_utr": string | null }; Returns: undefined
+                           },
+"cancel_stale_orders":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"join_live_session":
+{ Args: { "p_session": string }; Returns: string
+                           },
+"approve_upi_payment":
+{ Args: { "p_money_seen"?: boolean,"p_proof": string,"p_whatsapp_seen"?: boolean }; Returns: Json
+                           },
+"reject_upi_payment":
+{ Args: { "p_note"?: string | null,"p_proof": string,"p_reason": string }; Returns: Json
+                           },
+"save_upi_settings":
+{ Args: { "p_settings": Json,"p_tenant_id": string }; Returns: Json
                            },
 "my_access":
 { Args: { "p_tenant_id": string }; Returns: Json

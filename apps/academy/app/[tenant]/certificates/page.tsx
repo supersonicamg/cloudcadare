@@ -5,7 +5,6 @@ import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { getShell } from '@/lib/shell'
 import { buttonQuiet, chipClass, h1s } from '@/lib/ui'
-import { AccountNav } from '../_components/account-nav'
 
 export const metadata = { title: 'My certificates' }
 
@@ -17,7 +16,6 @@ export default async function MyCertificates() {
   return (
     <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
       <section className="mx-auto max-w-[1000px] px-5 pb-20 pt-8 md:pt-10">
-        <AccountNav bundle={bundle} active="certificates" />
         <h1 className={h1s}>My certificates</h1>
         {data?.length ? (
           <ul className="mt-[26px] border-t-2 border-fg">

@@ -52,7 +52,8 @@ export const getViewer = cache(async () => {
   const bundle = await requireTenantBundle()
   const db = createServerDb(getPlane(bundle.tenant.planeId), await cookies())
   const { data } = await db.auth.getClaims()
-  return { signedIn: Boolean(data?.claims) }
+  const meta = (data?.claims?.user_metadata ?? {}) as { full_name?: string }
+  return { signedIn: Boolean(data?.claims), email: data?.claims?.email, fullName: meta.full_name }
 })
 
 export interface Need { permission: PermissionKey; feature?: FeatureKey }

@@ -5,6 +5,7 @@ import type { Database } from '@educore/db/types'
 import { isEnabled } from '@educore/features'
 import { emailSenderFromEnv, type EmailSender } from '@educore/integrations/email'
 import { loadTenantBundle } from '@educore/tenancy/privileged/load-tenant'
+import { REJECT_REASON_TEXT } from '../../commerce/upi'
 import { renderTemplate, safeDisplayName, textToHtml } from '../render'
 
 // THE EMAIL WORKER. Domain events sit in `outbox_events` (written in the same transaction as the change they describe).
@@ -70,6 +71,32 @@ async function handle(ev: OutboxEvent, sender: EmailSender | null, origin: (slug
     const { data: c } = await d.from('certificates').select('title, verification_code').eq('id', ev.aggregate_id).maybeSingle()
     if (!c) return 'skipped'
     mail = { tenantId: ev.tenant_id, memberId, eventKey: 'certificate.issued', vars: { ...common, 'course.title': c.title, 'links.certificate': `${base}/certificates/${ev.aggregate_id}`, 'links.verify': `${base}/verify/${c.verification_code}` } }
+  } else if (ev.event_type === 'payment.pending') {
+    // "We are checking your payment": the learner pressed "I have paid" (plan/16 §5.6). Email only; WhatsApp is by hand.
+    const [{ data: o }, { data: st }] = await Promise.all([
+      d.from('orders').select('order_no').eq('id', ev.aggregate_id).maybeSingle(),
+      d.from('tenant_settings').select('commerce').eq('tenant_id', ev.tenant_id).maybeSingle(),
+    ])
+    if (!o) return 'skipped'
+    const sla = String(((st?.commerce as { upi?: { sla_text?: string } } | null)?.upi?.sla_text) ?? '').slice(0, 80)
+    mail = {
+      tenantId: ev.tenant_id, memberId, eventKey: 'payment.pending',
+      vars: { ...common, 'order.no': o.order_no, 'links.order': `${base}/checkout/${ev.aggregate_id}/pending`, 'payment.sla': sla ? `We usually check it ${sla.replace(/^usually\s+/i, '')}.` : '' },
+    }
+  } else if (ev.event_type === 'payment.needs_action') {
+    // Staff sent the payment back (plan/16 §5.3, §5.6): the reason from the fixed list, the staff note, and the way forward.
+    const { data: o } = await d.from('orders').select('order_no').eq('id', ev.aggregate_id).maybeSingle()
+    if (!o) return 'skipped'
+    const reason = typeof payload.reason === 'string' ? (REJECT_REASON_TEXT[payload.reason] ?? '') : ''
+    const note = typeof payload.note === 'string' ? payload.note.trim().slice(0, 500) : ''
+    mail = {
+      tenantId: ev.tenant_id, memberId, eventKey: 'payment.needs_action',
+      vars: { ...common, 'order.no': o.order_no, 'links.order': `${base}/checkout/${ev.aggregate_id}/pending`, 'payment.reason': reason, 'payment.note': note ? `\n\nFrom our team: ${note}` : '' },
+    }
+  } else if (ev.event_type === 'whitelist.claimed') {
+    const { data: e } = await d.from('enrollments').select('courses(title)').eq('id', ev.aggregate_id).maybeSingle()
+    const course = Array.isArray(e?.courses) ? e?.courses[0] : e?.courses
+    mail = { tenantId: ev.tenant_id, memberId, eventKey: 'whitelist.claimed', vars: { ...common, 'course.title': course?.title ?? 'your course' } }
   }
   if (!mail) return 'skipped'
   return sendTemplated(mail, sender)

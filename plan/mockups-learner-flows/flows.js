@@ -8,15 +8,21 @@
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)) };
   var ic = function (n, c) { return '<svg class="ic' + (c ? ' ' + c : '') + '" aria-hidden="true"><use href="#i-' + n + '"/></svg>' };
   var brand = '<a class="brand" href="flows-index.html" aria-label="CloudCadre home"><svg class="mark" aria-hidden="true"><use href="#cc-mark"/></svg><span>Cloud<span class="c2">Cadre</span></span></a>';
+  // Signed in, the logo goes to the dashboard (flow E7); signed out it goes to the home page.
+  var brandIn = '<a class="brand" href="flow-dashboard.html#enrolled" aria-label="CloudCadre: your dashboard"><svg class="mark" aria-hidden="true"><use href="#cc-mark"/></svg><span>Cloud<span class="c2">Cadre</span></span></a>';
   var wa = '<svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg>';
   var WA = 'https://wa.me/919876543210';
 
   var learnLinks = [
-    ['home', 'My learning', 'flow-learn.html#home', 'home'],
+    ['home', 'Dashboard', 'flow-dashboard.html#enrolled', 'home'],
     ['material', 'Course material', 'flow-learn.html#material', 'book'],
     ['live', 'Live classes', 'flow-learn.html#live', 'live'],
     ['notes', 'My notes', 'flow-learn.html#notes', 'note']
   ];
+
+  // No course yet: only Dashboard, plus Program so they can read about CEAP.
+  var preLinks = [learnLinks[0], ['program', 'Program', 'flows-index.html', 'flag']];
+  function linkSet(set) { return set === 'pre' ? preLinks : learnLinks }
 
   function acctMenu(open) {
     return '<div class="acct"><button class="acct-btn" aria-haspopup="menu" aria-expanded="' + (open ? 'true' : 'false') + '" data-acct><span class="av" aria-hidden="true">RM</span>Rohit' + ic('chev') + '</button>' +
@@ -32,8 +38,8 @@
       '<a role="menuitem" class="out" href="flow-account.html#logout">' + ic('logout') + 'Log out</a>' +
       '</div></div>';
   }
-  function mnavIn(active) {
-    var l = learnLinks.map(function (x) { return '<a href="' + x[2] + '"' + (x[0] === active ? ' aria-current="page"' : '') + '>' + ic(x[3]) + x[1] + '</a>' }).join('');
+  function mnavIn(active, set) {
+    var l = linkSet(set).map(function (x) { return '<a href="' + x[2] + '"' + (x[0] === active ? ' aria-current="page"' : '') + '>' + ic(x[3]) + x[1] + '</a>' }).join('');
     return '<div class="mnav" id="mnav"><div class="who" style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)"><span class="av" aria-hidden="true">RM</span><div><b style="display:block;font-size:17px">Rohit Menon</b><span style="font-size:14px;color:var(--mute);font-weight:500">rohit.menon@example.com</span></div></div>' + l +
       '<a href="flow-account.html#profile">' + ic('user') + 'Account settings</a><a href="flow-account.html#payments">' + ic('receipt') + 'Payments and receipts</a>' +
       '<a href="' + WA + '" target="_blank" rel="noopener noreferrer">' + ic('help') + 'Help on WhatsApp</a>' +
@@ -50,11 +56,18 @@
         '<div class="nav-end"><a href="flow-join.html#login">Log in</a><a class="btn btn-sm btn-line" href="' + WA + '" target="_blank" rel="noopener noreferrer">' + wa + 'WhatsApp us</a></div>' +
         '<button class="menu" aria-expanded="false" aria-controls="mnav" data-menu>Menu</button></nav>' + mnavOut() + '</header></div>';
     },
-    inn: function (active, open) {
-      var l = learnLinks.map(function (x) { return '<a href="' + x[2] + '"' + (x[0] === active ? ' aria-current="page"' : '') + '>' + x[1] + '</a>' }).join('');
-      return '<div class="bar"><header class="hdr wrap"><nav class="nav" aria-label="Main">' + brand + '<div class="links">' + l + '</div>' +
+    inn: function (active, open, set) {
+      var l = linkSet(set).map(function (x) { return '<a href="' + x[2] + '"' + (x[0] === active ? ' aria-current="page"' : '') + '>' + x[1] + '</a>' }).join('');
+      return '<div class="bar"><header class="hdr wrap"><nav class="nav" aria-label="Main">' + brandIn + '<div class="links">' + l + '</div>' +
         '<div class="nav-end">' + acctMenu(open) + '</div>' +
-        '<button class="menu" aria-expanded="false" aria-controls="mnav" data-menu>Menu</button></nav>' + mnavIn(active) + '</header></div>';
+        '<button class="menu" aria-expanded="false" aria-controls="mnav" data-menu>Menu</button></nav>' + mnavIn(active, set) + '</header></div>';
+    },
+    // Signed in but on the home page: marketing links stay, "Log in" and "WhatsApp us" become "Dashboard" + the account button.
+    homein: function (open) {
+      return '<div class="bar"><header class="hdr wrap"><nav class="nav" aria-label="Main">' + brandIn +
+        '<div class="links"><a href="flows-index.html">Program</a><a href="flows-index.html">How we teach</a><a href="flows-index.html">Placements</a><a href="flows-index.html">Trainers</a><a href="flows-index.html">FAQ</a></div>' +
+        '<div class="nav-end"><a class="btn btn-sm btn-line" href="flow-dashboard.html#enrolled">' + ic('home') + 'Dashboard</a>' + acctMenu(open) + '</div>' +
+        '<button class="menu" aria-expanded="false" aria-controls="mnav" data-menu>Menu</button></nav>' + mnavIn('') + '</header></div>';
     },
     focus: function (title, exitLabel, exitHref, secure) {
       return '<div class="fbar"><header class="hdr wrap"><div class="fnav">' + brand +
@@ -68,7 +81,7 @@
       return '<footer class="wrap"><div class="foot-lite"><span>© 2026 CloudCadre</span><span>Need help? <a href="' + WA + '" target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a> · <a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Refunds</a></span></div></footer>';
     }
   };
-  window.CC = { ic: ic, H: H, F: F, brand: brand, wa: wa, WA: WA, acctMenu: acctMenu, mnavIn: mnavIn };
+  window.CC = { ic: ic, H: H, F: F, brand: brand, brandIn: brandIn, wa: wa, WA: WA, acctMenu: acctMenu, mnavIn: mnavIn };
 
   // Fake, non-scannable QR: finder squares in three corners plus seeded noise. Marked as a placeholder in the UI.
   function qr(n, seed) {
@@ -97,7 +110,8 @@
       var k = el.getAttribute('data-hdr'), a = el.getAttribute('data-active'), t = el.getAttribute('data-title');
       var out = '';
       if (k === 'out') out = H.out();
-      else if (k === 'in') out = H.inn(a, el.hasAttribute('data-open'));
+      else if (k === 'in') out = H.inn(a, el.hasAttribute('data-open'), el.getAttribute('data-links'));
+      else if (k === 'homein') out = H.homein(el.hasAttribute('data-open'));
       else if (k === 'focus') out = H.focus(t, el.getAttribute('data-exit'), el.getAttribute('data-href'), el.hasAttribute('data-secure'));
       el.outerHTML = out;
     });

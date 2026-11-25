@@ -401,3 +401,15 @@ Placeholders to replace with real data before launch: price (₹49,999 incl. GST
 - SQL: approve without `money_seen` fails; approve twice is a no-op; approving your own order fails; claim twice yields one enrolment; a removed or expired list row never claims; a different email never claims; paid + top-up reaches `paid` only at the full total; RLS: a learner cannot read another learner's proofs, notes or the whitelist; anon reads nothing.
 - Playwright (cloud project, one flow each): sign up → confirm → listed email → welcome back → lesson opens; sign up → confirm → not listed → pay QR → "I have paid" → waiting → staff approve → learner unlocked; reject with amount mismatch → top-up → approve → unlocked; add a note at a timestamp and reopen at that time; log out from the menu on desktop and phone.
 - Visual: every screen at 1280 and 390 wide with no sideways scroll, 44px targets on phone, keyboard focus visible, reduced motion respected (guide §16 checklist).
+
+## 12. Dashboard (flow E, proposed 2026-11-25, waiting for owner approval)
+
+Mockup: `plan/mockups-learner-flows/flow-dashboard.html` (E1–E7; open "Logic notes" on each screen).
+
+- **"My learning" is renamed "Dashboard" everywhere** (bar, phone menu, account button, emails). Route `/dashboard`; `/learn` redirects there (308). Course material, live classes and notes keep their `/learn/…` URLs.
+- **The dashboard is the signed-in default page.** Log in and email confirm redirect to `/dashboard` (a safe `next` still wins). Signed in, the logo links to `/dashboard`. `/` still shows the home page if typed (no redirect); its header swaps "Log in" and "WhatsApp us" for an outline "Dashboard" button and the account button.
+- **Log out goes to `/`** with a "You're logged out" note. `/logged-out` (C6) and `/welcome-back` (A4) become redirects.
+- **Batches:** one program (CEAP). The Oct 2026 batch is running; the next batch starts 8 Jan 2027. The page reads both from `batches` (status, `start_date`), never from copy.
+- **Change to §4 (whitelist):** a list match is no longer claimed silently on email confirm. A member with no enrolment whose confirmed email is on the running batch's list sees "You seem to be in the current batch: Join my batch now" (filled) and "Join the next batch instead" (outline). The button calls the same claim (enrolment `source = 'import'`, idempotent). Everyone else sees only "Join the next batch" → checkout.
+- **Dashboard states:** enrolled and running (E1), just claimed (E2, one-time banner), enrolled before the batch starts (E3, countdown and checklist), on list (E4), not on list (E5), UPI under review (E6). Never an empty dashboard.
+- **Progress shown:** overall % and lessons, pace against lessons released to the batch (never against other learners), labs, live classes attended, month tests, notes, this week's items, the climb, study material counts by type, certificate requirements.

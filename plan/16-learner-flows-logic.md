@@ -313,7 +313,12 @@ WhatsApp sending needs a provider (WhatsApp Business API or a service). Until th
 - Upcoming = `live_sessions` for the learner's batch, `status 'scheduled'`, soonest first. **Join** exists only from 10 minutes before `starts_at` until `ends_at`; opening the link records attendance once.
 - Recordings = `live_sessions` with `recording_media_id`, newest first. A completed session with none shows "Recording on its way". Target: recording up the same night (the FAQ promises it).
 - Every recording is also a lesson of `type 'live'` in the month list, so progress, completion (90% watched) and notes work like any video.
-- **Recording source is open:** the provider (Zoom/Meet/other) must hand the file to us for Mux/our storage. See §10 Q5.
+- **Provider is Microsoft Teams** (owner, 2026-11-25). `live_sessions.teams_join_url` holds the meeting link; "Join on Teams" opens it in a new tab.
+- **The page has two sections, in this order: Scheduled classes, then Recorded classes** (owner, 2026-11-25). The dashboard shows the same two, shortened (next class + 3, newest 3 recordings).
+- **A recording is one of two kinds** (`live_sessions.recording_kind`):
+  - `upload`: staff download the Teams .mp4 and upload it to the lesson. Plays in our player with notes, bookmarks and progress. Preferred.
+  - `teams_link`: staff paste the Teams/Stream share link. The card is labelled "Teams link" and opens Teams in a new tab; no notes or progress (completion = opened once).
+- Still open: whether learners outside the organiser's Microsoft 365 tenant can open Teams links (guest access or "anyone with the link"). See §10 Q5.
 
 ### 6.4 Notes, bookmarks, highlights (B4–B7)
 
@@ -378,7 +383,7 @@ Placeholders to replace with real data before launch: price (₹49,999 incl. GST
 | Q2 | Should the learner **upload** the screenshot on the site, **WhatsApp** it, or both? | Changes A6 and the queue | Both: WhatsApp is the main button, upload is secondary |
 | Q3 | Do you have a **WhatsApp Business API** or a sender service, or do staff message by hand? | Decides whether WhatsApp messages are automatic | Email is automatic; WhatsApp is copy-paste from the review screen |
 | Q4 | Should the learner-list screen be able to **email** "your access is ready" to the people you add? | Extra mail volume and copy | Not in v1 |
-| Q5 | Which tool runs live classes (**Zoom, Google Meet, other**) and can it send the recording to us? | Recordings must land in our storage to play with notes | Staff upload the recording file in the lesson editor |
+| Q5 | ~~Which tool runs live classes?~~ **Answered 2026-11-25: Microsoft Teams**; recordings are an uploaded Teams video or a Teams link. Still open: can learners outside the organiser's tenant open Teams recording links? | Link recordings fail for learners who can't open them | Upload every recording; use links only as a same-night fallback |
 | Q6 | How long should access last (**replay window** after the batch ends)? | Sets `expires_at` for paid and listed learners | 6 months after batch end |
 | Q7 | **Device limit** for logins (for example 2)? | Stops sharing one paid account | Off until you decide |
 | Q8 | Final **price**, GST treatment and whether **instalments by UPI** are offered (each instalment would need its own check) | Order totals and the QR amount | One payment of ₹49,999 incl. GST; top-ups only for shortfalls |

@@ -5,7 +5,7 @@ import { domainMapFromEnv, resolveHost } from '@educore/tenancy'
 // Next 16 renamed middleware to proxy. Runs on every request before routing.
 // Job: Host → tenant (edge map only, never Postgres), rewrite to /{slug}/…, refresh the auth cookie.
 
-const PROTECTED = ['/learn', '/admin', '/instructor', '/checkout']
+const PROTECTED = ['/learn', '/admin', '/instructor', '/checkout', '/account', '/welcome-back']
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl

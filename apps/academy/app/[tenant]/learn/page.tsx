@@ -6,7 +6,6 @@ import { requireMember } from '@/lib/dal'
 import { getMyEnrollments, type MyEnrollment } from '@/lib/learn'
 import { getShell, TERMS } from '@/lib/shell'
 import { bannerClass, buttonLg, buttonQuiet, h1s, h2s } from '@/lib/ui'
-import { AccountNav } from '../_components/account-nav'
 import { ProgressBar } from './_components/curriculum'
 
 export const metadata = { title: 'My learning' }
@@ -30,7 +29,7 @@ async function PaidBanner({ searchParams }: { searchParams: PageProps<'/[tenant]
   return (
     <p role="status" className={`${bannerClass('ok')} mb-[26px]`}>
       <Icon name="check" className="h-[22px] w-[22px] shrink-0" />
-      <span>Payment received. Your course is ready, and your receipt is in <Link href="/orders" className="underline">My orders</Link>.</span>
+      <span>Payment received. Your course is ready, and your receipt is in <Link href="/account/payments" className="underline">Payments and receipts</Link>.</span>
     </p>
   )
 }
@@ -45,7 +44,6 @@ export default async function MyLearning(props: PageProps<'/[tenant]/learn'>) {
   return (
     <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
       <section className="mx-auto max-w-[1000px] px-5 pb-20 pt-8 md:pt-10">
-        <AccountNav bundle={bundle} active="learning" />
         <Suspense fallback={null}><PaidBanner searchParams={props.searchParams} /></Suspense>
         <h1 className={h1s}>My learning</h1>
         <p className="mt-2 text-[17px] text-grey">Signed in as {a.memberName}.</p>

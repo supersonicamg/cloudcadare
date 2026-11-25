@@ -26,7 +26,9 @@ async function connect() {
   if (!hasPlaneEnv()) return { error: 'Sign-in is not configured in this environment yet.' }
   const tenant = await currentTenant()
   if (!tenant) return { error: 'This academy is not available.' }
-  return { tenantId: tenant.tenant.id, db: createServerDb(getPlane(tenant.tenant.planeId), await cookies()) }
+  // Forward the visitor's browser name so "Where you are logged in" shows their device, not this server.
+  const ua = (await headers()).get('user-agent')?.slice(0, 300)
+  return { tenantId: tenant.tenant.id, db: createServerDb(getPlane(tenant.tenant.planeId), await cookies(), ua ? { headers: { 'User-Agent': ua } } : undefined) }
 }
 
 type Connection = Exclude<Awaited<ReturnType<typeof connect>>, { error: string }>

@@ -34,7 +34,7 @@ export default async function Receipt({ params }: PageProps<'/[tenant]/orders/[i
   return (
     <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
       <section className="mx-auto max-w-[720px] px-5 pb-20 pt-10 md:pt-14">
-        <p className="mb-8 print:hidden"><Link href="/orders" className={backLink}><Icon name="back" />My orders</Link></p>
+        <p className="mb-8 print:hidden"><Link href="/account/payments" className={backLink}><Icon name="back" />Payments and receipts</Link></p>
         {receipt ? (
           <article aria-label="Receipt">
             <header className="flex flex-wrap items-baseline justify-between gap-4 border-b-2 border-fg pb-5">

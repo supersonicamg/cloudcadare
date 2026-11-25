@@ -2860,6 +2860,15 @@ isOneToOne: false
 "join_tenant":
 { Args: { "p_display_name"?: string,"p_tenant_id": string }; Returns: string
                            },
+"update_my_profile":
+{ Args: { "p_certificate_name": string,"p_city": string,"p_display_name": string,"p_phone": string,"p_tenant_id": string }; Returns: Json
+                           },
+"my_sessions":
+{ Args: Record<PropertyKey, never>; Returns: { id: string; user_agent: string | null; created_at: string; last_seen: string; is_current: boolean }[]
+                           },
+"end_my_session":
+{ Args: { "p_session_id": string }; Returns: boolean
+                           },
 "my_access":
 { Args: { "p_tenant_id": string }; Returns: Json
                            },

@@ -22,12 +22,23 @@ function SiteLayout({ brand, nav, account, children }: SiteLayoutProps) {
               <Link key={n.href} href={n.href} className="text-fg/75 hover:text-fg">{n.label}</Link>
             ))}
           </nav>
-          <Link
-            href={account.href}
-            className="rounded-[var(--radius)] border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
-          >
-            {account.label}
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={account.href}
+              className="rounded-[var(--radius)] border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+            >
+              {account.label}
+            </Link>
+            {account.viewer && (
+              <>
+                <Link href={account.viewer.menu[0]?.href ?? '/account'} className="hidden text-sm font-medium hover:underline sm:inline">Account</Link>
+                {/* A plain form POST: works without JavaScript and ends this device only. */}
+                <form action={account.viewer.logoutHref} method="post">
+                  <button type="submit" className="rounded-[var(--radius)] px-3 py-2 text-sm font-medium hover:bg-muted">Log out</button>
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </header>
       <main className="flex-1">{children}</main>

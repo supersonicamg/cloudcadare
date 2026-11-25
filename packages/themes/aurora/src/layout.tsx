@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import type { AuthLayoutProps, FocusLayoutProps, SiteLayoutProps } from '@educore/ui/theme'
-import { SiteHeader, WhatsAppFab } from './client'
+import { WhatsAppFab } from './client'
+import { SiteHeader } from './header'
 import { schibsted } from './font'
 import { A, Brand, WhatsAppIcon, waLink } from './parts'
 import './aurora.css'

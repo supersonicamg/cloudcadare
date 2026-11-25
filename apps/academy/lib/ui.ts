@@ -13,12 +13,17 @@ export const buttonQuiet =
   'rounded-[10px] border-2 border-fg px-3.5 py-1.5 text-[15px] font-semibold hover:bg-muted disabled:opacity-60'
 export const buttonLine =
   'inline-flex h-14 items-center justify-center gap-2.5 rounded-xl border-2 border-fg px-7 text-[17px] font-semibold hover:bg-muted'
-export const label = 'block text-[15px] font-semibold'
-export const hint = 'text-sm text-mute'
+export const label = 'block t-label !text-fg'
+export const hint = 't-small'
 
-export const h1s = 'font-heading text-[clamp(32px,3.4vw,44px)] font-extrabold leading-[1.04] tracking-[-0.04em] text-balance'
-export const h2s = 'font-heading text-[clamp(26px,2.6vw,34px)] font-bold leading-[1.1] tracking-[-0.035em] text-balance'
-export const lead = 'text-lg leading-relaxed text-grey'
+// Type roles come from the app type scale in packages/ui/src/styles.css (t-title, t-section, t-card, t-body, t-lead, t-label, t-small, t-num).
+export const h1s = 't-title'
+export const h2s = 't-section'
+export const h3s = 't-card'
+export const lead = 't-lead'
+export const body = 't-body'
+export const meta = 't-label'
+export const small = 't-small'
 export const backLink = 'inline-flex items-center gap-2 text-base font-semibold text-primary'
 /** Status chip. Pick one tone. */
 export const chip = {
@@ -38,12 +43,12 @@ export const ruleTop = 'border-t-2 border-fg'
 // ---- Staff admin (same tokens, denser than the learner pages)
 /** Title row: heading on the left, the page's one filled action on the right. Wraps on phones. */
 export const pageHead = 'mb-8 flex flex-wrap items-start justify-between gap-x-6 gap-y-4'
-export const pageTitle = 'font-heading text-[clamp(28px,3vw,38px)] font-extrabold leading-[1.05] tracking-[-0.035em]'
-export const pageLead = 'mt-2 max-w-2xl text-[17px] leading-relaxed text-grey'
+export const pageTitle = 't-title'
+export const pageLead = 'mt-2 max-w-2xl t-lead'
 /** Row of big numbers between two heavy rules. */
 export const statRow = 'grid border-y-2 border-fg'
 /** Section heading inside an admin page. */
-export const sectionTitle = 'font-heading text-2xl font-bold tracking-tight'
+export const sectionTitle = 't-section'
 /** Small filled action (the only one on its view). */
 export const buttonSm =
   'inline-flex h-11 items-center justify-center gap-2 rounded-[10px] bg-primary px-[18px] text-[15px] font-semibold text-primary-fg hover:bg-deep disabled:opacity-60'

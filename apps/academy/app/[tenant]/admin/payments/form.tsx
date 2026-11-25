@@ -8,22 +8,22 @@ export function GatewayForm({ mode, keyId, hasSecret, hasWebhookSecret }: { mode
   const [s, onSubmit, pending] = useKeepForm(saveGateway.bind(null, hasSecret))
   return (
     <form onSubmit={onSubmit} className="grid max-w-xl gap-5" autoComplete="off">
-      <div>
+      <div className="grid content-start gap-2">
         <label htmlFor="mode" className={label}>Mode</label>
         <select id="mode" name="mode" defaultValue={mode} className={input}>
           <option value="test">Test (no real money)</option>
           <option value="live">Live</option>
         </select>
       </div>
-      <div>
+      <div className="grid content-start gap-2">
         <label htmlFor="key_id" className={label}>Key ID</label>
         <input id="key_id" name="key_id" defaultValue={keyId} placeholder="rzp_test_…" required className={input} />
       </div>
-      <div>
+      <div className="grid content-start gap-2">
         <label htmlFor="secret" className={label}>Key Secret</label>
         <input id="secret" name="secret" type="password" autoComplete="new-password" placeholder={hasSecret ? 'Saved. Leave blank to keep it.' : ''} className={input} />
       </div>
-      <div>
+      <div className="grid content-start gap-2">
         <label htmlFor="webhook_secret" className={label}>Webhook secret</label>
         <input id="webhook_secret" name="webhook_secret" type="password" autoComplete="new-password" placeholder={hasWebhookSecret ? 'Saved. Leave blank to keep it.' : ''} className={input} />
         <p className={hint}>The secret you set when you add the webhook in Razorpay (see below).</p>

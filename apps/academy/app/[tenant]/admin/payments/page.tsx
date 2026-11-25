@@ -2,12 +2,12 @@ import { headers } from 'next/headers'
 import { fakeGatewayEnabled } from '@educore/core/commerce'
 import { readUpiSettings } from '@educore/core/commerce/upi'
 import { requireAccess } from '@/lib/dal'
-import { pageLead, pageTitle } from '@/lib/ui'
-import { Panel } from '../../_components/parts'
+import { Card, PageHeader, Tabs } from '../_components/ui'
+import { paymentPages, waitingPayments } from '../_components/sections'
 import { GatewayForm } from './form'
 import { UpiForm } from './upi-form'
 
-export const metadata = { title: 'Payment settings' }
+export const metadata = { title: 'How learners pay' }
 
 /*
  * D3 · Payment settings.
@@ -27,22 +27,16 @@ export default async function Payments() {
   const hook = `${proto}://${host}/api/webhooks/razorpay/${a.bundle.tenant.id}`
 
   return (
-    <div className="grid gap-12">
-      <div className="grid gap-2">
-        <h1 className={pageTitle}>Payment settings</h1>
-        <p className={pageLead}>Learners pay by UPI QR now. Razorpay shows as coming soon until you add its keys.</p>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
+      <div>
+        <PageHeader title="Payments" lead="Choose how students pay you. UPI works now; cards and net banking need a Razorpay account." />
+        <Tabs label="Payments" current="/admin/payments" items={paymentPages(a, await waitingPayments(a))} />
       </div>
 
-      <section aria-labelledby="upi-h" className="grid gap-4">
-        <h2 id="upi-h" className="t-section">UPI QR</h2>
-        <Panel><UpiForm s={upi} /></Panel>
-      </section>
+      <Card title="UPI QR" lead="Students scan a code, pay, and you approve it."><UpiForm s={upi} /></Card>
 
-      <section aria-labelledby="rz-h" className="grid max-w-2xl gap-4">
-        <div className="grid gap-1">
-          <h2 id="rz-h" className="t-section">Razorpay</h2>
-          <p className="t-body">Learners pay into your own Razorpay account, not ours. Start in test mode and switch to live once a test payment works.</p>
-        </div>
+      <Card title="Cards and net banking (Razorpay)" lead="Money goes into your own Razorpay account. Start in test mode and switch to live once a test payment works.">
+        <div className="grid max-w-2xl gap-4">
         {fakeGatewayEnabled() && (
           <p className="t-label rounded-2xl bg-muted px-4 py-3 !text-fg">A built-in test gateway is on for this development server, so checkout works without real keys. It is never available in production.</p>
         )}
@@ -52,7 +46,8 @@ export default async function Payments() {
           <p className="t-body">In the Razorpay dashboard add a webhook with this address, choose the <b>payment.captured</b> and <b>order.paid</b> events, and use the same secret as above. Webhooks confirm payments even when a learner closes the page too early.</p>
           <p className="t-label break-all rounded-xl bg-muted px-3 py-2 !text-fg" data-testid="webhook-url">{hook}</p>
         </div>
-      </section>
+        </div>
+      </Card>
     </div>
   )
 }

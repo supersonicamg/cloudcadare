@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { requireAccess } from '@/lib/dal'
 import { money } from '@/lib/money'
-import { chipClass, pageHead, pageLead, pageTitle, td, th, tableWrap } from '@/lib/ui'
+import { chipClass, td, th, tableWrap } from '@/lib/ui'
+import { PageHeader, Tabs } from '../_components/ui'
+import { paymentPages, waitingPayments } from '../_components/sections'
 
 export const metadata = { title: 'Orders' }
 
@@ -18,14 +20,10 @@ export default async function Orders() {
 
   return (
     <>
-      <div className={pageHead}>
-        <div>
-          <h1 className={pageTitle}>Orders</h1>
-          <p className={pageLead}>The latest 100 orders. Open one to see the payment and to refund it.</p>
-        </div>
-      </div>
+      <PageHeader title="Payments" lead="Your latest 100 orders. Open one to see the payment or give a refund." />
+      <Tabs label="Payments" current="/admin/orders" items={paymentPages(a, await waitingPayments(a))} />
       {data?.length ? (
-        <div className={tableWrap}>
+        <div className={`${tableWrap} rounded-[20px] bg-white p-5 ring-1 ring-border`}>
           <table className="w-full text-[15px]">
             <thead className="border-t-2 border-fg">
               <tr><th className={th}>Order</th><th className={th}>Learner</th><th className={`${th} text-right`}>Total</th><th className={th}>Status</th><th className={`${th} hidden text-right md:table-cell`}>Placed</th></tr>

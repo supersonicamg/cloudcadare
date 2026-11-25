@@ -1,3 +1,4 @@
+import { PageHeader } from '../../../../_components/ui'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { z } from 'zod'
@@ -53,9 +54,8 @@ export default async function QuizEditor({ params, searchParams }: PageProps<'/[
 
   return (
     <>
-      <Link href={`/admin/courses/${id}`} className="text-sm text-mute hover:text-fg">&larr; Back to the course</Link>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight">{test.data.title}</h1>
-      <p className="mt-1 text-mute">Quiz · {questions.length} {questions.length === 1 ? 'question' : 'questions'} · {Number(test.data.total_marks)} marks{test.data.pass_marks ? ` · pass at ${Number(test.data.pass_marks)}` : ''}</p>
+      <PageHeader title={test.data.title} back={{ href: `/admin/courses/${id}`, label: 'Back to the course' }}
+        lead={`Quiz · ${questions.length} ${questions.length === 1 ? 'question' : 'questions'} · ${Number(test.data.total_marks)} marks${test.data.pass_marks ? ` · pass at ${Number(test.data.pass_marks)}` : ''}`} />
 
       <section className="mt-10">
         <h2 className={sectionTitle + " mb-4"}>Settings</h2>

@@ -23,7 +23,7 @@ const optional = (v: FormDataEntryValue | null) => {
 }
 
 function message(e: unknown): string {
-  if (e instanceof MfaRequired) return 'This needs the two-step check first. Open Security, verify your code, then try again.'
+  if (e instanceof MfaRequired) return 'This needs the two-step check first. Open My security, enter your code, then try again.'
   if (e instanceof ActionDenied) return 'You do not have permission to do that.'
   const m = e instanceof Error ? e.message : String(e)
   if (m.includes('plan_limit_reached')) return 'Your plan has reached its limit for this. Upgrade the plan to add more.'
@@ -146,6 +146,22 @@ export async function addSection(courseId: string, _s: FormState, form: FormData
       tenant_id: a.bundle.tenant.id, course_id: courseId, title: title.data, label, position: (last?.position ?? 0) + 1, is_published: true,
     })
     if (error) return { error: message(error) }
+    done(a)
+    return { saved: true }
+  } catch (e) {
+    return { error: message(e) }
+  }
+}
+
+export async function renameSection(courseId: string, sectionId: string, _s: FormState, form: FormData): Promise<FormState> {
+  const title = z.string().trim().min(2).max(120).safeParse(form.get('title'))
+  if (!title.success) return { error: 'Give it a name of at least 2 characters.' }
+  try {
+    const a = await requireActionAccess({ permission: 'course.manage', feature: 'catalog.courses' })
+    const { error, count } = await a.db.from('course_sections').update({ title: title.data, label: optional(form.get('label')) }, { count: 'exact' })
+      .eq('id', sectionId).eq('course_id', courseId)
+    if (error) return { error: message(error) }
+    if (!count) return { error: 'That month was not found.' }
     done(a)
     return { saved: true }
   } catch (e) {

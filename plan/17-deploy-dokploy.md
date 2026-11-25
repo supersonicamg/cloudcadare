@@ -38,7 +38,7 @@ CRON_SECRET=
 
 - `CRON_SECRET`: any long random string (`openssl rand -hex 32`).
 - Only if used: `MUX_SIGNING_KEY_ID`, `MUX_SIGNING_PRIVATE_KEY` (signed videos). Full list: `apps/academy/.env.example`.
-- Only if videos are served from this VPS: `VIDEO_SERVER_URL` and `VIDEO_SERVER_SECRET` (§8).
+- Only if videos are served from this VPS: `VIDEO_SERVER_URL`, `VIDEO_SERVER_SECRET` and, for uploads from the dashboard, `VIDEO_UPLOAD_DIR` (§8).
 - **Never set `EDUCORE_FAKE_GATEWAY`** on a client's server.
 - Leave `UPSTASH_REDIS_REST_*` unset. When set, only hostnames listed in Redis are served.
 
@@ -105,6 +105,12 @@ server {
 
 5. Academy application: set `VIDEO_SERVER_URL=https://videos.<domain>` and `VIDEO_SERVER_SECRET=<the same secret>`, apply migration `…35_b1_self_hosted_video`, and redeploy.
 6. In the lesson editor choose **File on the video server** (video lesson) or fill **Or use a file on the video server** (class recording), with the path inside the academy's folder. Saving checks that the file answers.
+
+### Uploading from the admin dashboard
+
+In the **academy** application: **Advanced → Volumes / Mounts**, bind mount host path `/srv/videos` at `/videos`; **Environment**: `VIDEO_UPLOAD_DIR=/videos`; deploy. The app runs as user `1000`, so run `chown -R 1000:1000 /srv/videos` once (again after copying files in as root). Staff then upload in **Lessons and videos**; the file lands in `/srv/videos/<slug>/` and is attached to its lesson.
+
+Files go up in 5 MB pieces through `/api/video-upload/…` (resumable: choosing the same file again continues). Limits: MP4 or WebM, 4 GB, and 2 GB of disk is always left free. Unfinished pieces sit in `<slug>/.uploads/` and are removed after two days. Replaced videos stay on disk until deleted by hand.
 
 A file manager for uploads (FileBrowser Quantum) can share `/srv/videos`. **Do not give learners its share links**: they bypass sign-in and enrolment.
 

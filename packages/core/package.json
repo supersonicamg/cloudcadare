@@ -12,6 +12,7 @@
     "./catalog": "./src/catalog/index.ts",
     "./media": "./src/media/index.ts",
     "./media/files": "./src/media/files.ts",
+    "./media/upload": "./src/media/upload.ts",
     "./commerce": "./src/commerce/index.ts",
     "./commerce/upi": "./src/commerce/upi.ts",
     "./notifications": "./src/notifications/index.ts"

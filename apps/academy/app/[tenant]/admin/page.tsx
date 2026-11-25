@@ -2,89 +2,93 @@ import Link from 'next/link'
 import { isEnabled } from '@educore/features'
 import { can, holds, requireAccess } from '@/lib/dal'
 import { money } from '@/lib/money'
-import { buttonQuiet, buttonSm, pageHead, pageTitle, statRow } from '@/lib/ui'
+import { PageHeader, Task, Card } from './_components/ui'
+import { canTeach, paymentPages, studentPages, waitingPayments } from './_components/sections'
 
-export const metadata = { title: 'Overview' }
-
-const DAY = 86_400_000
+export const metadata = { title: 'Home' }
 
 export default async function AdminHome() {
   const a = await requireAccess({ permission: 'member.view' }, '/admin')
   const f = a.bundle.features
-  const hasCourses = isEnabled(f, 'catalog.courses')
+  const teaches = canTeach(a)
+  const students = studentPages(a)
   const sells = isEnabled(f, 'commerce.checkout') && can(a, 'order.view')
+  const monthStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString()
 
-  const now = new Date()
-  const weekAgo = new Date(now.getTime() - 7 * DAY).toISOString()
-  const monthStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString()
-
-  const [courses, published, members, learners, week, month, account] = await Promise.all([
-    a.db.from('courses').select('id', { count: 'exact', head: true }).is('deleted_at', null),
-    a.db.from('courses').select('id', { count: 'exact', head: true }).eq('status', 'published').is('deleted_at', null),
-    a.db.from('tenant_members').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-    a.db.from('enrollments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-    sells ? a.db.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'paid').gte('paid_at', weekAgo) : null,
+  const [waiting, enrolled, month, empty, courses, account] = await Promise.all([
+    waitingPayments(a),
+    students.length ? a.db.from('enrollments').select('id', { count: 'exact', head: true }).eq('status', 'active') : null,
     sells ? a.db.from('orders').select('total_minor').eq('status', 'paid').gte('paid_at', monthStart).limit(5000) : null,
-    sells ? a.db.from('payment_gateway_accounts').select('mode').eq('is_active', true).eq('is_default', true).maybeSingle() : null,
+    // Video lessons with nothing to play yet.
+    teaches ? a.db.from('lessons').select('id, title, course_id, courses!inner(status, deleted_at)', { count: 'exact' }).in('type', ['video', 'live'])
+      .is('media_asset_id', null).is('external_url', null).is('deleted_at', null).neq('courses.status', 'archived').is('courses.deleted_at', null)
+      .order('created_at', { ascending: false }).limit(5) : null,
+    teaches ? a.db.from('courses').select('id, status').is('deleted_at', null).neq('status', 'archived').order('updated_at', { ascending: false }).limit(20) : null,
+    sells && holds(a, 'price.manage') ? a.db.from('payment_gateway_accounts').select('mode').eq('is_active', true).eq('is_default', true).maybeSingle() : null,
   ])
 
+  const list = courses?.data ?? []
+  // With one program (CloudCadre today), "add videos" goes straight to it.
+  const uploadHref = list.length === 1 ? `/admin/courses/${list[0]!.id}` : '/admin/courses'
+  const payments = paymentPages(a, waiting)
   const stats = [
-    hasCourses && { label: 'Courses', value: String(courses.count ?? 0), note: `${published.count ?? 0} published` },
-    { label: 'Active members', value: String(members.count ?? 0), note: `${learners.count ?? 0} enrolments` },
-    sells && { label: 'Orders this week', value: String(week?.count ?? 0), note: 'paid, last 7 days' },
-    sells && { label: 'Revenue this month', value: money((month?.data ?? []).reduce((s, o) => s + o.total_minor, 0)), note: 'paid orders' },
-  ].filter(Boolean) as { label: string; value: string; note: string }[]
+    enrolled && { label: 'Students with access', value: String(enrolled.count ?? 0) },
+    month && { label: 'Money received this month', value: money((month.data ?? []).reduce((s, o) => s + o.total_minor, 0)) },
+    payments.length > 0 && { label: 'Payments to check', value: String(waiting) },
+  ].filter(Boolean) as { label: string; value: string }[]
 
-  // Steps appear only for modules this academy has, and tick themselves off.
-  const steps = [
-    hasCourses && can(a, 'course.manage') && { title: 'Add your first course', text: 'Start with a draft. Nothing is public until you publish it.', done: (published.count ?? 0) > 0, href: '/admin/courses', cta: 'Add a course' },
-    sells && holds(a, 'price.manage') && { title: 'Connect Razorpay', text: 'So learners can pay. Test mode uses no real money.', done: Boolean(account?.data), href: '/admin/payments', cta: 'Open payments' },
-    can(a, 'tenant.branding.manage') && { title: 'Set your name and colours', text: 'Your site updates within a moment.', done: Boolean(a.bundle.branding.tagline), href: '/admin/branding', cta: 'Open branding' },
-  ].filter(Boolean) as { title: string; text: string; done: boolean; href: string; cta: string }[]
-  const open = steps.filter((s) => !s.done)
+  const todo = [
+    teaches && can(a, 'course.manage') && !list.some((c) => c.status === 'published') && { text: 'Publish your course so people can see it.', href: uploadHref, cta: 'Open course' },
+    account && !account.data && { text: 'Card and net banking payments are not set up (UPI is separate).', href: '/admin/payments', cta: 'Set up payments' },
+    can(a, 'tenant.branding.manage') && !a.bundle.branding.tagline && { text: 'Add a one-line description of your academy.', href: '/admin/branding', cta: 'Website look' },
+  ].filter(Boolean) as { text: string; href: string; cta: string }[]
 
   return (
     <>
-      <div className={pageHead}>
-        <div>
-          <h1 className={pageTitle}>Overview</h1>
-          <p className="mt-1.5 text-base text-mute">{a.bundle.branding.displayName} · {new Intl.DateTimeFormat('en-IN', { dateStyle: 'long' }).format(now)}</p>
-        </div>
+      <PageHeader title={`Hello, ${a.memberName.split(' ')[0]}`} lead="What do you want to do?" />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {teaches && <Task href={uploadHref} icon="video" title="Upload class videos" text="Add recordings and lessons for your students." />}
+        {students.length > 0 && <Task href={students[0]!.href} icon="user" title="Give a student access" text="Open a course for someone, or see who has it." />}
+        {payments.length > 0 && <Task href={payments[0]!.href} icon="check" title="Check payments" text={waiting ? `${waiting} ${waiting === 1 ? 'student is' : 'students are'} waiting for approval.` : 'No payment is waiting.'} badge={waiting || undefined} />}
+        {can(a, 'tenant.branding.manage') && <Task href="/admin/branding" icon="image" title="Change the website look" text="Academy name, short description and colours." />}
       </div>
 
-      <dl className={`${statRow} grid-cols-2 gap-x-6 lg:grid-cols-4 lg:gap-x-0`}>
-        {stats.map((s) => (
-          <div key={s.label} className="border-fg/15 py-5 lg:border-l lg:pl-5 lg:first:border-l-0 lg:first:pl-0">
-            <dd className="font-heading text-[34px] font-extrabold leading-none tracking-tight">{s.value}</dd>
-            <dt className="mt-2 text-[15px] font-semibold">{s.label}</dt>
-            <dd className="text-sm text-mute">{s.note}</dd>
-          </div>
-        ))}
-      </dl>
-
-      {open.length > 0 && (
-        <section className="mt-12" aria-labelledby="start">
-          <h2 id="start" className="font-heading text-2xl font-bold tracking-tight">Get started</h2>
-          <p className="mt-1 text-base text-mute">{open.length === 1 ? 'One step left' : `${open.length} steps left`} before your first learner can buy.</p>
-          <ol className="mt-5 border-t-2 border-fg">
-            {steps.map((s, i) => (
-              <li key={s.title} className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-border py-4">
-                <span aria-hidden="true" className={`grid size-9 shrink-0 place-items-center rounded-full border-2 text-[15px] font-bold ${s.done ? 'border-primary bg-primary text-primary-fg' : 'border-fg'}`}>
-                  {s.done ? <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg> : i + 1}
-                </span>
-                <div className="min-w-0 flex-1 basis-56">
-                  <p className="text-[17px] font-bold leading-snug">{s.title}{s.done && <span className="sr-only"> (done)</span>}</p>
-                  <p className="text-[15px] text-mute">{s.done ? 'Done' : s.text}</p>
-                </div>
-                {!s.done && <Link href={s.href} className={buttonSm}>{s.cta}</Link>}
-              </li>
-            ))}
-          </ol>
-        </section>
+      {stats.length > 0 && (
+        <dl className="mt-6 grid gap-px overflow-hidden rounded-[20px] bg-border ring-1 ring-border sm:grid-cols-3">
+          {stats.map((s) => (
+            <div key={s.label} className="flex flex-col-reverse bg-white p-5">
+              <dt className="mt-2 t-label">{s.label}</dt>
+              <dd className="t-num">{s.value}</dd>
+            </div>
+          ))}
+        </dl>
       )}
 
-      {open.length === 0 && hasCourses && can(a, 'course.manage') && (
-        <p className="mt-10"><Link className={buttonQuiet} href="/admin/courses">Add or edit courses</Link></p>
+      {empty?.data?.length ? (
+        <Card className="mt-6" title={`${empty.count} ${empty.count === 1 ? 'lesson has' : 'lessons have'} no video`} lead="Students see “not ready” until you add one.">
+          <ul className="divide-y divide-border">
+            {empty.data.map((l) => (
+              <li key={l.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <span className="min-w-0 t-label !text-fg">{l.title}</span>
+                <Link href={`/admin/courses/${l.course_id}/lessons/${l.id}`} className="inline-flex min-h-11 items-center t-label !text-primary underline underline-offset-4">Add video</Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
+      {todo.length > 0 && (
+        <Card className="mt-6" title="Finish setting up">
+          <ul className="divide-y divide-border">
+            {todo.map((t) => (
+              <li key={t.text} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <span className="min-w-0 t-body !text-fg">{t.text}</span>
+                <Link href={t.href} className="inline-flex min-h-11 items-center t-label !text-primary underline underline-offset-4">{t.cta}</Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </>
   )

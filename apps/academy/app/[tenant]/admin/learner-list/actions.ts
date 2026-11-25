@@ -14,7 +14,7 @@ export interface AddResult {
 }
 
 function problem(e: unknown): string {
-  if (e instanceof MfaRequired) return 'This needs the two-step check first. Open Security, verify your code, then try again.'
+  if (e instanceof MfaRequired) return 'This needs the two-step check first. Open My security, enter your code, then try again.'
   if (e instanceof ActionDenied) return 'You do not have permission to do that.'
   return 'Something went wrong. Try again.'
 }

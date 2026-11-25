@@ -1,5 +1,7 @@
 import { requireAccess } from '@/lib/dal'
-import { buttonQuiet, input, pageTitle } from '@/lib/ui'
+import { inputSm } from '@/lib/ui'
+import { Empty, PageHeader } from '../_components/ui'
+import { ConfirmButton } from '../_components/confirm'
 import { revokeCertificate } from './actions'
 
 export const metadata = { title: 'Certificates' }
@@ -10,26 +12,27 @@ export default async function Certificates() {
     .order('issued_at', { ascending: false }).limit(200)
   return (
     <>
-      <h1 className={pageTitle}>Certificates</h1>
-      <p className="mt-2 max-w-2xl text-grey">Issued automatically when a learner completes a course. Turn it off for a course on its edit page. Revoking a certificate makes its public check page say so.</p>
+      <PageHeader title="Certificates" lead="Students get one automatically when they finish a course. You can switch this off in a course’s details." />
       {data?.length ? (
-        <ul className="mt-8 border-t border-border">
+        <ul className="divide-y divide-border rounded-[20px] bg-white px-5 ring-1 ring-border">
           {data.map((c) => (
-            <li key={c.id} className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-border py-3">
-              <div>
-                <p className="font-medium">{c.recipient_name} <span className="font-normal text-mute">{c.title}</span></p>
-                <p className="text-sm text-mute">{c.serial_no} · code {c.verification_code} · {new Date(c.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}{c.revoked_at ? ` · revoked${c.revoke_reason ? `: ${c.revoke_reason}` : ''}` : ''}</p>
+            <li key={c.id} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-4">
+              <div className="min-w-0 flex-1 basis-60">
+                <p className="t-card !text-[17px]">{c.recipient_name}</p>
+                <p className="t-small">{c.title} · given {new Date(c.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                <p className="break-all t-small">Number {c.serial_no} · check code {c.verification_code}</p>
+                {c.revoked_at && <p className="t-small !text-danger-ink">Cancelled{c.revoke_reason ? `: ${c.revoke_reason}` : ''}</p>}
               </div>
               {!c.revoked_at && (
-                <form action={revokeCertificate.bind(null, c.id)} className="flex items-center gap-2">
-                  <input name="reason" aria-label={`Reason to revoke ${c.serial_no}`} placeholder="Reason" maxLength={300} className={`${input} w-48`} />
-                  <button className={buttonQuiet}>Revoke</button>
-                </form>
+                <ConfirmButton action={revokeCertificate.bind(null, c.id)} label="Cancel certificate" name={`Cancel certificate ${c.serial_no}`} yes="Yes, cancel it"
+                  question={`Cancel ${c.recipient_name}’s certificate? Anyone checking it will see that it is not valid. This cannot be undone here.`}>
+                  <input name="reason" aria-label={`Reason for cancelling ${c.serial_no}`} placeholder="Reason (shown on the check page)" maxLength={300} className={`${inputSm} max-w-md`} />
+                </ConfirmButton>
               )}
             </li>
           ))}
         </ul>
-      ) : <p className="mt-8 text-grey">No certificates have been issued yet.</p>}
+      ) : <Empty icon="medal" title="No certificates yet">They appear here when students finish a course.</Empty>}
     </>
   )
 }

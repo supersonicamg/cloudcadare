@@ -1,10 +1,12 @@
 import { requireAccess } from '@/lib/dal'
 import { money } from '@/lib/money'
-import { buttonQuiet, pageTitle, sectionTitle } from '@/lib/ui'
+import { buttonOutline, chipClass } from '@/lib/ui'
+import { Card, Empty, PageHeader, Tabs } from '../_components/ui'
+import { paymentPages, waitingPayments } from '../_components/sections'
 import { setCouponActive } from './actions'
 import { CouponCreateForm } from './form'
 
-export const metadata = { title: 'Coupons' }
+export const metadata = { title: 'Discount codes' }
 
 const isPast = (iso: string | null) => (iso ? new Date(iso).getTime() < Date.now() : false)
 
@@ -16,41 +18,38 @@ export default async function Coupons() {
 
   return (
     <>
-      <h1 className={pageTitle}>Coupons</h1>
-      <p className="mt-2 text-grey">Learners enter a code at checkout. A coupon never changes a price you set; it applies to one order.</p>
+      <PageHeader title="Payments" lead="A discount code lowers the price of one order when a student types it at checkout." />
+      <Tabs label="Payments" current="/admin/coupons" items={paymentPages(a, await waitingPayments(a))} />
 
-      <section className="mt-8">
-        <h2 className={sectionTitle + " mb-4"}>New coupon</h2>
-        <CouponCreateForm />
-      </section>
-
-      <section className="mt-12">
-        <h2 className={sectionTitle + " mb-4"}>Your coupons</h2>
-        {data?.length ? (
-          <ul className="border-t border-border">
-            {data.map((c) => {
-              const expired = isPast(c.ends_at)
-              const off = c.discount_type === 'percent' ? `${Number(c.discount_value)}% off` : `${money(Math.round(Number(c.discount_value) * 100))} off`
-              return (
-                <li key={c.id} className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-border py-3">
-                  <div>
-                    <p className="font-medium"><span data-testid="coupon-code">{c.code}</span> <span className="font-normal text-mute">{off}</span></p>
-                    <p className="text-sm text-mute">
-                      Used {c.redeemed_count}{c.max_redemptions ? ` of ${c.max_redemptions}` : ''} · {c.per_member_limit} per learner
-                      {c.max_discount_minor ? ` · up to ${money(c.max_discount_minor)}` : ''}{c.min_order_minor ? ` · from ${money(c.min_order_minor)}` : ''}
-                      {c.ends_at ? ` · ${expired ? 'ended' : 'until'} ${new Date(c.ends_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
-                    </p>
-                  </div>
-                  <form action={setCouponActive.bind(null, c.id, !c.is_active)} className="flex items-center gap-3">
-                    <span className="text-sm text-mute">{c.is_active ? (expired ? 'Expired' : 'Active') : 'Off'}</span>
-                    <button className={buttonQuiet}>{c.is_active ? 'Turn off' : 'Turn on'}</button>
-                  </form>
-                </li>
-              )
-            })}
-          </ul>
-        ) : <p className="text-grey">No coupons yet.</p>}
-      </section>
+      <div className="grid gap-5">
+        <Card title="Make a discount code"><CouponCreateForm /></Card>
+        <Card title="Your codes">
+          {data?.length ? (
+            <ul className="divide-y divide-border border-y border-border">
+              {data.map((c) => {
+                const expired = isPast(c.ends_at)
+                const off = c.discount_type === 'percent' ? `${Number(c.discount_value)}% off` : `${money(Math.round(Number(c.discount_value) * 100))} off`
+                return (
+                  <li key={c.id} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3.5">
+                    <div className="min-w-0 flex-1 basis-56">
+                      <p className="t-card break-all"><span data-testid="coupon-code">{c.code}</span> <span className="t-label">{off}</span></p>
+                      <p className="t-small">
+                        Used {c.redeemed_count}{c.max_redemptions ? ` of ${c.max_redemptions}` : ''} · {c.per_member_limit} per student
+                        {c.max_discount_minor ? ` · up to ${money(c.max_discount_minor)}` : ''}{c.min_order_minor ? ` · on ${money(c.min_order_minor)} or more` : ''}
+                        {c.ends_at ? ` · ${expired ? 'ended' : 'until'} ${new Date(c.ends_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+                      </p>
+                    </div>
+                    <form action={setCouponActive.bind(null, c.id, !c.is_active)} className="flex items-center gap-3">
+                      <span className={chipClass(c.is_active && !expired ? 'ok' : 'quiet')}>{c.is_active ? (expired ? 'Expired' : 'Working') : 'Off'}</span>
+                      <button className={buttonOutline}>{c.is_active ? 'Turn off' : 'Turn on'}</button>
+                    </form>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : <Empty title="No discount codes yet" />}
+        </Card>
+      </div>
     </>
   )
 }

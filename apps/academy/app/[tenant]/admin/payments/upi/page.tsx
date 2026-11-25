@@ -7,12 +7,14 @@ import { can, holds, requireAccess, type Access } from '@/lib/dal'
 import { dateShort, nowMs, timeShort } from '@/lib/format'
 import { money } from '@/lib/money'
 import { tenantOrigin } from '@/lib/outbox'
-import { inputSm, pageLead, pageTitle, buttonOutline, td, th, tableWrap } from '@/lib/ui'
+import { inputSm, buttonOutline, td, th, tableWrap } from '@/lib/ui'
+import { PageHeader, Tabs } from '../../_components/ui'
+import { paymentPages } from '../../_components/sections'
 import { Icon } from '@educore/ui/marks'
 import { Note, StatusChip } from '../../../_components/parts'
 import { ReviewForm } from './review-form'
 
-export const metadata = { title: 'UPI payments' }
+export const metadata = { title: 'Payments to check' }
 
 /*
  * D1 · UPI payments queue.
@@ -194,13 +196,11 @@ export default async function UpiQueue(props: PageProps<'/[tenant]/admin/payment
 
   return (
     <>
-      <div className="grid gap-2">
-        <h1 className={pageTitle}>UPI payments</h1>
-        <p className={pageLead}>Check each payment against the order, then unlock access. Nothing unlocks until you approve.</p>
-      </div>
+      <PageHeader title="Payments" lead="Look for each payment in your bank or UPI app, then approve it. The course opens only after you approve." />
+      <Tabs label="Payments" current="/admin/payments/upi" items={paymentPages(a, counts.waiting)} />
 
-      <div className="mt-8 grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_400px]">
-        <section aria-labelledby="q-h" className="min-w-0">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
+        <section aria-labelledby="q-h" className="min-w-0 rounded-[20px] bg-white p-5 ring-1 ring-border sm:p-6">
           <h2 id="q-h" className="sr-only">Payments</h2>
           <nav aria-label="Filter payments" className="flex flex-wrap gap-x-6 border-b border-border">
             {TABS.map(([k, label]) => (

@@ -8,7 +8,7 @@ import type { KeepState } from '@/lib/use-keep-form'
 const NEED = { permission: 'enrollment.manage', feature: 'catalog.courses' } as const
 
 function message(e: unknown): string {
-  if (e instanceof MfaRequired) return 'This needs the two-step check first. Open Security, verify your code, then try again.'
+  if (e instanceof MfaRequired) return 'This needs the two-step check first. Open My security, enter your code, then try again.'
   if (e instanceof ActionDenied) return 'You do not have permission to do that.'
   return 'Something went wrong. Try again.'
 }
@@ -20,7 +20,7 @@ export async function grantAccess(_s: KeepState, form: FormData): Promise<KeepSt
   try {
     const a = await requireActionAccess(NEED)
     const { data: member } = await a.db.from('tenant_members').select('id, display_name').eq('email', parsed.data.email).eq('status', 'active').maybeSingle()
-    if (!member) return { error: 'No one with that email has signed in to this academy yet. Ask them to sign in once, then try again.' }
+    if (!member) return { error: 'No one has signed up with that email yet. Ask them to sign up, or approve their email in advance.' }
     const { data: course } = await a.db.from('courses').select('title').eq('id', parsed.data.courseId).is('deleted_at', null).maybeSingle()
     if (!course) return { error: 'That course was not found.' }
     const { error } = await a.db.rpc('grant_enrollment', { p_member_id: member.id, p_course_id: parsed.data.courseId })

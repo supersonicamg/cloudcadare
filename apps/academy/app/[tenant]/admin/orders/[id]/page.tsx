@@ -1,3 +1,4 @@
+import { PageHeader } from '../../_components/ui'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { z } from 'zod'
@@ -33,9 +34,7 @@ export default async function OrderDetail({ params }: PageProps<'/[tenant]/admin
 
   return (
     <>
-      <Link href="/admin/orders" className="text-sm text-mute hover:text-fg">&larr; Orders</Link>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight">Order {o.order_no}</h1>
-      <p className="mt-1 text-grey">{m?.display_name} · {m?.email} · placed {when(o.placed_at)}</p>
+      <PageHeader title={`Order ${o.order_no}`} lead={`${m?.display_name} · ${m?.email} · placed ${when(o.placed_at)}`} back={{ href: '/admin/orders', label: 'All orders' }} />
 
       <section className="mt-8 border-t border-border pt-5">
         <ul className="space-y-1">

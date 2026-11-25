@@ -9,7 +9,7 @@ import type { HomeContent, NavItem, SiteContent } from '@educore/ui/theme'
 // replace or delete each of them before the site goes live:
 //   - the syllabus: month split, topics, lab counts, hours a week, the batch date "12 Jan", the "-32%" in month 2
 //   - social proof: the hero's review score and count and "420+ placed" (the placements section is real, see there)
-//   - people: trainer names, bios, photos and LinkedIn links; the counsellor's name, photo and reply times
+//   - people: the counsellor's name, photo and reply times
 //   - images: every photo is a stock photo (Unsplash) that stands in for CloudCadre's own
 // A section left out of this object is simply not rendered. The WhatsApp number and phone are never written here:
 // they come from the academy's contact settings, and every WhatsApp control disappears when there is none.
@@ -32,7 +32,6 @@ export const auroraNav: NavItem[] = [
   { label: 'Program', href: '/#program' },
   { label: 'How we teach', href: '/#how' },
   { label: 'Placements', href: '/#placements' },
-  { label: 'Trainers', href: '/#trainers' },
   { label: 'FAQ', href: '/#talk' },
 ]
 
@@ -44,7 +43,6 @@ export const auroraSite: SiteContent = {
       { label: 'Placements', href: '/#placements' },
     ] },
     { title: 'Academy', links: [
-      { label: 'Trainers', href: '/#trainers' },
       { label: 'FAQ', href: '/#talk' },
     ] },
   ],
@@ -158,17 +156,6 @@ export const auroraHome: HomeContent = {
       { name: 'Abhilesh Jadhao', photo: cld('v1779777941/finops/partners/xeqthvtjcqo4pbk4tcgm'), lpa: '19', now: 'Project Manager, Cloud and DC', company: 'Fabutech', city: 'Mumbai' },
       { name: 'Atish Sonwane', photo: cld('v1779778117/finops/partners/ipu40he74efuwwiocpzu'), lpa: '20', now: 'Senior Cloud Engineer, FinOps', company: 'Persistent Systems', logo: logo('persistent'), city: 'Pune' },
       { name: 'Ashish Kumbhojkar', photo: cld('v1779696513/finops/partners/bmphc8rteevycsbqc1i7'), lpa: '14', now: 'Cloud FinOps Engineer', company: 'Cencora', city: 'Pune' },
-    ],
-  },
-
-  // INVENTED names, roles, years and photos. The LinkedIn links are placeholders too: use each trainer's own profile.
-  trainers: {
-    title: 'Taught by people who do this at work',
-    items: [
-      { name: 'Arjun R.', role: 'Lead platform engineer, fintech', years: 9, photo: photo('1560250097-0b93528c311a', 700), teaches: ['aws', 'docker'], linkedin: 'https://www.linkedin.com/' },
-      { name: 'Meera I.', role: 'Cloud architect, enterprise', years: 7, photo: photo('1580489944761-15a19d654956', 700), teaches: ['azure'], linkedin: 'https://www.linkedin.com/' },
-      { name: 'Karan S.', role: 'SRE, logistics', years: 8, photo: photo('1500648767791-00dcc994a43e', 700), teaches: ['kubernetes', 'terraform'], linkedin: 'https://www.linkedin.com/' },
-      { name: 'Nisha K.', role: 'FinOps lead, retail', years: 6, photo: photo('1573497019940-1c28c88b4f3e', 700), teaches: ['finops'], linkedin: 'https://www.linkedin.com/' },
     ],
   },
 

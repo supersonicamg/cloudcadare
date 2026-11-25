@@ -98,9 +98,10 @@ Pages are a stack of sections. Each section sits on exactly one surface:
 | 2 | Program climb (the 4 months) | mist panel |
 | 3 | How we teach (photo mosaic) | page |
 | 4 | Placements | dark panel |
-| 5 | Trainers | page |
-| 6 | Talk to a person + FAQ + "Next batch" strip | stone panel |
+| 5 | Talk to a person + FAQ + "Next batch" strip | stone panel |
 | — | Footer | ink |
+
+The v9 mockup also has a Trainers section between Placements and Talk. It is removed from the live homepage and its menu links (26 Nov 2026).
 
 ---
 
@@ -198,7 +199,7 @@ Every component below is in v9; copy the markup and CSS from there.
 Button and link labels are verbs plus objects: "Join the next batch", "Ask on WhatsApp", "Message Ananya on WhatsApp". Never "Click here" or "Submit".
 
 ### 7.2 Header (sticky)
-- Logo, then nav links (Program · How we teach · Placements · Trainers · FAQ), then on the right "Log in" and an outline "WhatsApp us".
+- Logo, then nav links (Program · How we teach · Placements · FAQ), then on the right "Log in" and an outline "WhatsApp us".
 - **Stays visible while scrolling.** It gets a hairline shadow once scrolled. The link for the section on screen gets a yellow underline.
 - Phone: logo and a "Menu" button that opens a dropdown panel.
 

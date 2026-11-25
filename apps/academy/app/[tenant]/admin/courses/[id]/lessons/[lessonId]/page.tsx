@@ -1,14 +1,14 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { z } from 'zod'
-import { humanSize } from '@educore/core/media'
+import { humanSize, videoServerFromEnv } from '@educore/core/media'
 import { isEnabled } from '@educore/features'
 import { can, requireAccess } from '@/lib/dal'
 import { LessonForm } from './lesson-form'
 
 export const metadata = { title: 'Edit lesson' }
 
-const PROVIDER: Record<string, string> = { youtube: 'YouTube', mux: 'Mux', external_url: 'Direct link' }
+const PROVIDER: Record<string, string> = { youtube: 'YouTube', mux: 'Mux', external_url: 'Direct link', self_hosted: 'Video server file' }
 
 export default async function EditLesson({ params }: PageProps<'/[tenant]/admin/courses/[id]/lessons/[lessonId]'>) {
   const { id, lessonId } = await params
@@ -26,7 +26,7 @@ export default async function EditLesson({ params }: PageProps<'/[tenant]/admin/
     if (m) currentFile = `${m.title ?? 'File'}${m.size_bytes ? ` (${humanSize(m.size_bytes)})` : ''}`
   } else if (l.media_asset_id) {
     const { data: m } = await a.db.from('media_assets').select('provider, playback_id, metadata').eq('id', l.media_asset_id).maybeSingle()
-    if (m) currentVideo = `${PROVIDER[m.provider] ?? m.provider} ${m.playback_id ?? ((m.metadata ?? {}) as { url?: string }).url ?? ''}`.trim()
+    if (m) currentVideo = `${PROVIDER[m.provider] ?? m.provider} ${m.playback_id ?? ((m.metadata ?? {}) as { url?: string }).url ?? ((m.metadata ?? {}) as { path?: string }).path ?? ''}`.trim()
   }
 
   return (
@@ -38,6 +38,7 @@ export default async function EditLesson({ params }: PageProps<'/[tenant]/admin/
         <LessonForm courseId={id} lessonId={lessonId} v={{
           title: l.title, summary: l.summary, type: l.type, minutes: l.duration_seconds ? Math.round(l.duration_seconds / 60) : null,
           isPreview: l.is_preview, text: ((l.body ?? {}) as { text?: string }).text ?? '', externalUrl: l.external_url ?? '',
+          videoFolder: videoServerFromEnv() ? a.bundle.tenant.slug : null,
           currentVideo, canAddVideo: isEnabled(a.bundle.features, 'content.video') && can(a, 'content.upload'),
           currentFile, canUpload: isEnabled(a.bundle.features, 'core.media') && isEnabled(a.bundle.features, l.type === 'live' ? 'content.video' : l.type === 'pdf' ? 'content.documents' : 'content.downloads') && can(a, 'content.upload'),
           dripAvailable: isEnabled(a.bundle.features, 'learning.drip'),

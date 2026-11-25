@@ -1,3 +1,5 @@
+import { serverVideoPath } from './server-video'
+
 // Pure helpers for video sources. No I/O: used by admin actions to validate what staff paste, and by the
 // playback resolver. Anything that reaches a <video src> or an iframe must pass through here first.
 
@@ -5,6 +7,7 @@ export type VideoSource =
   | { provider: 'youtube'; playbackId: string }
   | { provider: 'mux'; playbackId: string }
   | { provider: 'external_url'; url: string }
+  | { provider: 'self_hosted'; path: string }
 
 const YT_ID = /^[A-Za-z0-9_-]{11}$/
 const MUX_ID = /^[A-Za-z0-9]{8,80}$/
@@ -40,6 +43,7 @@ export function parseVideoSource(kind: string, value: string): VideoSource | nul
   const v = value.trim()
   if (kind === 'youtube') { const id = youtubeId(v); return id ? { provider: 'youtube', playbackId: id } : null }
   if (kind === 'mux') return MUX_ID.test(v) ? { provider: 'mux', playbackId: v } : null
+  if (kind === 'server') { const path = serverVideoPath(v); return path ? { provider: 'self_hosted', path } : null }
   if (kind === 'url') { const u = isDirectVideoUrl(v); return u ? { provider: 'external_url', url: u.toString() } : null }
   return null
 }

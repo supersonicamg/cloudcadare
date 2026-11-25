@@ -38,6 +38,7 @@ CRON_SECRET=
 
 - `CRON_SECRET`: any long random string (`openssl rand -hex 32`).
 - Only if used: `MUX_SIGNING_KEY_ID`, `MUX_SIGNING_PRIVATE_KEY` (signed videos). Full list: `apps/academy/.env.example`.
+- Only if videos are served from this VPS: `VIDEO_SERVER_URL` and `VIDEO_SERVER_SECRET` (§8).
 - **Never set `EDUCORE_FAKE_GATEWAY`** on a client's server.
 - Leave `UPSTASH_REDIS_REST_*` unset. When set, only hostnames listed in Redis are served.
 
@@ -78,3 +79,32 @@ podman run --rm -p 3000:3000 --env-file apps/academy/.env.local -e EDUCORE_FAKE_
 ## 7. What has been checked
 
 Both images build with Podman with no environment variables. The academy container was run against a development project with proxy-style headers: public pages load, signed-in pages redirect to log in, static files are served, and a mapped custom domain resolves. The console container was only started without a database. **Not yet checked:** a deploy on a real Dokploy server, TLS, signing in and checkout from the container, and the scheduled job.
+
+## 8. Videos on the VPS (optional)
+
+The app signs an address that expires after four hours; a small nginx service checks it. Files live in `/srv/videos/<tenant slug>/` on the VPS.
+
+1. DNS: point `videos.<domain>` at the VPS. Folder: `mkdir -p /srv/videos/<slug>`.
+2. Dokploy: **Create Service → Application**, provider **Docker**, image `nginx:alpine`.
+3. **Advanced → Volumes / Mounts**: a bind mount from `/srv/videos` to `/usr/share/nginx/videos`, and a file mount at `/etc/nginx/conf.d/default.conf` with the config below. Put the output of `openssl rand -hex 32` in place of `CHANGE_THIS_SECRET`; never commit it.
+4. **Domains**: `videos.<domain>`, container port `80`, HTTPS on. Deploy (again after any domain change).
+
+```nginx
+server {
+  listen 80;
+  root /usr/share/nginx/videos;
+
+  location / {
+    secure_link $arg_md5,$arg_expires;
+    secure_link_md5 "$secure_link_expires$uri CHANGE_THIS_SECRET";
+    if ($secure_link = "")  { return 403; }
+    if ($secure_link = "0") { return 410; }
+  }
+}
+```
+
+5. Academy application: set `VIDEO_SERVER_URL=https://videos.<domain>` and `VIDEO_SERVER_SECRET=<the same secret>`, apply migration `…35_b1_self_hosted_video`, and redeploy.
+6. In the lesson editor choose **File on the video server** (video lesson) or fill **Or use a file on the video server** (class recording), with the path inside the academy's folder. Saving checks that the file answers.
+
+A file manager for uploads (FileBrowser Quantum) can share `/srv/videos`. **Do not give learners its share links**: they bypass sign-in and enrolment.
+

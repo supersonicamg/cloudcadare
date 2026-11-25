@@ -8,6 +8,8 @@ import { FileUpload } from './file-upload'
 export interface LessonFormValues {
   title: string; summary: string | null; type: string; minutes: number | null; isPreview: boolean
   text: string; externalUrl: string; currentVideo: string | null; canAddVideo: boolean
+  /** The academy's folder on our video server, or null when no video server is set up. */
+  videoFolder: string | null
   currentFile: string | null; canUpload: boolean; dripAvailable: boolean; dripDays: number | null
 }
 
@@ -40,11 +42,14 @@ export function LessonForm({ courseId, lessonId, v }: { courseId: string; lesson
                 <div><label htmlFor="video_kind" className={label}>Source</label>
                   <select id="video_kind" name="video_kind" className={input} defaultValue="youtube">
                     <option value="youtube">YouTube link</option><option value="mux">Mux playback ID</option><option value="url">Direct https link</option>
+                    {v.videoFolder && <option value="server">File on the video server</option>}
                   </select></div>
-                <div><label htmlFor="video_value" className={label}>Link or ID</label><input id="video_value" name="video_value" className={input} autoComplete="off" /></div>
+                <div><label htmlFor="video_value" className={label}>{v.videoFolder ? 'Link, ID or file name' : 'Link or ID'}</label><input id="video_value" name="video_value" className={input} autoComplete="off" /></div>
               </div>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="mux_signed" /> Mux playback uses a signed policy</label>
-              <p className={hint}>A direct link must be https and end in .mp4, .webm or .m3u8. Uploading files comes with the media library.</p>
+              <p className={hint}>A direct link must be https and end in .mp4, .webm or .m3u8.{v.videoFolder
+                ? ` For the video server, upload the file to the “${v.videoFolder}” folder first, then enter its name, such as month-1/lesson-01.mp4.`
+                : ' Uploading files comes with the media library.'}</p>
             </>
           ) : <p className={hint}>Your role cannot add videos.</p>}
         </fieldset>
@@ -53,12 +58,17 @@ export function LessonForm({ courseId, lessonId, v }: { courseId: string; lesson
       {v.type === 'live' && (
         <fieldset className="grid gap-4 rounded-[var(--radius)] border border-border p-4">
           <legend className="px-1 text-sm font-medium">Class recording</legend>
-          <p className="text-sm">{v.currentFile ? <>Uploaded video: <span className="font-medium" data-testid="current-file">{v.currentFile}</span></> : v.externalUrl ? 'Using a Teams link.' : 'No recording yet. Learners see “Recording on its way”.'}</p>
+          <p className="text-sm">{v.currentFile ? <>Current video: <span className="font-medium" data-testid="current-file">{v.currentFile}</span></> : v.externalUrl ? 'Using a Teams link.' : 'No recording yet. Learners see “Recording on its way”.'}</p>
           <div className="grid gap-2">
             <p className={label}>Upload the Teams video (recommended)</p>
             <p className={hint}>Plays inside the academy, so learners get notes, bookmarks and progress.</p>
             {v.canUpload ? <FileUpload courseId={courseId} lessonId={lessonId} type="recording" /> : <p className={hint}>Your role or plan cannot upload videos.</p>}
           </div>
+          {v.videoFolder && v.canAddVideo && (
+            <div className="border-t border-border pt-4"><label htmlFor="server_path" className={label}>Or use a file on the video server</label>
+              <input id="server_path" name="server_path" className={input} autoComplete="off" placeholder="month-1/class-01.mp4" />
+              <p className={hint}>Upload it to the “{v.videoFolder}” folder first. Plays inside the academy. Saving replaces the current video or link.</p></div>
+          )}
           <div className="border-t border-border pt-4"><label htmlFor="recording_url" className={label}>Or paste a Teams link</label>
             <input key={v.externalUrl} id="recording_url" name="recording_url" type="url" defaultValue={v.externalUrl} placeholder="https://teams.microsoft.com/…" className={input} />
             <p className={hint}>Opens in Microsoft Teams. No notes or progress. Saving a link removes the uploaded video. Check that learners outside your organisation can open it.</p></div>

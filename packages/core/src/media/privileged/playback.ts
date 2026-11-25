@@ -4,6 +4,7 @@ import { createPrivilegedDb } from '@educore/auth/privileged'
 import { FILE_BUCKET } from '../files'
 import { isDirectVideoUrl, youtubeId } from '../source'
 import { muxSigningFromEnv, signMuxToken } from '../mux'
+import { serverVideoPath, signServerVideoUrl, videoServerFromEnv } from '../server-video'
 
 // PLAYBACK RESOLVER. media_assets is staff-only under RLS, so a learner's player cannot read it. The page
 // first proves the learner may see the LESSON (RLS on `lessons`), then calls this with that lesson's
@@ -23,7 +24,7 @@ export async function resolvePlayback(tenantId: string, mediaAssetId: string): P
   if (error) throw new Error(`media read failed: ${error.message}`)
   if (!a || a.status !== 'ready') return { kind: 'unavailable', reason: 'not_ready' }
 
-  const meta = (a.metadata ?? {}) as { url?: string; signed?: boolean }
+  const meta = (a.metadata ?? {}) as { url?: string; signed?: boolean; path?: string }
   switch (a.provider) {
     case 'youtube': {
       const id = a.playback_id ? youtubeId(a.playback_id) : null
@@ -41,6 +42,16 @@ export async function resolvePlayback(tenantId: string, mediaAssetId: string): P
       const signing = muxSigningFromEnv()
       if (!signing) return { kind: 'unavailable', reason: 'not_configured' }
       return { kind: 'hls', src: `${base}?token=${signMuxToken(a.playback_id, signing)}` }
+    }
+    case 'self_hosted': {
+      const server = videoServerFromEnv()
+      if (!server) return { kind: 'unavailable', reason: 'not_configured' }
+      const path = meta.path ? serverVideoPath(meta.path) : null
+      if (!path) return { kind: 'unavailable', reason: 'not_ready' }
+      // The folder is this academy's own, whatever the row says.
+      const { data: t, error: tenantError } = await db.from('tenants').select('slug').eq('id', tenantId).single()
+      if (tenantError) throw new Error(`tenant read failed: ${tenantError.message}`)
+      return { kind: 'file', src: signServerVideoUrl(server, t.slug, path) }
     }
     case 'supabase': {
       // An uploaded class recording. The link lasts long enough to watch a two-hour class with pauses.

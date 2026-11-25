@@ -5,7 +5,7 @@ import { updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import type { Database, Json } from '@educore/db/types'
-import { checkFile, createUploadTarget, isFileLessonType, isTeamsRecordingLink, mimeForExt, parseVideoSource, removeFile, safeFilename, statUpload, uploadRule, type UploadTarget, type UploadType } from '@educore/core/media'
+import { checkFile, checkServerVideo, createUploadTarget, isFileLessonType, isTeamsRecordingLink, mimeForExt, parseVideoSource, removeFile, safeFilename, statUpload, uploadRule, videoServerFromEnv, type UploadTarget, type UploadType } from '@educore/core/media'
 import { isEnabled } from '@educore/features'
 import { ActionDenied, MfaRequired, can, requireActionAccess, type Access } from '@/lib/dal'
 
@@ -28,6 +28,29 @@ function message(e: unknown): string {
   const m = e instanceof Error ? e.message : String(e)
   if (m.includes('plan_limit_reached')) return 'Your plan has reached its limit for this. Upgrade the plan to add more.'
   return 'Something went wrong. Try again.'
+}
+
+const SERVER_VIDEO_ERRORS = {
+  missing: 'No file with that name was found on the video server. Check the folder, spelling and capital letters.',
+  refused: 'The video server refused the link. Check that the app and the server use the same secret.',
+  unreachable: 'The video server did not answer with a video. Check its address and that it is running.',
+}
+
+/** A file already on our video server: check it is really there, then record it. */
+async function addServerVideo(a: Access, input: string, title: string): Promise<{ error: string } | { assetId: string }> {
+  const server = videoServerFromEnv()
+  if (!server) return { error: 'The video server is not set up.' }
+  const slug = a.bundle.tenant.slug
+  // Staff may copy the path as the file manager shows it, with the academy's folder in front.
+  const source = parseVideoSource('server', input.trim().replace(/^\/+/, '').replace(new RegExp(`^${slug}/`), ''))
+  if (source?.provider !== 'self_hosted') return { error: 'Enter the file name of an .mp4 or .webm video, with its folder if it has one.' }
+  const found = await checkServerVideo(server, slug, source.path)
+  if (!found.ok) return { error: SERVER_VIDEO_ERRORS[found.reason] }
+  const { data, error } = await a.db.from('media_assets').insert({
+    tenant_id: a.bundle.tenant.id, kind: 'video', provider: source.provider, title: source.path.split('/').pop() ?? title, status: 'ready',
+    metadata: { path: source.path }, size_bytes: found.sizeBytes, uploaded_by: a.memberId,
+  }).select('id').single()
+  return error ? { error: message(error) } : { assetId: data.id }
 }
 
 const done = (a: Access) => updateTag(`tenant:${a.bundle.tenant.id}:catalog`)
@@ -203,7 +226,7 @@ export async function updateLesson(courseId: string, lessonId: string, _s: FormS
   if (!parsed.success) return { error: 'Check the form: the title needs at least 2 characters and minutes must be a number.' }
   try {
     const a = await requireActionAccess({ permission: 'course.manage', feature: 'catalog.courses' })
-    const { data: lesson } = await a.db.from('lessons').select('id, type, media_asset_id').eq('id', lessonId).eq('course_id', courseId).is('deleted_at', null).maybeSingle()
+    const { data: lesson } = await a.db.from('lessons').select('id, type, media_asset_id, external_url').eq('id', lessonId).eq('course_id', courseId).is('deleted_at', null).maybeSingle()
     if (!lesson) return { error: 'That lesson was not found.' }
 
     const patch: Database['public']['Tables']['lessons']['Update'] = {
@@ -232,9 +255,25 @@ export async function updateLesson(courseId: string, lessonId: string, _s: FormS
       if (!url.success) return { error: 'Enter a link that starts with https://' }
       patch.external_url = url.data
     } else if (lesson.type === 'live') {
-      // A class recording is either the uploaded Teams video (the upload form attaches it) or a Teams link typed here.
+      // A class recording is the uploaded Teams video (the upload form attaches it), a file on our video server, or a
+      // Teams link typed here.
       const link = String(form.get('recording_url') ?? '').trim()
-      if (link) {
+      const file = String(form.get('server_path') ?? '').trim()
+      if (file) {
+        // The link box is prefilled with the saved link, so only a changed one counts as a second choice.
+        if (link && link !== lesson.external_url) return { error: 'Choose one: a file on the video server or a Teams link.' }
+        if (!isEnabled(a.bundle.features, 'content.video') || !can(a, 'content.upload')) return { error: 'You do not have permission to add videos.' }
+        const added = await addServerVideo(a, file, parsed.data.title)
+        if ('error' in added) return added
+        patch.external_url = null
+        patch.completion_rule = { type: 'watch_pct', pct: 90 }
+        patch.media_asset_id = added.assetId
+        replacedAsset = lesson.media_asset_id
+        if (replacedAsset) {
+          const { data: old } = await a.db.from('media_assets').select('storage_path').eq('id', replacedAsset).maybeSingle()
+          replacedFile = old?.storage_path ?? null
+        }
+      } else if (link) {
         if (link.length > 2000 || !isTeamsRecordingLink(link)) return { error: 'Paste the https share link from Microsoft Teams, Stream, SharePoint or OneDrive.' }
         // It replaces any uploaded video, so it needs the same rights as adding one.
         if (!isEnabled(a.bundle.features, 'content.video') || !can(a, 'content.upload')) return { error: 'You do not have permission to add videos.' }
@@ -254,17 +293,24 @@ export async function updateLesson(courseId: string, lessonId: string, _s: FormS
       const value = String(form.get('video_value') ?? '').trim()
       if (value) {
         if (!isEnabled(a.bundle.features, 'content.video') || !can(a, 'content.upload')) return { error: 'You do not have permission to add videos.' }
-        const source = parseVideoSource(String(form.get('video_kind') ?? ''), value)
-        if (!source) return { error: 'That video address is not valid for the type you chose. YouTube links, Mux playback IDs and direct https .mp4 or .m3u8 links work.' }
-        const signed = source.provider === 'mux' && form.get('mux_signed') === 'on'
-        const { data: asset, error } = await a.db.from('media_assets').insert({
-          tenant_id: a.bundle.tenant.id, kind: 'video', provider: source.provider, title: parsed.data.title, status: 'ready',
-          playback_id: 'playbackId' in source ? source.playbackId : null,
-          metadata: source.provider === 'external_url' ? { url: source.url } : signed ? { signed: true } : {},
-          uploaded_by: a.memberId,
-        }).select('id').single()
-        if (error) return { error: message(error) }
-        patch.media_asset_id = asset.id
+        const kind = String(form.get('video_kind') ?? '')
+        if (kind === 'server') {
+          const added = await addServerVideo(a, value, parsed.data.title)
+          if ('error' in added) return added
+          patch.media_asset_id = added.assetId
+        } else {
+          const source = parseVideoSource(kind, value)
+          if (!source || source.provider === 'self_hosted') return { error: 'That video address is not valid for the type you chose. YouTube links, Mux playback IDs and direct https .mp4 or .m3u8 links work.' }
+          const signed = source.provider === 'mux' && form.get('mux_signed') === 'on'
+          const { data: asset, error } = await a.db.from('media_assets').insert({
+            tenant_id: a.bundle.tenant.id, kind: 'video', provider: source.provider, title: parsed.data.title, status: 'ready',
+            playback_id: 'playbackId' in source ? source.playbackId : null,
+            metadata: source.provider === 'external_url' ? { url: source.url } : signed ? { signed: true } : {},
+            uploaded_by: a.memberId,
+          }).select('id').single()
+          if (error) return { error: message(error) }
+          patch.media_asset_id = asset.id
+        }
         replacedAsset = lesson.media_asset_id
       }
     }

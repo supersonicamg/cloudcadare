@@ -133,7 +133,7 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
                 : playback && playback.kind !== 'unavailable'
                   ? <VideoPlayer playback={playback} lessonId={lesson.id} startAt={deepT ?? (progress.completed ? 0 : progress.positionSeconds)} completed={progress.completed} title={lesson.title} />
                   : <Notice>{playback?.kind === 'unavailable' && playback.reason === 'not_configured'
-                      ? 'This video needs signed playback, which is not configured yet. Tell your instructor.'
+                      ? 'Video playback is not set up yet. Tell your instructor.'
                       : 'The video for this lesson is not ready yet. Check back soon.'}</Notice>
               )}
               </>}

@@ -49,7 +49,7 @@ async function signIn(page) {
   await page.goto(`${base}/login?next=/account`)
   await page.getByLabel('Email address').fill(EMAIL)
   await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  await page.getByRole('button', { name: 'Log in', exact: true }).click()
   await page.waitForURL((u) => u.pathname.startsWith('/account'), { timeout: 60_000 })
 }
 

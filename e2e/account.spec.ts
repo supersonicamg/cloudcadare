@@ -107,7 +107,7 @@ test('password: wrong current password is refused, a new one works and old sessi
   await other.goto('/login')
   await other.getByLabel('Email').fill(mail)
   await other.getByLabel('Password', { exact: true }).fill(PASSWORD)
-  await other.getByRole('button', { name: 'Sign in' }).click()
+  await other.getByRole('button', { name: 'Log in', exact: true }).click()
   await other.waitForURL((u) => u.pathname !== '/login')
 
   await page.reload()

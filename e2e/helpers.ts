@@ -22,14 +22,39 @@ export async function ensureUser(email: string) {
   if (!res.ok) throw new Error(`could not prepare user ${email}: ${res.status} ${await res.text()}`)
 }
 
-/** Signs in through the real login page. */
+/** The newest unused email code for an address, read with the service key (test setup only: learners can never read this table). */
+export async function latestEmailCode(email: string): Promise<string> {
+  const { base, headers } = authAdmin()
+  for (let i = 0; i < 20; i++) {
+    const res = await fetch(`${base}/rest/v1/email_verifications?select=code&email_norm=eq.${encodeURIComponent(email.toLowerCase())}&used_at=is.null&order=created_at.desc&limit=1`, { headers })
+    const rows = (await res.json()) as { code: string }[]
+    if (rows[0]) return rows[0].code
+    await new Promise((r) => setTimeout(r, 500))
+  }
+  throw new Error(`no email code for ${email}`)
+}
+
+/** Types the emailed code on the confirm page. */
+export async function confirmEmail(page: Page, email: string) {
+  await page.getByLabel('6-digit code').fill(await latestEmailCode(email))
+  await page.getByRole('button', { name: 'Confirm email' }).click()
+}
+
+/**
+ * Signs in through the real login page. A learner whose email is not confirmed yet lands on the confirm page; this
+ * types the code from the database, exactly like a learner reading it from their inbox, and carries on to `next`.
+ */
 export async function signIn(page: Page, email: string, next = '/') {
   await ensureUser(email)
   await page.goto(`/login?next=${encodeURIComponent(next)}`)
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-  await page.getByRole('button', { name: 'Sign in' }).click()
-  await page.waitForURL((u) => u.pathname === next)
+  await page.getByRole('button', { name: 'Log in', exact: true }).click()
+  await page.waitForURL((u) => u.pathname === next || u.pathname === '/signup/confirm')
+  if (new URL(page.url()).pathname === '/signup/confirm') {
+    await confirmEmail(page, email)
+    await page.waitForURL((u) => u.pathname === next)
+  }
 }
 
 // ---------------------------------------------------------------------------- two-step (TOTP)

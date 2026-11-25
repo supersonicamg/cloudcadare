@@ -3,6 +3,7 @@
 import { cookies, headers } from 'next/headers'
 import { createServerDb, getPlane, hasPlaneEnv } from '@educore/auth'
 import { describeAuthError, parseLogin, parseSignUp, safeNext, type AccountError } from '@educore/core/accounts'
+import { sendEmailCode } from '@educore/core/accounts/privileged'
 import { domainMapFromEnv, resolveHost } from '@educore/tenancy'
 import { loadTenantBundle } from '@educore/tenancy/privileged/load-tenant'
 
@@ -28,24 +29,41 @@ async function connect() {
   if (!tenant) return { error: 'This academy is not available.' }
   // Forward the visitor's browser name so "Where you are logged in" shows their device, not this server.
   const ua = (await headers()).get('user-agent')?.slice(0, 300)
-  return { tenantId: tenant.tenant.id, db: createServerDb(getPlane(tenant.tenant.planeId), await cookies(), ua ? { headers: { 'User-Agent': ua } } : undefined) }
+  return { tenantId: tenant.tenant.id, planeId: tenant.tenant.planeId, db: createServerDb(getPlane(tenant.tenant.planeId), await cookies(), ua ? { headers: { 'User-Agent': ua } } : undefined) }
 }
 
 type Connection = Exclude<Awaited<ReturnType<typeof connect>>, { error: string }>
 
 /** First sign-in on this academy creates the membership (public.join_tenant: idempotent, honours closed signup). */
-async function join({ db, tenantId }: Connection, fullName: unknown, next: FormDataEntryValue | null): Promise<AuthState> {
+async function join({ db, tenantId }: Connection, fullName: unknown): Promise<{ memberId: string } | { error: string }> {
   const name = typeof fullName === 'string' ? fullName.trim().slice(0, 80) : ''
-  const { error } = await db.rpc('join_tenant', { p_tenant_id: tenantId, p_display_name: name || undefined })
-  if (!error) return { done: safeNext(next) }
+  const { data, error } = await db.rpc('join_tenant', { p_tenant_id: tenantId, p_display_name: name || undefined })
+  if (!error && data) return { memberId: data }
   await db.auth.signOut()
   return {
-    error: error.message.includes('signup_closed')
+    error: error?.message.includes('signup_closed')
       ? 'This academy is invitation-only.'
-      : error.message.includes('member_blocked')
+      : error?.message.includes('member_blocked')
         ? 'This account cannot sign in here. Contact the academy.'
         : 'We could not finish signing you in.',
   }
+}
+
+const confirmPath = (next: string) => `/signup/confirm${next === '/' ? '' : `?next=${encodeURIComponent(next)}`}`
+
+/**
+ * Where a signed-in person goes. A learner whose email is not confirmed yet, and who has neither access nor a staff role
+ * (those were vetted another way), goes to the confirm step first and is sent a fresh code (the database throttles it).
+ */
+async function destination({ db, tenantId }: Connection, tenant: { planeId: string | null }, memberId: string, next: string): Promise<string> {
+  const [m, enrolled, roles] = await Promise.all([
+    db.from('tenant_members').select('email_verified_at').eq('id', memberId).single(),
+    db.from('enrollments').select('id').eq('member_id', memberId).in('status', ['active', 'paused', 'completed']).limit(1),
+    db.from('member_roles').select('member_id').eq('member_id', memberId).limit(1),
+  ])
+  if (m.data?.email_verified_at || enrolled.data?.length || roles.data?.length) return next
+  await sendEmailCode({ memberId, tenantId, planeId: tenant.planeId }).catch((e) => console.error('email code failed:', e))
+  return confirmPath(next)
 }
 
 export async function signUp(_prev: AuthState, form: FormData): Promise<AuthState> {
@@ -62,7 +80,11 @@ export async function signUp(_prev: AuthState, form: FormData): Promise<AuthStat
     console.error('sign-up returned no session: turn off "Confirm email" in the Supabase project (Authentication > Sign In / Providers > Email)')
     return { error: 'Sign-up is not fully set up yet. Contact the academy.' }
   }
-  return join(c, name, form.get('next'))
+  const joined = await join(c, name)
+  if ('error' in joined) return joined
+  // Nothing is granted until the email is confirmed (plan/16 §4.1): the code goes out now, whoever the address belongs to.
+  await sendEmailCode({ memberId: joined.memberId, tenantId: c.tenantId, planeId: c.planeId }).catch((e) => console.error('email code failed:', e))
+  return { done: confirmPath(safeNext(form.get('next'))) }
 }
 
 export async function signIn(_prev: AuthState, form: FormData): Promise<AuthState> {
@@ -73,5 +95,7 @@ export async function signIn(_prev: AuthState, form: FormData): Promise<AuthStat
 
   const { data, error } = await c.db.auth.signInWithPassword(parsed.data)
   if (error) return describeAuthError(error, 'login')
-  return join(c, data.user.user_metadata.full_name, form.get('next'))
+  const joined = await join(c, data.user.user_metadata.full_name)
+  if ('error' in joined) return joined
+  return { done: await destination(c, c, joined.memberId, safeNext(form.get('next'))) }
 }

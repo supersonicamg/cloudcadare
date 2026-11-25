@@ -2449,14 +2449,14 @@ isOneToOne: false
                   ]
                 },"tenant_members": {
                   Row: {
-                    "avatar_path": string | null,"branch_id": string | null,"created_at": string,"custom_fields": NonNullable<Json>,"date_of_birth": string | null,"display_name": string,"email": string | null,"gender": string | null,"id": string,"is_minor": boolean,"joined_at": string,"last_active_at": string | null,"locale": string | null,"member_code": string | null,"phone": string | null,"status": string,"tenant_id": string,"updated_at": string,"user_id": string | null
+                    "avatar_path": string | null,"branch_id": string | null,"created_at": string,"custom_fields": NonNullable<Json>,"date_of_birth": string | null,"display_name": string,"email": string | null,"email_verified_at": string | null,"gender": string | null,"id": string,"is_minor": boolean,"joined_at": string,"last_active_at": string | null,"locale": string | null,"member_code": string | null,"phone": string | null,"status": string,"tenant_id": string,"updated_at": string,"user_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "avatar_path"?: string | null,"branch_id"?: string | null,"created_at"?: string,"custom_fields"?: NonNullable<Json>,"date_of_birth"?: string | null,"display_name": string,"email"?: string | null,"gender"?: string | null,"id"?: string,"is_minor"?: boolean,"joined_at"?: string,"last_active_at"?: string | null,"locale"?: string | null,"member_code"?: string | null,"phone"?: string | null,"status"?: string,"tenant_id": string,"updated_at"?: string,"user_id"?: string | null
+                    "avatar_path"?: string | null,"branch_id"?: string | null,"created_at"?: string,"custom_fields"?: NonNullable<Json>,"date_of_birth"?: string | null,"display_name": string,"email"?: string | null,"email_verified_at"?: string | null,"gender"?: string | null,"id"?: string,"is_minor"?: boolean,"joined_at"?: string,"last_active_at"?: string | null,"locale"?: string | null,"member_code"?: string | null,"phone"?: string | null,"status"?: string,"tenant_id": string,"updated_at"?: string,"user_id"?: string | null
                   }
                   Update: {
-                    "avatar_path"?: string | null,"branch_id"?: string | null,"created_at"?: string,"custom_fields"?: NonNullable<Json>,"date_of_birth"?: string | null,"display_name"?: string,"email"?: string | null,"gender"?: string | null,"id"?: string,"is_minor"?: boolean,"joined_at"?: string,"last_active_at"?: string | null,"locale"?: string | null,"member_code"?: string | null,"phone"?: string | null,"status"?: string,"tenant_id"?: string,"updated_at"?: string,"user_id"?: string | null
+                    "avatar_path"?: string | null,"branch_id"?: string | null,"created_at"?: string,"custom_fields"?: NonNullable<Json>,"date_of_birth"?: string | null,"display_name"?: string,"email"?: string | null,"email_verified_at"?: string | null,"gender"?: string | null,"id"?: string,"is_minor"?: boolean,"joined_at"?: string,"last_active_at"?: string | null,"locale"?: string | null,"member_code"?: string | null,"phone"?: string | null,"status"?: string,"tenant_id"?: string,"updated_at"?: string,"user_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -2868,6 +2868,12 @@ isOneToOne: false
                            },
 "end_my_session":
 { Args: { "p_session_id": string }; Returns: boolean
+                           },
+"issue_email_code":
+{ Args: { "p_member_id": string }; Returns: Json
+                           },
+"verify_email_code":
+{ Args: { "p_code": string,"p_tenant_id": string }; Returns: Json
                            },
 "my_access":
 { Args: { "p_tenant_id": string }; Returns: Json

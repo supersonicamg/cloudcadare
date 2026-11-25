@@ -1,4 +1,5 @@
 import { cookies, headers } from 'next/headers'
+import { safeNext } from '@educore/core/accounts'
 import { createServerDb, getPlane } from '@educore/auth'
 import { resolveTenantFromHost } from '@/lib/dal'
 
@@ -18,6 +19,8 @@ export async function POST(request: Request) {
     await db.auth.signOut({ scope: 'local' })
   }
   const proto = (await headers()).get('x-forwarded-proto') ?? (host?.startsWith('localhost') || host?.includes('.localhost') ? 'http' : 'https')
+  // Optional `next` (same-site path only), for "use a different email"; otherwise the logged-out page.
+  const next = safeNext((await request.formData().catch(() => null))?.get('next'))
   // 303: the browser follows a POST redirect with a GET.
-  return new Response(null, { status: 303, headers: { Location: `${proto}://${host}/logged-out`, 'Cache-Control': 'no-store' } })
+  return new Response(null, { status: 303, headers: { Location: `${proto}://${host}${next === '/' ? '/logged-out' : next}`, 'Cache-Control': 'no-store' } })
 }

@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./accounts": "./src/accounts/index.ts",
+    "./accounts/privileged": "./src/accounts/privileged/index.ts",
     "./licensing": "./src/licensing/index.ts",
     "./tenants": "./src/tenants/index.ts",
     "./domains": "./src/domains/index.ts",

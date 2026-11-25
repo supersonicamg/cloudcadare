@@ -3,7 +3,7 @@ import { getShell } from '@/lib/shell'
 import { entryContext } from './context'
 import { LoginForm } from './login-form'
 
-export const metadata = { title: 'Sign in' }
+export const metadata = { title: 'Log in' }
 
 async function Form({ searchParams, tenantId }: { searchParams: PageProps<'/[tenant]/login'>['searchParams']; tenantId: string }) {
   const { next } = await searchParams

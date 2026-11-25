@@ -6,6 +6,7 @@ import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { dateShort, nowMs, timeShort } from '@/lib/format'
 import { money } from '@/lib/money'
+import { paymentsOff } from '@/lib/online-payments'
 import { getShell } from '@/lib/shell'
 import { buttonLg, h1s, lead } from '@/lib/ui'
 import { Panel } from '../../../_components/parts'
@@ -62,7 +63,7 @@ export default async function Pending({ params }: PageProps<'/[tenant]/checkout/
   const o = order.data
   const proof = proofs.data?.[0]
   if (o.status === 'paid') redirect(`/checkout/${orderId}/done`)
-  if (!proof) redirect(`/checkout/${orderId}`)
+  if (!proof || paymentsOff(settings.data?.commerce)) redirect(`/checkout/${orderId}`)
 
   const upi = readUpiSettings((settings.data?.commerce as { upi?: unknown } | null)?.upi)
   const title = items.data?.map((i) => i.title_snapshot).join(', ') ?? 'your course'

@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { requireMemberAction } from '@/lib/dal'
+import { onlinePaymentsOff } from '@/lib/online-payments'
 
 /**
  * "I have paid" (plan/16 §5.1). The database makes one payment row and one open proof; pressing the button twice, or
@@ -12,6 +13,7 @@ export async function submitUpiPayment(orderId: string, _form: FormData): Promis
   if (!z.uuid().safeParse(orderId).success) redirect('/courses')
   const a = await requireMemberAction().catch(() => null)
   if (!a) redirect(`/login?next=${encodeURIComponent(`/checkout/${orderId}`)}`)
+  if (await onlinePaymentsOff(a.db, a.bundle.tenant.id)) redirect(`/checkout/${orderId}`)
   const { error } = await a.db.rpc('submit_upi_payment', { p_order_id: orderId })
   if (error) {
     if (error.message.includes('email_not_confirmed')) redirect(`/signup/confirm?next=${encodeURIComponent(`/checkout/${orderId}`)}`)

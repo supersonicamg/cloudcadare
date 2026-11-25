@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { completeFreeOrder, startGatewayPayment } from '@educore/core/commerce'
 import { isEnabled } from '@educore/features'
 import { ActionDenied, requireMemberAction } from '@/lib/dal'
+import { onlinePaymentsOff } from '@/lib/online-payments'
 import { kickOutbox } from '@/lib/outbox'
 
 /** "Buy" on a course page. The order is created by the database from the product's current price. */
@@ -19,7 +20,7 @@ export async function startCheckout(productId: string, priceId: string, slug: st
     } else {
       const orderId = (data as { order_id: string }).order_id
       // A missing gateway is not an error here: the checkout page explains it.
-      await startGatewayPayment({ tenantId: a.bundle.tenant.id, orderId })
+      if (!(await onlinePaymentsOff(a.db, a.bundle.tenant.id))) await startGatewayPayment({ tenantId: a.bundle.tenant.id, orderId })
       target = `/checkout/${orderId}`
     }
   } catch (e) {
@@ -47,7 +48,9 @@ async function repriced(orderId: string, rpc: (db: Awaited<ReturnType<typeof req
     if (!isEnabled(a.bundle.features, 'commerce.coupons')) return { error: 'Coupons are not available.' }
     const { data, error } = await rpc(a.db)
     if (error) return { error: COUPON_MESSAGES[Object.keys(COUPON_MESSAGES).find((k) => error.message.includes(k)) ?? ''] ?? 'Something went wrong. Try again.' }
-    if ((data as { total_minor: number }).total_minor > 0) await startGatewayPayment({ tenantId: a.bundle.tenant.id, orderId })
+    if ((data as { total_minor: number }).total_minor > 0 && !(await onlinePaymentsOff(a.db, a.bundle.tenant.id))) {
+      await startGatewayPayment({ tenantId: a.bundle.tenant.id, orderId })
+    }
   } catch (e) {
     return { error: e instanceof ActionDenied ? 'Please sign in again.' : 'Something went wrong. Try again.' }
   }

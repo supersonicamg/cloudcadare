@@ -8,12 +8,14 @@ import { Icon, Logo, platformFor } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { emailCodeRequired } from '@/lib/email-code'
 import { money } from '@/lib/money'
+import { paymentsOff } from '@/lib/online-payments'
 import { getShell } from '@/lib/shell'
 import { buttonLg, h1s, lead } from '@/lib/ui'
 import { completeFree } from '../actions'
 import { CouponForm } from '../coupon-form'
 import { submitUpiPayment } from '../upi-actions'
 import { CopyRow } from './copy-row'
+import { LockedPayments } from './locked-payments'
 import { MethodPicker, type Method } from './method-picker'
 import { PayButton } from './pay-button'
 
@@ -26,6 +28,9 @@ export const metadata = { title: 'Checkout' }
  * 3. Reading order: "Pay ₹49,999" -> method list (UPI chosen, Razorpay greyed) -> the QR panel (dominant: the biggest
  *    block, on stone) with three numbered steps -> UPI ID and note to copy -> "I have paid". The order summary sits
  *    beside it on desktop and is secondary (smaller, no fill): the total is the one big numeral.
+ *
+ * Online payment switched off (lib/online-payments): the job is "enter your coupon code". "Apply code" is the one filled
+ * button; the payment methods sit under it, greyed, with a blurred stand-in. No real UPI ID or QR reaches the page.
  */
 export default async function Checkout({ params }: PageProps<'/[tenant]/checkout/[orderId]'>) {
   const { orderId } = await params
@@ -45,7 +50,8 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   if (!order.data) notFound()
   const o = order.data
   if (o.status === 'paid') redirect(`/checkout/${orderId}/done`)
-  if (proof.data) redirect(`/checkout/${orderId}/pending`)
+  const paused = paymentsOff(settings.data?.commerce)
+  if (proof.data && !paused) redirect(`/checkout/${orderId}/pending`)
   // Nothing is sold to an address nobody has proven (the same rule the database applies to "I have paid").
   if (codeRequired && !me?.email_verified_at) redirect(`/signup/confirm?next=${encodeURIComponent(`/checkout/${orderId}`)}`)
 
@@ -53,15 +59,17 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   const paid = (payments.data ?? []).filter((p) => p.status === 'captured').reduce((s, p) => s + p.amount_minor, 0)
   const balance = o.total_minor - paid
   const upi = readUpiSettings((settings.data?.commerce as { upi?: unknown } | null)?.upi)
-  const gw = gwPay.data?.gateway_order_id ? await loadGateway(a.bundle.tenant.id) : null
+  const gw = !paused && gwPay.data?.gateway_order_id ? await loadGateway(a.bundle.tenant.id) : null
   const open = o.status === 'awaiting_payment' || o.status === 'partially_paid'
   const free = o.status === 'awaiting_payment' && o.total_minor === 0
   const razorpayReady = Boolean(open && !free && gw && gwPay.data?.gateway_order_id)
   const couponsOn = isEnabled(a.bundle.features, 'commerce.coupons') && o.status === 'awaiting_payment' && paid === 0
   const logo = platformFor(title)
   const wa = whatsappScreenshotLink(upi.whatsappNumber || brand.contact?.whatsapp || '', o.order_no, undefined)
-  const help = (brand.contact?.whatsapp ?? upi.whatsappNumber).replace(/\D/g, '')
-  const helpHref = help.length >= 8 ? `https://wa.me/${help}?text=${encodeURIComponent(`Hi, I need help paying for order ${o.order_no}.`)}` : null
+  // With payment off the UPI settings are not real yet, so their WhatsApp number is not offered either.
+  const help = (brand.contact?.whatsapp ?? (paused ? '' : upi.whatsappNumber)).replace(/\D/g, '')
+  const helpText = paused ? `Hi, I need a coupon code for order ${o.order_no}.` : `Hi, I need help paying for order ${o.order_no}.`
+  const helpHref = help.length >= 8 ? `https://wa.me/${help}?text=${encodeURIComponent(helpText)}` : null
   const refunds = site?.legal?.find((l) => /refund/i.test(l.label))
 
   let fake: { paymentId: string; signature: string } | undefined
@@ -71,7 +79,7 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   }
 
   // ---- The UPI panel: the QR for exactly what is still due, on the server.
-  const upiOn = open && !free && upi.enabled && balance > 0
+  const upiOn = !paused && open && !free && upi.enabled && balance > 0
   const link = upiOn ? upiPayLink({ vpa: upi.vpa, payeeName: upi.payeeName || brand.name, amountMinor: balance, note: o.order_no }) : null
   const qr = link ? await upiQrSvg(link) : null
   const upiPanel = link && qr && (
@@ -120,24 +128,38 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
       panel: <PayButton orderId={o.id} gatewayOrderId={gwPay.data!.gateway_order_id!} keyId={gw!.keyId} amountMinor={o.total_minor} currency={o.currency}
         amountLabel={money(o.total_minor, o.currency)} academy={brand.name} description={title} prefill={{ name: a.memberName, email: '' }} fake={fake} />,
     })
-  } else if (open && !free && upi.razorpayComingSoon) {
+  } else if (!paused && open && !free && upi.razorpayComingSoon) {
     methods.push({ id: 'razorpay', title: 'Card, net banking, wallets', sub: 'Pay online with Razorpay', soon: true, panel: null })
   }
   const initial = methods.find((m) => !m.soon)?.id ?? ''
+  const couponOnly = paused && open && !free
 
   return (
     <theme.FocusLayout brand={brand} bar={{ title: 'Checkout', note: 'Secure checkout', exit: { label: 'Leave checkout', href: '/courses' } }}>
       <div className="mx-auto grid max-w-[1180px] items-start gap-10 px-[clamp(16px,5vw,72px)] pb-28 pt-8 md:pb-20 md:pt-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14">
         <div className="grid min-w-0 gap-6">
           <div className="grid gap-3">
-            <h1 className={h1s}>{free ? 'Your order is free' : `Pay ${money(balance > 0 ? balance : o.total_minor, o.currency)}`}</h1>
+            <h1 className={h1s}>{free ? 'Your order is free' : couponOnly ? 'Join with a coupon code' : `Pay ${money(balance > 0 ? balance : o.total_minor, o.currency)}`}</h1>
             <p className={lead}>
-              {paid > 0 ? `You have paid ${money(paid, o.currency)}. This is the rest.` : free ? 'The coupon covers the whole price. Enrol to start.' : 'Pay by UPI, then tell us it is done. We unlock your course once we see the payment.'}
+              {couponOnly ? 'Online payment is switched off for now. You can join only with a coupon code that we give you.'
+                : paid > 0 ? `You have paid ${money(paid, o.currency)}. This is the rest.` : free ? 'The coupon covers the whole price. Enrol to start.' : 'Pay by UPI, then tell us it is done. We unlock your course once we see the payment.'}
             </p>
           </div>
 
           {free ? (
             <form action={completeFree.bind(null, o.id)}><button className={`${buttonLg} w-full sm:w-auto`}>Enrol for free</button></form>
+          ) : couponOnly ? (
+            <>
+              {couponsOn ? (
+                <div className="grid gap-3">
+                  {o.coupon_id && <p role="status" className="t-body !text-fg">This code does not cover the full price. Remove it and enter the code we gave you.</p>}
+                  <CouponForm orderId={o.id} applied={Boolean(o.coupon_id)} main />
+                </div>
+              ) : (
+                <p className="t-body rounded-2xl bg-muted p-5 !text-fg">A coupon cannot be added to this order. Please contact us.</p>
+              )}
+              <LockedPayments />
+            </>
           ) : methods.length > 0 ? (
             <>
               <MethodPicker methods={methods} initial={initial} />
@@ -155,7 +177,7 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
           {helpHref && !free && (
             <p className="t-small flex items-center gap-2.5">
               <svg className="h-5 w-5 fill-[#25D366]" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp" /></svg>
-              <span>Payment stuck? <a href={helpHref} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline underline-offset-4">Message us on WhatsApp</a></span>
+              <span>{couponOnly ? 'Need a code?' : 'Payment stuck?'} <a href={helpHref} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline underline-offset-4">Message us on WhatsApp</a></span>
             </p>
           )}
           {wa === null && upiOn && <p className="t-small">The academy has not added a WhatsApp number for screenshots yet. You will be able to upload it on the next page.</p>}
@@ -177,7 +199,7 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
               {o.tax_minor > 0 && <p className="t-small text-right tnum">Includes {money(o.tax_minor, o.currency)} GST</p>}
             </div>
           </div>
-          {couponsOn && <CouponForm orderId={o.id} applied={Boolean(o.coupon_id)} />}
+          {couponsOn && !couponOnly && <CouponForm orderId={o.id} applied={Boolean(o.coupon_id)} />}
           {refunds && <p className="t-small flex items-start gap-2"><Icon name="shield" className="mt-px h-5 w-5 shrink-0 text-primary" /><span>Questions about refunds? Read the <a href={refunds.href} className="font-semibold text-primary underline underline-offset-4">refund policy</a>.</span></p>}
         </aside>
       </div>

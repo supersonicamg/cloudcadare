@@ -8,6 +8,8 @@ export interface Method {
   sub: string
   /** "Coming soon": shown, never selectable (aria-disabled, no handler). */
   soon?: boolean
+  /** The tag on a `soon` method. Defaults to "Coming soon". */
+  soonLabel?: string
   /** What opens when this method is chosen. Rendered by the server, so the QR needs no client code. */
   panel: ReactNode
 }
@@ -35,7 +37,7 @@ export function MethodPicker({ methods, initial }: { methods: Method[]; initial:
               <span className={`t-card ${m.soon ? '!text-mute' : ''}`}>{m.title}</span>
               <span className="t-small">{m.sub}</span>
             </span>
-            {m.soon && <span className="t-label shrink-0 rounded-full border border-border bg-white px-3 py-1 !text-mute">Coming soon</span>}
+            {m.soon && <span className="t-label shrink-0 rounded-full border border-border bg-white px-3 py-1 !text-mute">{m.soonLabel ?? 'Coming soon'}</span>}
           </label>
         ))}
       </fieldset>

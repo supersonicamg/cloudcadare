@@ -48,7 +48,7 @@ function Section({ s, n, open }: { s: SectionDto; n: string; open: boolean }) {
   )
 }
 
-export function CoursePage({ brand, site, course, cta, terms }: CoursePageProps) {
+export function CoursePage({ brand, site, course, cta, terms, catalogHref }: CoursePageProps) {
   const wa = waLink(brand)
   const logo = platformFor(course.title, course.tags)
   const art = site?.authArt
@@ -71,7 +71,7 @@ export function CoursePage({ brand, site, course, cta, terms }: CoursePageProps)
     <article className="au">
       <section className="wrap crs-hero">
         <div className="copy">
-          <p className="crumb"><A href="/courses">{terms.courses}</A> / {course.title}</p>
+          {catalogHref && <p className="crumb"><A href={catalogHref}>{terms.courses}</A> / {course.title}</p>}
           <h1 className="h1">{course.title}</h1>
           {course.subtitle && <p className="lead">{course.subtitle}</p>}
           {facts.length > 0 && <ul className="facts">{facts.map((f) => <li key={f}>{f}</li>)}</ul>}
@@ -119,7 +119,7 @@ export function CoursePage({ brand, site, course, cta, terms }: CoursePageProps)
             <div className="outline">
               <div className="ol-head">
                 {logo && <span className="tile"><Logo name={logo} /></span>}
-                <div><b>{plural(course.sections.length, 'module')}</b><span>{plural(total, 'lesson')}{duration(course.estimatedMinutes) ? ` · ${duration(course.estimatedMinutes)}` : ''}</span></div>
+                <div><b>{plural(course.sections.length, 'module')}</b>{total > 0 && <span>{plural(total, 'lesson')}{duration(course.estimatedMinutes) ? ` · ${duration(course.estimatedMinutes)}` : ''}</span>}</div>
               </div>
               {course.sections.map((s, i) => <Section key={s.id} s={s} n={String(i + 1).padStart(2, '0')} open={i === 0} />)}
             </div>

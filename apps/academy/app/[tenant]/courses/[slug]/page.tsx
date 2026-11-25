@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { isEnabled } from '@educore/features'
 import type { CourseCta, SectionDto } from '@educore/ui/theme'
-import { cachedCourse } from '@/lib/catalog'
+import { cachedCourse, catalogLink } from '@/lib/catalog'
 import { getAccess } from '@/lib/dal'
 import { getMyEnrollments } from '@/lib/learn'
 import { getShell, TERMS } from '@/lib/shell'
@@ -32,6 +32,8 @@ export default async function CoursePage({ params }: PageProps<'/[tenant]/course
   const course = await cachedCourse(bundle.tenant.id, slug)
   if (!course) notFound()
 
+  const catalog = await catalogLink(bundle.tenant.id)
+
   // The course itself is shared and cached; only this call line depends on who is looking.
   const login = `/login?next=${encodeURIComponent(`/courses/${slug}`)}`
   const access = await getAccess()
@@ -53,7 +55,7 @@ export default async function CoursePage({ params }: PageProps<'/[tenant]/course
 
   return (
     <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
-      <theme.CoursePage brand={brand} site={site} course={{ ...course, sections: withPreviewLinks(course.sections, slug) }} cta={cta} terms={TERMS} />
+      <theme.CoursePage brand={brand} site={site} course={{ ...course, sections: withPreviewLinks(course.sections, slug) }} cta={cta} terms={TERMS} catalogHref={catalog.only === slug ? undefined : '/courses'} />
     </theme.SiteLayout>
   )
 }

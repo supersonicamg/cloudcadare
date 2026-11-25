@@ -17,3 +17,14 @@ export async function cachedCourse(tenantId: string, slug: string) {
   cacheLife('hours')
   return getPublicCourse(tenantId, slug)
 }
+
+/**
+ * Where "the courses" are. An academy with exactly one published course (CloudCadre sells one program) goes straight to
+ * it; with two or more, the catalog appears again by itself.
+ */
+export async function catalogLink(tenantId: string) {
+  const courses = await cachedCourses(tenantId)
+  const only = courses.length === 1 ? courses[0]!.slug : null
+  return only ? { label: 'Program', href: `/courses/${only}`, only } : { label: 'Courses', href: '/courses', only }
+}
+

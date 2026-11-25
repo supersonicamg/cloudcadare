@@ -243,6 +243,8 @@ export interface CoursePageProps {
   course: CourseDto
   cta: CourseCta
   terms: { course: string; courses: string }
+  /** The list this course belongs to. Absent when it is the academy's only course: no breadcrumb back. */
+  catalogHref?: string
 }
 
 /** plan/05 §5. Pages and blocks join this contract as the modules that need them are built. */

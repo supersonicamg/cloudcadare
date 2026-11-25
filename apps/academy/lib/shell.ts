@@ -7,6 +7,7 @@ import { platformName } from '@/lib/env'
 import { getAccess, getViewer, holds } from '@/lib/dal'
 import { auroraHome, auroraNav, auroraSite } from '@/lib/aurora-content'
 import { getLeadCourseSlug } from '@/lib/learn'
+import { catalogLink } from '@/lib/catalog'
 
 const initialsOf = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('') || '?'
@@ -26,9 +27,10 @@ export async function getShell(opts: { home?: boolean } = {}) {
   const access = viewer.signedIn ? await getAccess() : null
 
   // Aurora's signed-out links point at sections of the home page, so they do not depend on the catalog feature.
+  const catalog = isEnabled(f, 'catalog.courses') ? await catalogLink(bundle.tenant.id) : null
   let nav: NavItem[] = aurora
     ? auroraNav
-    : isEnabled(f, 'catalog.courses') ? [{ label: 'Courses', href: '/courses' }] : []
+    : catalog ? [{ label: catalog.label, href: catalog.href }] : []
   let account: { label: string; href: string; viewer?: ViewerInfo } = { label: aurora ? 'Log in' : 'Sign in', href: '/login' }
 
   if (access) {
@@ -39,7 +41,7 @@ export async function getShell(opts: { home?: boolean } = {}) {
       { label: 'Dashboard', href: '/dashboard' },
       ...(slug
         ? [{ label: 'Course material', href: `/learn/${slug}/material` }, { label: 'Live classes', href: `/learn/${slug}/live` }, ...(isEnabled(f, 'learning.notes') ? [{ label: 'My notes', href: '/learn/notes' }] : [])]
-        : isEnabled(f, 'catalog.courses') ? [{ label: 'Program', href: '/courses' }] : []),
+        : catalog ? [{ label: 'Program', href: catalog.href }] : []),
     ]
     if (!opts.home) nav = learner
     const name = access.memberName || viewer.fullName || viewer.email || 'You'

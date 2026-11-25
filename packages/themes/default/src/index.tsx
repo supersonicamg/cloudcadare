@@ -176,10 +176,10 @@ function money(minor: number, currency: string) {
 
 const CTA = 'mt-5 block w-full rounded-[var(--radius)] bg-primary px-4 py-3 text-center text-sm font-medium text-primary-fg'
 
-function CoursePage({ course, cta, terms }: CoursePageProps) {
+function CoursePage({ course, cta, terms, catalogHref }: CoursePageProps) {
   return (
     <article className="mx-auto max-w-6xl px-5 py-14 md:py-20">
-      <Link href="/courses" className="text-sm text-fg/65 hover:text-fg">&larr; All {terms.courses.toLowerCase()}</Link>
+      {catalogHref && <Link href={catalogHref} className="text-sm text-fg/65 hover:text-fg">&larr; All {terms.courses.toLowerCase()}</Link>}
       <div className="mt-6 grid gap-12 md:grid-cols-[1fr_20rem]">
         <div>
           <h1 className="font-heading text-4xl font-semibold leading-[1.1] tracking-tight md:text-5xl">{course.title}</h1>

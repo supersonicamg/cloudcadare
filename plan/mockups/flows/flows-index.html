@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learner flows · CloudCadre mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="flows.css">
+<!-- Hub for the learner-flow mockups (2026-11-25). Built on the plan/15 design guide and homepage-v9. -->
+<style>
+  .hub { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .hub > * { min-width: 0; }
+  .fl { display: grid; gap: 16px; align-content: start; padding: clamp(20px, 2.4cqi, 28px); border-radius: var(--r-md); background: #fff; box-shadow: 0 1px 2px rgba(20,32,31,.06); }
+  .fl .no { font-size: 36px; font-weight: 800; letter-spacing: -0.05em; line-height: .9; color: var(--brand); }
+  .fl ul { display: grid; }
+  .fl li a { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 0 4px; border-bottom: 1px solid var(--line); font-size: 16.5px; font-weight: 600; }
+  .fl li:first-child a { border-top: 2px solid var(--ink); }
+  .fl li a:hover { color: var(--brand); }
+  .fl li a span { font-size: 13.5px; font-weight: 600; color: var(--mute); }
+  @container (max-width: 820px) { .hub { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<div class="frame"><div class="page">
+  <div class="bar"><header class="hdr wrap"><nav class="nav" aria-label="Main"><a class="brand" href="#"><svg class="mark" aria-hidden="true"><use href="#cc-mark"/></svg><span>Cloud<span class="c2">Cadre</span></span></a><span class="small" style="margin-left:auto">Mockups, 25 Nov 2026</span></nav></header></div>
+  <main>
+    <section class="s tight"><div class="wrap" style="display:grid;gap:18px">
+      <p class="flag-tag"><b>CEAP</b>Learner flows</p>
+      <h1 class="h1">What happens <span class="c">after the home page</span></h1>
+      <p class="lead">Every screen from sign-up to settings, redrawn in the v9 design system. Open "Logic notes" on any screen to see the rules behind it.</p>
+      <ul class="ffacts"><li><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg>24 screens in 4 flows</li><li><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg>Phone width on every screen</li><li><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg>Rules stored in plan/16</li></ul>
+    </div></section>
+    <section class="s s-alt"><div class="wrap">
+      <div class="hub">
+        <div class="fl"><span class="no">A</span><div><h2 class="h3" style="font-size:24px">Join</h2><p class="body" style="margin-top:6px">Sign up, confirm email, then either "already a learner" or pay by UPI and wait for a check.</p></div>
+          <ul><li><a href="flow-join.html#login">Log in<span>A1</span></a></li><li><a href="flow-join.html#signup">Sign up<span>A2</span></a></li><li><a href="flow-join.html#verify">Confirm your email<span>A3</span></a></li><li><a href="flow-join.html#welcome">Welcome back (on the learner list)<span>A4</span></a></li><li><a href="flow-join.html#checkout">Checkout: UPI QR live, Razorpay coming soon<span>A5</span></a></li><li><a href="flow-join.html#pending">Waiting for verification<span>A6</span></a></li><li><a href="flow-join.html#approved">Payment verified<span>A7</span></a></li><li><a href="flow-join.html#rejected">Could not match the payment<span>A8</span></a></li></ul></div>
+        <div class="fl"><span class="no">B</span><div><h2 class="h3" style="font-size:24px">Learn</h2><p class="body" style="margin-top:6px">Course material (videos, PDFs, images, live recordings) and the player with notes and bookmarks.</p></div>
+          <ul><li><a href="flow-learn.html#home">My learning<span>B1</span></a></li><li><a href="flow-learn.html#material">Course material<span>B2</span></a></li><li><a href="flow-learn.html#live">Live classes and recordings<span>B3</span></a></li><li><a href="flow-learn.html#player">Recording player with notes<span>B4</span></a></li><li><a href="flow-learn.html#pdf">PDF viewer with notes<span>B5</span></a></li><li><a href="flow-learn.html#image">Image viewer with notes<span>B6</span></a></li><li><a href="flow-learn.html#notes">My notes<span>B7</span></a></li></ul></div>
+        <div class="fl"><span class="no">C</span><div><h2 class="h3" style="font-size:24px">Navbar and account</h2><p class="body" style="margin-top:6px">The redesigned navbar with log out, and the learner's own settings.</p></div>
+          <ul><li><a href="flow-account.html#navbar">Navbar states<span>C1</span></a></li><li><a href="flow-account.html#profile">Profile and reminders<span>C2</span></a></li><li><a href="flow-account.html#subscription">Subscription<span>C3</span></a></li><li><a href="flow-account.html#payments">Payments and receipts<span>C4</span></a></li><li><a href="flow-account.html#security">Password and devices<span>C5</span></a></li><li><a href="flow-account.html#logout">Logged out<span>C6</span></a></li></ul></div>
+        <div class="fl"><span class="no">D</span><div><h2 class="h3" style="font-size:24px">Admin</h2><p class="body" style="margin-top:6px">Where staff verify UPI screenshots, keep the learner list and set payment details.</p></div>
+          <ul><li><a href="flow-admin.html#queue">UPI payments queue and review<span>D1</span></a></li><li><a href="flow-admin.html#list">Learner list (whitelist)<span>D2</span></a></li><li><a href="flow-admin.html#settings">Payment settings<span>D3</span></a></li></ul></div>
+      </div>
+    </div></section>
+  </main>
+</div></div>
+<script>window.FLOW = { title: 'Learner flows', screens: [{ id: 'x', label: 'Index' }] }</script>
+<script src="flows.js"></script>
+<script>document.querySelectorAll('.tb .seg').forEach(function (e) { e.remove() })</script>
+</body>
+</html>

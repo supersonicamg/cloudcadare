@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning flow · CloudCadre mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="flows.css">
+<!--
+  Flow B: what a paid learner sees (2026-11-25). Learner home, course material (videos, live class recordings,
+  PDFs, images), live classes + recordings, the player with timestamped notes and bookmarks, the PDF and image
+  viewers with notes, and "My notes".
+  The learner here is in month 2 of CEAP. Months 3 and 4 are locked until their week (unlock_rule: relative days).
+  PLACEHOLDER DATA: titles, trainer names, durations, dates, counts and every photo are invented; stock photos stand in for real class recordings.
+-->
+</head>
+<body>
+<script src="sprite.js"></script>
+
+<!-- B1 · Learner home -->
+<section class="screen" id="home" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>My learning · <code>/learn</code></h2>
+  <ul>
+    <li><b>Job:</b> resume where you left off. One filled button: "Resume lesson".</li>
+    <li>Reading order: Continue card → the climb as <b>your</b> progress → next live class and latest recordings → your latest notes.</li>
+    <li><b>Continue card</b> = <code>enrollments.last_lesson_id</code> with its saved position (<code>lesson_progress</code>). If nothing started: "Start with lesson 1".</li>
+    <li>The climb reuses the guide's component: done months tick (pale), the current month is dark, later months are grey with "Unlocks 7 Dec". Clicking a month shows its numbers; "Open course material" goes to the list.</li>
+    <li>If the learner has <b>no active enrolment</b> this page shows the order status instead: "awaiting payment" → checkout, "pending review" → waiting page. Never an empty dashboard.</li>
+  </ul></div><div>
+  <h2>Data</h2>
+  <ul>
+    <li>Progress: <code>enrollments.progress_pct, lessons_completed, lessons_total</code>.</li>
+    <li>Next live class: <code>live_sessions</code> where <code>status = 'scheduled'</code> for the learner's batch, soonest first. The join link shows only from 10 minutes before the start.</li>
+    <li>Latest recordings: completed sessions with <code>recording_media_id</code>, newest first (3).</li>
+    <li>Notes: <code>lesson_notes</code> for this member, newest 3.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active="home"></div>
+  <main>
+    <section class="s tight" aria-labelledby="h-home">
+      <div class="wrap" style="display:grid;gap:24px">
+        <div style="display:grid;gap:14px">
+          <h1 class="h2" id="h-home">Welcome back, <span class="c">Rohit</span></h1>
+          <ul class="ffacts">
+            <li><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg>Month 2 of 4 · Week 7</li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>36 of 86 lessons done</li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Next live class: Tue 1 Dec, 7 pm</li>
+          </ul>
+        </div>
+        <div class="cont">
+          <div class="thumb">
+            <!-- stock placeholder for a real class recording frame -->
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=75" alt="Frame from the recording of live class 14">
+            <span class="pbtn"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span><span class="dur">1:32:08</span><span class="wp"><i style="width:62%"></i></span>
+          </div>
+          <div class="meta">
+            <span class="kick">Continue · Month 2 · Live class 14</span>
+            <h2 class="t">Tagging and cost allocation</h2>
+            <p class="sub">Karthik Rao · 35 minutes left · 2 notes</p>
+            <div class="bar-p" aria-label="62% watched"><i style="width:62%"></i></div>
+          </div>
+          <a class="btn btn-brand" href="#player" data-go="player">Resume lesson <span class="ar" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="s s-mist" aria-labelledby="h-climb">
+      <div class="wrap">
+        <div class="sh">
+          <div><h2 class="h2" id="h-climb">Where you are in CEAP</h2><p class="lead">Month 2 of 4. Months 3 and 4 open on their week.</p></div>
+          <a class="tlink" href="#material" data-go="material">Open course material <span class="ar" aria-hidden="true">→</span></a>
+        </div>
+        <div class="climb" role="tablist" aria-label="Your months">
+          <button class="step done" role="tab" aria-selected="false"><span class="top"><span class="mn">01</span><span class="tick"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span><span class="wks">Weeks 1–4</span></span><span class="h3">Three clouds, one architecture</span><span class="st">Done · 22 of 22</span></button>
+          <button class="step" role="tab" aria-selected="true"><span class="top"><span class="mn">02</span><span class="wks">Weeks 5–8</span></span><span class="h3">FinOps and cloud costs</span><span class="st">14 of 22 lessons</span></button>
+          <button class="step lockd" role="tab" aria-selected="false"><span class="top"><span class="mn">03</span><span class="wks">Weeks 9–12</span></span><span class="h3">Automate and ship</span><span class="st">Unlocks 7 Dec</span></button>
+          <button class="step lockd" role="tab" aria-selected="false"><span class="goal"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg>Cloud architect</span><span class="top"><span class="mn">04</span><span class="wks">Weeks 13–16</span></span><span class="h3">Design, defend, get hired</span><span class="st">Unlocks 4 Jan</span></button>
+        </div>
+        <div class="mdetail" role="tabpanel">
+          <div class="md-copy">
+            <span class="wk">Month 2 of 4 · Weeks 5–8</span>
+            <h3 class="h3" style="font-size:clamp(24px,2.4cqi,32px);letter-spacing:-0.03em">FinOps and cloud costs</h3>
+            <p class="out"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg><span><b>By week 8</b> you can find the waste in a cloud bill and show finance what it saves.</span></p>
+            <dl class="stats3"><div><dd>14/22</dd><dt>Lessons done</dt></div><div><dd>2</dd><dt>Labs left</dt></div><div><dd>9</dd><dt>Notes taken</dt></div></dl>
+          </div>
+          <div style="display:grid;gap:10px">
+            <b style="font-size:14px;color:var(--brand)">Up next in month 2</b>
+            <a class="mrow" style="padding:10px 12px;border:0;border-radius:12px;background:#F7F7F4" href="#"><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-video"/></svg></span><span class="tt"><b>Budgets and alerts</b><span>Video · 26 min</span></span><span></span><span class="sd"><span class="chip new">New</span></span></a>
+            <a class="mrow" style="padding:10px 12px;border:0;border-radius:12px;background:#F7F7F4" href="#"><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-pdf"/></svg></span><span class="tt"><b>Tag audit checklist</b><span>PDF · 4 pages</span></span><span></span><span class="sd"><span class="chip new">New</span></span></a>
+            <a class="mrow" style="padding:10px 12px;border:0;border-radius:12px;background:#F7F7F4" href="#"><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-lab"/></svg></span><span class="tt"><b>Lab 7: find the waste in a bill</b><span>Lab · about 45 min</span></span><span></span><span class="sd"></span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="s" aria-labelledby="h-live">
+      <div class="wrap">
+        <div class="sh"><h2 class="h2" id="h-live">Live classes</h2><a class="tlink" href="#live" data-go="live">All live classes and recordings <span class="ar" aria-hidden="true">→</span></a></div>
+        <div class="up">
+          <div class="dateb"><b>01</b><span>Tue · Dec</span></div>
+          <div><span class="chip ok" style="margin-bottom:8px">Next live class</span><h3 class="t">Budgets, alerts and showback reports</h3>
+            <div class="m"><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>7:00 to 9:00 pm</span><span><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Karthik Rao</span><span><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg>WhatsApp reminder at 6:30 pm</span></div></div>
+          <div style="display:grid;gap:6px;justify-items:end"><a class="btn btn-line btn-sm" href="#"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Add to calendar</a><span class="small">Join link opens at 6:50 pm</span></div>
+        </div>
+        <h3 class="h3" style="margin:32px 0 16px">Latest recordings</h3>
+        <div class="rgrid" data-rec="3"></div>
+      </div>
+    </section>
+
+    <section class="s s-alt" aria-labelledby="h-notes">
+      <div class="wrap">
+        <div class="sh"><h2 class="h2" id="h-notes">Your latest notes</h2><a class="tlink" href="#notes" data-go="notes">All my notes <span class="ar" aria-hidden="true">→</span></a></div>
+        <div class="split75">
+          <div style="display:grid;gap:12px" data-lastnotes></div>
+          <aside class="card pad" style="display:grid;gap:16px;align-content:start">
+            <div style="display:flex;align-items:center;gap:14px"><img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=160&h=160&crop=faces&q=75" alt="" width="56" height="56" style="width:56px;height:56px;border-radius:50%;object-fit:cover"><div><b style="display:block;font-size:18px;letter-spacing:-0.02em">Stuck on a lab?</b><span class="small">Ananya or your mentor replies within 15 minutes.</span></div></div>
+            <a class="btn btn-line" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Message on WhatsApp</a>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- B2 · Course material -->
+<section class="screen" id="material" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Course material · <code>/learn/ceap/material</code></h2>
+  <ul>
+    <li><b>Job:</b> find any lesson, file or recording fast. No filled button: every row is a link.</li>
+    <li>Four kinds of material, one list, grouped by month: <b>Videos</b> (lesson<code>.type = 'video'</code>), <b>Live recordings</b> (<code>'live'</code> with a recording), <b>PDFs</b> (<code>'pdf'</code>, <code>'document'</code>), <b>Images</b> (<code>'image'</code>). Counts in the chips are for the whole program.</li>
+    <li>Filter chips are single-select; search matches lesson titles and the learner's own note text. "All" is the default.</li>
+    <li>Row states: <b>tick</b> = completed, <b>New</b> (yellow) = published in the last 7 days and not opened, <b>progress %</b> = started video, <b>lock + date</b> = <code>unlock_rule</code> not met yet, <b>pencil + n</b> = my notes on it.</li>
+    <li>The month the learner is in opens by default; finished months are collapsed; locked months show titles but not links.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Access = an active enrolment (<code>my_access</code> RPC, already built). Without one the list shows the first lessons marked <code>is_preview</code> and a banner "Unlock CEAP".</li>
+    <li>Files and recordings are served by signed URLs that expire in minutes (<code>/api/lesson-file/[lessonId]</code>). A PDF with <code>allow_download = false</code> opens in the viewer with no download button.</li>
+    <li>Unpublished items are invisible. Staff upload and order them in the lesson editor (no new admin screen).</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active="material"></div>
+  <main>
+    <section class="s tight" aria-labelledby="h-mat">
+      <div class="wrap">
+        <div class="mhead">
+          <div style="display:grid;gap:12px"><p class="flag-tag"><b>CEAP</b>CloudCadre Elite Architect Program</p><h1 class="h2" id="h-mat">Course material</h1><p class="lead">Every video, recording, PDF and diagram, month by month.</p></div>
+          <div style="min-width:min(100%,260px);display:grid;gap:8px"><div style="display:flex;justify-content:space-between;font-size:15px;font-weight:650"><span>36 of 86 done</span><span class="c">42%</span></div><div class="bar-p" style="height:8px"><i style="width:42%"></i></div></div>
+        </div>
+        <div class="mtools">
+          <div class="fchips" data-single role="group" aria-label="Filter by type">
+            <button class="fchip" aria-pressed="true"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>All <em>86</em></button>
+            <button class="fchip" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-video"/></svg>Videos <em>41</em></button>
+            <button class="fchip" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-live"/></svg>Live recordings <em>18</em></button>
+            <button class="fchip" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-pdf"/></svg>PDFs <em>17</em></button>
+            <button class="fchip" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg>Images <em>10</em></button>
+          </div>
+          <div class="srch"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input class="inp" type="search" placeholder="Search lessons and my notes" aria-label="Search lessons and my notes"></div>
+        </div>
+      </div>
+    </section>
+    <section class="s s-alt" aria-label="Months" style="padding-block:clamp(20px,2.4cqi,32px)">
+      <div class="wrap"><div class="months" data-months></div></div>
+    </section>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- B3 · Live classes -->
+<section class="screen" id="live" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Live classes · <code>/learn/ceap/live</code></h2>
+  <ul>
+    <li><b>Job:</b> know the next class and re-watch any past one. No filled button: "Add to calendar" and the recordings are all secondary.</li>
+    <li><b>Upcoming:</b> <code>live_sessions</code> for the learner's batch. The join button <b>exists only from 10 minutes before start until the end</b>; before that the card says when it opens. It is the one filled button of the page, and appears only then.</li>
+    <li><b>Recordings:</b> sessions with a <code>recording_media_id</code>, newest first. Chips filter by month. Each card shows: duration, date, trainer, how much I watched (bar), how many notes I took.</li>
+    <li>Recordings appear the same night after staff attach them (target: within a few hours). A session with no recording yet shows "Recording on its way".</li>
+    <li>Every recording is also a lesson of type <code>live</code> in the month list, so progress and notes work the same way.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Joining marks attendance (<code>attendance_mode = auto</code>): opening the join link records a row once.</li>
+    <li>Watching a recording to 90% marks the lesson complete (<code>completion_rule: watch_pct 90</code>).</li>
+    <li>Reminders: WhatsApp and email 30 minutes before; the learner can turn each off in Account → Profile.</li>
+    <li>Provider is Zoom/Meet/other (open question). The recording needs to come back into our storage; see plan/16 §9.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active="live"></div>
+  <main>
+    <section class="s tight" aria-labelledby="h-lv">
+      <div class="wrap" style="display:grid;gap:28px">
+        <div style="display:grid;gap:12px"><p class="flag-tag"><b>CEAP</b>Oct 2026 batch</p><h1 class="h2" id="h-lv">Live classes</h1><p class="lead">Tuesday, Thursday and Saturday at 7 pm. Every class is recorded and up the same night.</p></div>
+        <div class="up">
+          <div class="dateb"><b>01</b><span>Tue · Dec</span></div>
+          <div><span class="chip ok" style="margin-bottom:8px">Next live class</span><h2 class="t">Budgets, alerts and showback reports</h2>
+            <div class="m"><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>7:00 to 9:00 pm</span><span><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Karthik Rao</span><span><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg>Bring one real bill to class</span></div></div>
+          <div style="display:grid;gap:6px;justify-items:end"><a class="btn btn-line btn-sm" href="#"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Add to calendar</a><span class="small">Join link opens at 6:50 pm</span></div>
+        </div>
+        <div>
+          <h2 class="h3" style="margin-bottom:12px">After that</h2>
+          <ol class="sched">
+            <li><span class="dt">Thu 3 Dec <span class="tm" style="display:block">7:00 pm</span></span><span><b>Unit economics: cost per user</b><span class="by" style="display:block">Meera Iyer</span></span><span class="chip">Live</span></li>
+            <li><span class="dt">Sat 5 Dec <span class="tm" style="display:block">7:00 pm</span></span><span><b>Lab clinic: your tag audit</b><span class="by" style="display:block">Karthik Rao</span></span><span class="chip">Live</span></li>
+            <li><span class="dt">Tue 8 Dec <span class="tm" style="display:block">7:00 pm</span></span><span><b>Month 2 review and capstone brief</b><span class="by" style="display:block">Meera Iyer</span></span><span class="chip">Live</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+    <section class="s s-alt" aria-labelledby="h-recs">
+      <div class="wrap">
+        <div class="sh"><div><h2 class="h2" id="h-recs">Recordings</h2><p class="lead">Watch again, and take notes at the exact minute.</p></div></div>
+        <div class="fchips" data-single role="group" aria-label="Filter by month" style="margin-bottom:24px">
+          <button class="fchip" aria-pressed="true">All months <em>18</em></button><button class="fchip" aria-pressed="false">Month 1 <em>12</em></button><button class="fchip" aria-pressed="false">Month 2 <em>6</em></button>
+        </div>
+        <div class="rgrid" data-rec="6"></div>
+      </div>
+    </section>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- B4 · Player -->
+<section class="screen" id="player" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Recording player with notes · <code>/learn/[course]/[lessonId]</code></h2>
+  <ul>
+    <li><b>Job:</b> learn without distraction. Focus layout (logo + one exit). One filled button: <b>"Mark complete"</b>; next lesson is an outline button.</li>
+    <li><b>Take a note:</b> the note box stamps the <b>current video time</b> (<code>position_seconds</code>). The timestamp chip is a button that seeks the video. Press <b>N</b> to focus the box and pause; <b>Ctrl+Enter</b> saves.</li>
+    <li><b>Mark this moment</b> = a bookmark (<code>kind = 'bookmark'</code>, optional text). Notes and bookmarks both show as <b>yellow ticks on the scrubber</b>, so the learner sees where they marked things.</li>
+    <li>Notes are private to the learner (RLS: <code>member_id</code> = me). Edit and delete are inline; delete asks nothing but offers "Undo" for 6 seconds.</li>
+    <li>Notes autosave as drafts in the browser while typing and are saved to the server on "Save note" (offline-safe).</li>
+  </ul></div><div>
+  <h2>Progress and resume</h2>
+  <ul>
+    <li>Heartbeat every 15 s writes position through the existing progress API; reopening resumes at that second (minus 3 s).</li>
+    <li>Complete automatically at 90% watched, or by "Mark complete". Completing moves the learner to the next lesson only if they press Next.</li>
+    <li>Tabs in the side panel: <b>Notes</b> (this lesson), <b>Chapters</b> (from the lesson's chapter list), <b>Class list</b> (lessons around this one).</li>
+    <li>Phone: the panel sits under the video; the note box stays pinned above the keyboard.</li>
+    <li>Free preview lessons (<code>is_preview</code>) play for signed-out visitors but have no Notes tab: it shows "Log in to take notes".</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="focus" data-title="<b>CEAP</b> · Month 2 · Live class 14" data-exit="Back to live classes" data-href="flow-learn.html#live"></div>
+  <main class="wrap">
+    <div class="pl">
+      <div>
+        <div class="vid">
+          <!-- stock placeholder for a real class recording frame -->
+          <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=75" alt="Recording of live class 14: the trainer in front of the class">
+          <button class="big" aria-label="Play"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></button>
+          <div class="ctrl">
+            <div class="scrub" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="5528" aria-valuenow="1634" aria-valuetext="27 minutes 14 seconds of 1 hour 32 minutes"><div class="tr"><i class="f" style="width:29.5%"></i><i class="h" style="left:29.5%"></i>
+              <i class="mk" style="left:4.5%" title="Note 04:12"></i><i class="mk" style="left:13.5%" title="Bookmark 12:40"></i><i class="mk" style="left:29.5%" title="Note 27:14"></i><i class="mk" style="left:44%" title="Bookmark 40:35"></i><i class="mk" style="left:71%" title="Note 1:05:20"></i></div></div>
+            <div class="cbtns"><button aria-label="Play"><svg class="ic" aria-hidden="true" style="fill:currentColor;stroke:none"><use href="#i-play"/></svg></button><span style="font-variant-numeric:tabular-nums">27:14 / 1:32:08</span>
+              <span class="sp"><button aria-label="Playback speed">1.25×</button><button aria-label="Captions">CC</button><button aria-label="Full screen"><svg class="ic" aria-hidden="true"><use href="#i-full"/></svg></button></span></div>
+          </div>
+        </div>
+        <div class="vtitle">
+          <span class="kick">Live class recording · Month 2 · Lesson 14 of 22</span>
+          <h1 class="h2" style="font-size:clamp(26px,2.6cqi,34px)">Tagging and cost allocation</h1>
+          <div class="vmeta"><span><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Karthik Rao</span><span><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Recorded Tue 24 Nov, 7 pm</span><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>1 h 32 min</span></div>
+        </div>
+        <div class="vact">
+          <a class="btn btn-brand" href="#">Mark complete</a>
+          <a class="btn btn-line" href="#">Next: Budgets and alerts <span class="ar" aria-hidden="true">→</span></a>
+          <span class="sp"><a class="tlink ink" href="#"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg>Previous</a></span>
+        </div>
+        <div class="res"><h2 class="h3" style="margin-bottom:2px">Class material</h2>
+          <a class="rr" href="#" data-go="pdf"><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-pdf"/></svg></span><span><b>Class 14 slides</b><span>PDF · 24 pages · 2 notes</span></span><span class="tlink">Open →</span></a>
+          <a class="rr" href="#" data-go="image"><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg></span><span><b>Tag-based cost allocation</b><span>Diagram · opens full size</span></span><span class="tlink">Open →</span></a>
+        </div>
+      </div>
+      <aside class="side" data-tabs data-side="video" aria-label="Notes for this lesson"></aside>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<!-- B5 · PDF viewer -->
+<section class="screen" id="pdf" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>PDF viewer with notes · same route, <code>lesson.type = 'pdf'</code></h2>
+  <ul>
+    <li><b>Job:</b> read and mark up. Same shell and side panel as the video player so notes feel the same everywhere.</li>
+    <li>The note box stamps the <b>current page</b> (<code>page_no</code>). The "p.3" chip jumps to that page.</li>
+    <li><b>Highlight</b> tool (<code>kind = 'highlight'</code>): select text, it is saved as the quoted text plus the page, and shown yellow on the page for this learner only.</li>
+    <li>Download button appears only when the lesson file has <code>allow_download = true</code>. Otherwise the document is view-only and watermarked with the learner's name + email in the footer margin.</li>
+    <li>Reading position (last page) is saved like video position; the lesson completes at the last page or "Mark complete".</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Rendered with the browser's PDF engine from a signed URL (no third-party viewer).</li>
+    <li>Thumbnails strip is for jumping; phones hide it and use "Page 3 of 24" with swipe.</li>
+    <li>One filled button on the page: "Mark complete" (kept in the page bar, not shown here to keep the viewer clean).</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="focus" data-title="<b>Class 14 slides.pdf</b> · Tagging and cost allocation" data-exit="Back to lesson" data-href="flow-learn.html#player"></div>
+  <main class="wrap">
+    <div class="pl">
+      <div>
+        <div class="viewer">
+          <div class="vbar"><button aria-label="Previous page"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><span>Page 3 of 24</span><button aria-label="Next page"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button>
+            <span class="sp"><button aria-label="Zoom in"><svg class="ic" aria-hidden="true"><use href="#i-zoom"/></svg></button><button aria-pressed="true"><svg class="ic" aria-hidden="true"><use href="#i-highlight"/></svg>Highlight</button><button><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Download</button><button aria-label="Full screen"><svg class="ic" aria-hidden="true"><use href="#i-full"/></svg></button></span></div>
+          <div class="vstage">
+            <article class="doc" aria-label="Page 3">
+              <span class="dk">Month 2 · FinOps and cloud costs</span>
+              <h3>Tag every resource, or nobody pays for it</h3>
+              <p>A cloud bill lists services, not teams. <mark>Tags are the only way to turn a bill line into a person who can fix it.</mark> Every resource must carry three tags from the day it is created.</p>
+              <table><thead><tr><th>Tag</th><th>Example</th><th>Why</th></tr></thead><tbody>
+                <tr><td>owner</td><td>priya@acme.in</td><td>Who to call</td></tr>
+                <tr><td>env</td><td>prod, dev</td><td>What can be switched off</td></tr>
+                <tr><td>cost-centre</td><td>CC-2041</td><td>Which budget pays</td></tr></tbody></table>
+              <h4>Check this week</h4>
+              <p>Run the tag audit on your own account. Anything untagged after 7 days goes in the review list.</p>
+              <p class="pn">Page 3 · Rohit Menon · rohit.menon@example.com</p>
+            </article>
+          </div>
+          <div class="thumbs" role="group" aria-label="Pages"><button>1</button><button>2</button><button aria-current="true">3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>…</button></div>
+        </div>
+      </div>
+      <aside class="side" data-tabs data-side="pdf" aria-label="Notes for this document"></aside>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<!-- B6 · Image viewer -->
+<section class="screen" id="image" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Image viewer with notes · same route, <code>lesson.type = 'image'</code></h2>
+  <ul>
+    <li><b>Job:</b> look closely at a diagram and keep a note on it. Same shell and side panel as the other viewers.</li>
+    <li>Pinch/scroll to zoom, drag to pan, "Open full size" in a new tab (signed URL). Keyboard: <b>+</b>, <b>−</b>, <b>0</b> to reset.</li>
+    <li>A note on an image has no time or page; it is attached to the image as a whole (<code>kind = 'note'</code>, no position).</li>
+    <li>Captions and alt text are required fields when staff upload an image (lesson editor), so the page always has real text for screen readers.</li>
+    <li>A set of related images (the 10 images of month 2) gets the thumbnail strip like PDF pages.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Diagrams are drawn in code by the team, never generated images (guide §9). Course images uploaded by trainers follow the same file rules as PDFs (type, size, signed URL).</li>
+    <li>Download follows <code>allow_download</code> exactly like PDFs.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="focus" data-title="<b>Tag-based cost allocation</b> · Diagram 2 of 10" data-exit="Back to lesson" data-href="flow-learn.html#player"></div>
+  <main class="wrap">
+    <div class="pl">
+      <div>
+        <div class="viewer">
+          <div class="vbar"><button aria-label="Previous image"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><span>Image 2 of 10</span><button aria-label="Next image"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button>
+            <span class="sp"><button aria-label="Zoom in"><svg class="ic" aria-hidden="true"><use href="#i-zoom"/></svg></button><button><svg class="ic" aria-hidden="true"><use href="#i-ext"/></svg>Open full size</button><button><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Download</button></span></div>
+          <div class="vstage"><figure class="dia">
+            <svg viewBox="0 0 720 300" role="img" aria-label="Tags flow from cloud resources to a cost report and then to team budgets. The cost-centre tag is highlighted.">
+              <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="14" y="30" width="150" height="240" rx="14" stroke-dasharray="6 6"/>
+                <rect x="34" y="62" width="110" height="44" rx="9" fill="#fff"/><rect x="34" y="124" width="110" height="44" rx="9" fill="#fff"/><rect x="34" y="186" width="110" height="44" rx="9" fill="#fff"/>
+                <path d="M164 84h74M164 146h74M164 208h74" stroke-dasharray="3 5"/>
+                <rect x="238" y="100" width="150" height="100" rx="14" fill="#fff"/>
+                <rect x="256" y="150" width="114" height="28" rx="14" fill="#FFC845" stroke="none"/>
+                <path d="M388 150h66"/><path d="M448 142l8 8-8 8"/>
+                <rect x="456" y="40" width="250" height="220" rx="14" fill="#fff"/>
+                <rect x="474" y="136" width="46" height="100" rx="4"/><rect x="534" y="164" width="46" height="72" rx="4"/><rect x="594" y="188" width="46" height="48" rx="4"/><path d="M468 236h226"/>
+              </g>
+              <use href="#lg-aws" x="46" y="68" width="30" height="30"/><use href="#lg-aws" x="46" y="130" width="30" height="30"/><use href="#lg-aws" x="46" y="192" width="30" height="30"/>
+              <text x="108" y="89">EC2 · web</text><text x="108" y="151">S3 · logs</text><text x="108" y="213">RDS · data</text>
+              <text x="89" y="52" class="sl">Cloud resources</text><text x="313" y="124">Cost report</text><text x="313" y="169">cost-centre</text><text x="313" y="192" class="sl" style="font-size:10.5px">groups every line</text>
+              <text x="581" y="62" class="sl">Team budgets</text><text x="497" y="256">Data</text><text x="557" y="256">App</text><text x="617" y="256">Web</text>
+            </svg>
+            <figcaption class="small" style="margin-top:12px;text-align:center">The cost-centre tag (yellow) is what turns one bill into three team budgets.</figcaption>
+          </figure></div>
+        </div>
+      </div>
+      <aside class="side" data-tabs data-side="image" aria-label="Notes for this image"></aside>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<!-- B7 · My notes -->
+<section class="screen" id="notes" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>My notes · <code>/learn/notes</code></h2>
+  <ul>
+    <li><b>Job:</b> find something I wrote or marked, then jump back to that exact minute or page. No filled button.</li>
+    <li>Everything from <code>lesson_notes</code> for this learner, grouped by lesson (newest lesson first), filtered by kind (Notes, Bookmarks, Highlights) and searchable by text and lesson title.</li>
+    <li>Each item links to the lesson with <code>?t=1634</code> (seconds) or <code>?page=3</code>; the player opens there.</li>
+    <li>"Download as PDF" builds one document grouped by month and lesson with timestamps, so learners can revise offline. Generated on request, not stored.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Notes are private. Trainers and admins cannot read them.</li>
+    <li>Deleting a lesson (staff) keeps the learner's notes hidden, not deleted, for 30 days.</li>
+    <li>If access ends (expiry or refund) notes stay readable and exportable for 30 more days, but lessons are locked.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active="notes"></div>
+  <main>
+    <section class="s tight" aria-labelledby="h-nt">
+      <div class="wrap">
+        <div class="mhead">
+          <div style="display:grid;gap:12px"><h1 class="h2" id="h-nt">My notes</h1><p class="lead">34 notes and bookmarks from 12 lessons.</p></div>
+          <a class="btn btn-line btn-sm" href="#"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Download as PDF</a>
+        </div>
+        <div class="mtools">
+          <div class="fchips" data-single role="group" aria-label="Filter by kind">
+            <button class="fchip" aria-pressed="true">All <em>34</em></button>
+            <button class="fchip" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg>Notes <em>21</em></button>
+            <button class="fchip" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-bookmark"/></svg>Bookmarks <em>9</em></button>
+            <button class="fchip" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-highlight"/></svg>Highlights <em>4</em></button>
+          </div>
+          <div class="srch"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input class="inp" type="search" placeholder="Search my notes" aria-label="Search my notes"></div>
+        </div>
+      </div>
+    </section>
+    <section class="s s-alt" aria-label="Notes by lesson" style="padding-block:clamp(20px,2.4cqi,32px)">
+      <div class="wrap"><div class="months" data-notegroups></div></div>
+    </section>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<script>
+(function () {
+  var ic = function (n) { return '<svg class="ic" aria-hidden="true"><use href="#i-' + n + '"/></svg>' };
+  // ---- recordings (stock placeholders) ----
+  var IMG = { a: '1522202176988-66273c2fd55f', b: '1522071820081-009f0129c71c', c: '1552664730-d307ca884978', d: '1543269865-cbf427effbad', e: '1573164713988-8665fc963095', f: '1551836022-d5d88e9218df' };
+  var RECS = [
+    { t: 'Tagging and cost allocation', d: 'Tue 24 Nov', by: 'Karthik Rao', dur: '1:32:08', w: 62, n: 2, i: 'a' },
+    { t: 'Reading your first cloud bill', d: 'Sat 21 Nov', by: 'Meera Iyer', dur: '1:48:30', w: 100, n: 5, i: 'b' },
+    { t: 'Lab clinic: Cost Explorer', d: 'Thu 19 Nov', by: 'Karthik Rao', dur: '1:12:44', w: 100, n: 1, i: 'c' },
+    { t: 'Why bills surprise you', d: 'Tue 17 Nov', by: 'Meera Iyer', dur: '1:35:02', w: 100, n: 3, i: 'd' },
+    { t: 'Month 1 review and Q&A', d: 'Sat 14 Nov', by: 'Karthik Rao', dur: '1:21:15', w: 100, n: 0, i: 'e' },
+    { t: 'Identity and access across clouds', d: 'Thu 12 Nov', by: 'Meera Iyer', dur: '1:44:51', w: 40, n: 2, i: 'f' }
+  ];
+  function rec(r) {
+    return '<a class="rec" href="#player" data-go="player"><div class="thumb"><img src="https://images.unsplash.com/photo-' + IMG[r.i] + '?auto=format&fit=crop&w=640&q=70" alt="" loading="lazy">' +
+      (r.n ? '<span class="nt">' + ic('note') + r.n + ' note' + (r.n > 1 ? 's' : '') + '</span>' : '') +
+      '<span class="pbtn"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span><span class="dur">' + r.dur + '</span>' +
+      (r.w ? '<span class="wp"><i style="width:' + r.w + '%"></i></span>' : '') + '</div>' +
+      '<div class="rb"><span class="d">' + r.d + '</span><b>' + r.t + '</b><span class="by">' + r.by + (r.w === 100 ? ' · Watched' : r.w ? ' · ' + r.w + '% watched' : '') + '</span></div></a>';
+  }
+  document.querySelectorAll('[data-rec]').forEach(function (el) { el.innerHTML = RECS.slice(0, +el.getAttribute('data-rec')).map(rec).join('') });
+
+  // ---- course material ----
+  var T = { v: ['video', 'Video'], r: ['live', 'Live class recording'], p: ['pdf', 'PDF'], i: ['image', 'Diagram'] };
+  var M = [
+    { n: '01', t: 'Three clouds, one architecture', w: 'Weeks 1–4', done: '22 of 22', pc: 100, cls: 'done', open: false, rows: [] },
+    { n: '02', t: 'FinOps and cloud costs', w: 'Weeks 5–8', done: '14 of 22', pc: 64, cls: '', open: true, rows: [
+      ['r', 'Tagging and cost allocation', '1 h 32 min · Tue 24 Nov', 'p62', 2, 'cur'],
+      ['p', 'Class 14 slides', '24 pages', 'done', 2],
+      ['i', 'Tag-based cost allocation', 'zoom and download', 'done', 1],
+      ['r', 'Reading your first cloud bill', '1 h 48 min · Sat 21 Nov', 'done', 5],
+      ['v', 'Budgets and alerts', '26 min', 'new', 0],
+      ['p', 'Tag audit checklist', '4 pages', 'new', 0],
+      ['v', 'Unit economics: cost per user', '31 min', 'lock:3 Dec', 0]
+    ] },
+    { n: '03', t: 'Automate and ship', w: 'Weeks 9–12', done: '0 of 24', pc: 0, cls: 'lockd', open: false, lock: 'Unlocks 7 Dec', rows: [] },
+    { n: '04', t: 'Design, defend, get hired', w: 'Weeks 13–16', done: '0 of 18', pc: 0, cls: 'lockd', open: false, lock: 'Unlocks 4 Jan', rows: [] }
+  ];
+  function row(r) {
+    var t = T[r[0]], st = r[3], right = '', c = '';
+    if (st === 'done') right = '<span class="tickc" aria-label="Completed">' + ic('check') + '</span>';
+    else if (st === 'new') right = '<span class="chip new">New</span>';
+    else if (st.indexOf('p') === 0) right = '<span class="chip ok">' + st.slice(1) + '% watched</span>';
+    else if (st.indexOf('lock') === 0) { right = '<span class="chip">' + ic('lock') + st.slice(5) + '</span>'; c = ' lk' }
+    if (r[5] === 'cur') c += ' cur';
+    var go = r[0] === 'p' ? 'pdf' : r[0] === 'i' ? 'image' : 'player';
+    return '<a class="mrow' + c + '" href="#' + go + '" data-go="' + go + '"><span class="ti">' + ic(t[0]) + '</span><span class="tt"><b>' + r[1] + '</b><span>' + t[1] + ' · ' + r[2] + '</span></span>' +
+      '<span class="nn">' + (r[4] ? ic('note') + r[4] : '') + '</span><span class="sd">' + right + '</span></a>';
+  }
+  var mm = document.querySelector('[data-months]');
+  if (mm) mm.innerHTML = M.map(function (m) {
+    var body = m.rows.length ? '<div class="mlist">' + m.rows.map(row).join('') + '</div>' : '';
+    var right = m.lock ? '<span class="chip">' + ic('lock') + m.lock + '</span>' : '<span class="pc"><span>' + m.done + '</span><span class="bar-p"><i style="width:' + m.pc + '%"></i></span></span>';
+    return '<details class="mcard ' + m.cls + '"' + (m.open ? ' open' : '') + '><summary><span class="mn">' + m.n + '</span><span><b>' + m.t + '</b><span class="w">' + m.w + '</span></span>' + right + '<span class="cv">' + ic('chev') + '</span></summary>' + body + '</details>';
+  }).join('');
+
+  // ---- side panel: notes (video, pdf, image) ----
+  var NOTES = {
+    video: { at: 'Note at <span class="tsx">27:14</span>', ph: 'Write what you want to remember…', hint: 'Press N to note at this time', items: [
+      ['04:12', 'note', 'Billing data is 24 h late. Always compare the same day, not "today".', 0],
+      ['12:40', 'bookmark', 'Mandatory tags: owner, env, cost-centre', 0],
+      ['27:14', 'note', 'Tag policy: owner, env, cost-centre. Ask Karthik about untagged EBS volumes.', 1],
+      ['40:35', 'bookmark', 'Showback vs chargeback (come back to this)', 0]
+    ], kinds: 'Notes and bookmarks' },
+    pdf: { at: 'Note on <span class="tsx">page 3</span>', ph: 'Write a note about this page…', hint: 'Select text to highlight it', items: [
+      ['p.3', 'highlight', '“Tags are the only way to turn a bill line into a person who can fix it.”', 0],
+      ['p.3', 'note', 'Add this table to my own tag policy doc.', 0],
+      ['p.7', 'note', 'Budget alert at 80%, not 100%.', 0]
+    ], kinds: 'Notes and highlights' },
+    image: { at: 'Note on <span class="tsx">this image</span>', ph: 'Write a note about this diagram…', hint: 'Notes stay with the image', items: [
+      ['Image', 'note', 'cost-centre is the one that finance reads. Owner is for engineers.', 0]
+    ], kinds: 'Notes' }
+  };
+  function nit(i, kind) {
+    var cls = i[1] === 'bookmark' ? 'tsx bm' : 'tsx', icn = i[1] === 'bookmark' ? 'bookmark' : i[1] === 'highlight' ? 'highlight' : 'note';
+    return '<li class="nit' + (i[3] ? ' ed' : '') + '"><button class="' + cls + '" aria-label="Go to ' + i[0] + '">' + ic(icn) + i[0] + '</button><p>' + i[2] + '</p>' +
+      '<div class="ft"><button>' + ic('edit') + 'Edit</button><button>' + ic('trash') + 'Delete</button></div></li>';
+  }
+  document.querySelectorAll('[data-side]').forEach(function (el) {
+    var k = el.getAttribute('data-side'), d = NOTES[k];
+    var tabs = k === 'video'
+      ? '<button role="tab" aria-selected="true" data-tab="n">Notes <span class="cnt">' + d.items.length + '</span></button><button role="tab" aria-selected="false" data-tab="c">Chapters</button><button role="tab" aria-selected="false" data-tab="l">Class list</button>'
+      : '<button role="tab" aria-selected="true" data-tab="n">Notes <span class="cnt">' + d.items.length + '</span></button><button role="tab" aria-selected="false" data-tab="c">' + (k === 'pdf' ? 'Pages' : 'Images') + '</button>';
+    el.innerHTML = '<div class="tabs" role="tablist">' + tabs + '</div>' +
+      '<div data-pane="n" style="display:flex;flex-direction:column;min-height:0;flex:1">' +
+      '<div class="compose"><span class="at">' + d.at + '</span><textarea class="inp" aria-label="New note" placeholder="' + d.ph + '"></textarea>' +
+      '<div class="cr"><button class="btn btn-line btn-sm">Save note</button>' + (k === 'video' ? '<button class="btn btn-line btn-sm">' + ic('bookmark') + 'Mark this moment</button>' : '') + '<span class="sp">' + d.hint + '</span></div></div>' +
+      '<div class="nfilters" data-single role="group" aria-label="Filter"><button aria-pressed="true">All</button><button aria-pressed="false">Notes</button>' + (k === 'video' ? '<button aria-pressed="false">Bookmarks</button>' : k === 'pdf' ? '<button aria-pressed="false">Highlights</button>' : '') + '</div>' +
+      '<ul class="nlist">' + d.items.map(nit).join('') + '</ul>' +
+      '<div class="foot"><span>Only you can see these</span><a class="tlink" href="#notes" data-go="notes" style="font-size:14px">All my notes →</a></div></div>' +
+      '<div data-pane="c" hidden><ul class="chapters">' +
+      (k === 'video' ? '<li><span class="tsx">00:00</span><span>Where the bill comes from</span></li><li><span class="tsx">12:10</span><span>Mandatory tags</span></li><li><span class="tsx">24:30</span><span>Tag policy workshop</span></li><li><span class="tsx">48:00</span><span>Showback and chargeback</span></li><li><span class="tsx">1:15:00</span><span>Q&amp;A</span></li>'
+        : '<li><span class="tsx">p.1</span><span>Why tags</span></li><li><span class="tsx">p.3</span><span>The three required tags</span></li><li><span class="tsx">p.9</span><span>Audit steps</span></li>') + '</ul></div>' +
+      (k === 'video' ? '<div data-pane="l" hidden><ul class="chapters"><li><span class="tsx">13</span><span>Reading your first cloud bill</span></li><li style="background:#fff;box-shadow:inset 3px 0 0 var(--brand)"><span class="tsx">14</span><span>Tagging and cost allocation</span></li><li><span class="tsx">15</span><span>Budgets and alerts</span></li><li><span class="tsx">16</span><span>Unit economics</span></li></ul></div>' : '');
+  });
+
+  // ---- latest notes on home, grouped notes page ----
+  var LN = [['27:14', 'Tagging and cost allocation', 'Tag policy: owner, env, cost-centre. Ask Karthik about untagged EBS volumes.', 'note'], ['12:40', 'Tagging and cost allocation', 'Mandatory tags: owner, env, cost-centre', 'bookmark'], ['p.3', 'Class 14 slides', 'Add this table to my own tag policy doc.', 'note']];
+  var ln = document.querySelector('[data-lastnotes]');
+  if (ln) ln.innerHTML = LN.map(function (n) { return '<a class="card pad" href="#player" data-go="player" style="display:grid;gap:8px;padding:16px 20px"><span style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute);font-weight:600"><span class="nit" style="display:inline-flex;padding:0;background:none;box-shadow:none"><span class="tsx' + (n[3] === 'bookmark' ? ' bm' : '') + '" style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 9px;border-radius:8px;background:' + (n[3] === 'bookmark' ? 'var(--accent)' : 'var(--mist)') + ';color:' + (n[3] === 'bookmark' ? 'var(--ink)' : 'var(--brand)') + ';font-weight:750">' + ic(n[3] === 'bookmark' ? 'bookmark' : 'note') + n[0] + '</span></span>' + n[1] + '</span><span style="font-size:16.5px;line-height:1.45">' + n[2] + '</span></a>' }).join('');
+  var NG = [
+    ['Tagging and cost allocation', 'Live class recording · Month 2', 'live', [['27:14', 'note', 'Tag policy: owner, env, cost-centre. Ask Karthik about untagged EBS volumes.'], ['12:40', 'bookmark', 'Mandatory tags: owner, env, cost-centre'], ['04:12', 'note', 'Billing data is 24 h late. Always compare the same day.']]],
+    ['Class 14 slides', 'PDF · Month 2', 'pdf', [['p.3', 'highlight', '“Tags are the only way to turn a bill line into a person who can fix it.”'], ['p.3', 'note', 'Add this table to my own tag policy doc.']]],
+    ['Reading your first cloud bill', 'Live class recording · Month 2', 'live', [['18:02', 'note', 'Look at “Usage type”, not “Service”, to find idle volumes.'], ['51:30', 'bookmark', 'Reserved vs on-demand example']]]
+  ];
+  var ng = document.querySelector('[data-notegroups]');
+  if (ng) ng.innerHTML = NG.map(function (g) {
+    return '<section class="mcard" aria-label="' + g[0] + '"><div style="display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:14px;padding:16px 22px"><span class="ti" style="display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--mist);color:var(--brand)">' + ic(g[2]) + '</span><span><b style="display:block;font-size:19px;letter-spacing:-0.02em">' + g[0] + '</b><span class="small">' + g[1] + '</span></span><a class="tlink" href="#player" data-go="player">Open lesson →</a></div>' +
+      '<ul class="nlist" style="padding:0 16px 16px">' + g[3].map(function (i) { return nit([i[0], i[1], i[2], 0]) }).join('') + '</ul></section>';
+  }).join('');
+})();
+window.FLOW = { title: 'Learning flow', screens: [
+  { id: 'home', label: 'My learning', group: 'Learner' },
+  { id: 'material', label: 'Course material' },
+  { id: 'live', label: 'Live classes' },
+  { id: 'notes', label: 'My notes' },
+  { id: 'player', label: 'Recording player + notes', group: 'Viewers' },
+  { id: 'pdf', label: 'PDF viewer' },
+  { id: 'image', label: 'Image viewer' }
+] }
+</script>
+<script src="flows.js"></script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account flow · CloudCadre mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="flows.css">
+<!--
+  Flow C: the navbar and the learner's own settings (2026-11-25).
+  The old app has no way to log out and no learner settings page (only /admin/* settings exist).
+  This flow adds: the redesigned navbar (signed out, learner, account menu, phone), Account (Profile, Subscription,
+  Payments and receipts, Password and devices) and the signed-out confirmation.
+  PLACEHOLDER DATA: Rohit Menon, dates, order numbers and amounts are invented.
+-->
+</head>
+<body>
+<script src="sprite.js"></script>
+
+<!-- C1 · Navbar states -->
+<section class="screen" id="navbar" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Navbar · every page</h2>
+  <ul>
+    <li><b>Signed out:</b> logo, the five marketing links, "Log in", outline "WhatsApp us". Same as the home page (v9), so nothing changes there.</li>
+    <li><b>Signed in (learner):</b> logo, four links: <b>My learning · Course material · Live classes · My notes</b>, and one account button on the right (avatar + first name). "Log in" and "WhatsApp us" leave the bar; WhatsApp help moves into the account menu and the "Stuck on a lab?" card on My learning.</li>
+    <li>The current page link gets the yellow underline (guide §7.2). The bar is sticky and gets the hairline shadow once scrolled.</li>
+    <li><b>Account menu</b> (a real <code>menu</code> button, closes on Esc and outside click): Profile · Subscription · Payments and receipts · Password and devices · Help on WhatsApp · <b>Log out</b> (last, after a divider, always visible). Staff also get "Admin panel" above the divider.</li>
+    <li><b>Phone:</b> logo + "Menu" button (guide §7.2). The panel starts with who is signed in, then the same links, then account items, then Log out. All targets 44px or taller.</li>
+  </ul></div><div>
+  <h2>Why this shape</h2>
+  <ul>
+    <li>Old problem: no log out anywhere, and the learner area was a second row of tabs under the bar. Four links in the bar replace those tabs.</li>
+    <li>Log out is one click, no confirm dialog. It clears the session on this device only; "log out everywhere" lives in Password and devices.</li>
+    <li>Pending buyers (UPI waiting) and unpaid users see the same bar; Course material and Live classes show the unlock banner instead of lists.</li>
+    <li>Focus screens (checkout, player, viewers) replace the bar with logo + one exit, so there is nothing to wander off to mid-lesson.</li>
+  </ul></div></div></div>
+<div class="page">
+  <main class="wrap">
+    <div class="states">
+      <div class="state"><h3>1 · Signed out (desktop)</h3><div class="box"><div data-hdr="out"></div></div></div>
+      <div class="state"><h3>2 · Learner, "Course material" is the current page</h3><div class="box"><div data-hdr="in" data-active="material"></div></div></div>
+      <div class="state"><h3>3 · Learner, account menu open</h3><div class="box tall"><div data-hdr="in" data-active="home" data-open></div></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:28px">
+        <div class="state"><h3>4 · Learner on a phone, menu open</h3>
+          <div class="box narrow">
+            <div class="nav wrap" style="padding-inline:16px"><a class="brand" href="#"><svg class="mark" aria-hidden="true"><use href="#cc-mark"/></svg><span>Cloud<span class="c2">Cadre</span></span></a><button class="menu" style="display:block" aria-expanded="true">Close</button></div>
+            <div class="mnav-static">
+              <div class="who"><span class="av" aria-hidden="true">RM</span><div><b>Rohit Menon</b><span>rohit.menon@example.com</span></div></div>
+              <a href="#" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>My learning</a>
+              <a href="#"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg>Course material</a>
+              <a href="#"><svg class="ic" aria-hidden="true"><use href="#i-live"/></svg>Live classes</a>
+              <a href="#"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg>My notes</a>
+              <a href="#"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Account settings</a>
+              <a href="#"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg>Payments and receipts</a>
+              <a href="#"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg>Help on WhatsApp</a>
+              <a href="#" style="border-bottom:0"><svg class="ic" style="color:var(--ink)" aria-hidden="true"><use href="#i-logout"/></svg>Log out</a>
+            </div>
+          </div></div>
+        <div class="state"><h3>5 · Signed out on a phone, menu open</h3>
+          <div class="box narrow">
+            <div class="nav wrap" style="padding-inline:16px"><a class="brand" href="#"><svg class="mark" aria-hidden="true"><use href="#cc-mark"/></svg><span>Cloud<span class="c2">Cadre</span></span></a><button class="menu" style="display:block" aria-expanded="true">Close</button></div>
+            <div class="mnav-static"><a href="#">Program</a><a href="#">How we teach</a><a href="#">Placements</a><a href="#">Trainers</a><a href="#">FAQ</a><a href="#">Log in</a><a class="btn btn-line" href="#"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg>WhatsApp us</a></div>
+          </div></div>
+      </div>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<!-- Shared account shell is repeated per screen, so each screen can be read on its own. -->
+
+<!-- C2 · Profile -->
+<section class="screen" id="profile" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Profile · <code>/account</code></h2>
+  <ul>
+    <li><b>Job:</b> keep my details right. One filled button: "Save changes" (the reminder switches save on their own and show "Saved").</li>
+    <li>Writes <code>tenant_members</code>: <code>display_name</code>, <code>phone</code>, <code>avatar_path</code>; city goes to <code>custom_fields</code>. A learner can only update their own row (RLS), and only these columns.</li>
+    <li><b>Name on certificate</b> is separate from the display name and is locked once a certificate is issued. It is what <code>/verify/[code]</code> shows.</li>
+    <li><b>Email is read only here.</b> Change it under Password and devices: needs the password, then a code sent to the new address. Changing it never re-runs the whitelist.</li>
+    <li>WhatsApp number must be a valid Indian mobile (10 digits, +91). Changing it asks to confirm with a code on WhatsApp later (not in v1).</li>
+    <li>Photo: jpg/png up to 2 MB, cropped square, stored in a private bucket. Initials show until a photo exists.</li>
+  </ul></div><div>
+  <h2>Reminders</h2>
+  <ul>
+    <li>Stored in <code>notification_preferences</code> (member, <code>event_key</code>, <code>channel</code>, <code>enabled</code>): <code>live_class.reminder</code> on <code>whatsapp</code> and <code>email</code>, <code>material.new</code> on <code>email</code>. Default on, on, off.</li>
+    <li>Payment and security messages are not optional and are not listed here.</li>
+    <li>Each switch is a real <code>role="switch"</code> button with an accessible label.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active=""></div>
+  <main class="s tight">
+    <div class="wrap">
+      <h1 class="h2" style="margin-bottom:28px">Account</h1>
+      <div class="acc">
+        <nav class="rail" aria-label="Account sections">
+          <a href="#profile" data-go="profile" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Profile</a>
+          <a href="#subscription" data-go="subscription"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg>Subscription</a>
+          <a href="#payments" data-go="payments"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg>Payments and receipts</a>
+          <a href="#security" data-go="security"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg>Password and devices</a>
+          <div class="sep"></div>
+          <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg>Help on WhatsApp</a>
+          <a class="out" href="#logout" data-go="logout"><svg class="ic" aria-hidden="true"><use href="#i-logout"/></svg>Log out</a>
+        </nav>
+        <div class="apanel">
+          <section class="acard" aria-labelledby="c-det">
+            <header><div><h2 class="h3" id="c-det">Your details</h2><p>This is how CloudCadre and your trainers see you.</p></div></header>
+            <div class="profile-top"><span class="av lg" aria-hidden="true">RM</span><div><b style="font-size:18px">Rohit Menon</b><div class="acts"><button class="tlink" type="button">Change photo</button><button class="tlink ink" type="button">Remove</button></div></div></div>
+            <form class="form" onsubmit="return false">
+              <div class="row2">
+                <div class="field"><label for="p-name">Full name</label><input class="inp" id="p-name" value="Rohit Menon" autocomplete="name"></div>
+                <div class="field"><label for="p-wa">WhatsApp number</label><input class="inp" id="p-wa" type="tel" value="+91 98765 12345" autocomplete="tel-national"></div>
+              </div>
+              <div class="row2">
+                <div class="field"><label for="p-email">Email</label><input class="inp" id="p-email" value="rohit.menon@example.com" readonly><span class="hint">To change it, go to <a class="tlink" href="#security" data-go="security" style="font-size:inherit">Password and devices</a>.</span></div>
+                <div class="field"><label for="p-city">City <span class="opt">(optional)</span></label><input class="inp" id="p-city" value="Hyderabad" autocomplete="address-level2"></div>
+              </div>
+              <div class="field"><label for="p-cert">Name on your certificate</label><input class="inp" id="p-cert" value="Rohit Menon"><span class="hint">We print this name on your certificate. Check the spelling: it cannot be changed after the certificate is issued.</span></div>
+              <div class="actions"><button class="btn btn-brand" type="submit">Save changes</button></div>
+            </form>
+          </section>
+          <section class="acard" aria-labelledby="c-rem">
+            <header><div><h2 class="h3" id="c-rem">Reminders</h2><p>Choose how we remind you. Payment and security messages always come through.</p></div></header>
+            <div style="display:grid">
+              <div class="switch" style="border-top:2px solid var(--ink);padding-block:10px;border-bottom:1px solid var(--line)"><div><b>Live class reminders on WhatsApp</b><span class="d">30 minutes before each class</span></div><button class="tgl" role="switch" aria-checked="true" aria-label="Live class reminders on WhatsApp"></button></div>
+              <div class="switch" style="padding-block:10px;border-bottom:1px solid var(--line)"><div><b>Live class reminders by email</b><span class="d">The evening before and 30 minutes before</span></div><button class="tgl" role="switch" aria-checked="true" aria-label="Live class reminders by email"></button></div>
+              <div class="switch" style="padding-block:10px"><div><b>New material by email</b><span class="d">When a trainer adds a recording, PDF or lab</span></div><button class="tgl" role="switch" aria-checked="false" aria-label="New material by email"></button></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- C3 · Subscription -->
+<section class="screen" id="subscription" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Subscription · <code>/account/subscription</code></h2>
+  <ul>
+    <li><b>Job:</b> answer "do I have access, until when, and why?". No filled button (nothing to buy while active).</li>
+    <li>"Subscription" is the learner's word for <b>their access to CEAP</b>: the active row in <code>enrollments</code>. No new table: status, <code>started_at</code>, <code>expires_at</code>, <code>batch_id</code> come from it.</li>
+    <li><b>How you got access</b> comes from <code>enrollments.source</code>: <code>purchase</code> → "Paid by UPI, verified on …" with the order number; <code>import</code> → "Added by CloudCadre. Your email was on our learner list."; <code>admin</code> or <code>coupon</code> have their own sentence. (The preview switch below only shows the two variants.)</li>
+    <li>Status words: <b>Active</b>, <b>Ends in N days</b> (30 days or fewer, yellow banner, "Message us to extend"), <b>Ended</b> (lessons locked; notes and certificate stay), <b>Paused</b> (staff action).</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>No self-service cancel or refund in v1: the refund policy applies and staff handle it (Orders → refund). The page links to the policy and WhatsApp.</li>
+    <li>Extending access is a staff action (Enrolments → change end date) or a new order. When Razorpay/instalments arrive, this page shows "Next payment" from <code>installments</code>.</li>
+    <li>If a learner has no enrolment the page shows the unlock offer with the one filled button "Join the next batch" instead of the plan.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active=""></div>
+  <main class="s tight">
+    <div class="wrap">
+      <h1 class="h2" style="margin-bottom:28px">Account</h1>
+      <div class="acc">
+        <nav class="rail" aria-label="Account sections">
+          <a href="#profile" data-go="profile"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Profile</a>
+          <a href="#subscription" data-go="subscription" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg>Subscription</a>
+          <a href="#payments" data-go="payments"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg>Payments and receipts</a>
+          <a href="#security" data-go="security"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg>Password and devices</a>
+          <div class="sep"></div>
+          <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg>Help on WhatsApp</a>
+          <a class="out" href="#logout" data-go="logout"><svg class="ic" aria-hidden="true"><use href="#i-logout"/></svg>Log out</a>
+        </nav>
+        <div class="apanel" data-tabs>
+          <div class="preview-as" role="tablist" aria-label="Preview as"><span>Preview as:</span><div class="atabs"><button role="tab" aria-selected="true" data-tab="paid">Paid learner</button><button role="tab" aria-selected="false" data-tab="list">Existing learner (on the list)</button></div></div>
+          <section class="acard" aria-labelledby="c-plan">
+            <header><div><h2 class="h3" id="c-plan">Your subscription</h2></div></header>
+            <div class="plan">
+              <div class="pt"><svg viewBox="0 0 799 612" aria-hidden="true"><use href="#cc-mark"/></svg></div>
+              <div><p class="flag-tag" style="margin-bottom:10px"><b>CEAP</b>CloudCadre Elite Architect Program</p><h3 class="t">Live online · 4 months</h3>
+                <div class="m"><span><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Oct 2026 batch</span><span><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg>Month 2 of 4</span><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Access until 31 Jul 2027</span></div></div>
+              <span class="chip ok" style="justify-self:start">Active</span>
+            </div>
+            <div data-pane="paid" class="src"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span><b>Paid by UPI.</b> Order CC-2026-000118, ₹49,999. Verified by CloudCadre on 7 Oct 2026. <a class="tlink" href="#payments" data-go="payments" style="font-size:inherit">See payments →</a></span></div>
+            <div data-pane="list" class="src" hidden><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg><span><b>Added by CloudCadre.</b> Your email was on our learner list on 2 Nov 2026, so there is nothing to pay.</span></div>
+            <dl class="kv">
+              <div><dt>Status</dt><dd>Active</dd><span></span></div>
+              <div><dt>Started</dt><dd>12 Oct 2026</dd><span></span></div>
+              <div><dt>Access until</dt><dd>31 Jul 2027</dd><span></span></div>
+              <div><dt>Progress</dt><dd>36 of 86 lessons · 42%</dd><a class="tlink" href="flow-learn.html#material">Open →</a></div>
+              <div><dt>After it ends</dt><dd style="font-weight:500;color:var(--grey);font-size:15.5px">Lessons lock. You keep your notes for 30 days and your certificate for good.</dd><span></span></div>
+            </dl>
+            <div class="actions"><a class="btn btn-line btn-sm" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Ask about my access</a><a class="tlink ink" href="#">Refund policy</a></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- C4 · Payments and receipts -->
+<section class="screen" id="payments" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Payments and receipts · <code>/account/payments</code> (replaces <code>/orders</code>)</h2>
+  <ul>
+    <li><b>Job:</b> prove what I paid. No filled button.</li>
+    <li>One block per <b>order</b>, with its <b>payments</b> underneath (an underpaid order shows two payments). Source: <code>orders</code> + <code>payments</code> for this member. The existing <code>/orders</code> and <code>/orders/[id]</code> routes redirect here.</li>
+    <li>Payment status shown to the learner: <b>Verified</b> (captured), <b>Waiting for check</b> (UPI, <code>pending_review</code>) with a link to the waiting page, <b>Needs action</b> (rejected, with the reason), <b>Failed</b> (gateway, later).</li>
+    <li>Receipt: opens the receipt page (print to PDF), existing. GST tax invoice PDFs are a later phase (tracker I5).</li>
+    <li>A whitelisted learner has no orders: the page says so and explains why (no empty table).</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Amounts in ₹ with Indian grouping. Dates like "7 Oct 2026".</li>
+    <li>Learners can never edit or delete a payment record. Staff corrections create audit rows.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active=""></div>
+  <main class="s tight">
+    <div class="wrap">
+      <h1 class="h2" style="margin-bottom:28px">Account</h1>
+      <div class="acc">
+        <nav class="rail" aria-label="Account sections">
+          <a href="#profile" data-go="profile"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Profile</a>
+          <a href="#subscription" data-go="subscription"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg>Subscription</a>
+          <a href="#payments" data-go="payments" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg>Payments and receipts</a>
+          <a href="#security" data-go="security"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg>Password and devices</a>
+          <div class="sep"></div>
+          <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg>Help on WhatsApp</a>
+          <a class="out" href="#logout" data-go="logout"><svg class="ic" aria-hidden="true"><use href="#i-logout"/></svg>Log out</a>
+        </nav>
+        <div class="apanel" data-tabs>
+          <div class="preview-as" role="tablist" aria-label="Preview as"><span>Preview as:</span><div class="atabs"><button role="tab" aria-selected="true" data-tab="paid">Paid learner</button><button role="tab" aria-selected="false" data-tab="list">Existing learner (on the list)</button></div></div>
+          <section class="acard" data-pane="paid" aria-labelledby="c-pay">
+            <header><div><h2 class="h3" id="c-pay">Order CC-2026-000118</h2><p>CEAP · placed 6 Oct 2026 · total ₹49,999</p></div><span class="chip ok">Paid in full</span></header>
+            <div style="overflow-x:auto"><table class="ptable">
+              <thead><tr><th>Date</th><th class="hide-s">Method</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr><td class="n">6 Oct 2026</td><td class="hide-s">UPI QR</td><td class="r n">₹40,000</td><td><span class="chip ok">Verified</span></td><td class="r"><a class="tlink" href="#" style="font-size:15px">Receipt</a></td></tr>
+                <tr><td class="n">7 Oct 2026</td><td class="hide-s">UPI QR · top-up</td><td class="r n">₹9,999</td><td><span class="chip ok">Verified</span></td><td class="r"><a class="tlink" href="#" style="font-size:15px">Receipt</a></td></tr>
+              </tbody></table></div>
+            <p class="small">The first payment was ₹9,999 short, so we asked for the rest on 6 Oct. Both payments belong to the same order.</p>
+          </section>
+          <section class="acard" data-pane="paid" aria-labelledby="c-pay2">
+            <header><div><h2 class="h3" id="c-pay2">What a waiting payment looks like</h2></div></header>
+            <div style="overflow-x:auto"><table class="ptable">
+              <thead><tr><th>Date</th><th class="hide-s">Method</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead>
+              <tbody><tr><td class="n">Today</td><td class="hide-s">UPI QR</td><td class="r n">₹49,999</td><td><span class="chip wait">Waiting for check</span></td><td class="r"><a class="tlink" href="flow-join.html#pending" style="font-size:15px">Open →</a></td></tr></tbody></table></div>
+          </section>
+          <section class="acard" data-pane="list" aria-labelledby="c-none" hidden>
+            <header><div><h2 class="h3" id="c-none">No payments to show</h2></div></header>
+            <p class="src"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg><span>You are on CloudCadre's learner list, so CEAP was added for you and there is nothing to pay. If you think you paid us before, <a class="tlink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" style="font-size:inherit">message us on WhatsApp</a>.</span></p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- C5 · Password and devices -->
+<section class="screen" id="security" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Password and devices · <code>/account/security</code></h2>
+  <ul>
+    <li><b>Job:</b> keep the account safe. One filled button: "Update password".</li>
+    <li><b>Update password:</b> needs the current password; new password 8+ characters; on success all <b>other</b> sessions end and the learner gets an email.</li>
+    <li><b>Devices:</b> the sessions of this account, newest first, with browser, city (from IP, approximate) and last seen. "Log out" on a row ends that session; "Log out of all other devices" ends the rest. The current device is marked and cannot be ended here (use Log out in the menu).</li>
+    <li><b>Email change:</b> password first, then a 6-digit code to the <b>new</b> address; the old address gets a notice. Does not touch enrolments or the whitelist.</li>
+    <li>Learners do not get authenticator codes in v1 (staff accounts keep them, as built). Phone-code login is a later option.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Device limit: <code>tenant_settings.security.device_limit</code> already exists in the schema. If set (for example 2), a new login beyond it signs the oldest device out. Stops password sharing of a paid course. <b>Value is an open question</b> for the owner (plan/16 §10).</li>
+    <li>Forgot password lives on the login page and uses the emailed link.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active=""></div>
+  <main class="s tight">
+    <div class="wrap">
+      <h1 class="h2" style="margin-bottom:28px">Account</h1>
+      <div class="acc">
+        <nav class="rail" aria-label="Account sections">
+          <a href="#profile" data-go="profile"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Profile</a>
+          <a href="#subscription" data-go="subscription"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg>Subscription</a>
+          <a href="#payments" data-go="payments"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg>Payments and receipts</a>
+          <a href="#security" data-go="security" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg>Password and devices</a>
+          <div class="sep"></div>
+          <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg>Help on WhatsApp</a>
+          <a class="out" href="#logout" data-go="logout"><svg class="ic" aria-hidden="true"><use href="#i-logout"/></svg>Log out</a>
+        </nav>
+        <div class="apanel">
+          <section class="acard" aria-labelledby="c-pw">
+            <header><div><h2 class="h3" id="c-pw">Password</h2><p>Last changed 6 Oct 2026.</p></div></header>
+            <form class="form" onsubmit="return false">
+              <div class="field"><label for="pw0">Current password</label><input class="inp" id="pw0" type="password" autocomplete="current-password" value="correct horse" style="max-width:420px"></div>
+              <div class="row2"><div class="field"><label for="pw1">New password</label><input class="inp" id="pw1" type="password" autocomplete="new-password"><span class="hint">At least 8 characters.</span></div>
+              <div class="field"><label for="pw2">Repeat new password</label><input class="inp" id="pw2" type="password" autocomplete="new-password"></div></div>
+              <div class="actions"><button class="btn btn-brand" type="submit">Update password</button></div>
+            </form>
+          </section>
+          <section class="acard" aria-labelledby="c-dev">
+            <header><div><h2 class="h3" id="c-dev">Where you are logged in</h2><p>If you do not recognise one, log it out and change your password.</p></div></header>
+            <ul class="sess">
+              <li><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></span><span><b>Chrome on Windows <span class="chip ok" style="margin-left:6px">This device</span></b><span class="d">Hyderabad · active now</span></span><span></span></li>
+              <li><span class="ti"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg></span><span><b>Chrome on Android</b><span class="d">Hyderabad · 2 days ago</span></span><button class="btn btn-line btn-sm" type="button">Log out</button></li>
+            </ul>
+            <div class="actions"><button class="btn btn-line btn-sm" type="button">Log out of all other devices</button></div>
+          </section>
+          <section class="acard" aria-labelledby="c-em">
+            <header><div><h2 class="h3" id="c-em">Sign-in email</h2></div></header>
+            <div class="kv" style="margin-top:-6px"><div><dt>Email</dt><dd>rohit.menon@example.com</dd><button class="tlink" type="button">Change email</button></div></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- C6 · Logged out -->
+<section class="screen" id="logout" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Log out · server action, then <code>/logged-out</code></h2>
+  <ul>
+    <li>"Log out" in the account menu, the phone menu and the account rail all call the same action: end this device's session, clear the cookies, redirect here. <b>No confirm dialog.</b></li>
+    <li>The page is signed-out chrome (marketing header). One filled button: "Log in".</li>
+    <li>Session also ends by itself after 30 days without use, or when the password changes (other devices).</li>
+    <li>Footer of every signed-in page keeps no log out link; the menu is the one place, so it never goes missing.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Log out must work with JavaScript off (it is a form POST).</li>
+    <li>On a shared computer, the browser back button must not show learner pages: send <code>Cache-Control: no-store</code> on all learner routes.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="out"></div>
+  <main class="wrap">
+    <div class="center-card">
+      <span class="seal"><svg class="ic" aria-hidden="true"><use href="#i-logout"/></svg></span>
+      <h1 class="h2">You are logged out.</h1>
+      <p class="lead">Your progress and notes are saved. Log in any time to carry on.</p>
+      <div class="actions"><a class="btn btn-brand" href="flow-join.html#login">Log in <span class="ar" aria-hidden="true">→</span></a><a class="tlink" href="flows-index.html">Back to the home page</a></div>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<script>
+window.FLOW = { title: 'Account flow', screens: [
+  { id: 'navbar', label: 'Navbar states', group: 'Navbar' },
+  { id: 'profile', label: 'Profile', group: 'Account' },
+  { id: 'subscription', label: 'Subscription' },
+  { id: 'payments', label: 'Payments and receipts' },
+  { id: 'security', label: 'Password and devices' },
+  { id: 'logout', label: 'Logged out' }
+] }
+</script>
+<script src="flows.js"></script>
+</body>
+</html>

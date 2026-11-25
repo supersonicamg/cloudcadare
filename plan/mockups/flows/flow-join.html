@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join flow · CloudCadre mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="flows.css">
+<!--
+  Flow A: join CloudCadre (2026-11-25). Sign up or log in, confirm the email, then one of two paths:
+    - the email is on the owner's learner list (whitelist) -> access is granted, no payment;
+    - otherwise -> checkout. UPI QR is live, Razorpay is marked "Coming soon".
+  After a UPI payment the learner waits for staff to verify the screenshot (admin side: flow-admin.html).
+  Rules for every screen are in the yellow "Logic notes" bars (toggle in the toolbar) and in plan/16-learner-flows-logic.md.
+  PLACEHOLDER DATA: learner, price, batch date, UPI ID, WhatsApp number, order number and all photos are invented; stock photos stand in for CloudCadre's own.
+-->
+</head>
+<body>
+<script src="sprite.js"></script>
+
+<!-- A1 · Log in -->
+<section class="screen" id="login" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Log in · <code>/login</code></h2>
+  <ul>
+    <li><b>Job:</b> get a returning learner back in. One filled button.</li>
+    <li>Email + password. Wrong email or password shows one message that does not say which was wrong.</li>
+    <li>After login: if the learner has an active enrolment go to <code>?next</code> or <code>/learn</code>; if they have an order <code>awaiting_payment</code> or a UPI payment <code>pending_review</code> go to that order's page; otherwise go to <code>/checkout</code> for CEAP.</li>
+    <li>Staff (admin roles) go to <code>/admin</code> and are asked for the authenticator code, as today.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Rate limit: 5 wrong tries per email per 15 minutes, then ask for the emailed code instead of the password.</li>
+    <li>A signed-out visitor who opens any learner page is sent here with <code>?next=</code> set. Only same-site paths are accepted for <code>next</code>.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="out"></div>
+  <main class="auth">
+    <div class="auth-art">
+      <div class="auth-frame"><div class="auth-back"></div><div class="auth-photo">
+        <!-- stock placeholder: replace with a real CloudCadre class photo -->
+        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=75" alt="A small group of learners in a live class with laptops">
+        <div class="auth-tag"><b>Your next live class is waiting</b><span>Recordings, notes and labs, in one place</span></div>
+      </div></div>
+    </div>
+    <div class="auth-form">
+      <div class="form" style="gap:22px">
+        <h1 class="h2">Log in</h1>
+        <div class="field"><label for="l-email">Email</label><input class="inp" id="l-email" type="email" autocomplete="email" value="rohit.menon@example.com"></div>
+        <div class="field"><label for="l-pw">Password</label><div class="pw"><input class="inp" id="l-pw" type="password" autocomplete="current-password" value="correct horse"><button type="button" class="tlink">Show</button></div></div>
+        <a class="tlink" href="#" style="align-self:flex-start">Forgot your password?</a>
+        <a class="btn btn-brand btn-block" href="flow-learn.html#home">Log in <span class="ar" aria-hidden="true">→</span></a>
+      </div>
+      <p class="swap">New to CloudCadre? <a href="#" data-go="signup">Create an account</a></p>
+      <p class="help-line"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg><span>Cannot log in? <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a></span></p>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<!-- A2 · Sign up -->
+<section class="screen" id="signup" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Sign up · <code>/signup</code></h2>
+  <ul>
+    <li><b>Job:</b> create the account fast. One filled button: "Create account".</li>
+    <li>Fields: full name, email, WhatsApp number (+91, 10 digits), password (8+ characters). WhatsApp number is <b>required</b>: payment help and class reminders go there, and staff match screenshots by it.</li>
+    <li>Email is lower-cased and trimmed before it is stored or compared. <code>tenant_members.email</code> is a <code>citext</code>, so it already compares without case.</li>
+    <li>Terms and refund policy: one checkbox, links open in a new tab.</li>
+    <li>On submit: create the auth user + <code>tenant_member</code>, send the 6-digit email code, go to "Confirm your email". <b>Nothing is granted yet.</b></li>
+  </ul></div><div>
+  <h2>Why the code comes before the whitelist</h2>
+  <ul>
+    <li>The whitelist gives access by email alone. If we granted access on a typed email, anyone who knows a learner's address could sign up as them and take the access.</li>
+    <li>So <b>every</b> new account confirms its email first. Same screen for everyone, so the form never reveals whether an email is on the list.</li>
+    <li>This changes today's setting "Confirm email: off" (PROGRESS.md). It must be turned on for the cloud project. See plan/16 §4.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="out"></div>
+  <main class="auth">
+    <div class="auth-art">
+      <div class="auth-frame"><div class="auth-back"></div><div class="auth-photo">
+        <!-- stock placeholder -->
+        <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1000&q=75" alt="Young learners studying together at a table">
+        <div class="auth-tag"><b>Next batch starts 12 Jan</b><span>4 months · live online · capstone and interview prep</span></div>
+      </div></div>
+    </div>
+    <div class="auth-form">
+      <div class="form">
+        <p class="flag-tag"><b>CEAP</b>CloudCadre Elite Architect Program</p>
+        <h1 class="h2">Create your account</h1>
+        <p class="body">Use an email you can open now. We send a code to confirm it.</p>
+        <div class="field"><label for="s-name">Full name</label><input class="inp" id="s-name" autocomplete="name" value="Rohit Menon"></div>
+        <div class="field"><label for="s-email">Email</label><input class="inp" id="s-email" type="email" autocomplete="email" value="rohit.menon@example.com"></div>
+        <div class="field"><label for="s-wa">WhatsApp number</label><input class="inp" id="s-wa" type="tel" autocomplete="tel-national" value="+91 98765 12345"><span class="hint">For class reminders and payment help. We never share it.</span></div>
+        <div class="field"><label for="s-pw">Password</label><div class="pw"><input class="inp" id="s-pw" type="password" autocomplete="new-password" value="correct horse"><button type="button" class="tlink">Show</button></div><span class="hint">At least 8 characters.</span></div>
+        <label class="check"><input type="checkbox" checked><span>I agree to the <a class="tlink" href="#" style="font-size:inherit">Terms</a> and the <a class="tlink" href="#" style="font-size:inherit">Refund policy</a>.</span></label>
+        <a class="btn btn-brand btn-block" href="#" data-go="verify">Create account <span class="ar" aria-hidden="true">→</span></a>
+      </div>
+      <p class="swap">Already have an account? <a href="#" data-go="login">Log in</a></p>
+      <p class="help-line"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg><span>Questions first? <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Ask Ananya on WhatsApp</a></span></p>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<!-- A3 · Confirm email -->
+<section class="screen" id="verify" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Confirm your email · <code>/signup/confirm</code></h2>
+  <ul>
+    <li><b>Job:</b> prove the learner owns the email. One filled button.</li>
+    <li>6-digit code, valid 10 minutes, 5 attempts, resend after 60 s (3 resends per hour).</li>
+    <li>On success the server runs <b>one</b> check: is this email on the whitelist (and unclaimed, not expired)?
+      <b>Yes</b> → "Welcome back" (access granted). <b>No</b> → checkout. Wrong code stays on this screen.</li>
+    <li>"Change email" goes back to the form and keeps the other fields.</li>
+  </ul></div><div>
+  <h2>Edge cases</h2>
+  <ul>
+    <li>Learner closes the tab and comes back by log in: an unconfirmed account is sent here again.</li>
+    <li>Email already confirmed on another account: sign up says "This email already has an account. Log in instead." (this message is fine to show after the code step, not before).</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="focus" data-exit="Cancel" data-href="flow-join.html#signup"></div>
+  <main class="wrap">
+    <div class="center-card">
+      <span class="seal"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg></span>
+      <h1 class="h2">Check your email</h1>
+      <p class="lead">We sent a 6-digit code to <b style="color:var(--ink)">rohit.menon@example.com</b>. It works for 10 minutes.</p>
+      <div class="code" role="group" aria-label="6-digit code"><input inputmode="numeric" maxlength="1" aria-label="Digit 1" value="4"><input inputmode="numeric" maxlength="1" aria-label="Digit 2" value="8"><input inputmode="numeric" maxlength="1" aria-label="Digit 3" value="1"><input inputmode="numeric" maxlength="1" aria-label="Digit 4"><input inputmode="numeric" maxlength="1" aria-label="Digit 5"><input inputmode="numeric" maxlength="1" aria-label="Digit 6"></div>
+      <div class="actions" style="width:100%"><a class="btn btn-brand" href="#" data-go="welcome">Confirm email <span class="ar" aria-hidden="true">→</span></a></div>
+      <p class="small">Did not get it? Check spam, or <a class="tlink" href="#" style="font-size:inherit">resend the code in 0:42</a> · <a class="tlink ink" href="#" data-go="signup" style="font-size:inherit">Change email</a></p>
+      <p class="small"><a class="tlink" href="#" data-go="checkout" style="font-size:inherit">Preview: this email is not on the learner list →</a></p>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<!-- A4 · Whitelisted: welcome back -->
+<section class="screen" id="welcome" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Already a learner · <code>/welcome-back</code></h2>
+  <ul>
+    <li><b>Shown when</b> the confirmed email matches an <code>access_whitelist</code> row with status <code>waiting</code> and not expired.</li>
+    <li>The server (never the browser) creates the enrolment in the same transaction: <code>enrollments.source = 'import'</code>, <code>status = 'active'</code>, <code>started_at = now()</code>, <code>expires_at</code> and <code>batch_id</code> from the whitelist row, then sets the row to <code>claimed</code> with member and time.</li>
+    <li>No order, no payment, no invoice. The account's Subscription page says "Added by CloudCadre" (see Account → Subscription).</li>
+    <li><b>Job:</b> tell them it worked and send them to the course. One filled button.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>One row grants once. If it was already claimed by another account, the second sign-up falls through to checkout, and staff see "claimed twice" in the whitelist screen.</li>
+    <li>Several courses on one row are allowed later; with one program today the row stores the CEAP course.</li>
+    <li>Idempotent: refreshing or opening this URL again never creates a second enrolment.</li>
+    <li>Staff can remove a row before it is claimed, or cancel the enrolment after (admin → Enrolments).</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active="home"></div>
+  <main class="wrap">
+    <div class="center-card">
+      <span class="seal y"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span>
+      <p class="flag-tag"><b>CEAP</b>CloudCadre Elite Architect Program</p>
+      <h1 class="h2">Welcome back, <span class="c">Rohit.</span></h1>
+      <p class="lead">Your email is on our learner list, so CEAP is already unlocked. No payment needed.</p>
+      <ul class="ffacts">
+        <li><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Oct 2026 batch (Month 2 now)</li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Access until 31 Jul 2027</li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-lab"/></svg>All recordings, PDFs and labs</li>
+      </ul>
+      <div class="actions"><a class="btn btn-brand" href="flow-learn.html#home">Go to my course <span class="ar" aria-hidden="true">→</span></a></div>
+      <p class="small">Something wrong with your batch or dates? <a class="tlink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" style="font-size:inherit">Tell us on WhatsApp</a>.</p>
+    </div>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- A5 · Checkout -->
+<section class="screen" id="checkout" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Checkout · <code>/checkout/[orderId]</code></h2>
+  <ul>
+    <li><b>Job:</b> pay with confidence. One filled button: "I have paid" (UPI). Focus layout: logo only, no navigation.</li>
+    <li>The order exists before this page (<code>orders.status = 'awaiting_payment'</code>, order no <code>CC-2026-000123</code> from <code>tenant_counters</code>). Price, GST and coupon are fixed on the order; the page only reads them.</li>
+    <li><b>UPI QR: live.</b> <b>Razorpay: "Coming soon"</b>, not selectable, no click target, <code>aria-disabled</code>. It switches on later when the owner adds Razorpay keys (admin → Payment settings); no code change.</li>
+    <li>The QR encodes a UPI link with the <b>exact amount</b> and the order number as the payment note: <code>upi://pay?pa=cloudcadre@okaxis&amp;pn=CloudCadre&amp;am=49999.00&amp;tn=CC-2026-000123&amp;cu=INR</code>. If the owner prefers one static QR, the page shows the amount and the note to type.</li>
+    <li>On a phone the page also shows "Open UPI app" (the same link), because a learner cannot scan their own screen.</li>
+  </ul></div><div>
+  <h2>What "I have paid" does</h2>
+  <ul>
+    <li>Creates <code>payments</code> row: <code>gateway = 'upi_manual'</code>, <code>status = 'created'</code>, amount = order total. Order stays <code>awaiting_payment</code>. A <code>payment_proofs</code> row is opened with state <code>pending_review</code>.</li>
+    <li>Notifies staff (admin badge on "UPI payments", optional WhatsApp or email to the owner).</li>
+    <li>Goes to the "Waiting for verification" page. Pressing it twice must not create two payments (idempotency key = order id + "upi").</li>
+    <li>The learner can come back and re-open the QR until the order is paid or cancelled (orders unpaid for 7 days are cancelled).</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="focus" data-secure data-title="Checkout"></div>
+  <main class="wrap">
+    <div class="co">
+      <div class="co-main">
+        <div style="display:grid;gap:10px">
+          <p class="flag-tag"><b>CEAP</b>CloudCadre Elite Architect Program</p>
+          <h1 class="h2">How do you want to pay?</h1>
+        </div>
+        <div class="methods" role="radiogroup" aria-label="Payment method">
+          <button class="method" role="radio" aria-checked="true" data-show="upi"><span class="mi upi" aria-hidden="true">UPI</span><span><b>UPI QR code</b><span class="d">Scan with GPay, PhonePe, Paytm or any UPI app</span></span><span style="display:flex;align-items:center;gap:12px"><span class="chip ok">Live</span><span class="radio" aria-hidden="true"></span></span></button>
+          <button class="method off" role="radio" aria-checked="false" aria-disabled="true" tabindex="-1"><span class="mi" aria-hidden="true"><svg class="ic"><use href="#i-card"/></svg></span><span><b>Card, net banking, wallets</b><span class="d">Pay online with Razorpay</span></span><span style="display:flex;align-items:center;gap:12px"><span class="chip soon">Coming soon</span><span class="radio" aria-hidden="true"></span></span></button>
+        </div>
+
+        <div data-method="upi" style="display:grid;gap:16px">
+          <div class="pay-box">
+            <div class="qr-wrap">
+              <div class="qr" data-qr="11"></div>
+              <p class="qr-cap">₹49,999 is filled in for you<br><span style="font-weight:500;color:var(--mute)">Placeholder QR, not scannable</span></p>
+              <a class="btn btn-line btn-sm only-s" href="#">Open UPI app</a>
+            </div>
+            <ol class="qr-steps">
+              <li><span class="n">1</span><span><b>Scan the code</b> with any UPI app.</span></li>
+              <li><span class="n">2</span><span><b>Pay ₹49,999.</b> Do not change the amount or the note.</span></li>
+              <li><span class="n">3</span><span><b>Take a screenshot</b> of the success screen. You will send it on the next page.</span></li>
+            </ol>
+          </div>
+          <div style="display:grid;gap:8px">
+            <div class="kvc"><span>UPI ID</span><b>cloudcadre@okaxis</b><button data-copy>Copy</button></div>
+            <div class="kvc"><span>Payment note</span><b>CC-2026-000123</b><button data-copy>Copy</button></div>
+          </div>
+          <div class="actions" style="margin-top:4px"><a class="btn btn-brand" href="#" data-go="pending">I have paid <span class="ar" aria-hidden="true">→</span></a></div>
+          <p class="help-line"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg><span>Payment stuck? <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Message Ananya on WhatsApp</a></span></p>
+        </div>
+      </div>
+
+      <aside class="sum" aria-label="Order summary">
+        <div class="sum-top">
+          <div class="th"><svg viewBox="0 0 799 612" aria-hidden="true" style="color:inherit"><use href="#cc-mark"/></svg></div>
+          <div><b style="display:block;font-size:19px;letter-spacing:-0.02em">CEAP</b><span class="small">CloudCadre Elite Architect Program</span></div>
+        </div>
+        <ul class="ffacts" style="font-size:15px;gap:8px 18px">
+          <li><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Batch starts 12 Jan</li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>4 months, live online</li>
+        </ul>
+        <dl>
+          <div><dt>Program fee</dt><dd>₹42,372</dd></div>
+          <div><dt>GST (18%)</dt><dd>₹7,627</dd></div>
+          <div class="tot"><dt>Total</dt><dd>₹49,999</dd></div>
+        </dl>
+        <p class="small" style="margin-top:-6px">Order CC-2026-000123 · <a class="tlink" href="#" style="font-size:inherit">Have a coupon?</a></p>
+        <p class="help-line" style="font-size:14px"><svg class="ic" aria-hidden="true" style="color:var(--brand)"><use href="#i-shield"/></svg><span>Not happy in the first 7 days? See the <a href="#">refund policy</a>.</span></p>
+      </aside>
+    </div>
+  </main>
+</div></div>
+</section>
+
+<!-- A6 · Waiting for verification -->
+<section class="screen" id="pending" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Waiting for verification · <code>/checkout/[orderId]/pending</code></h2>
+  <ul>
+    <li><b>Job:</b> get the screenshot to CloudCadre and set expectations. One filled button: "Send screenshot on WhatsApp".</li>
+    <li>The button opens <code>wa.me/&lt;number&gt;?text=…</code> with the text <i>"Hi, my CEAP order is CC-2026-000123. Payment screenshot attached."</i> already filled. The learner attaches the image in WhatsApp.</li>
+    <li>Optional: upload the screenshot here instead (jpg, png, pdf, max 5 MB) plus the 12-digit UPI reference. If uploaded, it is stored in a private bucket and shown to staff on the review screen. If sent on WhatsApp, staff tick "Screenshot received on WhatsApp" when they approve.</li>
+    <li>The page checks status every 20 s (and on focus) and switches itself to "Approved" or "Needs action".</li>
+    <li>Access stays locked until a staff member approves. Free preview lessons stay open.</li>
+  </ul></div><div>
+  <h2>Timing and copy</h2>
+  <ul>
+    <li>"Usually within 2 hours, 9am to 9pm, Mon to Sat" is a placeholder; the real hours live in Payment settings and are printed here from there.</li>
+    <li>Outside hours the line changes to "We will verify it first thing at 9am."</li>
+    <li>After 24 hours with no decision staff see the order marked <b>Overdue</b> in the queue.</li>
+    <li>Email + WhatsApp message go out on approve or reject (templates in plan/16 §7).</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active="home"></div>
+  <main>
+    <section class="s tight">
+      <div class="wrap">
+        <p class="flag-tag" style="margin-bottom:10px"><b>CEAP</b>Order CC-2026-000123</p>
+        <h1 class="h2" style="margin-bottom:28px">Thank you. We are checking your payment.</h1>
+        <ol class="track" aria-label="Order progress">
+          <li class="trk"><span class="n">01<span class="tick"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span></span><b>Order placed</b><span class="d">Today, 4:12 pm</span></li>
+          <li class="trk"><span class="n">02<span class="tick"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span></span><b>You paid by UPI</b><span class="d">₹49,999</span></li>
+          <li class="trk now" aria-current="step"><span class="n">03</span><b>We verify it</b><span class="d">Usually within 2 hours</span></li>
+          <li class="trk todo"><span class="n">04</span><b>CEAP unlocked</b><span class="d">You get a WhatsApp message</span></li>
+        </ol>
+        <div class="proof">
+          <div style="display:grid;gap:18px;align-content:start">
+            <div>
+              <h2 class="h3" style="font-size:24px;letter-spacing:-0.03em">Send us the payment screenshot</h2>
+              <p class="body" style="margin-top:8px;max-width:34em">Message it to our WhatsApp number with your order number. We unlock CEAP as soon as we see it.</p>
+            </div>
+            <div class="actions"><a class="btn btn-brand" href="https://wa.me/919876543210?text=Hi%2C%20my%20CEAP%20order%20is%20CC-2026-000123.%20Payment%20screenshot%20attached." target="_blank" rel="noopener noreferrer"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Send screenshot on WhatsApp</a></div>
+            <p class="small" style="margin-top:-6px">WhatsApp number: <b style="color:var(--ink)">+91 98765 43210</b> · opens with your order number already typed</p>
+            <hr class="rule" style="margin-block:4px">
+            <details>
+              <summary class="tlink ink" style="list-style:none;cursor:pointer"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg>Or upload it here instead</summary>
+              <div style="display:grid;gap:14px;margin-top:16px">
+                <div class="drop"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg><b style="color:var(--ink)">Drop the screenshot here</b><span>JPG, PNG or PDF, up to 5 MB</span><button class="btn btn-line btn-sm" type="button">Choose a file</button></div>
+                <div class="field"><label for="utr">UPI reference number <span class="opt">(optional)</span></label><input class="inp" id="utr" inputmode="numeric" placeholder="12 digits, from your UPI app"><span class="hint">It helps us match your payment faster.</span></div>
+                <div><button class="btn btn-line btn-sm" type="button">Send for checking</button></div>
+              </div>
+            </details>
+          </div>
+          <aside style="display:grid;gap:14px;align-content:start;padding:20px;border-radius:16px;background:var(--alt)">
+            <h2 class="h3" style="font-size:18px">What we check</h2>
+            <ul class="chk" style="display:grid;gap:12px;font-size:15.5px">
+              <li style="display:flex;gap:10px;align-items:center"><svg class="ic" style="color:var(--brand)" aria-hidden="true"><use href="#i-check"/></svg>Amount is <b>₹49,999</b></li>
+              <li style="display:flex;gap:10px;align-items:center"><svg class="ic" style="color:var(--brand)" aria-hidden="true"><use href="#i-check"/></svg>Paid to <b>cloudcadre@okaxis</b></li>
+              <li style="display:flex;gap:10px;align-items:center"><svg class="ic" style="color:var(--brand)" aria-hidden="true"><use href="#i-check"/></svg>Note says <b>CC-2026-000123</b></li>
+              <li style="display:flex;gap:10px;align-items:center"><svg class="ic" style="color:var(--brand)" aria-hidden="true"><use href="#i-check"/></svg>Payment is from today</li>
+            </ul>
+            <hr class="rule" style="margin-block:2px">
+            <p class="small">While you wait, <a class="tlink" href="flow-learn.html#material" style="font-size:inherit">open the free preview lessons →</a></p>
+          </aside>
+        </div>
+        <p class="small" style="margin-top:20px"><a class="tlink" href="#" data-go="approved" style="font-size:inherit">Preview: what the learner sees after approval →</a> · <a class="tlink" href="#" data-go="rejected" style="font-size:inherit">Preview: payment could not be matched →</a></p>
+      </div>
+    </section>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- A7 · Approved -->
+<section class="screen" id="approved" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Payment verified · <code>/checkout/[orderId]/done</code></h2>
+  <ul>
+    <li>Reached when staff approve in the admin queue (or by the live-polling page).</li>
+    <li>Approval runs one transaction: <code>payments.status = 'captured'</code>, <code>orders.status = 'paid'</code> + <code>paid_at</code>, create the enrolment (<code>source = 'purchase'</code>, linked to the order item), mark the proof <code>approved</code>, write the audit row (who, when), queue the receipt email + WhatsApp message.</li>
+    <li>Idempotent: approving twice does nothing the second time.</li>
+    <li><b>Job:</b> send them into the course. One filled button.</li>
+  </ul></div><div>
+  <h2>Messages sent</h2>
+  <ul>
+    <li>Email: receipt (GST invoice later) and "CEAP is unlocked".</li>
+    <li>WhatsApp: "Hi Rohit, payment received. CEAP is unlocked: &lt;link&gt;".</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active="home"></div>
+  <main class="wrap">
+    <div class="center-card">
+      <span class="seal y"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span>
+      <h1 class="h2">Payment verified. <span class="c">CEAP is unlocked.</span></h1>
+      <p class="lead">Welcome to the next batch, Rohit. Your first live class is on 12 Jan at 7 pm.</p>
+      <ul class="ffacts">
+        <li><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg>Receipt CC-2026-000123 emailed</li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Batch starts 12 Jan</li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Access until 30 Nov 2027</li>
+      </ul>
+      <div class="actions"><a class="btn btn-brand" href="flow-learn.html#home">Start learning <span class="ar" aria-hidden="true">→</span></a><a class="tlink" href="flow-account.html#payments">Download receipt</a></div>
+    </div>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<!-- A8 · Could not match -->
+<section class="screen" id="rejected" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Payment could not be matched · same URL, state <code>needs_action</code></h2>
+  <ul>
+    <li>Staff reject with <b>one reason</b> from a fixed list, plus an optional note. The learner sees the matching text:
+      <code>amount_mismatch</code> (shows what we saw and what is due), <code>not_received</code>, <code>screenshot_unclear</code>, <code>wrong_account</code>, <code>duplicate</code>.</li>
+    <li>Order stays <code>awaiting_payment</code>; the proof is <code>rejected</code> (kept for audit). Nothing is refunded by the app: money that arrived by mistake is returned by hand, and staff record it as a refund on the order.</li>
+    <li><b>Underpaid:</b> the one filled button opens a new QR for <b>only the missing amount</b> (second payment on the same order). The order is paid when the sum of captured payments reaches the total.</li>
+    <li>Other reasons: the filled button is "Send the screenshot again".</li>
+    <li>Secondary action is always WhatsApp to a person.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>No red and no scolding copy: say what we saw and what to do next.</li>
+    <li>A learner can have only one open proof per order. A new upload supersedes the rejected one.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div data-hdr="in" data-active="home"></div>
+  <main class="wrap">
+    <div class="center-card">
+      <span class="seal" style="background:var(--alt);color:var(--ink)"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></span>
+      <h1 class="h2">We could not match your payment yet.</h1>
+      <div class="alert" style="width:100%"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><div><b>Amount does not match.</b> Your screenshot shows ₹40,000. This order is ₹49,999, so ₹9,999 is still due. Checked by Neha on 12 Dec, 5:40 pm.</div></div>
+      <dl class="kv" style="width:100%">
+        <div><dt>Order</dt><dd>CC-2026-000123</dd></div>
+        <div><dt>Paid so far</dt><dd>₹40,000</dd></div>
+        <div><dt>Still due</dt><dd>₹9,999</dd></div>
+      </dl>
+      <div class="actions" style="width:100%"><a class="btn btn-brand" href="#" data-go="checkout">Pay the remaining ₹9,999 <span class="ar" aria-hidden="true">→</span></a><a class="btn btn-line" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><svg class="wa" aria-hidden="true"><use href="#lg-whatsapp"/></svg>Talk to Ananya</a></div>
+    </div>
+  </main>
+  <div data-foot></div>
+</div></div>
+</section>
+
+<script>
+window.FLOW = { title: 'Join flow', screens: [
+  { id: 'login', label: 'Log in', group: 'Before' },
+  { id: 'signup', label: 'Sign up' },
+  { id: 'verify', label: 'Confirm email' },
+  { id: 'welcome', label: 'Welcome back (on list)', group: 'Branch' },
+  { id: 'checkout', label: 'Checkout (UPI)' },
+  { id: 'pending', label: 'Waiting for verification', group: 'After' },
+  { id: 'approved', label: 'Approved' },
+  { id: 'rejected', label: 'Could not match' }
+] }
+</script>
+<script src="flows.js"></script>
+</body>
+</html>

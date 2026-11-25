@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin flow · CloudCadre mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="flows.css">
+<!--
+  Flow D: the staff side of the new learner flows (2026-11-25).
+  /admin/payments/upi (verify screenshots and unlock access), /admin/learner-list (the whitelist), and
+  /admin/payments/settings (UPI ID, QR, WhatsApp number, Razorpay "coming soon").
+  Admin uses the same tokens, no marketing patterns, no reveal animation (guide §14). Dense tables are fine here.
+  PLACEHOLDER DATA: every learner, amount, UPI ID and phone number is invented.
+-->
+</head>
+<body>
+<script src="sprite.js"></script>
+
+<!-- D1 · UPI payments queue -->
+<section class="screen" id="queue" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>UPI payments · <code>/admin/payments/upi</code></h2>
+  <ul>
+    <li><b>Job:</b> turn a screenshot into access, safely. One filled button: "Verify and unlock CEAP".</li>
+    <li>Queue = <code>payment_proofs</code> joined to <code>orders</code> + member. Default tab is <b>Waiting</b>, oldest first. A waiting item older than 24 h shows an <b>Overdue</b> chip. The sidebar badge counts waiting items.</li>
+    <li><b>Proof source:</b> <i>Uploaded</i> (image shown in the panel) or <i>WhatsApp</i> (nothing to show; staff tick "I saw the screenshot on WhatsApp"). Staff can match a WhatsApp screenshot by the learner's phone number, shown in the row.</li>
+    <li>The panel auto-checks what it can: amount equals the order balance, note equals the order number, UTR not already used on another order (<code>unique (gateway, gateway_payment_id)</code> already exists), proof not older than the order.</li>
+    <li><b>Approve needs the tick</b> "I can see this payment in our UPI app or bank statement". A screenshot can be faked; the money in the account cannot. Without the tick the button stays disabled.</li>
+  </ul></div><div>
+  <h2>What approve and reject do</h2>
+  <ul>
+    <li><b>Approve</b> (one transaction, idempotent): payment → <code>captured</code>; if captured payments ≥ order total: order → <code>paid</code>, enrolment created (<code>source = 'purchase'</code>), receipt created; else order → <code>partially_paid</code>. Proof → <code>approved</code> with reviewer + time. Outbox: receipt email + WhatsApp.</li>
+    <li><b>Reject</b>: needs a reason (<code>amount_mismatch</code>, <code>not_received</code>, <code>screenshot_unclear</code>, <code>wrong_account</code>, <code>duplicate</code>) and an optional note. Proof → <code>rejected</code>, order stays <code>awaiting_payment</code>, learner sees "needs action".</li>
+    <li>Permission: new <code>payment.verify</code> in the catalog, added to owner and finance roles; the action needs the authenticator step-up (<code>sensitive</code>) like refunds.</li>
+    <li>Every decision writes an audit row. Nobody can approve their own order (reviewer ≠ buyer).</li>
+  </ul></div></div></div>
+<div class="page">
+  <div class="adm">
+    <aside class="asb" data-asb="upi"></aside>
+    <main class="amain">
+      <div class="ahead">
+        <div><h1>UPI payments</h1><p>Check each payment against the order, then unlock access. Nothing unlocks until you approve.</p></div>
+        <div class="atabs" data-single role="group" aria-label="Status"><button aria-pressed="true">Waiting <span class="cnt">3</span></button><button aria-pressed="false">Needs action <span class="cnt">1</span></button><button aria-pressed="false">Verified <span class="cnt">28</span></button><button aria-pressed="false">All <span class="cnt">32</span></button></div>
+      </div>
+      <div class="ws">
+        <div class="apanel2">
+          <div class="tbar"><div class="srch"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input class="inp" type="search" placeholder="Order, name, phone or email" aria-label="Search payments"></div><span class="small" style="margin-left:auto">Oldest first</span></div>
+          <div style="overflow-x:auto"><table class="tbl">
+            <thead><tr><th>Learner and order</th><th class="hide-s">WhatsApp</th><th class="r">Amount</th><th class="hide-s">Proof</th><th>Waiting</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td><div class="pp"><span class="av sm">RM</span><div><b>Rohit Menon</b><span>CC-2026-000123</span></div></div></td><td class="hide-s mono">+91 98765 12345</td><td class="r mono">₹49,999</td><td class="hide-s"><span class="chip ok">Uploaded</span></td><td><span class="chip wait">26 h · Overdue</span></td></tr>
+              <tr><td><div class="pp"><span class="av sm">SP</span><div><b>Sneha Patil</b><span>CC-2026-000124</span></div></div></td><td class="hide-s mono">+91 90000 22110</td><td class="r mono">₹49,999</td><td class="hide-s"><span class="chip">WhatsApp</span></td><td>2 h 10 min</td></tr>
+              <tr><td><div class="pp"><span class="av sm">AK</span><div><b>Arjun Kulkarni</b><span>CC-2026-000125</span></div></div></td><td class="hide-s mono">+91 98450 11876</td><td class="r mono">₹9,999</td><td class="hide-s"><span class="chip ok">Uploaded</span></td><td>45 min</td></tr>
+            </tbody></table></div>
+        </div>
+        <aside class="review" aria-label="Review payment">
+          <div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><div><h2 class="h3">Review payment</h2><p class="small" style="margin-top:2px">CC-2026-000123 · CEAP · Oct to Jan batch</p></div><span class="chip wait">Waiting</span></div>
+          <div class="shot">
+            <svg viewBox="0 0 190 330" role="img" aria-label="Screenshot from the learner: payment successful, ₹49,999 paid to cloudcadre@okaxis, note CC-2026-000123" style="font-family:var(--f)">
+              <rect width="190" height="330" rx="14" fill="#fff"/><rect y="0" width="190" height="26" rx="14" fill="#F2F2EF"/><text x="14" y="17" font-size="9" font-weight="700" fill="#14201F">4:19</text><text x="176" y="17" font-size="9" font-weight="700" fill="#14201F" text-anchor="end">5G · 78%</text>
+              <circle cx="95" cy="78" r="26" fill="#0F5C56"/><path d="M82 78l9 9 17-18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="95" y="128" font-size="12" font-weight="700" fill="#14201F" text-anchor="middle">Payment successful</text>
+              <text x="95" y="160" font-size="26" font-weight="800" fill="#14201F" text-anchor="middle">₹49,999</text>
+              <text x="95" y="180" font-size="9.5" fill="#46514F" text-anchor="middle">12 Dec 2026, 4:19 pm</text>
+              <path d="M16 200h158" stroke="#E2E3DF"/><text x="16" y="218" font-size="9" fill="#67716F">To</text><text x="174" y="218" font-size="9.5" font-weight="700" fill="#14201F" text-anchor="end">CloudCadre</text>
+              <text x="16" y="238" font-size="9" fill="#67716F">UPI ID</text><text x="174" y="238" font-size="9.5" font-weight="700" fill="#14201F" text-anchor="end">cloudcadre@okaxis</text>
+              <text x="16" y="258" font-size="9" fill="#67716F">Note</text><text x="174" y="258" font-size="9.5" font-weight="700" fill="#14201F" text-anchor="end">CC-2026-000123</text>
+              <text x="16" y="278" font-size="9" fill="#67716F">UPI ref</text><text x="174" y="278" font-size="9.5" font-weight="700" fill="#14201F" text-anchor="end">4129 8830 1175</text>
+              <text x="95" y="312" font-size="8" fill="#67716F" text-anchor="middle">Placeholder screenshot</text>
+            </svg>
+          </div>
+          <p class="mini">Uploaded by the learner today, 4:21 pm · <a class="tlink" href="#" style="font-size:inherit">Open full size</a></p>
+          <ul class="chk" aria-label="Automatic checks">
+            <li class="ok"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><b>Amount</b><span class="v">₹49,999 = due ₹49,999</span></li>
+            <li class="ok"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><b>Note</b><span class="v">CC-2026-000123</span></li>
+            <li class="ok"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><b>Paid to</b><span class="v">cloudcadre@okaxis</span></li>
+            <li class="ok"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><b>UPI ref</b><span class="v">New, not used before</span></li>
+            <li class="no"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><b>Date</b><span class="v">12 Dec; order placed 11 Dec</span></li>
+          </ul>
+          <label class="check"><input type="checkbox"><span><b style="color:var(--ink)">I can see this payment</b> in our UPI app or bank statement.</span></label>
+          <div class="rbtns" style="grid-template-columns:minmax(0,1fr)"><button class="btn btn-brand off" disabled>Verify and unlock CEAP</button><button class="btn btn-line">Reject…</button></div>
+          <details><summary class="tlink ink" style="cursor:pointer;list-style:none">Reject with a reason</summary>
+            <div style="display:grid;gap:12px;margin-top:12px"><div class="field"><label for="rr">Reason</label><select class="inp" id="rr"><option>Amount does not match</option><option>Payment not received</option><option>Screenshot unclear</option><option>Paid to a different account</option><option>Duplicate</option></select></div>
+              <div class="field"><label for="rn">Note to the learner <span class="opt">(optional)</span></label><textarea class="inp" id="rn" style="min-height:70px">Your screenshot shows ₹40,000. ₹9,999 is still due.</textarea></div>
+              <button class="btn btn-line btn-sm" type="button">Send rejection</button></div></details>
+          <p class="small">Verifying enrols Rohit Menon in CEAP, marks the order paid and sends the receipt by email and WhatsApp.</p>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div></div>
+</section>
+
+<!-- D2 · Learner list (whitelist) -->
+<section class="screen" id="list" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Learner list (whitelist) · <code>/admin/learner-list</code></h2>
+  <ul>
+    <li><b>Job:</b> tell the system which existing learners already have CEAP, so they never pay again. One filled button: "Add to list".</li>
+    <li>New table <code>access_whitelist</code> (columns in plan/16 §3): <code>email_norm</code> (lower-case, trimmed), <code>name</code>, <code>course_id</code>, <code>batch_id</code>, <code>expires_at</code>, <code>status</code> (<code>waiting</code> / <code>claimed</code> / <code>expired</code> / <code>removed</code>), <code>claimed_by</code>, <code>claimed_at</code>, <code>added_by</code>, <code>note</code>. Unique per (tenant, email, course).</li>
+    <li><b>Add:</b> paste emails (one per line, commas, or spreadsheet column) or import a CSV (<code>email,name,batch,access_until</code>). The result is explained: added, already on the list, looks wrong (no @ or domain). Nothing is silently dropped.</li>
+    <li><b>Matching rule:</b> exact match after lower-casing and trimming. No "gmail dot" or "+tag" tricks, no wildcards, no whole domains (a domain wildcard would give everyone at a company free access).</li>
+    <li>Rows are removable only while <code>waiting</code>. A <code>claimed</code> row links to the learner and to their enrolment, where staff can end access.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>The learner must <b>confirm the email by code</b> before the list is checked (Join flow, "Confirm email"). That is what makes an email-only list safe.</li>
+    <li>Access ends at <code>expires_at</code> (the enrolment gets the same date). Blank = the batch end plus the standard replay window.</li>
+    <li>Adding an email that already has an active enrolment (paid or not) changes nothing and says so.</li>
+    <li>Requires permission <code>enrollment.manage</code> + step-up, same as giving access by hand today.</li>
+    <li>Not yet decided: whether the owner can send an "your access is ready, sign up here" email from this screen (plan/16 §10).</li>
+  </ul></div></div></div>
+<div class="page">
+  <div class="adm">
+    <aside class="asb" data-asb="list"></aside>
+    <main class="amain">
+      <div class="ahead">
+        <div><h1>Learner list</h1><p>Emails on this list get CEAP without paying when they sign up and confirm their email.</p></div>
+        <div class="atabs" data-single role="group" aria-label="Status"><button aria-pressed="true">Waiting <span class="cnt">214</span></button><button aria-pressed="false">Claimed <span class="cnt">96</span></button><button aria-pressed="false">Expired <span class="cnt">4</span></button><button aria-pressed="false">All <span class="cnt">314</span></button></div>
+      </div>
+      <div class="ws">
+        <div class="apanel2">
+          <div class="tbar"><div class="srch"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input class="inp" type="search" placeholder="Search by email or name" aria-label="Search the learner list"></div><button class="btn btn-line btn-sm" style="margin-left:auto"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Export</button></div>
+          <div style="overflow-x:auto"><table class="tbl">
+            <thead><tr><th>Email</th><th class="hide-s">Access until</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><div class="pp"><span class="av sm">AD</span><div><b>anita.desai@example.com</b><span>Anita Desai</span></div></div></td><td class="hide-s"><b style="font-weight:650">31 Jul 2027</b><span style="display:block;font-size:13px;color:var(--mute)">Oct 2026 batch</span></td><td><span class="chip wait">Waiting</span></td><td class="r"><button class="tlink ink" style="font-size:14px">Remove</button></td></tr>
+              <tr><td><div class="pp"><span class="av sm">RM</span><div><b>rohit.menon@example.com</b><span>Rohit Menon</span></div></div></td><td class="hide-s"><b style="font-weight:650">31 Jul 2027</b><span style="display:block;font-size:13px;color:var(--mute)">Oct 2026 batch</span></td><td><span class="chip ok">Claimed 3 Nov</span></td><td class="r"><a class="tlink" href="#" style="font-size:14px">View</a></td></tr>
+              <tr><td><div class="pp"><span class="av sm">VS</span><div><b>vikram.s@example.com</b><span>Vikram S</span></div></div></td><td class="hide-s"><b style="font-weight:650">30 Apr 2027</b><span style="display:block;font-size:13px;color:var(--mute)">Jul 2026 batch</span></td><td><span class="chip wait">Waiting</span></td><td class="r"><button class="tlink ink" style="font-size:14px">Remove</button></td></tr>
+              <tr><td><div class="pp"><span class="av sm">PN</span><div><b>pooja.nair@example.com</b><span>Pooja Nair</span></div></div></td><td class="hide-s"><b style="font-weight:650">30 Apr 2027</b><span style="display:block;font-size:13px;color:var(--mute)">Jul 2026 batch</span></td><td><span class="chip ok">Claimed 9 Nov</span></td><td class="r"><a class="tlink" href="#" style="font-size:14px">View</a></td></tr>
+              <tr><td><div class="pp"><span class="av sm">MJ</span><div><b>manoj.j@example.com</b><span>—</span></div></div></td><td class="hide-s"><b style="font-weight:650">31 Oct 2026</b><span style="display:block;font-size:13px;color:var(--mute)">Apr 2026 batch</span></td><td><span class="chip">Expired</span></td><td class="r"><button class="tlink ink" style="font-size:14px">Extend</button></td></tr>
+            </tbody></table></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--line);font-size:14px;color:var(--grey)"><span>Showing 1 to 5 of 214</span><span style="display:flex;gap:8px"><button class="btn btn-line btn-sm">Previous</button><button class="btn btn-line btn-sm">Next</button></span></div>
+        </div>
+        <aside class="review" aria-label="Add emails">
+          <div><h2 class="h3">Add emails</h2><p class="small" style="margin-top:2px">One per line, or comma separated. You can paste a column from a spreadsheet.</p></div>
+          <div class="field"><label for="em">Emails</label><textarea class="inp" id="em" style="min-height:130px">anita.desai@example.com
+vikram.s@example.com, sandeep.k@example.com
+rohit@gmailcom</textarea></div>
+          <div class="formgrid">
+            <div class="field"><label for="cr">Course</label><select class="inp" id="cr"><option>CEAP</option></select></div>
+            <div class="field"><label for="bt">Batch</label><select class="inp" id="bt"><option>Oct 2026</option><option>Jul 2026</option><option>Apr 2026</option></select></div>
+            <div class="field full"><label for="ex">Access until <span class="opt">(blank = batch end + replay window)</span></label><input class="inp" id="ex" value="31 Jul 2027"></div>
+          </div>
+          <div class="alert warn"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><div><b>Check before adding:</b> 3 will be added, 1 looks wrong (<b>rohit@gmailcom</b> has no dot after the @), 1 is already on the list (<b>anita.desai@example.com</b>).</div></div>
+          <div class="rbtns" style="grid-template-columns:1fr auto"><button class="btn btn-brand">Add to list</button><button class="btn btn-line"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg>CSV</button></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div></div>
+</section>
+
+<!-- D3 · Payment settings -->
+<section class="screen" id="settings" hidden>
+<div class="frame">
+<div class="logic"><div class="cols"><div>
+  <h2>Payment settings · <code>/admin/payments</code> (extends the page that exists today)</h2>
+  <ul>
+    <li><b>Job:</b> set where learners pay and who they message. One filled button: "Save settings".</li>
+    <li><b>UPI</b> card (new): UPI ID, name shown in the UPI app, QR mode, the WhatsApp number for screenshots, verification hours, and who is alerted when a payment arrives. Stored in <code>tenant_settings.commerce.upi</code> (JSON, no secrets, so no Vault). No change to <code>payment_gateway_accounts</code>, which stays for Razorpay and other keyed gateways.</li>
+    <li><b>QR mode:</b> <i>Make a QR for each order</i> (default; amount and order number are inside it, learners cannot mistype) or <i>Use my own QR image</i> (a still image; learners type the amount and note themselves, so mismatches are more likely).</li>
+    <li>The UPI ID is validated by shape (<code>name@bank</code>) and the owner is asked to make one test payment of ₹1 to themselves before turning it on. "Live" is a switch: off hides UPI at checkout.</li>
+    <li><b>Razorpay</b> card (today's form): stays, with the keys disabled and the badge <b>Coming soon</b>. A switch "Show Razorpay as Coming soon at checkout" is on. When the owner adds keys and flips it to Live, checkout offers it with no code change.</li>
+  </ul></div><div>
+  <h2>Rules</h2>
+  <ul>
+    <li>Changing the UPI ID never changes existing QR codes or orders; pending orders keep the ID they were created with (<code>payments.raw</code> stores it).</li>
+    <li>The WhatsApp number and hours are read from here by checkout, the waiting page, receipts and the header help line. One place, no hard-coded numbers.</li>
+    <li>Requires the same permission as the Razorpay form today, plus step-up.</li>
+  </ul></div></div></div>
+<div class="page">
+  <div class="adm">
+    <aside class="asb" data-asb="settings"></aside>
+    <main class="amain" style="max-width:980px">
+      <div class="ahead"><div><h1>Payment settings</h1><p>What learners see at checkout, and who they message after paying.</p></div></div>
+      <section class="apanel2" aria-labelledby="up-h">
+        <div class="tbar"><span class="mi upi" aria-hidden="true" style="width:40px;height:40px;border-radius:10px;font-size:12px">UPI</span><h2 class="h3" id="up-h">UPI QR payments</h2><span class="chip ok">Live</span><button class="tgl" role="switch" aria-checked="true" aria-label="UPI is live" style="margin-left:auto"></button></div>
+        <div class="aform">
+          <div class="formgrid">
+            <div class="field"><label for="u1">UPI ID</label><input class="inp" id="u1" value="cloudcadre@okaxis"><span class="hint">Learners pay to this ID. Make one ₹1 test payment before going live.</span></div>
+            <div class="field"><label for="u2">Name shown in the UPI app</label><input class="inp" id="u2" value="CloudCadre"></div>
+          </div>
+          <fieldset style="border:0;display:grid;gap:10px"><legend class="lab" style="margin-bottom:6px">QR code</legend>
+            <label class="method" role="radio" aria-checked="true" style="grid-template-columns:48px 1fr auto"><span class="mi"><svg class="ic" aria-hidden="true"><use href="#i-qr"/></svg></span><span><b style="font-size:17px">Make a QR for each order</b><span class="d">Amount and order number are filled in. Fewer mistakes. Recommended.</span></span><span class="radio" aria-hidden="true"></span></label>
+            <label class="method" role="radio" aria-checked="false" style="grid-template-columns:48px 1fr auto;box-shadow:inset 0 0 0 1.5px var(--line)"><span class="mi"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg></span><span><b style="font-size:17px">Use my own QR image</b><span class="d">Learners type the amount and the order number themselves.</span></span><span class="radio" aria-hidden="true"></span></label>
+          </fieldset>
+          <div class="formgrid">
+            <div class="field"><label for="u3">WhatsApp number for screenshots</label><input class="inp" id="u3" value="+91 98765 43210"><span class="hint">Shown on the waiting page. The button opens a chat with the order number typed in.</span></div>
+            <div class="field"><label for="u4">Verification hours</label><input class="inp" id="u4" value="9am to 9pm, Mon to Sat"><span class="hint">Shown as "usually within 2 hours" inside these hours.</span></div>
+            <div class="field full"><label class="lab">Tell me when a payment arrives</label>
+              <div class="switch"><div><b>Email to payments@cloudcadre.in</b></div><button class="tgl" role="switch" aria-checked="true" aria-label="Email on new payment"></button></div>
+              <div class="switch"><div><b>WhatsApp to +91 98765 43210</b></div><button class="tgl" role="switch" aria-checked="false" aria-label="WhatsApp on new payment"></button></div></div>
+          </div>
+        </div>
+      </section>
+      <section class="apanel2" aria-labelledby="rz-h">
+        <div class="tbar"><span class="mi" aria-hidden="true" style="width:40px;height:40px;border-radius:10px"><svg class="ic" style="width:22px;height:22px"><use href="#i-card"/></svg></span><h2 class="h3" id="rz-h">Razorpay: cards, net banking, wallets</h2><span class="chip soon">Coming soon</span></div>
+        <div class="aform">
+          <p class="body">Add your Razorpay keys when your account is ready. Until then, learners see this option at checkout marked "Coming soon" and cannot choose it.</p>
+          <div class="formgrid"><div class="field"><label for="r1">Key ID</label><input class="inp" id="r1" placeholder="rzp_live_…" disabled></div><div class="field"><label for="r2">Key secret</label><input class="inp" id="r2" type="password" placeholder="Not set" disabled></div></div>
+          <div class="switch"><div><b>Show "Coming soon" at checkout</b><span class="d">Turn off to hide Razorpay completely.</span></div><button class="tgl" role="switch" aria-checked="true" aria-label="Show Razorpay as coming soon"></button></div>
+        </div>
+      </section>
+      <div class="actions"><button class="btn btn-brand">Save settings</button></div>
+    </main>
+  </div>
+</div></div>
+</section>
+
+<script>
+// Admin sidebar, shared by the three screens
+(function () {
+  var ic = function (n) { return '<svg class="ic" aria-hidden="true"><use href="#i-' + n + '"/></svg>' };
+  var groups = [
+    ['', [['Overview', 'home'], ['Courses', 'book'], ['Enrolments', 'users']]],
+    ['Sales', [['Orders', 'receipt'], ['UPI payments', 'qr', 'upi', '3', 'queue'], ['Coupons', 'tag']]],
+    ['People', [['Learner list', 'list', 'list', '', 'list']]],
+    ['Settings', [['Payment settings', 'card', 'settings', '', 'settings'], ['Branding', 'image'], ['Security', 'shield']]]
+  ];
+  document.querySelectorAll('[data-asb]').forEach(function (el) {
+    var cur = el.getAttribute('data-asb');
+    el.innerHTML = '<a class="brand" href="flows-index.html"><svg class="mark" aria-hidden="true"><use href="#cc-mark"/></svg><span>Cloud<span class="c2">Cadre</span></span></a>' +
+      groups.map(function (g) {
+        return (g[0] ? '<h2>' + g[0] + '</h2>' : '') + g[1].map(function (i) {
+          var key = i[2], go = i[4];
+          return '<a href="#' + (go || '') + '"' + (go ? ' data-go="' + go + '"' : '') + (key === cur ? ' aria-current="page"' : '') + '>' + ic(i[1]) + i[0] + (i[3] ? '<span class="bd">' + i[3] + '</span>' : '') + '</a>';
+        }).join('');
+      }).join('') +
+      '<div style="margin-top:auto;padding:14px 10px 4px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px"><span class="av sm" aria-hidden="true">NK</span><span style="font-size:14px;line-height:1.3"><b style="display:block">Neha K.</b><span style="color:var(--mute)">Finance</span></span></div>';
+  });
+})();
+window.FLOW = { title: 'Admin flow', screens: [
+  { id: 'queue', label: 'UPI payments queue', group: 'Admin' },
+  { id: 'list', label: 'Learner list (whitelist)' },
+  { id: 'settings', label: 'Payment settings' }
+] }
+</script>
+<script src="flows.js"></script>
+</body>
+</html>

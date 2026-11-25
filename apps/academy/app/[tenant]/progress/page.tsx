@@ -4,6 +4,7 @@ import { isEnabled } from '@educore/features'
 import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { getShell } from '@/lib/shell'
+import { LearnerShell } from '../_components/learner-shell'
 import { h1s, h2s } from '@/lib/ui'
 import { ProgressBar } from '../learn/_components/curriculum'
 
@@ -15,7 +16,8 @@ const date = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: 'nume
 
 export default async function Progress({ searchParams }: PageProps<'/[tenant]/progress'>) {
   const a = await requireMember('/progress')
-  const { theme, brand, nav, account, site, bundle } = await getShell()
+  const shell = await getShell()
+  const { bundle } = shell
   if (!isEnabled(bundle.features, 'engage.gamification')) notFound()
   const { board: wanted } = await searchParams
   const boardKey = BOARDS.find(([k]) => k === wanted)?.[0] ?? 'weekly_xp'
@@ -48,8 +50,8 @@ export default async function Progress({ searchParams }: PageProps<'/[tenant]/pr
   )
 
   return (
-    <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
-      <section className="mx-auto max-w-[1000px] px-5 pb-20 pt-8 md:pt-10">
+    <LearnerShell a={a} shell={shell} active={null}>
+      <section>
         <h1 className={h1s}>My progress</h1>
 
         <div className="mt-[26px] grid items-end gap-6 rounded-[28px] bg-tint-1 p-6 md:grid-cols-[1fr_auto] md:p-10">
@@ -129,6 +131,6 @@ export default async function Progress({ searchParams }: PageProps<'/[tenant]/pr
           </section>
         )}
       </section>
-    </theme.SiteLayout>
+    </LearnerShell>
   )
 }

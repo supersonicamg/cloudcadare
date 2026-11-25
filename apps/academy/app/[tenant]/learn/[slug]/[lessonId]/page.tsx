@@ -10,8 +10,10 @@ import { getLearnCourse, getLessonContent, getLessonProgress } from '@/lib/learn
 import { getLessonNotes } from '@/lib/notes'
 import { getShell } from '@/lib/shell'
 import type { LearnSection } from '@/lib/learn'
-import { buttonLg, buttonLine } from '@/lib/ui'
-import { Curriculum, ProgressBar, dripDate } from '../../_components/curriculum'
+import { buttonLg, buttonLine, buttonOutline } from '@/lib/ui'
+import { LearnerShell } from '../../../_components/learner-shell'
+import { dripDate } from '../../_components/curriculum'
+import { LessonList, sectionHas } from '../../_components/lesson-list'
 import { QuizOverview, type QuizOverviewData } from '../../_components/quiz-overview'
 import { LessonCompletion } from '../../_components/lesson-completion'
 import { Prose } from '../../_components/prose'
@@ -27,7 +29,7 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   const { quiz: quizNotice, t: tParam, page: pageParam } = await searchParams
   if (!z.uuid().safeParse(lessonId).success) notFound()
   const a = await requireMember(`/learn/${slug}/${lessonId}`)
-  const [{ theme, brand }, lesson, course] = await Promise.all([getShell(), getLessonContent(a, lessonId), getLearnCourse(a, slug)])
+  const [shell, lesson, course] = await Promise.all([getShell(), getLessonContent(a, lessonId), getLearnCourse(a, slug)])
   // RLS already hides lessons the member may not see, so a null here also covers "not enrolled and not a free preview".
   if (!lesson) notFound()
 
@@ -87,30 +89,29 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   const kind = [KIND[lesson.type] ?? lesson.type, lesson.durationSeconds ? `${Math.max(1, Math.round(lesson.durationSeconds / 60))} min` : null].filter(Boolean).join(' · ')
   const e = course?.enrollment
 
+  const monthOf = course?.sections.findIndex((sec) => sectionHas(sec, lesson.id)) ?? -1
+  const month = course && monthOf >= 0 ? course.sections[monthOf] : null
+
   return (
-    <theme.FocusLayout brand={brand}>
+    <LearnerShell a={a} shell={shell} active="lessons" wide>
       <StageProvider lessonId={lesson.id} mode={mode} enabled={notesOn} initialNotes={notes} startPage={deepPage ?? 1}>
-      <div className="flex min-h-screen flex-col">
-        <div className="flex h-16 items-center gap-4 border-b border-border bg-white px-[clamp(16px,2.4vw,32px)]">
-          <Link href={course ? `/learn/${slug}/${lesson.type === 'live' ? 'live' : 'material'}` : `/courses/${slug}`} className="inline-flex items-center gap-2 text-base font-semibold text-primary">
-            <Icon name="back" /><span className="max-sm:hidden">{lesson.type === 'live' ? 'Live classes' : 'Lessons'}</span>
+        <div className="lx-crumb">
+          <Link href={course ? `/learn/${slug}/${lesson.type === 'live' ? 'live' : 'material'}${lesson.type !== 'live' && month ? `?month=${month.id}` : ''}` : `/courses/${slug}`} className="lx-back">
+            <Icon name="back" className="lx-i" />{lesson.type === 'live' ? 'Live classes' : 'Lessons'}
           </Link>
-          <div className="min-w-0 flex-1 truncate text-base font-semibold">
-            {section && <small className="block truncate text-[13px] font-medium text-mute">{section}</small>}
-            {lesson.title}
-          </div>
           {e && (
-            <div className="flex items-center gap-3 whitespace-nowrap text-sm text-mute">
-              <ProgressBar pct={e.progressPct} label="Course progress" className="!h-2 w-[140px] max-md:hidden" />
-              {e.lessonsCompleted} of {e.lessonsTotal}
-            </div>
+            <p className="lx-crumb-prog">
+              <span className="lx-bar" role="progressbar" aria-valuenow={Math.round(e.progressPct)} aria-valuemin={0} aria-valuemax={100} aria-label="Course progress"><i style={{ width: `${Math.max(0, Math.min(100, e.progressPct))}%` }} /></span>
+              <span>{e.lessonsCompleted} of {e.lessonsTotal} done</span>
+            </p>
           )}
         </div>
-        <div className="grid flex-1 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <main className="min-w-0 px-[clamp(20px,3.4vw,56px)] pb-14 pt-[clamp(20px,2.6vw,40px)]">
+
+        <div className={`lx-lgrid${course ? ' has-side' : ''}`}>
+          <article className="lx-lmain" aria-labelledby="lesson-h">
             {!tracked && (
-              <p className="mb-6 rounded-2xl bg-tint-2 px-4 py-3 text-sm">
-                This is a free preview. <Link href={`/courses/${slug}`} className="font-semibold text-primary underline">See the full course</Link> to enrol.
+              <p className="lx-note">
+                <Icon name="info" /><span>This is a free preview. <Link href={`/courses/${slug}`}>See the full course</Link> to enrol.</span>
               </p>
             )}
             <div>
@@ -140,14 +141,15 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
               {isVideo && !lock && !teamsLink && <ScrubMarks fallbackSeconds={lesson.durationSeconds} />}
             </div>
 
-            <div className="mt-7 flex flex-wrap items-start justify-between gap-x-7 gap-y-4">
-              <div>
-                <p className="text-base font-semibold text-primary">{kind}</p>
-                <h1 className="mt-1.5 font-heading text-[clamp(26px,2.6vw,36px)] font-bold leading-[1.08] tracking-[-0.038em] text-balance">{lesson.title}</h1>
+
+            <header className="lx-ltitle">
+              <div className="min-w-0">
+                <p className="lx-k">{section ? `${section} · ` : ''}{kind}</p>
+                <h1 id="lesson-h" className="lx-h1">{lesson.title}</h1>
               </div>
-              {progress.completed && <span className="inline-block rounded-lg bg-ok-bg px-[11px] py-1 text-sm font-semibold text-ok-ink">Completed</span>}
-            </div>
-            {lesson.summary && <p className="mt-3.5 max-w-[38em] text-[17px] leading-relaxed text-grey">{lesson.summary}</p>}
+              {progress.completed && <span className="lx-done"><Icon name="check" className="lx-i" />Completed</span>}
+            </header>
+            {lesson.summary && <p className="lx-lede">{lesson.summary}</p>}
 
             <div className="mt-6">
               {lock ? null : <>
@@ -182,42 +184,40 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
               </>}
             </div>
 
+
             {course && (
-              <nav className="mt-9 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6" aria-label="Lesson navigation">
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                  {prev && <Link href={`/learn/${slug}/${prev.id}`} className="text-base font-semibold text-grey hover:text-fg">&larr; {prev.title}</Link>}
-                  {lock ? null : lesson.type === 'article' || lesson.type === 'external_link' || fileType || imageOn
-                    ? <LessonCompletion lessonId={lesson.id} rule={lesson.completionRule} completed={progress.completed} tracked={tracked}
-                        next={next ? `/learn/${slug}/${next.id}` : null} />
-                    : null}
-                </div>
+              <nav className="lx-lactions" aria-label="Lesson navigation">
                 {/* One filled action per view: on a quiz that is not passed yet, "Start the quiz" is the filled one. */}
                 {lock ? (
-                  // Locked: the way forward is the lesson that unlocks this one, not the next locked lesson.
-                  <Link href={blocker ? `/learn/${slug}/${blocker.id}` : `/learn/${slug}`} className={`${buttonLg} max-sm:w-full`}>
-                    {blocker ? `Go to ${blocker.title}` : 'Back to the course'} <span aria-hidden="true">→</span>
+                  <Link href={blocker ? `/learn/${slug}/${blocker.id}` : `/learn/${slug}/material`} className={`${buttonLg} max-sm:w-full`}>
+                    {blocker ? `Go to ${blocker.title}` : 'Back to the lessons'}<Icon name="chev" className="lx-i" />
                   </Link>
-                ) : next ? <Link href={`/learn/${slug}/${next.id}`} className={`${lesson.type === 'quiz' && !progress.completed ? buttonLine : buttonLg} max-sm:w-full`}>Next: {next.title} <span aria-hidden="true">→</span></Link>
-                  : <Link href={`/learn/${slug}`} className={`${lesson.type === 'quiz' && !progress.completed ? buttonLine : buttonLg} max-sm:w-full`}>Back to the course <span aria-hidden="true">→</span></Link>}
+                ) : next ? (
+                  <Link href={`/learn/${slug}/${next.id}`} className={`${lesson.type === 'quiz' && !progress.completed ? buttonOutline : buttonLg} max-sm:w-full`}>Next: {next.title}<Icon name="chev" className="lx-i" /></Link>
+                ) : (
+                  <Link href={`/learn/${slug}/material`} className={`${lesson.type === 'quiz' && !progress.completed ? buttonOutline : buttonLg} max-sm:w-full`}>Back to the lessons<Icon name="chev" className="lx-i" /></Link>
+                )}
+                <div className="lx-lside-acts">
+                  {prev && <Link href={`/learn/${slug}/${prev.id}`} className="lx-link"><Icon name="back" className="lx-i" />Previous: {prev.title}</Link>}
+                  {lock ? null : lesson.type === 'article' || lesson.type === 'external_link' || fileType || imageOn
+                    ? <LessonCompletion lessonId={lesson.id} rule={lesson.completionRule} completed={progress.completed} tracked={tracked} next={next ? `/learn/${slug}/${next.id}` : null} />
+                    : null}
+                </div>
               </nav>
             )}
-          </main>
+          </article>
 
           {course && (
-            <aside className="border-t border-border bg-white px-5 pb-10 pt-6 lg:border-l lg:border-t-0">
+            <aside className="lx-lside" aria-label="Notes and lesson list">
               <SidePanel
                 notesOn={notesOn}
-                classList={<>
-                  <h2 className="mx-1.5 mb-3 text-sm font-semibold text-mute">{course.enrollment.course.title}</h2>
-                  <Curriculum slug={slug} sections={course.sections} currentId={lesson.id} compact />
-                </>}
+                classList={<LessonList slug={slug} sections={course.sections} currentId={lesson.id} />}
               />
             </aside>
           )}
         </div>
-      </div>
       </StageProvider>
-    </theme.FocusLayout>
+    </LearnerShell>
   )
 }
 

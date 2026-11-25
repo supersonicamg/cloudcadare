@@ -19,7 +19,7 @@ export function ScrubMarks({ fallbackSeconds }: { fallbackSeconds: number | null
         {marks.map((n) => (
           <button key={n.id} type="button" onClick={() => s.jump(n)} title={`${n.kind === 'bookmark' ? 'Bookmark' : 'Note'} ${clock(n.positionSeconds!)}`}
             aria-label={`${n.kind === 'bookmark' ? 'Bookmark' : 'Note'} at ${clock(n.positionSeconds!)}`}
-            className="absolute top-0 h-3 w-3 -translate-x-1/2 rounded-sm bg-accent ring-2 ring-white hover:scale-125 focus-visible:scale-125"
+            className="absolute top-0 h-3 w-3 -translate-x-1/2 rounded-sm bg-accent ring-2 ring-white before:absolute before:-inset-4 hover:scale-125 focus-visible:scale-125"
             style={{ left: `${Math.min(99, ((n.positionSeconds ?? 0) / total) * 100)}%` }} />
         ))}
       </div>

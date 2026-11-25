@@ -4,18 +4,20 @@ import { isEnabled } from '@educore/features'
 import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { getShell } from '@/lib/shell'
+import { LearnerShell } from '../_components/learner-shell'
 import { buttonQuiet, chipClass, h1s } from '@/lib/ui'
 
 export const metadata = { title: 'My certificates' }
 
 export default async function MyCertificates() {
   const a = await requireMember('/certificates')
-  const { theme, brand, nav, account, site, bundle } = await getShell()
+  const shell = await getShell()
+  const { bundle } = shell
   if (!isEnabled(bundle.features, 'learning.certificates')) notFound()
   const { data } = await a.db.from('certificates').select('id, title, serial_no, issued_at, revoked_at').eq('member_id', a.memberId).order('issued_at', { ascending: false })
   return (
-    <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
-      <section className="mx-auto max-w-[1000px] px-5 pb-20 pt-8 md:pt-10">
+    <LearnerShell a={a} shell={shell} active={null}>
+      <section>
         <h1 className={h1s}>My certificates</h1>
         {data?.length ? (
           <ul className="mt-[26px] border-t-2 border-fg">
@@ -34,6 +36,6 @@ export default async function MyCertificates() {
           </ul>
         ) : <p className="mt-6 max-w-lg text-[17px] text-grey">You will get a certificate here when you finish a course that offers one.</p>}
       </section>
-    </theme.SiteLayout>
+    </LearnerShell>
   )
 }

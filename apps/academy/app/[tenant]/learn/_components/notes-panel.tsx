@@ -14,17 +14,14 @@ const field = 'w-full rounded-[10px] border-2 border-field bg-white px-3.5 py-2.
 export function SidePanel({ classList, notesOn }: { classList: ReactNode; notesOn: boolean }) {
   const stage = useStage()
   const [tab, setTab] = useState<'notes' | 'list'>(notesOn ? 'notes' : 'list')
-  const tabs = [...(notesOn ? [['notes', `Notes (${stage.notes.length})`] as const] : []), ['list', 'Class list'] as const]
+  const tabs = [...(notesOn ? [['notes', `Notes (${stage.notes.length})`] as const] : []), ['list', 'Lesson list'] as const]
   return (
-    <div className="grid gap-4">
-      <div role="tablist" aria-label="Lesson side panel" className="flex gap-6 border-b border-border">
+    <div className="grid gap-5">
+      {tabs.length > 1 ? <div role="tablist" aria-label="Lesson side panel" className="lx-ptabs">
         {tabs.map(([k, label]) => (
-          <button key={k} type="button" role="tab" id={`tab-${k}`} aria-selected={tab === k} aria-controls={`panel-${k}`} onClick={() => setTab(k)}
-            className={`-mb-px inline-flex min-h-11 items-center border-b-[3px] t-label ${tab === k ? 'border-fg !text-fg font-bold' : 'border-transparent hover:!text-fg'}`}>
-            {label}
-          </button>
+          <button key={k} type="button" role="tab" id={`tab-${k}`} aria-selected={tab === k} aria-controls={`panel-${k}`} onClick={() => setTab(k)}>{label}</button>
         ))}
-      </div>
+      </div> : <h2 className="lx-h2">Lesson list</h2>}
       <div role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" hidden={tab !== 'notes'}>{notesOn ? <NotesTab /> : null}</div>
       <div role="tabpanel" id="panel-list" aria-labelledby="tab-list" hidden={tab !== 'list'}>{classList}</div>
     </div>
@@ -112,12 +109,12 @@ function NotesTab() {
               <li key={n.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3 border-b border-border py-3">
                 {place ? (
                   <button type="button" onClick={() => jump(n)} aria-label={`Go to ${place}`}
-                    className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#E4EFEB] px-2.5 t-label tnum !font-bold !text-deep"><Icon name={KIND_ICON[n.kind]} className="h-4 w-4" />{place}</button>
-                ) : <span className="inline-flex min-h-9 items-center px-1"><Icon name={KIND_ICON[n.kind]} className="h-4 w-4 text-primary" /></span>}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#E4EFEB] px-2.5 t-label tnum !font-bold !text-deep"><Icon name={KIND_ICON[n.kind]} className="h-4 w-4" />{place}</button>
+                ) : <span className="inline-flex min-h-11 items-center px-1"><Icon name={KIND_ICON[n.kind]} className="h-4 w-4 text-primary" /></span>}
                 <p className="t-body min-w-0 break-words whitespace-pre-line !text-fg">
                   {n.kind === 'highlight' && n.body ? <mark className="bg-accent/70 px-0.5">{n.body}</mark> : n.body || <span className="text-mute">Bookmark</span>}
                 </p>
-                <button type="button" onClick={() => remove(n.id)} aria-label={`Delete this ${n.kind}`} className="inline-grid h-9 w-9 place-items-center rounded-lg text-mute hover:bg-muted hover:text-fg">
+                <button type="button" onClick={() => remove(n.id)} aria-label={`Delete this ${n.kind}`} className="inline-grid h-11 w-11 place-items-center rounded-lg text-mute hover:bg-muted hover:text-fg">
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
                 </button>
               </li>

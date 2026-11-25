@@ -1,27 +1,29 @@
 import { isEnabled } from '@educore/features'
+import { getAccess } from '@/lib/dal'
 import { getShell } from '@/lib/shell'
+import { LearnerShell } from '../_components/learner-shell'
 import { AccountRail } from './rail'
 
 export const metadata = { title: { default: 'Account', template: '%s · Account' } }
 
 /*
- * Account shell (C2-C5). Each page brings its own h1 (Profile, Subscription, ...) in the right column; the left
- * column is a quiet list of sections. The dominant region of every page is its first panel or list.
+ * Account area (profile, subscription, payments, password) inside the learner frame. Each page brings its own h1; the
+ * sections are a row of chips above it, like the filters on Lessons and Notes. Log out lives in the account menu.
+ * Signed out: the pages redirect to the login themselves, so there is nothing to frame.
  */
 export default async function AccountLayout({ children }: LayoutProps<'/[tenant]/account'>) {
-  const { theme, brand, nav, account, site, bundle } = await getShell()
+  const [shell, a] = await Promise.all([getShell(), getAccess()])
+  if (!a) return <>{children}</>
   const items = [
     { href: '/account', label: 'Profile' },
     { href: '/account/subscription', label: 'Subscription' },
-    ...(isEnabled(bundle.features, 'commerce.checkout') ? [{ href: '/account/payments', label: 'Payments and receipts' }] : []),
+    ...(isEnabled(shell.bundle.features, 'commerce.checkout') ? [{ href: '/account/payments', label: 'Payments and receipts' }] : []),
     { href: '/account/security', label: 'Password and devices' },
   ]
   return (
-    <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
-      <div className="mx-auto grid max-w-[1280px] gap-8 px-[clamp(16px,5vw,72px)] pb-24 pt-8 md:grid-cols-[232px_minmax(0,1fr)] md:gap-14 md:pt-14">
-        <AccountRail items={items} logoutHref="/logout" />
-        <div className="min-w-0">{children}</div>
-      </div>
-    </theme.SiteLayout>
+    <LearnerShell a={a} shell={shell} active={null}>
+      <AccountRail items={items} />
+      <div className="min-w-0">{children}</div>
+    </LearnerShell>
   )
 }

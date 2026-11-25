@@ -6,6 +6,7 @@ import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { getLearnCourse } from '@/lib/learn'
 import { getShell } from '@/lib/shell'
+import { LearnerShell } from '../../../../../_components/learner-shell'
 import { backLink, buttonLg, buttonLine, chipClass, h1s } from '@/lib/ui'
 
 export const metadata: Metadata = { title: 'Quiz result' }
@@ -21,7 +22,7 @@ export default async function QuizResult({ params }: PageProps<'/[tenant]/learn/
   const { slug, lessonId, attemptId } = await params
   if (!z.uuid().safeParse(lessonId).success || !z.uuid().safeParse(attemptId).success) notFound()
   const a = await requireMember(`/learn/${slug}/${lessonId}/result/${attemptId}`)
-  const { theme, brand, nav, account, site } = await getShell()
+  const shell = await getShell()
   const courseHome = getLearnCourse(a, slug)
   const { data, error } = await a.db.rpc('get_attempt_result', { p_attempt_id: attemptId })
   if (error) {
@@ -39,8 +40,8 @@ export default async function QuizResult({ params }: PageProps<'/[tenant]/learn/
   const pct = Math.round(Number(r.percentage ?? 0))
 
   return (
-    <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
-      <article className="mx-auto max-w-[880px] px-5 pb-20 pt-8 md:pt-10">
+    <LearnerShell a={a} shell={shell} active="lessons">
+      <article className="max-w-[880px]">
         <Link href={`/learn/${slug}/${lessonId}`} className={backLink}><Icon name="back" />{r.title}</Link>
         <div className="mt-7 flex flex-col items-start gap-3.5">
           <span className={chipClass(passed ? 'ok' : failed ? 'bad' : 'quiet')}>{passed ? 'Passed' : failed ? 'Not passed yet' : 'Submitted'}</span>
@@ -106,6 +107,6 @@ export default async function QuizResult({ params }: PageProps<'/[tenant]/learn/
           </section>
         )}
       </article>
-    </theme.SiteLayout>
+    </LearnerShell>
   )
 }

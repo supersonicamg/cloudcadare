@@ -35,7 +35,7 @@ function Brand({ brand }: { brand: Shell['brand'] }) {
   )
 }
 
-export async function LearnerShell({ a, shell, active, children }: { a: Access; shell: Shell; active: LearnerTab; children: ReactNode }) {
+export async function LearnerShell({ a, shell, active, wide = false, children }: { a: Access; shell: Shell; active: LearnerTab | null; wide?: boolean; children: ReactNode }) {
   const { theme, brand, account, bundle } = shell
   const slug = await getLeadCourseSlug(a)
   const notes = isEnabled(bundle.features, 'learning.notes')
@@ -93,7 +93,7 @@ export async function LearnerShell({ a, shell, active, children }: { a: Access; 
         </header>
 
         <main id="main" className="lx-main">
-          <div className="lx-page">{children}</div>
+          <div className={`lx-page${wide ? ' wide' : ''}`}>{children}</div>
         </main>
 
         <nav aria-label="Learning" className="lx-tabs" style={{ '--n': tabs.length } as React.CSSProperties}>

@@ -5,6 +5,7 @@ import { requireMember } from '@/lib/dal'
 import { money } from '@/lib/money'
 import { Icon } from '@educore/ui/marks'
 import { getShell } from '@/lib/shell'
+import { LearnerShell } from '../../_components/learner-shell'
 import { backLink, h1s, ruleTop } from '@/lib/ui'
 import { PrintButton } from './print-button'
 
@@ -16,7 +17,7 @@ export default async function Receipt({ params }: PageProps<'/[tenant]/orders/[i
   const { id } = await params
   if (!z.uuid().safeParse(id).success) notFound()
   const a = await requireMember(`/orders/${id}`)
-  const [{ theme, brand, nav, account, site }, order, docs] = await Promise.all([
+  const [shell, order, docs] = await Promise.all([
     getShell(),
     a.db.from('orders').select('id, order_no, status, paid_at, placed_at').eq('id', id).eq('member_id', a.memberId).maybeSingle(),
     a.db.from('invoices').select('id, kind, invoice_no, issued_at, seller, buyer, lines, totals').eq('order_id', id).order('issued_at'),
@@ -32,8 +33,8 @@ export default async function Receipt({ params }: PageProps<'/[tenant]/orders/[i
   const date = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
-    <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
-      <section className="mx-auto max-w-[720px] px-5 pb-20 pt-10 md:pt-14">
+    <LearnerShell a={a} shell={shell} active={null}>
+      <section className="max-w-[720px]">
         <p className="mb-8 print:hidden"><Link href="/account/payments" className={backLink}><Icon name="back" />Payments and receipts</Link></p>
         {receipt ? (
           <article aria-label="Receipt">
@@ -64,6 +65,6 @@ export default async function Receipt({ params }: PageProps<'/[tenant]/orders/[i
             <p className="mt-4 text-lg text-grey">This order has no receipt because it has not been paid.</p></div>
         )}
       </section>
-    </theme.SiteLayout>
+    </LearnerShell>
   )
 }

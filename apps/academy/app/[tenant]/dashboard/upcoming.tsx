@@ -4,18 +4,17 @@ import { istDate, type Enrolled } from '@/lib/dashboard'
 import { courseAbbr, dateShort, timeShort } from '@/lib/format'
 import type { MyEnrollment } from '@/lib/learn'
 import { dayOfMonth, monthName, weekday } from '@/lib/live'
-import { buttonLg, buttonOutline } from '@/lib/ui'
+import { buttonLg } from '@/lib/ui'
 import { ClassList } from '../_components/live'
-import { Climb } from './climb'
 
 const TEAMS_DOWNLOAD = 'https://www.microsoft.com/microsoft-teams/download-app'
 
 /**
- * Seat confirmed, batch not started (plan/16 §12, E3). One job: get ready for day one. The filled button is the first
- * free-preview lesson (the orientation) while it is unwatched. Ticks come from real records only; links without a record
- * (Teams, WhatsApp group) show no tick.
+ * Home, when the seat is confirmed but the batch has not started (plan/16 §12, E3). One job: get ready for day one.
+ * The filled button is the first free-preview lesson (the orientation) while it is unwatched. Ticks come from real
+ * records only; links without a record (Teams, WhatsApp group) show a link mark instead of a tick.
  */
-export function UpcomingDashboard({ d, lead, first, whatsapp, goal }: { d: Enrolled; lead: MyEnrollment; first: string; whatsapp: string | null; goal?: string }) {
+export function UpcomingHome({ d, lead, first }: { d: Enrolled; lead: MyEnrollment; first: string }) {
   const start = istDate(d.batch!.startDate!)
   const orientation = d.m.all.find((l) => l.isPreview && !l.lock) ?? null
   const classes = d.upcoming.slice(0, 3)
@@ -31,58 +30,67 @@ export function UpcomingDashboard({ d, lead, first, whatsapp, goal }: { d: Enrol
 
   return (
     <>
-      <section aria-labelledby="dash-h" className="ld-s tight">
-        <div className="ld-wrap flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
-          <div className="grid gap-[22px]">
-            <div className="ld-hi">
-              <h1 id="dash-h" className="ld-h1">You&apos;re in, {first}. See you on <em>{dateShort(start)}</em>.</h1>
-              <p className="ld-meta">{courseAbbr(lead.course.title)} · {d.batch!.name}</p>
-            </div>
-            <div className="ld-count">
-              <span className="ld-date"><b>{dayOfMonth(start)}</b><span>{weekday(start)} · {monthName(start)}</span></span>
-              <p><b>{d.startsIn} {d.startsIn === 1 ? 'day' : 'days'} to go</b>{classes[0] ? `First class at ${timeShort(classes[0].startsAt)}${teams ? ' on Teams' : ''}.` : ''} {d.batch!.schedule ? `Classes ${d.batch!.schedule}.` : ''}</p>
-            </div>
-          </div>
-          {orientation && !orientation.done && <Link href={`/learn/${lead.course.slug}/${orientation.id}`} className={`${buttonLg} max-[820px]:w-full`}>Watch the orientation <span aria-hidden="true">→</span></Link>}
+      <header className="lx-head">
+        <div>
+          <h1 className="lx-h1">You&apos;re in, {first}. See you on <em>{dateShort(start)}</em>.</h1>
+          <p className="lx-lede">{courseAbbr(lead.course.title)} · {d.batch!.name}</p>
+        </div>
+        {orientation && !orientation.done && <Link href={`/learn/${lead.course.slug}/${orientation.id}`} className={`${buttonLg} max-[720px]:w-full`}>Watch the orientation<Icon name="chev" className="lx-i" /></Link>}
+      </header>
+
+      <section className="lx-card lx-hero" aria-label="Countdown" style={{ gridTemplateColumns: '96px minmax(0, 1fr)' }}>
+        <span className="lx-date"><b>{dayOfMonth(start)}</b><span>{weekday(start)} · {monthName(start)}</span></span>
+        <div>
+          <h2>{d.startsIn} {d.startsIn === 1 ? 'day' : 'days'} to go</h2>
+          <p className="when">{classes[0] ? `First class at ${timeShort(classes[0].startsAt)}${teams ? ' on Teams' : ''}. ` : ''}{d.batch!.schedule ? `Classes ${d.batch!.schedule}.` : ''}</p>
         </div>
       </section>
 
-      <section aria-label="Get ready" className="ld-panel ld-s">
-        <div className="ld-wrap">
-          <div className={classes.length ? 'ld-2' : 'grid'}>
-            <div className="ld-card ld-pad">
-              <div className="ld-wh"><h2 className="ld-h3">Before {dateShort(start)}</h2><span className="m">{done} of {checkable.length} done</span></div>
-              <ul className="ld-check">
-                {items.map((i) => (
-                  <li key={i.key} className={i.check ? 'dn' : undefined}>
-                    {i.check === null
-                      ? <span className="st none"><Icon name="link" className="h-[18px] w-[18px]" /></span>
-                      : <span className={`st${i.check ? ' ok' : ''}`}>{i.check && <Icon name="check" className="h-3.5 w-3.5" />}<span className="sr-only">{i.check ? 'Done' : 'To do'}</span></span>}
-                    <span><b>{i.title}</b><span className="d">{i.detail}</span></span>
-                    {i.href.startsWith('/')
-                      ? <Link href={i.href} className="ld-link" aria-label={`${i.action}: ${i.title}`}>{i.action}</Link>
-                      : <a href={i.href} target="_blank" rel="noopener noreferrer" className="ld-link" aria-label={`${i.action}: ${i.title}`}>{i.action}</a>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {classes.length > 0 && (
-              <div className="ld-card ld-pad">
-                <div className="ld-wh"><h2 className="ld-h3">Scheduled classes</h2><span className="m">First classes{teams ? ', on Teams' : ''}</span></div>
-                <div className="mt-3"><ClassList sessions={classes} /></div>
-              </div>
-            )}
+      <div className={classes.length ? 'lx-two even' : 'grid'}>
+        <section className="lx-card" aria-labelledby="ready-h">
+          <div className="lx-sec-h" style={{ paddingBottom: 12 }}>
+            <h2 className="lx-h2" id="ready-h">Before {dateShort(start)}</h2>
+            <span className="lx-meta">{done} of {checkable.length} done</span>
           </div>
-          {whatsapp && <div className="mt-6"><a href={whatsapp} target="_blank" rel="noopener noreferrer" className={buttonOutline}>Ask us on WhatsApp</a></div>}
-        </div>
-      </section>
+          <ul className="lx-todo">
+            {items.map((i) => (
+              <li key={i.key} className={i.check ? 'dn' : undefined}>
+                {i.check === null
+                  ? <span className="lx-st link"><Icon name="link" /></span>
+                  : <span className={`lx-st${i.check ? ' ok' : ''}`}>{i.check && <Icon name="check" />}<span className="sr-only">{i.check ? 'Done' : 'To do'}</span></span>}
+                <span><b>{i.title}</b><span className="d">{i.detail}</span></span>
+                {i.href.startsWith('/')
+                  ? <Link href={i.href} className="lx-link" aria-label={`${i.action}: ${i.title}`}>{i.action}</Link>
+                  : <a href={i.href} target="_blank" rel="noopener noreferrer" className="lx-link" aria-label={`${i.action}: ${i.title}`}>{i.action}</a>}
+              </li>
+            ))}
+          </ul>
+        </section>
+        {classes.length > 0 && (
+          <section className="lx-card" aria-labelledby="first-h">
+            <div className="lx-sec-h" style={{ paddingBottom: 6 }}>
+              <h2 className="lx-h2" id="first-h">First classes</h2>
+              <span className="lx-meta">{teams ? 'On Microsoft Teams' : ''}</span>
+            </div>
+            <ClassList sessions={classes} />
+          </section>
+        )}
+      </div>
 
       {d.months.length > 0 && (
-        <section aria-labelledby="months-h" className="ld-panel mist ld-s">
-          <div className="ld-wrap">
-            <div className="ld-head"><div><h2 id="months-h" className="ld-h2">Your {d.months.length} months</h2><p>Month 1 opens on {dateShort(start)}.</p></div></div>
-            <Climb label="Months of the program" goal={goal} steps={d.months.map((mo) => ({ key: mo.id, number: mo.number, title: mo.title, state: 'locked', detail: mo.opensOn ? `Opens ${mo.opensOn}` : `${mo.total} lessons` }))} />
-          </div>
+        <section className="lx-sec" aria-labelledby="months-h">
+          <div className="lx-sec-h"><h2 className="lx-h2" id="months-h">Your {d.months.length} months</h2><span className="lx-meta">Month 1 opens on {dateShort(start)}</span></div>
+          <ol className="lx-card stone lx-months" aria-label="Months of the program">
+            {d.months.map((mo) => (
+              <li key={mo.id}>
+                <div className="row">
+                  <span className="n">{mo.number}</span>
+                  <span className="t">{mo.title}</span>
+                  <span className="c">{mo.opensOn ? `Opens ${mo.opensOn}` : `${mo.total} lessons`}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
         </section>
       )}
     </>

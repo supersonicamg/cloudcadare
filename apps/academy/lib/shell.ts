@@ -35,12 +35,12 @@ export async function getShell(opts: { home?: boolean } = {}) {
 
   if (access) {
     // Signed in (plan/16 §7, §12): the learner's own links in the bar, everything about the person in the account menu.
-    // Course material and Live classes belong to a course, so they appear once the learner has one.
+    // Lessons and Live classes belong to a course, so they appear once the learner has one.
     const slug = await getLeadCourseSlug(access)
     const learner: NavItem[] = [
-      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Home', href: '/dashboard' },
       ...(slug
-        ? [{ label: 'Course material', href: `/learn/${slug}/material` }, { label: 'Live classes', href: `/learn/${slug}/live` }, ...(isEnabled(f, 'learning.notes') ? [{ label: 'My notes', href: '/learn/notes' }] : [])]
+        ? [{ label: 'Lessons', href: `/learn/${slug}/material` }, { label: 'Live classes', href: `/learn/${slug}/live` }, ...(isEnabled(f, 'learning.notes') ? [{ label: 'Notes', href: '/learn/notes' }] : [])]
         : catalog ? [{ label: 'Program', href: catalog.href }] : []),
     ]
     if (!opts.home) nav = learner

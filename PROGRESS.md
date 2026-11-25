@@ -6,6 +6,8 @@
 > **Screens to build are tracked in `plan/tracker.json`:** run `node scripts/track.mjs` to see only the open ones, `node scripts/track.mjs next` for the next one, and `node scripts/track.mjs done E1` after it is built and checked. Do not keep a second list here. The default view is the earliest unfinished phase (`phase 2`, `open` show the rest). Mockups: `plan/mockups/aurora-flows*.html` (six files, 154 screens; start at `plan/mockups/index.html`, which lists every route; `-phase1`, `-phase2`, `-later`, `-pages` added 2026-11-25).
 > Last updated: 2026-11-25 (session 15: Dashboard and Live classes built into the app; session 14: Dashboard mockups, flow E; session 11: aurora home page rebuilt from homepage-v9 per plan/15; session 10 before it: email + password sign-up and sign-in; flow E staff screens not started)
 
+> **Learner area redesigned (2026-11-26).** Home, Lessons (was "Course material"), Live classes and Notes now sit in one app frame (`app/[tenant]/_components/learner-shell.tsx`, styles `lx.css`): left sidebar on a laptop, bottom tab bar on a phone, no marketing header or footer. `learner.css` and `dashboard/climb.tsx` remain only for the "no course yet" join screens (`dashboard/join.tsx`, not redone). Checked in a browser at 1280 and 390 wide; e2e not run.
+
 ## Status
 
 | Phase | State |

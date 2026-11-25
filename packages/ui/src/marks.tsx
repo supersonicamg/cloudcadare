@@ -66,6 +66,8 @@ const PATHS = {
   flame: <path d="M12 3c.6 3.2 5 5.4 5 10.2A5 5 0 0 1 7 13.2c0-1.8.8-3 1.8-4 .2 1.6 1 2.4 1.9 2.8C10.4 9 10.8 5.6 12 3z" />,
   print: <><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><rect x="7" y="14" width="10" height="7" rx="1.5" /></>,
   shield: <path d="M12 3l7 3v5.5c0 4.4-2.9 8-7 9.5-4.1-1.5-7-5.1-7-9.5V6z M9 12l2.2 2.2L15.5 10" />,
+  home: <path d="M4 11.5L12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" />,
+  chev: <path d="M9.5 6l6 6-6 6" />,
   book: <><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17H7.5A2.5 2.5 0 0 0 5 21.5z" /><path d="M5 19.5V4.5" /></>,
 } as const
 export type IconName = keyof typeof PATHS

@@ -55,7 +55,7 @@ test.describe.serial('UPI review and notes', () => {
 
     // ---- learner: unlocked; the order is paid
     await l.goto(`/learn/${slug}/material`)
-    await expect(l.getByRole('heading', { level: 1, name: 'Course material' })).toBeVisible()
+    await expect(l.getByRole('heading', { level: 1, name: 'Lessons' })).toBeVisible()
     await l.getByRole('link', { name: /First reading/ }).click()
     await l.waitForURL(/\/learn\/[^/]+\/[0-9a-f-]{36}/)
 
@@ -69,7 +69,7 @@ test.describe.serial('UPI review and notes', () => {
     await l.getByRole('tab', { name: /^Notes/ }).click()
     await expect(l.getByText('Tags drive cost allocation')).toBeVisible()
     await l.goto('/learn/notes')
-    await expect(l.getByRole('heading', { level: 1, name: 'My notes' })).toBeVisible()
+    await expect(l.getByRole('heading', { level: 1, name: 'Notes' })).toBeVisible()
     await expect(l.getByText('Tags drive cost allocation')).toBeVisible()
 
     // ---- delete shows Undo, and undoing brings it back
@@ -103,7 +103,7 @@ test.describe.serial('UPI review and notes', () => {
     await expect(l.getByText('We saw 500 rupees.')).toBeVisible()
     // nothing unlocked
     await l.goto(`/learn/${slug}/material`)
-    await expect(l.getByRole('heading', { level: 1, name: 'Course material' })).toHaveCount(0)
+    await expect(l.getByRole('heading', { level: 1, name: 'Lessons' })).toHaveCount(0)
     await ctx.close()
   })
 })

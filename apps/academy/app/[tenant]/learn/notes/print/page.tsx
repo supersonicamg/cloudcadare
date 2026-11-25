@@ -7,7 +7,7 @@ import { dateLong, nowMs } from '@/lib/format'
 import { getNoteGroups } from '@/lib/my-notes'
 import { PrintNow } from './print-now'
 
-export const metadata: Metadata = { title: 'My notes (print)' }
+export const metadata: Metadata = { title: 'Notes (print)' }
 
 // "Download as PDF" (plan/16 B7): a clean printable page that opens the browser's print dialog, where "Save as PDF" is an
 // option on every device. Same approach as the certificate. Generated on request; nothing is stored.

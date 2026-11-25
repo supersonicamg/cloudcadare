@@ -93,7 +93,7 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
       <div className="flex min-h-screen flex-col">
         <div className="flex h-16 items-center gap-4 border-b border-border bg-white px-[clamp(16px,2.4vw,32px)]">
           <Link href={course ? `/learn/${slug}/${lesson.type === 'live' ? 'live' : 'material'}` : `/courses/${slug}`} className="inline-flex items-center gap-2 text-base font-semibold text-primary">
-            <Icon name="back" /><span className="max-sm:hidden">{lesson.type === 'live' ? 'Live classes' : 'Course material'}</span>
+            <Icon name="back" /><span className="max-sm:hidden">{lesson.type === 'live' ? 'Live classes' : 'Lessons'}</span>
           </Link>
           <div className="min-w-0 flex-1 truncate text-base font-semibold">
             {section && <small className="block truncate text-[13px] font-medium text-mute">{section}</small>}

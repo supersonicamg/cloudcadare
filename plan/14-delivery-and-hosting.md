@@ -52,7 +52,7 @@ Do not set `EDUCORE_FAKE_GATEWAY` on a client's server. Full list: `apps/academy
 
 ## 5. VPS layout (when the time comes)
 
-Not built yet. The intended shape:
+Build and run settings for Dokploy are in [17](17-deploy-dokploy.md); no server has been set up yet. The intended shape:
 
 - One process per client (Node or a container), each with its own env file, on its own port.
 - A reverse proxy (Caddy or nginx) on the VPS maps each client's domain to its port and handles TLS.

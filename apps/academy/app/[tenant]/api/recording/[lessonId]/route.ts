@@ -9,17 +9,17 @@ import { resolveTenantFromHost } from '@/lib/dal'
 // person sent to the link, and only to a Microsoft https address.
 
 const noStore = { 'Cache-Control': 'private, no-store' }
+// Redirects to our own pages are relative: behind a reverse proxy request.url holds the server's address, not the site's.
 const go = (location: string) => new Response(null, { status: 303, headers: { Location: location, ...noStore } })
 
-export async function GET(request: Request, { params }: RouteContext<'/[tenant]/api/recording/[lessonId]'>) {
+export async function GET(_request: Request, { params }: RouteContext<'/[tenant]/api/recording/[lessonId]'>) {
   const { lessonId } = await params
   if (!z.uuid().safeParse(lessonId).success) return new Response('Not found', { status: 404, headers: noStore })
   const bundle = await resolveTenantFromHost()
   if (!bundle) return new Response('Not found', { status: 404, headers: noStore })
-  const origin = new URL(request.url).origin
   const db = createServerDb(getPlane(bundle.tenant.planeId), await cookies())
   const { data: claims } = await db.auth.getClaims()
-  if (!claims?.claims) return go(`${origin}/login?next=${encodeURIComponent('/dashboard')}`)
+  if (!claims?.claims) return go(`/login?next=${encodeURIComponent('/dashboard')}`)
 
   const { data: lesson } = await db.from('lessons').select('type, external_url')
     .eq('id', lessonId).eq('is_published', true).is('deleted_at', null).maybeSingle()
@@ -28,6 +28,6 @@ export async function GET(request: Request, { params }: RouteContext<'/[tenant]/
   }
   const { error } = await db.rpc('record_lesson_progress', { p_lesson_id: lessonId })
   // A locked lesson stays shut. A free preview opened without an enrolment is not tracked, and opens.
-  if (error?.message.includes('lesson_locked')) return go(`${origin}/dashboard?live=unavailable`)
+  if (error?.message.includes('lesson_locked')) return go(`/dashboard?live=unavailable`)
   return go(lesson.external_url)
 }

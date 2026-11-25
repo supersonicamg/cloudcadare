@@ -1,3 +1,4 @@
+import path from 'node:path'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -10,6 +11,9 @@ const nextConfig: NextConfig = {
     '@educore/tenancy', '@educore/theme-aurora', '@educore/theme-default', '@educore/ui',
   ],
   poweredByHeader: false,
+  // Self-hosting (Dockerfile): a self-contained server, tracing files from the monorepo root.
+  output: 'standalone',
+  outputFileTracingRoot: path.join(__dirname, '../../'),
   // Old addresses still work: saved links and sent emails point at them (plan/16 §12). Exact paths only.
   redirects: async () => [
     { source: '/learn', destination: '/dashboard', permanent: true },

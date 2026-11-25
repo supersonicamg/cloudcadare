@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { z } from 'zod'
-import { readUpiSettings, whatsappScreenshotLink } from '@educore/core/commerce/upi'
+import { REJECT_REASON_TEXT, readUpiSettings, whatsappScreenshotLink } from '@educore/core/commerce/upi'
 import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { dateShort, nowMs, timeShort } from '@/lib/format'
@@ -23,14 +23,6 @@ export const metadata = { title: 'Your payment' }
  * 3. Reading order: outcome as the title -> where we are in four steps (a quiet list; the current step is bold) ->
  *    the action card (dominant) -> what we will check (facts, secondary, stone).
  */
-
-const REASONS: Record<string, string> = {
-  amount_mismatch: 'We saw a different amount from the one on your order.',
-  not_received: 'We cannot see this payment in our account yet.',
-  screenshot_unclear: 'We could not read your screenshot.',
-  wrong_account: 'The payment went to a different UPI ID.',
-  duplicate: 'This payment was already used for another order.',
-}
 
 function when(iso: string) {
   const day = (d: string | number) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(d))
@@ -101,7 +93,7 @@ export default async function Pending({ params }: PageProps<'/[tenant]/checkout/
           <div className="grid gap-3">
             <p className="t-label tnum">Order {o.order_no}</p>
             <h1 id="rj-h" className={h1s}>We could not match your payment</h1>
-            <p className={lead}>{REASONS[reason] ?? REASONS.not_received}{short && balance > 0 ? ` ${money(balance, o.currency)} is still due.` : ''}</p>
+            <p className={lead}>{REJECT_REASON_TEXT[reason] ?? REJECT_REASON_TEXT.not_received}{short && balance > 0 ? ` ${money(balance, o.currency)} is still due.` : ''}</p>
           </div>
           {proof.reject_note && (
             <p className="t-body flex items-start gap-3 rounded-2xl bg-muted p-4 !text-fg">

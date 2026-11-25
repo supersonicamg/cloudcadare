@@ -106,3 +106,12 @@ export function normaliseUtr(raw: string): string | null {
   const v = raw.replace(/\s/g, '')
   return /^\d{12}$/.test(v) ? v : v === '' ? '' : null
 }
+
+/** Why a payment was sent back (plan/16 §3.3): the fixed list, in the words the learner reads (page, email and WhatsApp text). */
+export const REJECT_REASON_TEXT: Record<string, string> = {
+  amount_mismatch: 'We saw a different amount from the one on your order.',
+  not_received: 'We cannot see this payment in our account yet.',
+  screenshot_unclear: 'We could not read your screenshot.',
+  wrong_account: 'The payment went to a different UPI ID.',
+  duplicate: 'This payment was already used for another order.',
+}

@@ -39,6 +39,13 @@ export async function removeProof(path: string): Promise<void> {
   await db().storage.from(BUCKET).remove([path])
 }
 
+/** Unpaid orders nobody came back to are cancelled after 7 days (plan/16 §3.5). Returns how many. Run by the scheduler route. */
+export async function cancelStaleOrders(): Promise<number> {
+  const { data, error } = await db().rpc('cancel_stale_orders')
+  if (error) throw new Error(`cancel stale orders failed: ${error.message}`)
+  return data ?? 0
+}
+
 /** A link that works for one minute, for the staff member who is reviewing the payment. */
 export async function signedProofUrl(path: string): Promise<string | null> {
   const { data, error } = await db().storage.from(BUCKET).createSignedUrl(path, 60)

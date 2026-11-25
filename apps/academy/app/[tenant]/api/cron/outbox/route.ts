@@ -1,4 +1,5 @@
 import { timingSafeEqual } from 'node:crypto'
+import { cancelStaleOrders } from '@educore/core/commerce'
 import { processOutbox } from '@educore/core/notifications'
 import { tenantOrigin } from '@/lib/outbox'
 
@@ -11,5 +12,7 @@ export async function GET(request: Request) {
   const ok = Boolean(secret) && given.length === secret!.length && timingSafeEqual(Buffer.from(given), Buffer.from(secret!))
   if (!ok) return new Response('Not found', { status: 404 })
   const r = await processOutbox({ limit: 50, origin: tenantOrigin })
-  return Response.json(r, { headers: { 'Cache-Control': 'no-store' } })
+  // Unpaid UPI orders nobody came back to are cancelled after 7 days (plan/16 §3.5). Safe to run every minute.
+  const cancelledOrders = await cancelStaleOrders().catch(() => null)
+  return Response.json({ ...r, cancelledOrders }, { headers: { 'Cache-Control': 'no-store' } })
 }

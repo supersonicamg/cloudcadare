@@ -2957,6 +2957,12 @@ isOneToOne: false
 "cancel_stale_orders":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"approve_upi_payment":
+{ Args: { "p_money_seen"?: boolean,"p_proof": string,"p_whatsapp_seen"?: boolean }; Returns: Json
+                           },
+"reject_upi_payment":
+{ Args: { "p_note"?: string | null,"p_proof": string,"p_reason": string }; Returns: Json
+                           },
 "save_upi_settings":
 { Args: { "p_settings": Json,"p_tenant_id": string }; Returns: Json
                            },

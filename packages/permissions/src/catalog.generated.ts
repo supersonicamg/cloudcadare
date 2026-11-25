@@ -337,6 +337,13 @@ export const PERMISSIONS = [
     "sensitive": true
   },
   {
+    "key": "payment.verify",
+    "featureKey": "commerce.checkout",
+    "group": "Sales",
+    "description": "Verify UPI payments",
+    "sensitive": true
+  },
+  {
     "key": "invoice.view",
     "featureKey": "commerce.gst_invoicing",
     "group": "Sales",

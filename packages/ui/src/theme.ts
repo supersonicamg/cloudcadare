@@ -161,7 +161,12 @@ export interface HomeContent {
 }
 
 /** Chrome-free wrapper for focus pages (lesson player, quiz): the theme's font and colours, no site menu. */
-export interface FocusLayoutProps { brand: BrandInfo; children: ReactNode }
+export interface FocusLayoutProps {
+  brand: BrandInfo
+  children: ReactNode
+  /** Optional top bar for focus pages that need one (checkout): logo, a page name, and one way out. No site menu. */
+  bar?: { title: string; exit?: NavItem; note?: string }
+}
 
 export interface HomePageProps {
   brand: BrandInfo

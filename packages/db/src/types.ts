@@ -1720,6 +1720,40 @@ isOneToOne: false
       referencedColumns: ["tenant_id","id"]
     }
                   ]
+                },"payment_proofs": {
+                  Row: {
+                    "amount_minor": number,"file_path": string | null,"id": string,"member_id": string,"money_seen": boolean,"order_id": string,"payment_id": string,"reject_note": string | null,"reject_reason": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"source": string,"state": string,"submitted_at": string,"tenant_id": string,"utr": string | null,"whatsapp_seen": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount_minor": number,"file_path"?: string | null,"id"?: string,"member_id": string,"money_seen"?: boolean,"order_id": string,"payment_id": string,"reject_note"?: string | null,"reject_reason"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"source"?: string,"state"?: string,"submitted_at"?: string,"tenant_id": string,"utr"?: string | null,"whatsapp_seen"?: boolean
+                  }
+                  Update: {
+                    "amount_minor"?: number,"file_path"?: string | null,"id"?: string,"member_id"?: string,"money_seen"?: boolean,"order_id"?: string,"payment_id"?: string,"reject_note"?: string | null,"reject_reason"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"source"?: string,"state"?: string,"submitted_at"?: string,"tenant_id"?: string,"utr"?: string | null,"whatsapp_seen"?: boolean
+                  }
+                  Relationships: [
+{
+      foreignKeyName: "payment_proofs_tenant_id_order_id_fkey"
+      columns: ["tenant_id","order_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["tenant_id","id"]
+    },
+{
+      foreignKeyName: "payment_proofs_tenant_id_payment_id_fkey"
+      columns: ["tenant_id","payment_id"]
+isOneToOne: false
+      referencedRelation: "payments"
+      referencedColumns: ["tenant_id","id"]
+    },
+{
+      foreignKeyName: "payment_proofs_tenant_id_member_id_fkey"
+      columns: ["tenant_id","member_id"]
+isOneToOne: false
+      referencedRelation: "tenant_members"
+      referencedColumns: ["tenant_id","id"]
+    }
+                  ]
                 },"notification_preferences": {
                   Row: {
                     "channel": string,"enabled": boolean,"event_key": string,"member_id": string,"tenant_id": string
@@ -2913,6 +2947,18 @@ isOneToOne: false
                            },
 "claim_my_list_access":
 { Args: { "p_tenant_id": string }; Returns: string
+                           },
+"submit_upi_payment":
+{ Args: { "p_order_id": string }; Returns: Json
+                           },
+"attach_payment_proof":
+{ Args: { "p_file_path": string | null,"p_proof_id": string,"p_utr": string | null }; Returns: undefined
+                           },
+"cancel_stale_orders":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"save_upi_settings":
+{ Args: { "p_settings": Json,"p_tenant_id": string }; Returns: Json
                            },
 "my_access":
 { Args: { "p_tenant_id": string }; Returns: Json

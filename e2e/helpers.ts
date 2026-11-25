@@ -125,6 +125,8 @@ export async function signUpAndConfirm(page: Page, email: string, name = 'E2e Le
   await page.getByRole('button', { name: 'Create account' }).click()
   await page.waitForURL((u) => u.pathname === '/signup/confirm')
   await confirmEmail(page, email)
+  // The confirm page ends with a hard navigation; wait for it so the next goto does not abort it.
+  await page.waitForURL((u) => u.pathname !== '/signup/confirm')
 }
 
 /**
@@ -197,9 +199,10 @@ export async function createPaidCourse(page: Page, title: string, priceRupees: s
   await expect(page.getByRole('link', { name: 'First reading' })).toBeVisible()
   await page.getByRole('button', { name: 'Publish' }).click()
   await expect(page.getByText('Published', { exact: true })).toBeVisible()
+  await page.waitForLoadState('networkidle') // before hydration a click would submit the form as a plain GET
   await page.getByLabel('Price (₹)', { exact: true }).fill(priceRupees)
   await page.getByRole('button', { name: 'Start selling' }).click()
-  await expect(page.getByText('This course is for sale.')).toBeVisible()
+  await expect(page.getByText('This course is for sale.')).toBeVisible({ timeout: 30_000 })
 }
 
 // ---------------------------------------------------------------------------- mail

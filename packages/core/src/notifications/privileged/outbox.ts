@@ -70,6 +70,18 @@ async function handle(ev: OutboxEvent, sender: EmailSender | null, origin: (slug
     const { data: c } = await d.from('certificates').select('title, verification_code').eq('id', ev.aggregate_id).maybeSingle()
     if (!c) return 'skipped'
     mail = { tenantId: ev.tenant_id, memberId, eventKey: 'certificate.issued', vars: { ...common, 'course.title': c.title, 'links.certificate': `${base}/certificates/${ev.aggregate_id}`, 'links.verify': `${base}/verify/${c.verification_code}` } }
+  } else if (ev.event_type === 'payment.pending') {
+    // "We are checking your payment": the learner pressed "I have paid" (plan/16 §5.6). Email only; WhatsApp is by hand.
+    const [{ data: o }, { data: st }] = await Promise.all([
+      d.from('orders').select('order_no').eq('id', ev.aggregate_id).maybeSingle(),
+      d.from('tenant_settings').select('commerce').eq('tenant_id', ev.tenant_id).maybeSingle(),
+    ])
+    if (!o) return 'skipped'
+    const sla = String(((st?.commerce as { upi?: { sla_text?: string } } | null)?.upi?.sla_text) ?? '').slice(0, 80)
+    mail = {
+      tenantId: ev.tenant_id, memberId, eventKey: 'payment.pending',
+      vars: { ...common, 'order.no': o.order_no, 'links.order': `${base}/checkout/${ev.aggregate_id}/pending`, 'payment.sla': sla ? `We usually check it ${sla.replace(/^usually\s+/i, '')}.` : '' },
+    }
   } else if (ev.event_type === 'whitelist.claimed') {
     const { data: e } = await d.from('enrollments').select('courses(title)').eq('id', ev.aggregate_id).maybeSingle()
     const course = Array.isArray(e?.courses) ? e?.courses[0] : e?.courses

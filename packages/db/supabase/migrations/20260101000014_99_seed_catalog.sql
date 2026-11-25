@@ -170,6 +170,7 @@ insert into public.permission_catalog (key, feature_key, group_name, description
   ('order.manage',             'commerce.checkout',      'Sales',        'Edit orders', true),
   ('payment.record_offline',   'commerce.offline_payments','Sales',      'Record offline payments', true),
   ('refund.manage',            'commerce.checkout',      'Sales',        'Issue refunds', true),
+  ('payment.verify',          'commerce.checkout',      'Sales',        'Verify UPI payments', true),
   ('invoice.view',             'commerce.gst_invoicing', 'Sales',        'View invoices', false),
   ('affiliate.manage',         'commerce.affiliates',    'Sales',        'Manage affiliates', false),
   ('lead.view',                'crm.leads',              'CRM',          'View leads', false),
@@ -200,7 +201,7 @@ insert into private.role_templates (key, name, kind, description, permissions, s
   ('counsellor', 'Counsellor / Sales',  'staff',    'Leads, enquiries, admissions',
      '{member.view,member.invite,lead.view,lead.manage,order.view,enrollment.view}', 7),
   ('accountant', 'Accountant',          'staff',    'Fees, payments, invoices',
-     '{member.view,order.view,order.manage,payment.record_offline,refund.manage,invoice.view,report.view,report.export}', 8),
+     '{member.view,order.view,order.manage,payment.record_offline,payment.verify,refund.manage,invoice.view,report.view,report.export}', 8),
   ('student',    'Student',             'learner',  'Learner', '{}', 20),
   ('guardian',   'Parent / Guardian',   'guardian', 'Views linked learners', '{}', 21)
 on conflict (key) do update set permissions = excluded.permissions, name = excluded.name;

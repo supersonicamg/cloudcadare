@@ -96,6 +96,25 @@ export function AuthLayout({ brand, site, children }: AuthLayoutProps) {
   )
 }
 
-export function FocusLayout({ children }: FocusLayoutProps) {
-  return <div className={`${schibsted.variable} au-shell min-h-screen`}>{children}</div>
+export function FocusLayout({ brand, bar, children }: FocusLayoutProps) {
+  return (
+    <div className={`${schibsted.variable} au-shell min-h-screen`}>
+      {bar && (
+        <div className="au">
+          <header className="focus-bar wrap">
+            <Brand brand={brand} />
+            <span className="focus-title">{bar.title}</span>
+            {bar.note && (
+              <span className="focus-note">
+                <svg className="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="3" /><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" /></svg>
+                {bar.note}
+              </span>
+            )}
+            {bar.exit && <A href={bar.exit.href} className="focus-exit">{bar.exit.label}</A>}
+          </header>
+        </div>
+      )}
+      {children}
+    </div>
+  )
 }

@@ -93,8 +93,8 @@ export function SiteHeader({ brand, nav, account, whatsapp }: { brand: BrandInfo
 
   // Signed in: the link of the page the learner is on. Signed out: the home section on screen.
   const here = (href: string) => {
-    if (viewer) {
-      // Only the most specific link is marked: "My learning" (/learn) must not light up on /learn/ceap/material too.
+    if (viewer && !viewer.homeButton) {
+      // Only the most specific link is marked: "My notes" (/learn/notes) must not light up beside a deeper link too.
       const match = (h: string) => pathname === h || (h !== '/' && pathname.startsWith(`${h}/`))
       const best = nav.filter((n) => match(n.href)).sort((x, y) => y.href.length - x.href.length)[0]
       return best?.href === href ? 'page' : undefined
@@ -106,10 +106,16 @@ export function SiteHeader({ brand, nav, account, whatsapp }: { brand: BrandInfo
     <div className={`au bar${scrolled ? ' scrolled' : ''}`}>
       <header className="hdr wrap">
         <nav className="nav" aria-label="Main">
-          <Brand brand={brand} />
+          {/* Signed in, the logo goes to the dashboard; the home page is still at "/" for anyone who types it. */}
+          <Brand brand={brand} href={viewer ? account.href : undefined} />
           <div className="links">{nav.map((n) => <A key={n.href + n.label} href={n.href} aria-current={here(n.href)}>{n.label}</A>)}</div>
           <div className="nav-end">
-            {viewer ? <AccountMenu viewer={viewer} whatsapp={whatsapp} /> : (
+            {viewer ? (
+              <>
+                {viewer.homeButton && <A href={viewer.homeButton.href} className="btn btn-sm btn-line">{viewer.homeButton.label}</A>}
+                <AccountMenu viewer={viewer} whatsapp={whatsapp} />
+              </>
+            ) : (
               <>
                 <A href={account.href}>{account.label}</A>
                 {whatsapp && <a className="btn btn-sm btn-line" href={whatsapp} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />WhatsApp us</a>}
@@ -122,6 +128,7 @@ export function SiteHeader({ brand, nav, account, whatsapp }: { brand: BrandInfo
         </nav>
         <div id="au-mnav" className="mnav" hidden={!open}>
           {viewer && <div className="who"><Avatar initials={viewer.initials} /><div><b>{viewer.name}</b>{viewer.email && <span>{viewer.email}</span>}</div></div>}
+          {viewer?.homeButton && <A href={viewer.homeButton.href} onClick={close}>{viewer.homeButton.label}</A>}
           {nav.map((n) => <A key={n.href + n.label} href={n.href} aria-current={here(n.href)} onClick={close}>{n.label}</A>)}
           {viewer ? (
             <>

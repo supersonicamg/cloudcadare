@@ -41,7 +41,7 @@ test.describe.serial('progress, certificates and email', () => {
   test('finishing the course earns XP, a place on the leaderboard and a certificate', async ({ page }) => {
     await signIn(page, learner, `/courses/${slug}`)
     await page.getByRole('button', { name: 'Enrol for free' }).first().click()
-    await page.waitForURL(/\/learn/)
+    await page.waitForURL(/\/(dashboard|learn)/)
     await page.goto(`/learn/${slug}`)
     for (const name of ['Part one', 'Part two']) {
       await page.goto(`/learn/${slug}`)

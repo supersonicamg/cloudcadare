@@ -33,9 +33,9 @@ export function PayButton(p: {
   async function confirm(r: RazorpayResponse) {
     setBusy(true)
     const res = await fetch('/api/checkout/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ orderId: p.orderId, ...r }) })
-    if (res.ok) { router.push('/learn?paid=1'); router.refresh(); return }
+    if (res.ok) { router.push('/dashboard?paid=1'); router.refresh(); return }
     setBusy(false)
-    setError('We could not confirm the payment. If money left your account, it will be matched automatically within a few minutes. Check My learning, or contact the academy.')
+    setError('We could not confirm the payment. If money left your account, it will be matched automatically within a few minutes. Check your dashboard, or contact the academy.')
   }
 
   async function pay() {

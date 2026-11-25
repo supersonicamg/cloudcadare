@@ -53,7 +53,7 @@ async function handle(ev: OutboxEvent, sender: EmailSender | null, origin: (slug
   const { data: tenant } = await d.from('tenants').select('slug, name').eq('id', ev.tenant_id).maybeSingle()
   if (!tenant) return 'skipped'
   const base = origin(tenant.slug)
-  const common = { 'tenant.name': tenant.name, 'links.learn': `${base}/learn` }
+  const common = { 'tenant.name': tenant.name, 'links.learn': `${base}/dashboard` }
 
   let mail: Mail | null = null
   if (ev.event_type === 'order.paid' || ev.event_type === 'order.refunded') {

@@ -32,14 +32,14 @@ test('staff and learner screens', async ({ page, browser }) => {
   await page.goto('/admin/learner-list')
   await snap(page, 'd2-list', true)
 
-  // ---- learner on the list: A4
+  // ---- learner on the list: E4
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } })
   const l = await ctx.newPage()
   await signUpAndConfirm(l, `shots-${stamp}@example.com`, 'Shots Learner')
-  await l.waitForURL((u) => u.pathname === '/welcome-back')
-  await snap(l, 'a4-welcome')
+  await l.waitForURL((u) => u.pathname === '/dashboard')
+  await snap(l, 'e4-on-list')
   await l.setViewportSize({ width: 390, height: 844 })
-  await snap(l, 'a4-welcome', true)
+  await snap(l, 'e4-on-list', true)
   await l.goto('/account/subscription')
   await snap(l, 'c3-subscription-listed')
   await ctx.close()

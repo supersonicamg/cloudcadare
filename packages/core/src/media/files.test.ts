@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkFile, extOf, humanSize, safeFilename } from './files'
+import { checkFile, extOf, humanSize, safeFilename, isTeamsRecordingLink } from './files'
 
 describe('checkFile', () => {
   it('accepts a PDF in a PDF lesson and nothing else', () => {
@@ -31,5 +31,22 @@ describe('names and sizes', () => {
   it('formats sizes', () => {
     expect(humanSize(2048)).toBe('2 KB')
     expect(humanSize(5 * 1024 * 1024)).toBe('5.0 MB')
+  })
+})
+
+describe('class recordings', () => {
+  it('takes MP4 and WebM up to the limit, nothing else', () => {
+    expect(checkFile('recording', 'Class 14.MP4', 300 * 1024 * 1024)).toEqual({ ok: true, ext: 'mp4' })
+    expect(checkFile('recording', 'class.mov', 10)).toEqual({ ok: false, reason: 'type' })
+    expect(checkFile('recording', 'class.mp4', 501 * 1024 * 1024)).toEqual({ ok: false, reason: 'size' })
+  })
+  it('follows only Microsoft https links', () => {
+    expect(isTeamsRecordingLink('https://teams.microsoft.com/l/meetingrecap?x=1')).toBe(true)
+    expect(isTeamsRecordingLink('https://contoso-my.sharepoint.com/:v:/g/personal/a')).toBe(true)
+    expect(isTeamsRecordingLink('http://teams.microsoft.com/x')).toBe(false)
+    expect(isTeamsRecordingLink('https://teams.microsoft.com.evil.example/x')).toBe(false)
+    expect(isTeamsRecordingLink('https://sharepoint.com.evil.example/x')).toBe(false)
+    expect(isTeamsRecordingLink('https://user@teams.microsoft.com/x')).toBe(false)
+    expect(isTeamsRecordingLink('javascript:alert(1)')).toBe(false)
   })
 })

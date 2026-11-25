@@ -61,7 +61,9 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   const imageOn = lesson.type === 'image'
   const notesFeature = isEnabled(a.bundle.features, 'learning.notes')
   const mode: NoteMode = isVideo ? 'time' : lesson.type === 'pdf' ? 'page' : 'none'
-  const notesOn = notesFeature && tracked && !lock && lesson.type !== 'quiz'
+  // A class recording left in Microsoft Teams opens there: no player here, so no notes either.
+  const teamsLink = lesson.type === 'live' && !lesson.mediaAssetId && Boolean(lesson.externalUrl)
+  const notesOn = notesFeature && tracked && !lock && lesson.type !== 'quiz' && !teamsLink
   const notes = notesOn ? await getLessonNotes(a, lesson.id) : []
   const videoOn = isEnabled(a.bundle.features, 'content.video')
   const fileType = isFileLessonType(lesson.type)
@@ -120,7 +122,14 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
                 </Notice>
               ) : <>
               {isVideo && (
-                !videoOn ? <Notice>Video lessons are not enabled for this academy.</Notice>
+                teamsLink ? (
+                  <div className="grid justify-items-start gap-4 rounded-[20px] bg-muted p-6 sm:p-8">
+                    <p className="t-body !text-fg">This recording is in Microsoft Teams. It opens in a new tab.</p>
+                    <a href={`/api/recording/${lesson.id}`} target="_blank" rel="noopener noreferrer" className={buttonLine}>Open in Microsoft Teams &nearr;</a>
+                  </div>
+                )
+                : lesson.type === 'live' && !lesson.mediaAssetId ? <Notice>The recording is on its way. It is usually up the same night.</Notice>
+                : !videoOn ? <Notice>Video lessons are not enabled for this academy.</Notice>
                 : playback && playback.kind !== 'unavailable'
                   ? <VideoPlayer playback={playback} lessonId={lesson.id} startAt={deepT ?? (progress.completed ? 0 : progress.positionSeconds)} completed={progress.completed} title={lesson.title} />
                   : <Notice>{playback?.kind === 'unavailable' && playback.reason === 'not_configured'
@@ -128,7 +137,7 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
                       : 'The video for this lesson is not ready yet. Check back soon.'}</Notice>
               )}
               </>}
-              {isVideo && !lock && <ScrubMarks fallbackSeconds={lesson.durationSeconds} />}
+              {isVideo && !lock && !teamsLink && <ScrubMarks fallbackSeconds={lesson.durationSeconds} />}
             </div>
 
             <div className="mt-7 flex flex-wrap items-start justify-between gap-x-7 gap-y-4">

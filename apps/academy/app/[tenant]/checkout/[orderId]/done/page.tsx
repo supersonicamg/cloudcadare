@@ -47,7 +47,7 @@ export default async function Done({ params }: PageProps<'/[tenant]/checkout/[or
           <li className="flex items-center gap-2"><Icon name="clock" className="h-5 w-5 text-primary" />{enr.data?.expires_at ? `Access until ${dateLong(enr.data.expires_at)}` : 'No end date'}</li>
         </ul>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <Link href={course?.slug ? `/learn/${course.slug}` : '/learn'} className={`${buttonLg} w-full sm:w-auto`}>Start learning <span aria-hidden="true">→</span></Link>
+          <Link href={course?.slug ? `/learn/${course.slug}` : '/dashboard'} className={`${buttonLg} w-full sm:w-auto`}>Start learning <span aria-hidden="true">→</span></Link>
           <Link href={`/orders/${orderId}`} className="inline-flex min-h-11 items-center t-btn-sm !font-bold text-primary underline underline-offset-4">See your receipt</Link>
         </div>
       </section>

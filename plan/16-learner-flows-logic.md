@@ -1,6 +1,6 @@
 # 16 · Learner flows: logic and rules (join, learn, account, UPI, whitelist)
 
-> **Status:** design approved for **review only** (2026-11-25). Nothing here is built. The owner reviews the mockups first, then says "build".
+> **Status:** built in sessions 12, 13 and 15 (see PROGRESS.md). Where §12 differs from earlier sections, §12 wins.
 > **Mockups:** [`plan/mockups-learner-flows/flows-index.html`](mockups-learner-flows/flows-index.html) (24 screens). Every screen has a yellow **Logic notes** bar (toolbar toggle) that repeats the rules for that screen. This file is the full version and wins if they ever differ.
 > **Design rules:** [15-design-and-ux-guide.md](15-design-and-ux-guide.md) and `plan/mockups/homepage-v9.html`. Visual decisions there are final.
 > **Who reads this:** whoever builds these screens. Read §1 (what the owner asked), §3 (data), §4–§5 (the two risky flows), §10 (open questions), then the screen table in §2.
@@ -315,9 +315,9 @@ WhatsApp sending needs a provider (WhatsApp Business API or a service). Until th
 - Every recording is also a lesson of `type 'live'` in the month list, so progress, completion (90% watched) and notes work like any video.
 - **Provider is Microsoft Teams** (owner, 2026-11-25). `live_sessions.teams_join_url` holds the meeting link; "Join on Teams" opens it in a new tab.
 - **The page has two sections, in this order: Scheduled classes, then Recorded classes** (owner, 2026-11-25). The dashboard shows the same two, shortened (next class + 3, newest 3 recordings).
-- **A recording is one of two kinds** (`live_sessions.recording_kind`):
-  - `upload`: staff download the Teams .mp4 and upload it to the lesson. Plays in our player with notes, bookmarks and progress. Preferred.
-  - `teams_link`: staff paste the Teams/Stream share link. The card is labelled "Teams link" and opens Teams in a new tab; no notes or progress (completion = opened once).
+- **A recording is one of two kinds**, set on the `live` lesson in the course editor:
+  - upload: staff download the Teams .mp4 and upload it to the lesson. Plays in our player with notes, bookmarks and progress. Preferred.
+  - Teams link: staff paste the Teams/Stream share link. The card is labelled "Teams link" and opens Teams in a new tab; no notes or progress (completion = opened once).
 - Still open: whether learners outside the organiser's Microsoft 365 tenant can open Teams links (guest access or "anyone with the link"). See §10 Q5.
 
 ### 6.4 Notes, bookmarks, highlights (B4–B7)
@@ -407,7 +407,7 @@ Placeholders to replace with real data before launch: price (₹49,999 incl. GST
 - Playwright (cloud project, one flow each): sign up → confirm → listed email → welcome back → lesson opens; sign up → confirm → not listed → pay QR → "I have paid" → waiting → staff approve → learner unlocked; reject with amount mismatch → top-up → approve → unlocked; add a note at a timestamp and reopen at that time; log out from the menu on desktop and phone.
 - Visual: every screen at 1280 and 390 wide with no sideways scroll, 44px targets on phone, keyboard focus visible, reduced motion respected (guide §16 checklist).
 
-## 12. Dashboard (flow E, proposed 2026-11-25, waiting for owner approval)
+## 12. Dashboard (flow E, approved and built 2026-11-25)
 
 Mockup: `plan/mockups-learner-flows/flow-dashboard.html` (E1–E7; open "Logic notes" on each screen).
 
@@ -418,3 +418,11 @@ Mockup: `plan/mockups-learner-flows/flow-dashboard.html` (E1–E7; open "Logic n
 - **Change to §4 (whitelist):** a list match is no longer claimed silently on email confirm. A member with no enrolment whose confirmed email is on the running batch's list sees "You seem to be in the current batch: Join my batch now" (filled) and "Join the next batch instead" (outline). The button calls the same claim (enrolment `source = 'import'`, idempotent). Everyone else sees only "Join the next batch" → checkout.
 - **Dashboard states:** enrolled and running (E1), just claimed (E2, one-time banner), enrolled before the batch starts (E3, countdown and checklist), on list (E4), not on list (E5), UPI under review (E6). Never an empty dashboard.
 - **Progress shown:** overall % and lessons, pace against lessons released to the batch (never against other learners), labs, live classes attended, month tests, notes, this week's items, the climb, study material counts by type, certificate requirements.
+
+**Built (session 15), with these differences from the mockup:**
+- Joining a **running** batch sets the enrolment's start to the batch start, so months already open to the batch are open to the learner (migration 34).
+- Thumbnails are drawn (date or icon), not photos. Trainer names, a named counsellor, class numbers and week ranges are left out: there is no data for them yet.
+- The "before your batch starts" checklist ticks only what is recorded (certificate name, preview lesson). Teams and the WhatsApp group (`batches.settings.whatsapp_group_url`) are links without ticks.
+- The certificate card lists lessons and tests only; there is no capstone record yet.
+- Recordings: no `recording_kind` column. A `live` lesson with a media file is the upload; one with `external_url` is the Teams link.
+

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createPublishedCourse, signUpAndConfirm, staffWithMfa } from './helpers'
 
-// Slice 3 (plan/16 §11): sign up -> confirm -> listed email -> "Welcome back" -> the course opens; an unlisted email
+// Slice 3 (plan/16 §11): sign up -> confirm -> listed email -> "Join my batch now" -> the course opens; an unlisted email
 // is not let in; staff see every outcome of an add. Staff here is a throwaway account, never the real owner.
 const stamp = Date.now().toString().slice(-6)
 const title = `List Course ${stamp}`
@@ -28,15 +28,15 @@ test('a listed email gets the course after confirming; an unlisted one does not'
   await expect(page.getByRole('link', { name: /Waiting/ })).toContainText(/[1-9]/)
   await expect(page.getByText('Listed Learner').first()).toBeVisible()
 
-  // The listed learner signs up, confirms, and is welcomed back: access is already there.
+  // The listed learner signs up, confirms, and is offered their batch; pressing the button gives access.
   const learner = await (await browser.newContext()).newPage()
   await signUpAndConfirm(learner, listed, 'Listed Learner')
-  await learner.waitForURL((u) => u.pathname === '/welcome-back')
-  await expect(learner.getByRole('heading', { level: 1, name: /Welcome back, Listed/ })).toBeVisible()
+  await learner.waitForURL((u) => u.pathname === '/dashboard')
+  await expect(learner.getByRole('heading', { level: 1, name: /Hi Listed, which batch are you in/ })).toBeVisible()
   await learner.reload() // reading the page changes nothing
-  await learner.getByRole('link', { name: /Go to my course/ }).click()
-  await learner.waitForURL((u) => u.pathname.startsWith('/learn/'))
-  await expect(learner.getByRole('heading', { name: title })).toBeVisible()
+  await learner.getByRole('button', { name: /Join my batch now/ }).click()
+  await learner.waitForURL((u) => u.pathname === '/dashboard' && u.searchParams.get('joined') === '1')
+  await expect(learner.getByRole('heading', { level: 1, name: /Welcome, Listed/ })).toBeVisible()
   await learner.goto('/account/subscription')
   await expect(learner.getByText('Added by CloudCadre. Your email was on our learner list')).toBeVisible()
   await learner.close()
@@ -44,7 +44,7 @@ test('a listed email gets the course after confirming; an unlisted one does not'
   // Someone else is not on the list: no welcome, no access.
   const other = await (await browser.newContext()).newPage()
   await signUpAndConfirm(other, stranger, 'Stranger')
-  await other.waitForURL((u) => u.pathname === '/')
+  await other.waitForURL((u) => u.pathname === '/dashboard')
   await other.goto(`/learn/${title.toLowerCase().replace(/\s+/g, '-')}`)
   await expect(other.getByRole('heading', { name: title })).toHaveCount(0)
   await other.close()

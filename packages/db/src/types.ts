@@ -2948,6 +2948,9 @@ isOneToOne: false
 "claim_my_list_access":
 { Args: { "p_tenant_id": string }; Returns: string
                            },
+"my_list_match":
+{ Args: { "p_tenant_id": string }; Returns: Json
+                           },
 "submit_upi_payment":
 { Args: { "p_order_id": string }; Returns: Json
                            },

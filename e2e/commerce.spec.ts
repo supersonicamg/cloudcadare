@@ -87,7 +87,7 @@ test.describe.serial('selling a course', () => {
     await startBuying(page, `buyer-${stamp}@example.com`)
     await expect(page.getByText('Includes ₹180 tax')).toBeVisible()
     await page.getByRole('button', { name: 'Pay ₹1,180' }).click()
-    await page.waitForURL(/\/learn(\?|$)/)
+    await page.waitForURL(/\/dashboard(\?|$)/)
     await expect(page.getByRole('heading', { name: title })).toBeVisible()
 
     // the course page now says continue, and the order cannot be paid twice

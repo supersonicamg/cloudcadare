@@ -5,271 +5,289 @@
       "id": "A1",
       "group": "A · Join",
       "title": "Log in",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
       "route": "/login",
       "code": "apps/academy/app/[tenant]/login/",
       "mockup": "plan/mockups-learner-flows/flow-join.html#login",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LA1. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "A2",
       "group": "A · Join",
       "title": "Sign up (with WhatsApp number)",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
       "route": "/signup",
       "code": "apps/academy/app/[tenant]/signup/",
       "mockup": "plan/mockups-learner-flows/flow-join.html#signup",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LA2. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "A3",
       "group": "A · Join",
       "title": "Confirm your email",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/signup/confirm",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-join.html#verify",
       "phase": "1",
-      "note": "Must come before the whitelist check (plan/16 §4)."
+      "note": "Same screen as LA3. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "A4",
       "group": "A · Join",
       "title": "Welcome back (on the learner list)",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/welcome-back",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-join.html#welcome",
-      "phase": "1"
+      "phase": "1",
+      "note": "Replaced 2026-11-25 by the dashboard card \"Join my batch now\" (LE4); /welcome-back redirects."
     },
     {
       "id": "A5",
       "group": "A · Join",
       "title": "Checkout: UPI QR live, Razorpay coming soon",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
       "route": "/checkout/[orderId]",
       "code": "apps/academy/app/[tenant]/checkout/",
       "mockup": "plan/mockups-learner-flows/flow-join.html#checkout",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LA5. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "A6",
       "group": "A · Join",
       "title": "Waiting for verification",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/checkout/[orderId]/pending",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-join.html#pending",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LA6. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "A7",
       "group": "A · Join",
       "title": "Payment verified",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/checkout/[orderId]/done",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-join.html#approved",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LA7. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "A8",
       "group": "A · Join",
       "title": "Could not match the payment",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/checkout/[orderId]/pending (needs_action)",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-join.html#rejected",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LA8. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "B1",
       "group": "B · Learn",
       "title": "My learning, now the Dashboard (see LE1)",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
-      "route": "/learn",
-      "code": "apps/academy/app/[tenant]/learn/",
+      "route": "/dashboard",
+      "code": "apps/academy/app/[tenant]/dashboard/",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#enrolled",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LB1. Built, not yet walked end to end with real accounts. Now the Dashboard (LE1) at /dashboard."
     },
     {
       "id": "B2",
       "group": "B · Learn",
       "title": "Course material",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/learn/[slug]/material",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-learn.html#material",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LB2. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "B3",
       "group": "B · Learn",
       "title": "Live classes and recordings",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/learn/[slug]/live",
-      "code": "",
+      "code": "apps/academy/app/[tenant]/learn/[slug]/live/",
       "mockup": "plan/mockups-learner-flows/flow-learn.html#live",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LB3. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "B4",
       "group": "B · Learn",
       "title": "Recording player with notes",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
       "route": "/learn/[slug]/[lessonId]",
       "code": "apps/academy/app/[tenant]/learn/[slug]/[lessonId]/",
       "mockup": "plan/mockups-learner-flows/flow-learn.html#player",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LB4. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "B5",
       "group": "B · Learn",
       "title": "PDF viewer with notes",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/learn/[slug]/[lessonId] (pdf)",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-learn.html#pdf",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LB5. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "B6",
       "group": "B · Learn",
       "title": "Image viewer with notes",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/learn/[slug]/[lessonId] (image)",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-learn.html#image",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LB6. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "B7",
       "group": "B · Learn",
       "title": "My notes",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/learn/notes",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-learn.html#notes",
       "phase": "1",
-      "note": "Replaces old tracker item I4."
+      "note": "Same screen as LB7. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "C1",
       "group": "C · Navbar and account",
       "title": "Navbar (all states, with log out)",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
       "route": "every page",
       "code": "packages/themes/aurora/src/",
       "mockup": "plan/mockups-learner-flows/flow-account.html#navbar",
       "phase": "1",
-      "note": "Fixes: there is no way to log out today."
+      "note": "Same screen as LC1. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "C2",
       "group": "C · Navbar and account",
       "title": "Profile and reminders",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/account",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-account.html#profile",
       "phase": "1",
-      "note": "Replaces old tracker item F7."
+      "note": "Same screen as LC2. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "C3",
       "group": "C · Navbar and account",
       "title": "Subscription",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/account/subscription",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-account.html#subscription",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LC3. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "C4",
       "group": "C · Navbar and account",
       "title": "Payments and receipts",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
       "route": "/account/payments",
       "code": "apps/academy/app/[tenant]/orders/",
       "mockup": "plan/mockups-learner-flows/flow-account.html#payments",
       "phase": "1",
-      "note": "/orders redirects here."
+      "note": "Same screen as LC4. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "C5",
       "group": "C · Navbar and account",
       "title": "Password and devices",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/account/security",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-account.html#security",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LC5. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "C6",
       "group": "C · Navbar and account",
       "title": "Logged out",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/logged-out",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-account.html#logout",
-      "phase": "1"
+      "phase": "1",
+      "note": "Replaced 2026-11-25: log out lands on the home page with a note; /logged-out redirects."
     },
     {
       "id": "D1",
       "group": "D · Admin: payments and learner list",
       "title": "UPI payments queue and review",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/admin/payments/upi",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-admin.html#queue",
       "phase": "1",
-      "note": "Approve needs the \"money seen\" tick (DB check)."
+      "note": "Same screen as LD1. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "D2",
       "group": "D · Admin: payments and learner list",
       "title": "Learner list (whitelist)",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/admin/learner-list",
       "code": "",
       "mockup": "plan/mockups-learner-flows/flow-admin.html#list",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LD2. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "D3",
       "group": "D · Admin: payments and learner list",
       "title": "Payment settings (UPI, Razorpay soon)",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
       "route": "/admin/payments",
       "code": "apps/academy/app/[tenant]/admin/payments/",
       "mockup": "plan/mockups-learner-flows/flow-admin.html#settings",
-      "phase": "1"
+      "phase": "1",
+      "note": "Same screen as LD3. Built, not yet walked end to end with real accounts."
     },
     {
       "id": "E1",
@@ -2018,7 +2036,7 @@
       "route": "/welcome-back",
       "code": "apps/academy/app/[tenant]/welcome-back/",
       "mockup": "plan/mockups-learner-flows/flow-join.html#welcome",
-      "note": "",
+      "note": "Replaced 2026-11-25 by the dashboard card \"Join my batch now\" (LE4); /welcome-back redirects.",
       "phase": "1"
     },
     {
@@ -2072,13 +2090,13 @@
     {
       "id": "LB1",
       "group": "Learner flows (plan/16)",
-      "title": "My learning (to be replaced by the Dashboard, LE1)",
+      "title": "My learning (replaced by the Dashboard, LE1)",
       "status": "done",
       "kind": "build",
       "route": "/learn",
       "code": "apps/academy/app/[tenant]/learn/",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#enrolled",
-      "note": "",
+      "note": "Removed 2026-11-25; /learn redirects to /dashboard.",
       "phase": "1"
     },
     {
@@ -2102,7 +2120,7 @@
       "route": "/learn/[slug]/live",
       "code": "apps/academy/app/[tenant]/learn/[slug]/live/",
       "mockup": "plan/mockups-learner-flows/flow-learn.html#live",
-      "note": "",
+      "note": "Redrawn 2026-11-25: Scheduled classes and Recorded classes; Teams uploads and links.",
       "phase": "1"
     },
     {
@@ -2222,7 +2240,7 @@
       "route": "/logged-out",
       "code": "apps/academy/app/[tenant]/logged-out/",
       "mockup": "plan/mockups-learner-flows/flow-account.html#logout",
-      "note": "Slice 1 of plan/16 §11.",
+      "note": "Replaced 2026-11-25: log out lands on the home page with a note; /logged-out redirects.",
       "phase": "1"
     },
     {
@@ -2263,80 +2281,87 @@
     },
     {
       "id": "LE1",
-      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "group": "LE · Dashboard (plan/16 §12)",
       "title": "Dashboard: current batch learner (progress, course overview, study material)",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/dashboard",
       "code": "apps/academy/app/[tenant]/dashboard/",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#enrolled",
-      "phase": "1"
+      "phase": "1",
+      "note": "Built 2026-11-25. Layout checked in screenshots with sample data; not yet walked with real accounts. Needs migration 34."
     },
     {
       "id": "LE2",
-      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "group": "LE · Dashboard (plan/16 §12)",
       "title": "Dashboard: just joined the current batch",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/dashboard?joined=1",
       "code": "apps/academy/app/[tenant]/dashboard/",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#claimed",
-      "phase": "1"
+      "phase": "1",
+      "note": "Built 2026-11-25. Layout checked in screenshots with sample data; not yet walked with real accounts. Needs migration 34."
     },
     {
       "id": "LE3",
-      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "group": "LE · Dashboard (plan/16 §12)",
       "title": "Dashboard: joined the next batch, before it starts",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/dashboard",
       "code": "apps/academy/app/[tenant]/dashboard/",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#upcoming",
-      "phase": "1"
+      "phase": "1",
+      "note": "Built 2026-11-25. Layout checked in screenshots with sample data; not yet walked with real accounts. Needs migration 34. Shows only for enrolments that have a batch (learner-list rows); paid checkout does not assign one yet."
     },
     {
       "id": "LE4",
-      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "group": "LE · Dashboard (plan/16 §12)",
       "title": "Dashboard: on the current batch list, \"Join my batch now\"",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/dashboard",
       "code": "apps/academy/app/[tenant]/dashboard/",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#existing",
-      "phase": "1"
+      "phase": "1",
+      "note": "Built 2026-11-25. Layout checked in screenshots with sample data; not yet walked with real accounts. Needs migration 34."
     },
     {
       "id": "LE5",
-      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "group": "LE · Dashboard (plan/16 §12)",
       "title": "Dashboard: not on a list, join the next batch",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/dashboard",
       "code": "apps/academy/app/[tenant]/dashboard/",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#new",
-      "phase": "1"
+      "phase": "1",
+      "note": "Built 2026-11-25. Layout checked in screenshots with sample data; not yet walked with real accounts. Needs migration 34."
     },
     {
       "id": "LE6",
-      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "group": "LE · Dashboard (plan/16 §12)",
       "title": "Dashboard: UPI payment being checked",
-      "status": "todo",
+      "status": "done",
       "kind": "new",
       "route": "/dashboard",
       "code": "apps/academy/app/[tenant]/dashboard/",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#pending",
-      "phase": "1"
+      "phase": "1",
+      "note": "Built 2026-11-25. Layout checked in screenshots with sample data; not yet walked with real accounts. Needs migration 34."
     },
     {
       "id": "LE7",
-      "group": "LE · Dashboard (plan/16 §12, waiting for owner approval)",
+      "group": "LE · Dashboard (plan/16 §12)",
       "title": "Navbar and routing: Dashboard label, logo to /dashboard, log out to /",
-      "status": "todo",
+      "status": "done",
       "kind": "restyle",
       "route": "(all)",
       "code": "apps/academy/lib/shell.ts",
       "mockup": "plan/mockups-learner-flows/flow-dashboard.html#routing",
-      "phase": "1"
+      "phase": "1",
+      "note": "Built 2026-11-25. Layout checked in screenshots with sample data; not yet walked with real accounts. Needs migration 34."
     }
   ]
 }

@@ -12,7 +12,7 @@ async function openMenu(page: Page) {
 
 test('signed-in navbar: account menu, Escape, and one-click Log out that ends the session', async ({ page }) => {
   const mail = email('menu')
-  await signIn(page, mail, '/learn')
+  await signIn(page, mail, '/dashboard')
 
   await openMenu(page)
   const panel = page.locator('#au-acct')
@@ -29,8 +29,8 @@ test('signed-in navbar: account menu, Escape, and one-click Log out that ends th
 
   await openMenu(page)
   await panel.getByRole('button', { name: 'Log out' }).click()
-  await page.waitForURL('**/logged-out')
-  await expect(page.getByRole('heading', { level: 1, name: 'You are logged out' })).toBeVisible()
+  await page.waitForURL((u) => u.pathname === '/' && u.searchParams.has('logged-out'))
+  await expect(page.getByRole('status').filter({ hasText: 'You are logged out' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Log in' }).first()).toBeVisible()
 
   // The session is gone: protected pages send the visitor to the login page.
@@ -40,13 +40,13 @@ test('signed-in navbar: account menu, Escape, and one-click Log out that ends th
 
 test('log out works from the phone menu', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await signIn(page, email('phone'), '/learn')
+  await signIn(page, email('phone'), '/dashboard')
   await page.getByRole('button', { name: 'Menu' }).click()
   const menu = page.locator('#au-mnav')
   await expect(menu.getByText('Log out')).toBeVisible()
   await expect(menu.locator('.who')).toBeVisible()
   await menu.getByRole('button', { name: 'Log out' }).click()
-  await page.waitForURL('**/logged-out')
+  await page.waitForURL((u) => u.pathname === '/' && u.searchParams.has('logged-out'))
 })
 
 test('profile saves, validates the number, and reminders stay switched', async ({ page }) => {

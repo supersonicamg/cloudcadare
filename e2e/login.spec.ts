@@ -32,7 +32,7 @@ test('a new learner confirms the email with the emailed code, then logs in again
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
   await page.getByRole('button', { name: 'Log in', exact: true }).click()
-  await page.waitForURL((u) => u.pathname === '/learn')
+  await page.waitForURL((u) => u.pathname === '/dashboard')
 })
 
 test('after five wrong codes the code is locked, and sending again is closed for a minute', async ({ page }) => {

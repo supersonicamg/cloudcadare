@@ -79,7 +79,7 @@ test.describe.serial('quizzes', () => {
   test('a learner takes the quiz, passes, and sees a review; the key never reaches the browser', async ({ page }) => {
     await signIn(page, `quiz-${stamp}@example.com`, `/courses/${slug}`)
     await page.getByRole('button', { name: 'Enrol for free' }).first().click()
-    await page.waitForURL(/\/learn/)
+    await page.waitForURL(/\/(dashboard|learn)/)
     await page.goto(`/learn/${slug}`)
     await page.getByRole('link', { name: /Cloud quiz/ }).first().click()
     await page.waitForURL(/\/learn\/[^/]+\/[0-9a-f-]{36}$/)

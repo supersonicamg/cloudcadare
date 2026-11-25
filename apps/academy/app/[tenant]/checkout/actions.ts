@@ -74,5 +74,5 @@ export async function completeFree(orderId: string, _form: FormData): Promise<vo
   if (!order || order.total_minor !== 0 || order.status !== 'awaiting_payment') redirect(`/checkout/${orderId}`)
   await completeFreeOrder({ orderId })
   kickOutbox()
-  redirect('/learn')
+  redirect('/dashboard')
 }

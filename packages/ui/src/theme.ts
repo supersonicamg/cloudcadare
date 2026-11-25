@@ -144,6 +144,8 @@ export interface HomeContent {
       was?: string
       now: string
       company: string
+      /** The employer's logo (an image URL). Optional: the company name is shown in text when there is none. */
+      logo?: string
       city?: string
     }>
   }

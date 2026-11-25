@@ -258,7 +258,7 @@ The signature component, rated 10/10 by the owner. Reuse it for any staged journ
 Built for trust with new visitors: many real faces at once, not a few big cards.
 1. Heading, and one line of counted numbers under it ("15 placement stories · 12 companies · ₹29 LPA highest package"). Count them from the list; never an "average" of hand-picked stories.
 2. Two lanes of **white** horizontal cards drifting in opposite directions (lane 1 left, lane 2 right), full width of the panel, alternating people between lanes so no face is on screen twice at once.
-3. Card: square photo on the left, shown whole (square frame, `object-fit: cover`, top-aligned); on the right the package in teal ("₹17 LPA", city after it in grey), then the name, the company in bold, and the role in grey (2 lines at most). No "Was / Now" unless the previous job is known.
+3. Card: square photo on the left, shown whole (square frame, `object-fit: cover`, top-aligned); on the right the package in teal ("₹17 LPA", city after it in grey), then the name, the company (its **logo** when there is an official vector file, fitted into one 124×26px box with `object-fit: contain`; otherwise the name in bold text), and the role in grey (2 lines at most). Never use scraped favicons as logos. No "Was / Now" unless the previous job is known.
 4. Motion: ~6s per card, linear, seamless loop (list drawn twice, track slides 50%). It stops on hover or focus and has a visible Pause / Play button. Under `prefers-reduced-motion` nothing moves and the lanes become plain rows to swipe or scroll. The duplicate list is `aria-hidden` and `inert`.
 **Only real, consented placements may go live.**
 

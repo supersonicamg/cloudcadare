@@ -121,7 +121,12 @@ function Placements({ c }: { c: NonNullable<Content['placements']> }) {
       <div className="pc-bd">
         <p className="pc-pkg"><b>₹{p.lpa}</b> LPA{p.city ? <span> · {p.city}</span> : null}</p>
         <h3 className="pc-name">{p.name}</h3>
-        <p className="pc-co">{p.company}</p>
+        <p className="pc-co">
+          {p.logo
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img className="pc-logo" src={p.logo} alt={p.company} height={26} loading="lazy" decoding="async" />
+            : p.company}
+        </p>
         <p className="pc-role">{p.was ? `${p.was} → ` : ''}{p.now}</p>
       </div>
     </li>

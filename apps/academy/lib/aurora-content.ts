@@ -21,6 +21,13 @@ const photo = (id: string, w: number, extra = '') => `https://images.unsplash.co
 // modern-format copy instead of the 1024px original. Move them to the academy's own storage before the old site goes.
 const cld = (path: string) => `https://res.cloudinary.com/dqw5bkqgz/image/upload/f_auto,q_auto,w_700/${path}.jpg`
 
+// Employer logos in apps/academy/public/cloudcadre/logos/ (SVG, cropped to the mark). Sources: Infosys and Zensar from
+// Simple Icons (CC0), Capgemini, Amdocs, ZS, HCLTech and Persistent from Wikimedia Commons. They are trademarks of their
+// owners, shown only to say where learners work (the footer disclaimer covers this). NOT yet available, so the name is
+// shown as text: NICE, Cencora, Truetech, Fabutech, SA Technologies. Add each one's official SVG to that folder and a
+// `logo: logo('<file>')` here. (Do not use scraped favicons: they are blurry and do not match the wordmarks.)
+const logo = (file: string) => `/cloudcadre/logos/${file}.svg`
+
 export const auroraNav: NavItem[] = [
   { label: 'Program', href: '/#program' },
   { label: 'How we teach', href: '/#how' },
@@ -136,20 +143,20 @@ export const auroraHome: HomeContent = {
       { value: '15', label: 'Placement stories' }, { value: '12', label: 'Companies' }, { value: '₹29 LPA', label: 'Highest package' },
     ],
     items: [
-      { name: 'Swapnil Khandare', photo: cld('v1779696875/finops/partners/wq8vsntaol8qea1jijb8'), lpa: '17', now: 'Cloud Engineer', company: 'Infosys' },
-      { name: 'Shubham Kulkarni', photo: cld('v1779774796/finops/partners/eoctu1xlij4zjufqy010'), lpa: '14', now: 'Cloud Engineer', company: 'Infosys' },
-      { name: 'Shrinath Gaikwad', photo: cld('v1779775162/finops/partners/inih6zmlzkcrvwmq7jqy'), lpa: '8', now: 'DevOps Engineer', company: 'HCL Technologies', city: 'Pune' },
-      { name: 'Rupali Janapure', photo: cld('v1779775550/finops/partners/vdycpmti6ndbv4fnnlck'), lpa: '12', now: 'Cloud FinOps Specialist', company: 'Amdocs', city: 'Pune' },
-      { name: 'Priyanka Dhavle', photo: cld('v1779775797/finops/partners/pkws9p6zmrfb1wmzdn9e'), lpa: '27', now: 'AWS DevOps Engineer', company: 'Capgemini' },
-      { name: 'Prashant Jawalkar', photo: cld('v1779775977/finops/partners/rxb2j3nfydwzcsvchi6s'), lpa: '18', now: 'Cloud FinOps Engineer', company: 'Infosys', city: 'Pune' },
-      { name: 'Prasad Suryawanshi', photo: cld('v1779776202/finops/partners/lbotu68t8kupfwqwrjyh'), lpa: '12.5', now: 'Cloud FinOps Admin', company: 'ZS Associates' },
+      { name: 'Swapnil Khandare', photo: cld('v1779696875/finops/partners/wq8vsntaol8qea1jijb8'), lpa: '17', now: 'Cloud Engineer', company: 'Infosys', logo: logo('infosys') },
+      { name: 'Shubham Kulkarni', photo: cld('v1779774796/finops/partners/eoctu1xlij4zjufqy010'), lpa: '14', now: 'Cloud Engineer', company: 'Infosys', logo: logo('infosys') },
+      { name: 'Shrinath Gaikwad', photo: cld('v1779775162/finops/partners/inih6zmlzkcrvwmq7jqy'), lpa: '8', now: 'DevOps Engineer', company: 'HCL Technologies', logo: logo('hcltech'), city: 'Pune' },
+      { name: 'Rupali Janapure', photo: cld('v1779775550/finops/partners/vdycpmti6ndbv4fnnlck'), lpa: '12', now: 'Cloud FinOps Specialist', company: 'Amdocs', logo: logo('amdocs'), city: 'Pune' },
+      { name: 'Priyanka Dhavle', photo: cld('v1779775797/finops/partners/pkws9p6zmrfb1wmzdn9e'), lpa: '27', now: 'AWS DevOps Engineer', company: 'Capgemini', logo: logo('capgemini') },
+      { name: 'Prashant Jawalkar', photo: cld('v1779775977/finops/partners/rxb2j3nfydwzcsvchi6s'), lpa: '18', now: 'Cloud FinOps Engineer', company: 'Infosys', logo: logo('infosys'), city: 'Pune' },
+      { name: 'Prasad Suryawanshi', photo: cld('v1779776202/finops/partners/lbotu68t8kupfwqwrjyh'), lpa: '12.5', now: 'Cloud FinOps Admin', company: 'ZS Associates', logo: logo('zs') },
       { name: 'Prakash Gulbhele', photo: cld('v1779776432/finops/partners/blck4mtyzs7rujlbor7y'), lpa: '16', now: 'AWS FinOps Engineer', company: 'Truetech' },
       { name: 'Ninand Bhoir', photo: cld('v1779776610/finops/partners/bq3rw6vjqcokhwvaz50s'), lpa: '13', now: 'AWS Developer', company: 'SA Technologies', city: 'Mumbai' },
       { name: 'Monika Singh', photo: cld('v1779776907/finops/partners/ot1kjhdy0fjn8cym60q6'), lpa: '27', now: 'Senior Program Manager, AWS and Cloud', company: 'NICE', city: 'Pune' },
-      { name: 'Mayuri Fate', photo: cld('v1779777079/finops/partners/d9hfe13d8rrbe1j1okef'), lpa: '13', now: 'Cloud Engineer', company: 'HCLTech' },
-      { name: 'Lalit Borse', photo: cld('v1779777581/finops/partners/pqtkm6wpsvd8zdjysg4t'), lpa: '29', now: 'Technical Specialist, Cloud and FinOps', company: 'Zensar', city: 'Pune' },
+      { name: 'Mayuri Fate', photo: cld('v1779777079/finops/partners/d9hfe13d8rrbe1j1okef'), lpa: '13', now: 'Cloud Engineer', company: 'HCLTech', logo: logo('hcltech') },
+      { name: 'Lalit Borse', photo: cld('v1779777581/finops/partners/pqtkm6wpsvd8zdjysg4t'), lpa: '29', now: 'Technical Specialist, Cloud and FinOps', company: 'Zensar', logo: logo('zensar'), city: 'Pune' },
       { name: 'Abhilesh Jadhao', photo: cld('v1779777941/finops/partners/xeqthvtjcqo4pbk4tcgm'), lpa: '19', now: 'Project Manager, Cloud and DC', company: 'Fabutech', city: 'Mumbai' },
-      { name: 'Atish Sonwane', photo: cld('v1779778117/finops/partners/ipu40he74efuwwiocpzu'), lpa: '20', now: 'Senior Cloud Engineer, FinOps', company: 'Persistent Systems', city: 'Pune' },
+      { name: 'Atish Sonwane', photo: cld('v1779778117/finops/partners/ipu40he74efuwwiocpzu'), lpa: '20', now: 'Senior Cloud Engineer, FinOps', company: 'Persistent Systems', logo: logo('persistent'), city: 'Pune' },
       { name: 'Ashish Kumbhojkar', photo: cld('v1779696513/finops/partners/bmphc8rteevycsbqc1i7'), lpa: '14', now: 'Cloud FinOps Engineer', company: 'Cencora', city: 'Pune' },
     ],
   },

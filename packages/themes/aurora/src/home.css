@@ -137,14 +137,16 @@
   .mq.rev .mq-track { animation-direction: reverse; }
   .mq-lanes:hover .mq-track, .mq.paused .mq-track, .mq:focus-within .mq-track { animation-play-state: paused; }
   .mq-list { display: flex; gap: 16px; padding-right: 16px; }
-  .pc { flex: none; display: flex; align-items: center; gap: 16px; width: 348px; height: 144px; padding: 16px; border-radius: var(--r-md); background: #fff; color: var(--ink); }
+  .pc { flex: none; display: flex; align-items: center; gap: 16px; width: 348px; height: 152px; padding: 16px; border-radius: var(--r-md); background: #fff; color: var(--ink); }
   .pc-pic { flex: none; width: 112px; height: 112px; border-radius: 14px; object-fit: cover; object-position: 50% 15%; background: var(--stone); }
   .pc-bd { display: grid; gap: 2px; min-width: 0; }
   .pc-pkg { font-size: 14px; font-weight: 700; color: var(--brand); }
   .pc-pkg span { font-weight: 500; color: var(--mute); }
   .pc-pkg b { font-family: var(--f-display); font-size: 27px; font-weight: 800; letter-spacing: -0.045em; line-height: 1.1; }
   .pc-name { font-size: 16.5px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
-  .pc-co { overflow: hidden; font-size: 15px; font-weight: 700; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+  .pc-co { display: flex; align-items: center; min-height: 28px; overflow: hidden; font-size: 15px; font-weight: 700; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+  /* Every logo fits the same box, so wide wordmarks and squarer marks look equally sized */
+  .pc-logo { width: 124px; height: 26px; object-fit: contain; object-position: left center; }
   .pc-role { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; line-height: 1.3; color: var(--grey); }
   .st-bar { display: flex; align-items: center; gap: 16px; margin-top: 24px; font-size: 14.5px; color: var(--on-dark); }
   .st-pause { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px 0 12px; border: 0; border-radius: 10px; background: transparent; box-shadow: inset 0 0 0 2px rgba(255,255,255,.55); color: #fff; font-size: 15px; font-weight: 650; cursor: pointer; }
@@ -210,7 +212,8 @@
     /* Built for bleeds to the screen edges and swipes */
     .bf { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gut) * -1); padding: 0 var(--gut) 32px; scroll-padding-inline: var(--gut); }
     .bf li { flex: none; width: 80%; scroll-snap-align: start; }
-    .pc { width: 316px; height: 140px; gap: 12px; padding: 12px; }
+    .pc { width: 316px; height: 148px; gap: 12px; padding: 12px; }
+    .pc-logo { width: 108px; height: 24px; }
     .pc-pic { width: 96px; height: 96px; }
     .pc-pkg b { font-size: 24px; }
     .pc-co { font-size: 14.5px; }

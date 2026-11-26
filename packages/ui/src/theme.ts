@@ -108,6 +108,8 @@ export interface HomeContent {
     /** The hero picture: it fills the right side and fades into the dark on its left edge. No caption on it. */
     photo: { src: string; alt: string }
   }
+  /** A real learner shown beside the sign in and sign up forms (hidden on phones). Without one, the form is the whole page. Needs the learner's written consent. */
+  authLearner?: { photo: string; alt: string; package: string; name: string; role: string; company: string }
   /** Where the syllabus PDF can be downloaded. The "Full syllabus (PDF)" link is hidden until this is set. */
   syllabusHref?: string
   placements?: {

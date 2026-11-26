@@ -74,6 +74,11 @@ export const auroraHome: HomeContent = {
     // (plan/15 §12); it fades into the dark on its left edge, so pick one whose subject sits on the right.
     photo: { src: photo('1517694712202-14dd9538aa97', 1400), alt: 'A laptop open on code during a lab' },
   },
+  // REAL learner on the sign in and sign up pages (see placements below). Confirm Monika Singh's written consent before launch.
+  authLearner: {
+    photo: cld(MONIKA, 'full'), alt: 'Monika Singh, a CloudCadre learner',
+    package: '27', name: 'Monika Singh', role: 'Senior Program Manager, AWS and Cloud', company: 'NICE',
+  },
   // syllabusHref: set to the syllabus PDF to show the "Full syllabus (PDF)" link.
 
   // REAL placements, taken from the old CloudCadre website's "partners" list (2026-11-25). Before launch confirm with each

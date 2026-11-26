@@ -7,7 +7,7 @@ import type { HomeContent, NavItem, SiteContent } from '@educore/ui/theme'
 // PLACEHOLDER DATA. Everything marked INVENTED below came from the design mockup and is NOT real. The full list
 // is plan/15 §15. Showing invented figures, people or placements to the public is misleading advertising, so
 // replace or delete each of them before the site goes live:
-//   - the batch: date "12 Jan", class times (Mon to Thu 8-10 pm, Sat lab 10-1), seats (30), fee (Rs 15,000 x 4, or Rs 60,000)
+//   - the batch: date "12 Jan", seats (30). Class times (Sat and Sun 11 am to 2 pm), weekday practice (10 am to 5 pm) and the first instalment (Rs 80,000) came from the owner
 //   - the program: month split, topics and lab counts (12 / 8 / 14 / "34 labs"), and the syllabus PDF
 //   - people: the counsellor's name, photo and reply time
 //   - images: every photo except the placements is a stock photo (Unsplash) that stands in for CloudCadre's own
@@ -55,8 +55,8 @@ export const auroraSite: SiteContent = {
   ],
   // stock placeholder
   authArt: { image: { src: photo('1531482615713-2afd69097998', 900), alt: 'Learners working through a cloud lab together' }, tag: 'Taught by working engineers' },
-  // The poster carries the 12 Jan date, 8-10 pm and Rs 15,000 a month: the same INVENTED placeholders as the home hero. Redo both together.
-  coursePosters: { ceap: { src: '/cloudcadre/ceap-poster.webp', alt: 'CloudCadre Elite Architect Program: become a cloud architect in 4 months. Next batch 12 Jan, classes 8 to 10 pm, Rs 15,000 a month.' } },
+  // The poster carries the 12 Jan date, the weekend class time and the first instalment, the same values as the home hero. Redo both together.
+  coursePosters: { ceap: { src: '/cloudcadre/ceap-poster.webp', alt: 'CloudCadre Elite Architect Program: become a cloud architect in 4 months. Next batch 12 Jan, weekend classes 11 am to 2 pm, first instalment Rs 80,000.' } },
   disclaimer: 'AWS, Azure, Google Cloud, Kubernetes and other marks belong to their owners.',
 }
 
@@ -64,11 +64,11 @@ export const auroraHome: HomeContent = {
   hero: {
     headline: 'Become a cloud engineer in 4 months.',
     lead: 'Live online classes in AWS, Azure, DevOps and FinOps.',
-    // INVENTED: the date, the class time and the fee. They are the answers to when, what time and how much.
+    // The answers to when, what time and how much. The date is INVENTED.
     facts: [
       { label: 'Next batch', value: '12 Jan' },
-      { label: 'Classes', value: '8–10 pm' },
-      { label: 'Fee', value: '₹15k/month' },
+      { label: 'Weekend classes', value: '11 am–2 pm' },
+      { label: 'First instalment', value: '₹80,000' },
     ],
     // The hero button goes to the batch ticket, so the visitor sees the date and the price before paying.
     primaryCta: { label: 'Join the 12 Jan batch', href: '/#batch' }, // INVENTED date
@@ -144,25 +144,25 @@ export const auroraHome: HomeContent = {
     ],
   },
 
-  // INVENTED: every value of the batch ticket (date, class days and times, fee). Confirm with the owner.
+  // The batch date is INVENTED: confirm it with the owner. The class times, practice hours and first instalment are theirs.
   batch: {
     title: 'Next batch',
     month: 'January 2027',
     day: '12',
     length: '4 months, live online',
     week: [
-      { day: 'Mon', kind: 'class', time: ['8–10', 'pm'] },
-      { day: 'Tue', kind: 'class', time: ['8–10', 'pm'] },
-      { day: 'Wed', kind: 'class', time: ['8–10', 'pm'] },
-      { day: 'Thu', kind: 'class', time: ['8–10', 'pm'] },
-      { day: 'Fri', kind: 'free' },
-      { day: 'Sat', kind: 'lab', time: ['Lab', '10–1'] },
-      { day: 'Sun', kind: 'free' },
+      { day: 'Mon', kind: 'lab', time: ['10 am', '5 pm'] },
+      { day: 'Tue', kind: 'lab', time: ['10 am', '5 pm'] },
+      { day: 'Wed', kind: 'lab', time: ['10 am', '5 pm'] },
+      { day: 'Thu', kind: 'lab', time: ['10 am', '5 pm'] },
+      { day: 'Fri', kind: 'lab', time: ['10 am', '5 pm'] },
+      { day: 'Sat', kind: 'class', time: ['11 am', '2 pm'] },
+      { day: 'Sun', kind: 'class', time: ['11 am', '2 pm'] },
     ],
-    fee: { amount: '₹15,000', per: '/ month × 4', alt: 'or ₹60,000 once · UPI, card, net banking' },
+    fee: { amount: '₹80,000', per: 'first instalment', alt: 'UPI, card, net banking' },
     // /courses until the program page exists (plan/15 §15).
     join: { label: 'Join the 12 Jan batch', href: '/courses' },
-    bar: { title: 'Next batch 12 Jan', line: '₹15,000 a month', label: 'Join batch' },
+    bar: { title: 'Next batch 12 Jan', line: '₹80,000 first instalment', label: 'Join batch' },
   },
 
   talk: {
@@ -176,7 +176,7 @@ export const auroraHome: HomeContent = {
     // Check each answer against CloudCadre's real policies before launch (hours, recordings, exam fees).
     faq: [
       { question: 'Do I need an IT background?', answer: 'No. Month 1 starts from cloud basics. If you are completely new to IT, a counsellor will suggest a short warm-up first.' },
-      { question: 'How many hours a week?', answer: 'About 8 to 10: two or three live evening classes, plus labs in your own time.' }, // INVENTED
+      { question: 'How many hours a week?', answer: 'Live classes are on Saturday and Sunday, 11 am to 2 pm. Practice is Monday to Friday, 10 am to 5 pm.' },
       { question: 'What if I miss a class?', answer: 'Every class is recorded and up the same night, and your mentor helps you catch up on the lab.' },
       { question: 'Do I get a certificate?', answer: 'Yes, a CEAP certificate employers can verify online. AWS, Azure and Google Cloud exam fees are paid to the exam provider.' },
       { question: 'Do you guarantee a job?', answer: 'No, and be wary of anyone who does. We give you the skills, a capstone, mock interviews, CV and LinkedIn help, and introductions.' },

@@ -150,7 +150,7 @@ export interface HomeContent {
     week: BatchDay[]
     fee: { amount: string; per: string; alt: string }
     join: NavItem
-    /** Phone action bar: "Next batch 12 Jan" over "₹15,000 a month", and the short button label. */
+    /** Phone action bar: "Next batch 12 Jan" over "₹80,000 first instalment", and the short button label. */
     bar: { title: string; line: string; label: string }
   }
   talk?: {

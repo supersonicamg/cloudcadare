@@ -158,7 +158,7 @@ function Batch({ c, wa }: { c: NonNullable<Content['batch']>; wa: string | null 
                 </li>
               ))}
             </ul>
-            <p className="legend"><span><i className="k-class" />Live class</span><span><i className="k-lab" />Lab with a mentor</span><span>Every class is recorded</span></p>
+            <p className="legend"><span><i className="k-class" />Live class</span><span><i className="k-lab" />Practice</span><span>Every class is recorded</span></p>
           </div>
           <div className="fee">
             <p className="t-label tk-h">Fee</p>

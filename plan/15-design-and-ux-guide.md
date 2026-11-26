@@ -100,7 +100,7 @@ How v11 applies it:
 | Placements | Learner photo, square | "₹27 LPA" | Name, role, logo |
 | Program | Diagram of what you build that month | Month title | "Month 1 · 12 labs" and one line |
 | How classes work | Class photo | "30", "34", "1", "2" | "seats in a batch" … |
-| Next batch | Calendar date, weekly timetable | "12", "₹15,000" | "/ month × 4" |
+| Next batch | Calendar date, weekly timetable | "12", "₹80,000" | "first instalment" |
 
 **Text budget per marketing section:** one H2, at most one short line under it, and at most 12 words per unit. If a section needs more, it belongs on another page (the program page, the syllabus PDF) or behind a tap.
 
@@ -291,8 +291,8 @@ A value is always H3/600 ink with a Label/400 muted above it. Use for the hero f
 ### 10.8 Batch ticket ("Next batch")
 One white block on paper with three parts separated by dashed rules:
 1. **Calendar:** month and year (Small, 600) → the day as a huge numeral → "4 months, live online" (Label).
-2. **Your week:** a 7-day row (Mon–Sun). Class days are ink cells ("8–10 pm"), the lab day is a saffron cell ("Lab 10–1"), free days are `--tile` with "–". A legend under it, plus "Every class is recorded".
-3. **Fee:** "₹15,000" (Number) + "/ month × 4" (Label) → "or ₹60,000 once · UPI, card, net banking" → the filled Join button → WhatsApp text link.
+2. **Your week:** a 7-day row (Mon–Sun). Class days are ink cells ("11 am / 2 pm"), practice days are saffron cells ("10 am / 5 pm"), free days are `--tile` with "–". A legend under it, plus "Every class is recorded".
+3. **Fee:** "₹80,000" (Number) + "first instalment" (Label) → "UPI, card, net banking" → the filled Join button → WhatsApp text link.
 This is where the price lives on the home page. Never hide the price behind "ask us".
 
 ### 10.9 FAQ and counsellor
@@ -399,7 +399,7 @@ Diagrams are **built in code (inline SVG), never generated images**: generated i
 
 ## 17. Open placeholders and questions (resolve before launch)
 
-- **Batch and price:** the date "12 Jan", class times (Mon–Thu 8–10 pm, Sat lab 10–1), the fee (₹15,000 × 4 or ₹60,000), seats (30).
+- **Batch and price:** the date "12 Jan", seats (30). Class times (Sat–Sun 11 am–2 pm), practice (Mon–Fri 10 am–5 pm) and the first instalment (₹80,000) came from the owner on 26 Nov 2026; the total fee and later instalments are not given yet.
 - **Program:** the month split, topics, lab counts (12 / 8 / 14 / "34 labs"), and a real syllabus PDF.
 - **People:** the counsellor's name, photo and hours; the WhatsApp number, phone and email.
 - **Consent:** every placement learner, and Monika Singh for the hero photo.

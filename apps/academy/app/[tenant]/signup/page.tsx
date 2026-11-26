@@ -9,13 +9,13 @@ import { SignUpForm } from './signup-form'
 export const metadata = { title: 'Create account' }
 
 async function Content({ searchParams, tenantId, brand, facts }: {
-  searchParams: PageProps<'/[tenant]/signup'>['searchParams']; tenantId: string; brand: BrandInfo; facts?: Array<{ label: string; value: string }>
+  searchParams: PageProps<'/[tenant]/signup'>['searchParams']; tenantId: string; brand: BrandInfo; facts?: Array<{ label: string; value: string; note?: string }>
 }) {
   const { next } = await searchParams
   const entry = await entryContext(next, tenantId)
   return (
     <>
-      <AuthTop brand={brand}>Have an account? <Link className="link link-s" href={withNext('/login', entry.next)}>Log in</Link></AuthTop>
+      <AuthTop brand={brand}><span className="ask">Have an account? </span><Link className="link link-s" href={withNext('/login', entry.next)}>Log in</Link></AuthTop>
       <SignUpForm {...entry} facts={facts} />
     </>
   )

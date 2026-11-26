@@ -139,7 +139,7 @@ export const auroraHome: HomeContent = {
     title: 'How classes work',
     // stock placeholders: swap for CloudCadre's own class and lab photos. The numbers are placeholders too (seats, labs).
     tiles: [
-      { image: { src: photo('1522202176988-66273c2fd55f', 800), alt: 'A small live class with laptops' }, value: '30', line: 'seats in a batch' },
+      { image: { src: photo('1552664730-d307ca884978', 800), alt: 'A class around a table while one person explains at the wall' }, value: '30', line: 'seats in a batch' },
       { image: { src: photo('1522071820081-009f0129c71c', 800), alt: 'Learners working through a lab' }, value: '34', line: 'labs a mentor checks' },
       { image: { src: photo('1517245386807-bb43f82c33c4', 800), alt: 'A learner explaining a design to a reviewer' }, value: '1', line: 'capstone you defend' },
       { image: { src: photo('1551836022-d5d88e9218df', 800), alt: 'A mock interview across a table' }, value: '2', line: 'mock interviews' },
@@ -164,7 +164,7 @@ export const auroraHome: HomeContent = {
     fee: { title: 'Start with', amount: '₹80,000', per: 'first instalment', alt: 'UPI, card, net banking' },
     // /courses until the program page exists (plan/15 §15).
     join: { label: 'Join the 12 Jan batch', href: '/courses' },
-    bar: { title: 'Start with ₹80,000', line: 'First instalment · 12 Jan batch', label: 'Join batch' },
+    bar: { title: 'Start with ₹80,000', line: '12 Jan batch', label: 'Join batch' },
   },
 
   talk: {

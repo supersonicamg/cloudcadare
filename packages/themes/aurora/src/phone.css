@@ -77,7 +77,33 @@
     .person .ph { grid-row: auto; width: 64px; height: 64px; aspect-ratio: 1; border-radius: 50%; }
     .person .btn { grid-column: 1 / -1; }
     .faq details p { padding-right: 0; }
-
-    .mbar-wrap { display: block; }
   }
+}
+
+/* ---------- Employer logos: one sliding line, never stacked rows ---------- */
+.cc-home {
+  @container stage (max-width: 560px) {
+    .logos { width: calc(100% + 2 * var(--gutter)); margin-inline: calc(-1 * var(--gutter)); overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+    .logo-track { display: flex; width: max-content; }
+    .logos ul { flex-wrap: nowrap; gap: 40px; padding-right: 40px; }
+    .logos li { flex: none; }
+    /* It slides only once the "Pause sliding" button exists (JavaScript, motion allowed), and that button stops it too. */
+    .place:has(.rail-ctl) .logos ul[aria-hidden] { display: flex; }
+    .place:has(.rail-ctl) .logo-track { animation: cc-logos 22s linear infinite; }
+    .place:has(.rail-ctl[data-paused]) .logo-track { animation-play-state: paused; }
+  }
+}
+@keyframes cc-logos { to { transform: translateX(-50%); } }
+
+/* ---------- Phone action bar (plan/15 §10.10): home and program page ---------- */
+.cc {
+  .mbar-wrap { display: none; position: sticky; bottom: 0; z-index: 45; height: 0; }
+  .mbar { position: absolute; inset: auto 0 0 0; display: flex; align-items: center; gap: 10px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: #fff; color: var(--ink); border-top: 1px solid var(--rule); box-shadow: 0 -6px 20px rgba(0,0,0,.06); transform: translateY(110%); visibility: hidden; transition: transform .25s, visibility 0s .25s; }
+  .mbar.show { transform: none; visibility: visible; transition: transform .25s; }
+  .mbar p { flex: 1; min-width: 0; font-size: var(--t-label); line-height: 1.35; color: var(--muted); }
+  .mbar p b { display: block; font-size: var(--t-small); font-weight: 600; color: var(--ink); }
+  .mbar .btn { min-height: 48px; padding: 0 18px; }
+  .mbar .wa-btn { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--rule); border-radius: 3px; color: #128C4A; }
+  .mbar .wa-btn .wa { width: 22px; height: 22px; }
+  @media (max-width: 560px) { .mbar-wrap { display: block; } }
 }

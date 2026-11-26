@@ -247,6 +247,12 @@ export interface CoursePageProps {
   catalogHref?: string
 }
 
+export interface NotFoundPageProps {
+  /** Where most people want to go (the program or the course list), when there is one. */
+  primary?: NavItem
+  secondary: NavItem
+}
+
 /** plan/05 §5. Pages and blocks join this contract as the modules that need them are built. */
 export interface ThemeContract {
   key: string
@@ -256,4 +262,6 @@ export interface ThemeContract {
   HomePage: ComponentType<HomePageProps>
   CatalogPage: ComponentType<CatalogPageProps>
   CoursePage: ComponentType<CoursePageProps>
+  /** Optional: without it the app draws its own plain "page not found". */
+  NotFoundPage?: ComponentType<NotFoundPageProps>
 }

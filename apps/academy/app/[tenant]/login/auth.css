@@ -9,3 +9,9 @@
 .v11 .in[aria-invalid="true"]{padding:0 13px}
 .v11 .pw .in[aria-invalid="true"]{padding-right:75px}
 .v11 .auth-box > form{display:grid;gap:20px}
+/* Phones: one short link at the top right, and the form starts under it instead of floating mid-screen. */
+@container stage (max-width:560px){
+.v11 .auth-top .t-small{white-space:nowrap}
+.v11 .auth-box{margin:0 auto;padding-top:24px}
+}
+@container stage (max-width:420px){.v11 .auth-top .ask{display:none}}

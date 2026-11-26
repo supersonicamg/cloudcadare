@@ -216,6 +216,8 @@ Eight roles. Every piece of text on a page uses exactly one of them.
 |---|---|---|---|
 | Header | Logo, 4 links, Log in, "WhatsApp us" | Links move to a **visible link row** under the header | WhatsApp becomes a 44px icon button; header and link row **hide on scroll down, return on scroll up** |
 | Hero | Copy left, photo right (50/50) | Copy first, photo below at 4:3 | Photo first (25svh) fading into the H1; two facts side by side, the money fact on its own row; buttons full width |
+| Employer logos | One row beside the head | Wraps | **One sliding line** with faded edges, stopped by the same "Pause sliding" button; never stacked rows |
+| Program page | Dark hero (copy, poster), then two columns; the fee and button stay beside the module list | One column | Same, with the phone action bar; modules start closed when long |
 | Placement wall | 5 per row | 3 per row | **Self-sliding row** of all 15, 232px cards, "Pause sliding" |
 | Month cards | 4 per row | 2 per row | **Swipe row**, snapping, card 82cqi, all lines shown |
 | Number tiles | 4 per row | 2 per row | **Self-sliding row**, card 68cqi, "Pause sliding" |
@@ -307,7 +309,7 @@ This is where the price lives on the home page. Never hide the price behind "ask
 - **FAQ:** native `<details>`, all closed, 1px ink top rule, 1px hairlines, question in Body/600, "+" / "–" on the right. 5–6 questions, answers of at most 2 sentences. Must include "Do you guarantee a job?" answered honestly (no).
 
 ### 10.10 Phone action bar
-See §8. White, 1px top rule, soft shadow. Left: "Start with ₹80,000" (Small, 600) over "First instalment · 12 Jan batch" (Label). Right: a 48px WhatsApp icon button and a filled "Join batch". Its links are `tabindex="-1"` and `aria-hidden` while it is hidden.
+See §8. White, 1px top rule, soft shadow. Left: "Start with ₹80,000" (Small, 600) over "12 Jan batch" (Label). The program page uses the same bar with its price and its own button. Right: a 48px WhatsApp icon button and a filled "Join batch". Its links are `tabindex="-1"` and `aria-hidden` while it is hidden.
 
 ### 10.11 Footer
 Dark. Logo + one line ("Live online training in cloud, DevOps and FinOps.") · Program · Help · Contact columns · bottom rule with the trademark line and Privacy · Terms · Refunds.
@@ -394,7 +396,7 @@ Diagrams are **built in code (inline SVG), never generated images**: generated i
 
 ## 16. Porting v11 into the app
 
-**Done 2026-11-26:** step 1 (Hanken Grotesk, `font.ts`), step 3 (home in `home.tsx`, `home.css`, `diagrams.tsx`; content keys in `aurora-content.ts`) and step 4 (header with link row, phone action bar, footer in `site.css`; the floating WhatsApp button is gone). The home page uses fixed v11 hex values in `site.css`, not tenant tokens, so step 2's branding tokens are still open, and so is step 5. The catalog and course pages still use the v9 `.au` rules in `aurora.css`. Steps as originally written:
+**Done 2026-11-26:** step 1 (Hanken Grotesk, `font.ts`), step 3 (home in `home.tsx`, `home.css`, `diagrams.tsx`; content keys in `aurora-content.ts`) and step 4 (header with link row, phone action bar, footer in `site.css`; the floating WhatsApp button is gone). The home page uses fixed v11 hex values in `site.css`, not tenant tokens, so step 2's branding tokens are still open, and so is step 5. The program page (`course.tsx`, `course.css`) and "page not found" were ported later the same day; the catalog (hidden while there is one program) and the unused theme sign-in layout still use the `.au` rules in `aurora.css`. Steps as originally written:
 1. **Font:** swap Schibsted Grotesk for Hanken Grotesk (400, 600) in `packages/themes/aurora/src/font.ts`.
 2. **Tokens:** set the tenant branding values in §5; replace aurora CSS radii (12–36px) with 3px; drop inset panels, the slanted hero frame, the yellow marker and reveal animations.
 3. **Home:** rebuild `packages/themes/aurora/src/home.tsx` and `home.css` to the v11 order (§4). Content keys in `apps/academy/lib/aurora-content.ts`: the hero gets a `learner` (photo, package, name, role, company); `program.months` gets a `diagram` id and a short `line`; `how.tiles` becomes number tiles; `talk.nextBatch` grows into the batch ticket (date, week, fee). Remove `builtFor` and the climb from the home page.

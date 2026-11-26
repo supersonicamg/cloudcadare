@@ -29,6 +29,11 @@
 .v11 .scr > .pg,.v11 .scr > .study,.v11 .scr > .qz,.v11 .scr > .co,.v11 .scr > .pst,.v11 .scr > .vpg{flex:1;width:100%}
 .v11 .scr > .auth{flex:1}
 /* ---------- the 8 type roles (guide §6), and nothing else ---------- */
+/* The Tailwind app utilities (packages/ui styles.css) have the same class names, so family, weight and colour are set
+   here too; without this the headings fell back to the system font and big numbers turned teal. */
+.v11 :is(.t-display,.t-h2,.t-title,.t-num,.t-h3,.t-card,.t-body,.t-lead,.t-label,.t-small){font-family:inherit}
+.v11 :is(.t-display,.t-h2,.t-title,.t-num,.t-h3){color:inherit}
+.v11 :is(.t-body,.t-lead,.t-label,.t-small){font-weight:400}
 .v11 .t-display{font-size:var(--t-display);line-height:1.02;letter-spacing:-.034em;font-weight:600;text-wrap:balance}
 .v11 .t-h2,.v11 .t-title{font-size:var(--t-h2);line-height:1.1;letter-spacing:-.025em;font-weight:600;text-wrap:balance}
 .v11 .t-num{font-size:var(--t-num);line-height:1;letter-spacing:-.03em;font-weight:600}
@@ -481,7 +486,7 @@
 .v11 .auth-top .t-small{margin-left:auto}
 .v11 .auth-box{width:100%;max-width:440px;margin:auto;display:grid;gap:20px;padding:32px 0}
 .v11 .auth-box .hfacts{display:flex;flex-wrap:wrap;gap:12px 32px;padding:16px 0;border-block:1px solid var(--rule)}
-.v11 .auth-box .hfacts li{display:grid;gap:4px}
+.v11 .auth-box .hfacts li{display:grid;align-content:start;gap:4px}
 .v11 .code{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
 .v11 .code input{height:64px;width:100%;text-align:center;font-size:28px;font-weight:600;border:1px solid var(--muted);border-radius:3px;background:#fff;color:var(--ink)}
 .v11 .or{display:flex;align-items:center;gap:12px;font-size:var(--t-label);color:var(--muted)}

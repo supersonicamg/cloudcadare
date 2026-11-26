@@ -8,6 +8,14 @@ import { buttonLg, buttonLine, h1s, lead } from '@/lib/ui'
 export default async function NotFound() {
   const { bundle, theme, brand, nav, account, site } = await getShell()
   const catalog = isEnabled(bundle.features, 'catalog.courses') ? await catalogLink(bundle.tenant.id) : null
+  const program = catalog ? { label: catalog.only ? 'See the program' : 'See all courses', href: catalog.href } : undefined
+  if (theme.NotFoundPage) {
+    return (
+      <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
+        <theme.NotFoundPage primary={program} secondary={account} />
+      </theme.SiteLayout>
+    )
+  }
   return (
     <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
       <section className="mx-auto max-w-[760px] px-5 pb-24 pt-14 md:pt-20">

@@ -1,33 +1,34 @@
 'use client'
 
 import { useEffect, useRef, useState, type ReactNode, type Ref } from 'react'
-import { A, WhatsAppIcon } from './parts'
+import { WhatsAppIcon } from './parts'
 
 /**
- * Phone action bar (plan/15 §8, §10.10): "Next batch 12 Jan" · WhatsApp · "Join batch". It slides up once the hero button
- * has scrolled away and hides again when the batch section comes into view (the price and the real Join button are
- * there). Phones only: the CSS (phone.css) shows it below 560px. While hidden its links are out of the tab order and hidden from
- * screen readers. The wrapper has no height, so the bar never pushes the page down.
+ * Phone action bar (plan/15 §8, §10.10): a short line, WhatsApp and the page's one action (`children`). It slides up
+ * once the button with id `trigger` has scrolled away and, when `until` is given, hides again while that section or
+ * anything below it is on screen (on the home page the batch ticket has the price and the real Join button). Phones
+ * only: the CSS (phone.css) shows it below 560px. While hidden it is inert: out of the tab order and hidden from screen
+ * readers. The wrapper has no height, so the bar never pushes the page down.
  */
-export function PhoneBar({ title, line, label, href, whatsapp }: { title: string; line: string; label: string; href: string; whatsapp: string | null }) {
+export function PhoneBar({ title, line, trigger, until, whatsapp, children }: { title: string; line: string; trigger: string; until?: string; whatsapp: string | null; children: ReactNode }) {
   const [on, setOn] = useState(false)
   useEffect(() => {
-    const hero = document.getElementById('hero-act')
-    const batch = document.getElementById('batch')
-    if (!hero || !batch) return
-    const check = () => setOn(hero.getBoundingClientRect().bottom < 0 && batch.getBoundingClientRect().top > innerHeight)
+    const check = () => {
+      const start = document.getElementById(trigger)
+      const end = until ? document.getElementById(until) : null
+      setOn(Boolean(start && start.getBoundingClientRect().bottom < 0 && (!end || end.getBoundingClientRect().top > innerHeight)))
+    }
     check()
     addEventListener('scroll', check, { passive: true })
     addEventListener('resize', check)
     return () => { removeEventListener('scroll', check); removeEventListener('resize', check) }
-  }, [])
-  const tab = on ? undefined : -1
+  }, [trigger, until])
   return (
     <div className="mbar-wrap">
       <div className={`mbar${on ? ' show' : ''}`} aria-hidden={!on} inert={!on}>
         <p><b>{title}</b>{line}</p>
-        {whatsapp && <a className="wa-btn" href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Ask on WhatsApp" tabIndex={tab}><WhatsAppIcon /></a>}
-        <A className="btn" href={href} tabIndex={tab}>{label}</A>
+        {whatsapp && <a className="wa-btn" href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Ask on WhatsApp"><WhatsAppIcon /></a>}
+        {children}
       </div>
     </div>
   )
@@ -125,7 +126,7 @@ export function Rail({ items, className, itemClassName, ordered, auto }: {
         {sliding && items.map((i) => <li key={`again-${i.key}`} className={itemClassName} aria-hidden="true">{i.node}</li>)}
       </List>
       {sliding && (
-        <button type="button" className="link rail-ctl" onClick={() => setPaused((p) => !p)}>
+        <button type="button" className="link rail-ctl" data-paused={paused || undefined} onClick={() => setPaused((p) => !p)}>
           {paused ? 'Resume sliding' : 'Pause sliding'}
         </button>
       )}

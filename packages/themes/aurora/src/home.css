@@ -31,7 +31,8 @@
   .place { background: var(--paper); }
   .sum { margin-top: 12px; font-size: var(--t-lead); color: var(--body); }
   .sum b { font-weight: 600; color: var(--ink); }
-  .logos { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 32px; }
+  .logos ul { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 32px; }
+  .logos ul[aria-hidden] { display: none; }
   .logos img { width: auto; height: 20px; filter: grayscale(1); opacity: .7; }
   .logos .tall img { height: 26px; }
   .logos .heavy img { height: 15px; }
@@ -44,6 +45,8 @@
   .pc .t-small { min-height: 2.8em; font-size: var(--t-label); }
   .co { display: flex; align-items: center; height: 24px; margin-top: 10px; font-size: var(--t-label); font-weight: 600; }
   .co img { width: auto; max-width: 92px; height: 17px; }
+  /* The ZS mark is nearly square, so it needs more height to read at all. */
+  .co img[src$="/zs.svg"] { height: 24px; }
   .place .fine { margin-top: 20px; }
 
   /* ============ 3. program: four month cards, each led by a diagram ============ */
@@ -94,7 +97,9 @@
 
   /* ============ 6. questions before you join: a real person, then the FAQ ============ */
   .faq-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: start; gap: 32px 64px; }
-  .faq-grid.solo { grid-template-columns: minmax(0, 860px); }
+  /* No counsellor (no WhatsApp number yet): the heading takes the left column, so the page is not half empty. */
+  .faq-grid.solo { grid-template-columns: minmax(0, 1fr); }
+  .solo > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: start; gap: 0 64px; }
   .person { display: grid; gap: 14px; }
   .person .ph { aspect-ratio: 4 / 3; overflow: hidden; border-radius: 3px; background: var(--tile); }
   .person .ph img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; }
@@ -107,16 +112,6 @@
   .faq details[open] summary::after { content: "–"; }
   .faq details p { padding: 0 40px 20px 0; color: var(--body); }
 
-  /* ============ phone action bar (plan/15 §10.10): phones only ============ */
-  .mbar-wrap { display: none; position: sticky; bottom: 0; z-index: 45; height: 0; }
-  .mbar { position: absolute; inset: auto 0 0 0; display: flex; align-items: center; gap: 10px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--rule); box-shadow: 0 -6px 20px rgba(0,0,0,.06); transform: translateY(110%); visibility: hidden; transition: transform .25s, visibility 0s .25s; }
-  .mbar.show { transform: none; visibility: visible; transition: transform .25s; }
-  .mbar p { flex: 1; font-size: var(--t-label); line-height: 1.35; color: var(--muted); }
-  .mbar p b { display: block; font-size: var(--t-small); font-weight: 600; color: var(--ink); }
-  .mbar .btn { min-height: 48px; padding: 0 18px; }
-  .mbar .wa-btn { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--rule); border-radius: 3px; color: #128C4A; }
-  .mbar .wa-btn .wa { width: 22px; height: 22px; }
-
   /* ===================== responsive: components respond to their own width ===================== */
   @container stage (max-width: 900px) {
     .hero { grid-template-columns: 1fr; min-height: 0; }
@@ -126,6 +121,7 @@
     .ticket { grid-template-columns: auto minmax(0, 1fr); }
     .ticket .fee { grid-column: 1 / -1; border-top: 1px dashed var(--rule); border-left: 0; }
     .faq-grid { grid-template-columns: 1fr; }
+    .solo > div { grid-template-columns: minmax(0, 1fr); }
     .person { order: 2; grid-template-columns: 200px 1fr; align-items: center; gap: 16px 24px; }
     .person .ph { grid-row: span 3; }
   }

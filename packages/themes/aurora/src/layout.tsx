@@ -6,6 +6,7 @@ import { A, Brand, WhatsAppIcon, waLink } from './parts'
 import './aurora.css'
 import './site.css'
 import './home.css'
+import './course.css'
 import './phone.css'
 
 export function SiteLayout({ brand, nav, account, site, children }: SiteLayoutProps) {

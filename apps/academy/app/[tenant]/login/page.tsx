@@ -14,7 +14,7 @@ async function Content({ searchParams, tenantId, brand }: { searchParams: PagePr
   const entry = await entryContext(next, tenantId)
   return (
     <>
-      <AuthTop brand={brand}>New here? <Link className="link link-s" href={withNext('/signup', entry.next)}>Create an account</Link></AuthTop>
+      <AuthTop brand={brand}><span className="ask">New here? </span><Link className="link link-s" href={withNext('/signup', entry.next)}>Create an account</Link></AuthTop>
       <LoginForm {...entry} forgotHref={waHref(brand, 'Hi, I forgot my password.')} />
     </>
   )

@@ -15,6 +15,7 @@ type Content = HomeContent
 //
 // Surfaces (plan/15 §4), touching sections never share one:
 //   header + hero dark -> placements paper -> program white -> how classes work dark -> batch paper -> FAQ white -> footer dark.
+// On phones this page has its own layout (phone.css).
 // Images are plain <img>: the photos are remote placeholders until the academy has its own (plan/15 §12).
 
 /** 1. Hero: the H1, one line, three facts (when, what time, how much), the one filled button, and a photo that fades into the dark. */
@@ -80,12 +81,19 @@ function Placements({ c }: { c: NonNullable<Content['placements']> }) {
               ))}
             </p>
           </div>
-          <ul className="logos" aria-label="Employers">
-            {c.logos.map((l) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <li key={l.src} className={l.size}><img src={l.src} alt={l.alt} loading="lazy" /></li>
-            ))}
-          </ul>
+          {/* On phones the logos slide in one line (phone.css); the second list is what makes that loop seamless. */}
+          <div className="logos">
+            <div className="logo-track">
+              {[false, true].map((again) => (
+                <ul key={String(again)} aria-label={again ? undefined : 'Employers'} aria-hidden={again || undefined}>
+                  {c.logos.map((l) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <li key={l.src} className={l.size}><img src={l.src} alt={again ? '' : l.alt} /></li>
+                  ))}
+                </ul>
+              ))}
+            </div>
+          </div>
         </div>
         <Rail className="wall" itemClassName="pc" items={cards} auto />
         <p className="t-small fine">{c.footnote}</p>
@@ -244,7 +252,11 @@ export function HomePage({ brand, content }: HomePageProps) {
       {content.how && <How c={content.how} />}
       {content.batch && <Batch c={content.batch} wa={wa} />}
       {content.talk && <Talk c={content.talk} brand={brand} />}
-      {content.batch && <PhoneBar {...content.batch.bar} href="/#batch" whatsapp={wa} />}
+      {content.batch && (
+        <PhoneBar title={content.batch.bar.title} line={content.batch.bar.line} trigger="hero-act" until="batch" whatsapp={wa}>
+          <A className="btn" href="/#batch">{content.batch.bar.label}</A>
+        </PhoneBar>
+      )}
     </div>
   )
 }

@@ -105,8 +105,8 @@ export interface HomeContent {
     facts: Array<{ label: string; value: string }>
     /** The one filled button of the page. Every "Join" button points here or to the batch ticket. */
     primaryCta: NavItem
-    /** A real learner: the hero picture. Needs the learner's written consent. */
-    learner: { photo: string; alt: string; package: string; name: string; role: string; company: string }
+    /** The hero picture: it fills the right side and fades into the dark on its left edge. No caption on it. */
+    photo: { src: string; alt: string }
   }
   /** Where the syllabus PDF can be downloaded. The "Full syllabus (PDF)" link is hidden until this is set. */
   syllabusHref?: string

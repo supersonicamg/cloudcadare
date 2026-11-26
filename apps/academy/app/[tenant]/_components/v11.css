@@ -3,6 +3,7 @@
  * Every rule is scoped under .v11 so nothing leaks into the admin screens or the marketing pages.
  * Fixed v11 colours, like the home page: ink + saffron, Hanken Grotesk 400/600, radius 3px, no shadows.
  * The frame (.v11) is the named container "stage"; each page body sits in .scr, which is the container that cqi units read.
+ * The frame spans the full viewport so the dark bars and the white page run edge to edge; each page body (.pg, .study, .co ...) caps and centres its own content.
  */
 .v11{
   --dark:#0C1312;--dark-2:#16201E;--ink:#0F1716;--body:#3A4240;--muted:#5F6764;--paper:#F5F4F0;--tile:#EEEDE8;--rule:#DCDAD3;
@@ -10,7 +11,7 @@
   --t-display:clamp(40px,4.8cqi,66px);--t-h2:clamp(28px,3cqi,40px);--t-num:clamp(28px,2.6cqi,36px);--t-h3:clamp(19px,1.5cqi,21px);
   --t-lead:clamp(17px,1.4cqi,19px);--t-body:17px;--t-small:15px;--t-label:14px;
   --gutter:clamp(16px,4cqi,56px);
-  container:stage/inline-size;max-width:1440px;margin:0 auto;min-height:100vh;min-height:100dvh;background:#fff;color:var(--ink);
+  container:stage/inline-size;width:100%;min-height:100vh;min-height:100dvh;background:#fff;color:var(--ink);
   display:flex;flex-direction:column;
   font-family:var(--font-hanken),"Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;font-size:var(--t-body);line-height:1.55;font-weight:400;
   -webkit-font-smoothing:antialiased}

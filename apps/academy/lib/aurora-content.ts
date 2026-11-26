@@ -30,7 +30,7 @@ const cld = (path: string, t: 'face' | 'full') =>
 // `logo: logo('<file>')` here. (Do not use scraped favicons: they are blurry and do not match the wordmarks.)
 const logo = (file: string) => `/cloudcadre/logos/${file}.svg`
 
-// Monika Singh is the hero (plan/15 §10.3): the real placement with the strongest story. Needs her written consent.
+// Monika Singh is the hero (plan/15 §10.3): the real placement with the strongest story, shown on sign in and sign up. Needs her written consent.
 const MONIKA = 'v1779776907/finops/partners/ot1kjhdy0fjn8cym60q6'
 
 
@@ -73,6 +73,11 @@ export const auroraHome: HomeContent = {
     // STOCK placeholder: a laptop open on code during a lab. Replace with a real photo of a CloudCadre lab or live class
     // (plan/15 §12); it fades into the dark on its left edge, so pick one whose subject sits on the right.
     photo: { src: photo('1517694712202-14dd9538aa97', 1400), alt: 'A laptop open on code during a lab' },
+  },
+  // REAL learner on the sign in and sign up pages (the home hero uses a stock photo now). Confirm Monika Singh's written consent before launch.
+  authLearner: {
+    photo: cld(MONIKA, 'full'), alt: 'Monika Singh, a CloudCadre learner',
+    package: '27', name: 'Monika Singh', role: 'Senior Program Manager, AWS and Cloud', company: 'NICE',
   },
   // syllabusHref: set to the syllabus PDF to show the "Full syllabus (PDF)" link.
 

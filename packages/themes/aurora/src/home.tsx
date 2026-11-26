@@ -17,9 +17,8 @@ type Content = HomeContent
 //   header + hero dark -> placements paper -> program white -> how classes work dark -> batch paper -> FAQ white -> footer dark.
 // Images are plain <img>: the photos are remote placeholders until the academy has its own (plan/15 §12).
 
-/** 1. Hero: the H1, one line, three facts (when, what time, how much), the one filled button, and a real learner. */
+/** 1. Hero: the H1, one line, three facts (when, what time, how much), the one filled button, and a photo that fades into the dark. */
 function Hero({ c, wa }: { c: Content['hero']; wa: string | null }) {
-  const { learner: l } = c
   return (
     <section className="hero dark" id="hero" aria-labelledby="h1">
       <div className="hero-copy">
@@ -35,11 +34,7 @@ function Hero({ c, wa }: { c: Content['hero']; wa: string | null }) {
       </div>
       <figure className="hero-ph">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={l.photo} alt={l.alt} fetchPriority="high" />
-        <figcaption>
-          <span className="t-num">₹{l.package}<small>LPA</small></span>
-          <p><b>{l.name}</b>, CloudCadre learner · {l.role}, {l.company}</p>
-        </figcaption>
+        <img src={c.photo.src} alt={c.photo.alt} fetchPriority="high" />
       </figure>
     </section>
   )

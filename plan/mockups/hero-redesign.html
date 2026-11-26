@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero directions</title>
+<!--
+  CloudCadre home: hero redesign, four directions to choose from.
+  Built from scratch on the owner's rules only (plan/15 §0, §2, §11, §13):
+  hierarchy first, one filled button, images that carry information,
+  specific over generic, honest, phone is first-class, nothing from the banned list.
+  Palette, type and shapes are deliberately reopened here.
+
+  PLACEHOLDERS (invented, replace before launch):
+  - every photo is Unsplash stock (marked `stock placeholder`)
+  - batch 08, 12 Jan, class times, 42 labs, labs per month, month split
+  - trainer "Arjun Nair" and his bio
+  - learner stories (names, roles, LPA figures, quotes)
+  - ★ 4.8, 1,200+ reviews, 420+ placed, "since 2021", EMI line
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Hanken+Grotesk:wght@400..700&family=Instrument+Sans:wght@400..700&family=Public+Sans:wght@400..700&family=Source+Serif+4:opsz,wght@8..60,400..600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:#D8D7D2;font-family:system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+h1,h2,h3,p,ul,ol,figure,blockquote{margin:0}
+h1{text-wrap:balance}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+button{font:inherit}
+:focus-visible{outline:3px solid #FFC845;outline-offset:3px}
+
+/* ---------- review toolbar (not part of the design) ---------- */
+.tb{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:10px 16px;background:#18181B;color:#E4E4E7;font:500 13px/1.2 system-ui,sans-serif}
+.tb-title{font-weight:600;color:#fff;margin-right:4px}
+.tb-tabs,.tb-tools{display:flex;flex-wrap:wrap;gap:4px}
+.tb-tools{margin-left:auto}
+.tb button{color:#D4D4D8;background:transparent;border:1px solid #3F3F46;border-radius:6px;padding:7px 11px;cursor:pointer;min-height:34px}
+.tb button:hover{border-color:#71717A;color:#fff}
+.tb button[aria-selected="true"],.tb button[aria-pressed="true"]{background:#F4F4F5;color:#18181B;border-color:#F4F4F5}
+.tb button b{font-weight:700;margin-right:4px}
+
+.common-notes{display:none;max-width:1440px;margin:0 auto;padding:20px 24px;background:#FAFAF9;border-bottom:1px solid #E4E4E7;font:400 14px/1.55 system-ui,sans-serif;color:#27272A}
+.notes-on .common-notes{display:block}
+.common-notes h2,.notes h2{font-size:14px;font-weight:700;margin-bottom:8px;color:#18181B}
+.common-notes ul,.notes ul{list-style:disc;padding-left:20px;display:grid;gap:4px;max-width:110ch}
+
+.stage{container:stage/inline-size;max-width:1440px;margin:0 auto;background:#fff;overflow:hidden}
+.stage.phone{max-width:390px;margin:28px auto 56px;border-radius:28px;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 60px rgba(0,0,0,.18)}
+.variant[hidden]{display:none}
+
+.notes{display:none;padding:24px clamp(16px,4cqi,56px) 32px;background:#FAFAF9;border-top:1px solid #E4E4E7;font:400 14px/1.55 system-ui,sans-serif;color:#27272A}
+.notes-on .notes{display:block}
+.notes dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:14px 0 0}
+.notes dt{font-weight:600}
+.notes dd{margin:0}
+@container stage (max-width:720px){.notes dl{grid-template-columns:1fr}.notes dd{margin-bottom:6px}}
+
+/* shared bits */
+.wrap{padding-inline:clamp(16px,4cqi,56px)}
+.menu-btn{display:none;min-height:44px;padding:0 16px;background:transparent;border:1px solid currentColor;border-radius:3px;font-weight:500;font-size:15px;color:inherit;cursor:pointer}
+.arrow{display:inline-block;margin-left:10px;transition:transform .15s}
+a:hover .arrow{transform:translateX(3px)}
+@media (prefers-reduced-motion:reduce){.arrow{transition:none}a:hover .arrow{transform:none}}
+
+/* =========================================================
+   A · Editorial split   (Archivo, paper + forest)
+   ========================================================= */
+.va{--paper:#F3F1EB;--ink:#111614;--body:#3B423E;--muted:#5D645F;--rule:#D3CFC4;--acc:#1C4A3C;--acc-hover:#143629;
+  background:var(--paper);color:var(--ink);font-family:"Archivo",sans-serif}
+.a-head{display:flex;align-items:center;gap:40px;height:72px;border-bottom:1px solid var(--rule)}
+.a-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;letter-spacing:-.02em;text-decoration:none}
+.a-logo i{width:13px;height:13px;background:var(--acc)}
+.a-nav{display:flex;gap:28px;font-size:15px}
+.a-nav a{text-decoration:none;color:var(--muted)}
+.a-nav a:hover{color:var(--ink)}
+.a-talk{margin-left:auto;font-size:15px;font-weight:500;text-decoration:none;border:1px solid var(--ink);padding:10px 16px;border-radius:3px}
+.a-talk:hover{background:var(--ink);color:var(--paper)}
+.a-hero{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 24px;align-items:center;padding-block:clamp(48px,6.5cqi,96px) clamp(48px,5cqi,72px)}
+.a-copy{grid-column:1/8;padding-bottom:4px}
+.a-kicker{font-size:15px;color:var(--muted);margin-bottom:28px}
+.a-kicker strong{color:var(--acc);font-weight:600}
+.a-kicker .sep{display:inline-block;width:28px;height:1px;background:var(--rule);vertical-align:middle;margin:0 12px}
+.va h1{font-size:clamp(46px,6.8cqi,98px);line-height:.95;letter-spacing:-.04em;font-weight:600;font-variation-settings:"wdth" 80;max-width:10.5ch}
+.a-lead{margin-top:28px;font-size:clamp(17px,1.45cqi,20px);line-height:1.5;color:var(--body);max-width:42ch}
+.a-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:40px}
+.a-btn{display:inline-flex;align-items:center;min-height:52px;padding:0 24px;background:var(--acc);color:#fff;font-weight:600;font-size:16px;text-decoration:none;border-radius:3px}
+.a-btn:hover{background:var(--acc-hover)}
+.a-link{font-size:16px;font-weight:500;text-underline-offset:5px;text-decoration-thickness:1px}
+.a-photo{grid-column:8/13}
+.a-photo img{width:100%;aspect-ratio:5/6;object-fit:cover;border-radius:3px}
+.a-photo figcaption{display:flex;gap:12px;margin-top:12px;font-size:13px;line-height:1.45;color:var(--muted)}
+.a-photo figcaption b{color:var(--ink);font-weight:600;white-space:nowrap}
+.a-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:2px solid var(--ink)}
+.a-facts li{padding:20px 24px 32px 0}
+.a-facts li+li{padding-left:24px;border-left:1px solid var(--rule)}
+.a-facts strong{display:block;font-size:clamp(26px,2.4cqi,34px);font-weight:600;letter-spacing:-.03em;font-variation-settings:"wdth" 85;line-height:1.1}
+.a-facts span{display:block;margin-top:6px;font-size:15px;line-height:1.45;color:var(--muted);max-width:26ch}
+@container stage (max-width:900px){
+  .a-nav{display:none}
+  .a-copy{grid-column:1/-1}
+  .a-photo{grid-column:1/-1;margin-top:40px}
+  .a-photo img{aspect-ratio:4/3}
+  .a-facts{grid-template-columns:1fr 1fr}
+  .a-facts li:nth-child(3){padding-left:0;border-left:0}
+  .a-facts li:nth-child(n+3){border-top:1px solid var(--rule)}
+}
+@container stage (max-width:560px){
+  .a-head{height:64px}
+  .a-talk{display:none}
+  .va .menu-btn{display:inline-flex;align-items:center;margin-left:auto}
+  .a-hero{padding-block:36px 40px}
+  .a-kicker{margin-bottom:20px;font-size:14px}
+  .a-kicker .sep{display:block;width:0;height:4px;margin:0}
+  .va h1{font-size:50px;max-width:none}
+  .a-actions{flex-direction:column;align-items:stretch;gap:18px}
+  .a-btn{justify-content:center}
+  .a-link{text-align:center}
+  .a-facts li,.a-facts li+li{padding:16px 12px 20px 0}
+  .a-facts li:nth-child(even){padding-left:12px}
+  .a-facts strong{font-size:24px}
+  .a-facts span{font-size:14px}
+}
+
+/* =========================================================
+   B · Photo-led   (Hanken Grotesk, ink + saffron)
+   ========================================================= */
+.vb{--ink:#0C1312;--paper:#F5F4F0;--muted:#5A625F;--rule:#DAD8D0;--acc:#F2B33D;--acc-hover:#FFC45A;
+  background:var(--paper);color:var(--ink);font-family:"Hanken Grotesk",sans-serif}
+.b-hero{position:relative;display:flex;flex-direction:column;min-height:clamp(600px,50cqi,720px);background:#0C1312;color:#fff;overflow:hidden}
+.b-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% 35%}
+/* functional scrim so white text stays at 4.5:1 over the photo */
+.b-scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,11,11,.9) 0%,rgba(7,11,11,.72) 38%,rgba(7,11,11,.12) 72%,rgba(7,11,11,0) 100%)}
+.b-head{position:relative;display:flex;align-items:center;gap:40px;height:76px}
+.b-logo{font-weight:700;font-size:19px;letter-spacing:-.02em;text-decoration:none}
+.b-nav{display:flex;gap:28px;font-size:15px}
+.b-nav a{text-decoration:none;color:rgba(255,255,255,.78)}
+.b-nav a:hover{color:#fff}
+.b-talk{margin-left:auto;font-size:15px;font-weight:500;text-decoration:none;color:#fff;border:1px solid rgba(255,255,255,.55);padding:10px 16px;border-radius:3px}
+.b-talk:hover{border-color:#fff}
+.b-copy{position:relative;margin-top:auto;padding-top:48px;padding-bottom:clamp(48px,5.5cqi,80px);max-width:min(820px,64cqi)}
+.b-kicker{font-size:15px;font-weight:500;color:rgba(255,255,255,.82);margin-bottom:22px}
+.vb h1{font-size:clamp(40px,4.9cqi,70px);line-height:1.02;letter-spacing:-.035em;font-weight:600}
+.b-lead{margin-top:24px;font-size:clamp(17px,1.4cqi,19px);line-height:1.55;color:rgba(255,255,255,.84);max-width:46ch}
+.b-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:36px}
+.b-btn{display:inline-flex;align-items:center;min-height:52px;padding:0 24px;background:var(--acc);color:var(--ink);font-weight:700;font-size:16px;text-decoration:none;border-radius:3px}
+.b-btn:hover{background:var(--acc-hover)}
+.b-link{font-size:16px;font-weight:500;text-underline-offset:5px;text-decoration-thickness:1px}
+.b-credit{position:absolute;right:clamp(16px,4cqi,56px);bottom:20px;font-size:12px;color:rgba(255,255,255,.7)}
+.b-bar{display:grid;grid-template-columns:1.2fr repeat(3,minmax(0,1fr));border-bottom:1px solid var(--rule)}
+.b-bar > div,.b-bar > li{padding:24px 24px 26px 0}
+.b-bar > * + *{padding-left:24px !important;border-left:1px solid var(--rule)}
+.b-label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+.b-bar strong{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.25}
+.b-bar small{display:block;margin-top:2px;font-size:15px;color:var(--muted)}
+@container stage (max-width:900px){
+  .b-nav{display:none}
+  .b-bar{grid-template-columns:1fr 1fr}
+  .b-bar > :nth-child(3){padding-left:0 !important;border-left:0}
+  .b-bar > :nth-child(n+3){border-top:1px solid var(--rule)}
+}
+@container stage (max-width:560px){
+  .b-head{height:64px}
+  .b-talk{display:none}
+  .vb .menu-btn{display:inline-flex;align-items:center;margin-left:auto;color:#fff;border-color:rgba(255,255,255,.6)}
+  .b-hero{min-height:680px}
+  .b-img{object-position:78% center}
+  .b-scrim{background:linear-gradient(180deg,rgba(7,11,11,.55) 0%,rgba(7,11,11,.1) 22%,rgba(7,11,11,.6) 48%,rgba(7,11,11,.94) 70%)}
+  .b-copy{max-width:none;padding-bottom:40px}
+  .vb h1{font-size:40px}
+  .b-actions{flex-direction:column;align-items:stretch;gap:18px}
+  .b-btn{justify-content:center}
+  .b-link{text-align:center}
+  .b-credit{display:none}
+  .b-bar > div,.b-bar > li{padding:16px 12px 18px 0}
+  .b-bar > * + *{padding-left:12px !important}
+  .b-bar > :first-child{grid-column:1/-1;padding-right:0}
+  .b-bar > :nth-child(2){padding-left:0 !important;border-left:0;border-top:1px solid var(--rule)}
+  .b-bar > :nth-child(3){padding-left:12px !important;border-left:1px solid var(--rule)}
+  .b-bar > :nth-child(4){grid-column:1/-1;padding-left:0 !important;border-left:0}
+  .b-bar strong{font-size:19px}
+  .b-bar small{font-size:14px}
+}
+
+/* =========================================================
+   C · Syllabus-led   (Source Serif 4 + Public Sans, white + teal)
+   ========================================================= */
+.vc{--ink:#13201E;--body:#3A4745;--muted:#5A6664;--rule:#DFE3E1;--tint:#F2F5F4;--acc:#0F5C56;--acc-hover:#0A433F;
+  background:#fff;color:var(--ink);font-family:"Public Sans",sans-serif}
+.c-head{display:flex;align-items:center;gap:40px;height:72px;border-bottom:1px solid var(--rule)}
+.c-logo{font-family:"Source Serif 4",serif;font-weight:600;font-size:22px;letter-spacing:-.01em;text-decoration:none}
+.c-nav{display:flex;gap:28px;font-size:15px}
+.c-nav a{text-decoration:none;color:var(--muted)}
+.c-nav a:hover{color:var(--ink)}
+.c-talk{margin-left:auto;font-size:15px;font-weight:500;color:var(--acc);text-underline-offset:5px}
+.c-hero{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 24px;padding-block:clamp(48px,6cqi,88px) clamp(48px,6cqi,88px)}
+.c-copy{grid-column:1/6;display:flex;flex-direction:column}
+.c-kicker{font-size:15px;color:var(--muted);margin-bottom:24px}
+.c-kicker strong{color:var(--ink);font-weight:600}
+.vc h1{font-family:"Source Serif 4",serif;font-weight:500;font-size:clamp(42px,5cqi,72px);line-height:1.02;letter-spacing:-.025em;font-optical-sizing:auto}
+.c-lead{margin-top:24px;font-size:clamp(17px,1.35cqi,19px);line-height:1.55;color:var(--body);max-width:40ch}
+.c-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:36px}
+.c-btn{display:inline-flex;align-items:center;min-height:52px;padding:0 24px;background:var(--acc);color:#fff;font-weight:600;font-size:16px;text-decoration:none;border-radius:4px}
+.c-btn:hover{background:var(--acc-hover)}
+.c-link{font-size:16px;font-weight:500;text-underline-offset:5px;text-decoration-thickness:1px}
+.c-trainer{display:flex;align-items:center;gap:14px;margin-top:auto;padding-top:48px}
+.c-trainer img{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none}
+.c-trainer p{font-size:15px;line-height:1.45;color:var(--muted)}
+.c-trainer strong{color:var(--ink);font-weight:600}
+.c-index{grid-column:7/13;align-self:start;background:var(--tint);border-radius:4px;padding:28px 32px 24px}
+.c-index-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;padding-bottom:16px}
+.c-index h2{font-family:"Source Serif 4",serif;font-weight:500;font-size:24px;letter-spacing:-.01em}
+.c-index-head span{font-size:14px;color:var(--muted)}
+.c-index ol{border-top:1px solid var(--ink)}
+.c-index li{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 16px;align-items:baseline;padding:18px 0;border-bottom:1px solid var(--rule)}
+.c-num{font-family:"Source Serif 4",serif;font-size:26px;font-weight:500;color:var(--acc);line-height:1}
+.c-index h3{font-size:17px;font-weight:600;line-height:1.3}
+.c-tools{display:block;margin-top:4px;font-size:15px;color:var(--muted);line-height:1.45}
+.c-meta{text-align:right;font-size:14px;color:var(--muted);line-height:1.45;white-space:nowrap}
+.c-meta b{display:block;color:var(--ink);font-weight:500}
+.c-more{display:inline-block;margin-top:18px;font-size:15px;font-weight:600;color:var(--acc);text-decoration:none}
+.c-more:hover{text-decoration:underline;text-underline-offset:5px}
+@container stage (max-width:900px){
+  .c-nav{display:none}
+  .c-copy,.c-index{grid-column:1/-1}
+  .c-trainer{padding-top:32px}
+  .c-index{margin-top:40px}
+}
+@container stage (max-width:560px){
+  .c-head{height:64px}
+  .c-talk{display:none}
+  .vc .menu-btn{display:inline-flex;align-items:center;margin-left:auto}
+  .c-hero{padding-block:36px 40px}
+  .c-kicker strong{display:block;margin-top:2px}
+  .vc h1{font-size:42px}
+  .c-actions{flex-direction:column;align-items:stretch;gap:18px}
+  .c-btn{justify-content:center}
+  .c-link{text-align:center}
+  .c-index{margin-inline:-16px;border-radius:0;padding:24px 16px 20px}
+  .c-index li{grid-template-columns:40px minmax(0,1fr)}
+  .c-num{font-size:22px}
+  .c-meta{grid-column:2;text-align:left;white-space:normal}
+  .c-meta b{display:inline;margin-right:6px}
+}
+
+/* =========================================================
+   D · Proof-led   (Instrument Sans, stone + teal + one yellow)
+   ========================================================= */
+.vd{--bg:#EEECE6;--ink:#101A19;--body:#3A4442;--muted:#5A6461;--rule:#D6D2C8;--teal:#0F5C56;--teal-hover:#0B4843;--teal-d:#0A3F3B;--yel:#FFC845;
+  background:var(--bg);color:var(--ink);font-family:"Instrument Sans",sans-serif}
+.d-head{display:flex;align-items:center;gap:40px;height:72px}
+.d-logo{font-weight:700;font-size:19px;letter-spacing:-.02em;text-decoration:none}
+.d-logo span{color:var(--teal)}
+.d-nav{display:flex;gap:28px;font-size:15px}
+.d-nav a{text-decoration:none;color:var(--muted)}
+.d-nav a:hover{color:var(--ink)}
+.d-talk{margin-left:auto;font-size:15px;font-weight:500;text-decoration:none;border:1px solid var(--ink);padding:10px 16px;border-radius:4px}
+.d-talk:hover{background:var(--ink);color:var(--bg)}
+.d-hero{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 24px;align-items:center;padding-block:clamp(40px,5cqi,72px) clamp(48px,6cqi,88px)}
+.d-copy{grid-column:1/7}
+.d-kicker{font-size:15px;color:var(--muted);margin-bottom:24px}
+.d-kicker strong{color:var(--teal);font-weight:600}
+.vd h1{font-size:clamp(44px,6cqi,86px);line-height:.97;letter-spacing:-.04em;font-weight:600;max-width:11ch}
+.d-lead{margin-top:26px;font-size:clamp(17px,1.4cqi,19px);line-height:1.55;color:var(--body);max-width:42ch}
+.d-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:36px}
+.d-btn{display:inline-flex;align-items:center;min-height:52px;padding:0 24px;background:var(--teal);color:#fff;font-weight:600;font-size:16px;text-decoration:none;border-radius:4px}
+.d-btn:hover{background:var(--teal-hover)}
+.d-link{font-size:16px;font-weight:500;text-underline-offset:5px;text-decoration-thickness:1px}
+.d-trust{margin-top:40px;padding-top:20px;border-top:1px solid var(--rule);font-size:15px;color:var(--muted)}
+.d-trust b{color:var(--ink);font-weight:600}
+.d-story{grid-column:8/13;background:var(--teal-d);color:#fff;border-radius:6px;overflow:hidden}
+.d-story-photo{position:relative}
+.d-story-photo img{width:100%;aspect-ratio:16/11;object-fit:cover;object-position:50% 25%}
+.d-story-photo p{position:absolute;left:20px;top:18px;padding:6px 10px;background:var(--teal-d);font-size:14px;font-weight:500;border-radius:3px}
+.d-story-body{padding:24px 28px 22px}
+.d-story blockquote{font-size:20px;line-height:1.4;font-weight:500;letter-spacing:-.01em}
+.d-who{margin-top:12px;font-size:15px;color:rgba(255,255,255,.72)}
+.d-move{display:grid;grid-template-columns:52px 1fr;gap:6px 12px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.16);font-size:15px}
+.d-move dt{color:rgba(255,255,255,.62)}
+.d-move dd{margin:0}
+.d-move .now{color:var(--yel);font-weight:600}
+.d-pager{display:flex;align-items:center;gap:8px;margin-top:20px}
+.d-pager button{width:44px;height:44px;display:grid;place-items:center;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:4px;cursor:pointer;font-size:18px}
+.d-pager button:hover{border-color:#fff}
+.d-count{font-size:14px;color:rgba(255,255,255,.72);margin-left:6px}
+.d-all{margin-left:auto;font-size:15px;font-weight:500;color:#fff;text-underline-offset:5px}
+.d-fade{transition:opacity .25s}
+.d-fade.out{opacity:0}
+@media (prefers-reduced-motion:reduce){.d-fade{transition:none}}
+@container stage (max-width:900px){
+  .d-nav{display:none}
+  .d-copy,.d-story{grid-column:1/-1}
+  .d-story{margin-top:40px}
+}
+@container stage (max-width:560px){
+  .d-head{height:64px}
+  .d-talk{display:none}
+  .vd .menu-btn{display:inline-flex;align-items:center;margin-left:auto}
+  .d-hero{padding-block:24px 40px}
+  .d-kicker strong{display:block;margin-top:2px}
+  .vd h1{font-size:44px}
+  .d-actions{flex-direction:column;align-items:stretch;gap:18px}
+  .d-btn{justify-content:center}
+  .d-link{text-align:center}
+  .d-trust{margin-top:28px}
+  .d-story{margin-inline:-16px;border-radius:0}
+  .d-story-body{padding:20px 16px}
+  .d-story blockquote{font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<div class="tb" role="toolbar" aria-label="Review controls">
+  <span class="tb-title">Home hero · pick a direction</span>
+  <div class="tb-tabs" role="tablist" aria-label="Direction">
+    <button role="tab" id="tab-a" aria-controls="v-a" aria-selected="true"><b>A</b>Editorial split</button>
+    <button role="tab" id="tab-b" aria-controls="v-b" aria-selected="false" tabindex="-1"><b>B</b>Photo-led</button>
+    <button role="tab" id="tab-c" aria-controls="v-c" aria-selected="false" tabindex="-1"><b>C</b>Syllabus-led</button>
+    <button role="tab" id="tab-d" aria-controls="v-d" aria-selected="false" tabindex="-1"><b>D</b>Proof-led</button>
+  </div>
+  <div class="tb-tools">
+    <button id="t-phone" aria-pressed="false">Phone width</button>
+    <button id="t-notes" aria-pressed="false">Design notes</button>
+  </div>
+</div>
+
+<section class="common-notes" aria-label="Notes for all directions">
+  <h2>What all four do differently from the current hero</h2>
+  <ul>
+    <li><strong>Small corners (3–6px), not 18–20px.</strong> Big round corners plus pastel panels is what made it feel like a kids' app.</li>
+    <li><strong>Weight 600 with tight tracking for the headline, not 800.</strong> The size does the work. Everything else stays at 400–500.</li>
+    <li><strong>No highlight bars, line drawings or icon chips in the hero.</strong> Information comes from words, numbers and one real photo or table.</li>
+    <li><strong>Everything sits on one 12-column grid</strong>, so the edges line up. Thin rules separate things instead of boxes and shadows.</li>
+    <li><strong>One accent colour per direction</strong>, one filled button, and WhatsApp as a plain text link. The header button is always an outline.</li>
+    <li>Every number, name, date and photo is a placeholder, listed at the top of the file.</li>
+  </ul>
+</section>
+
+<main class="stage" id="stage">
+
+<!-- ======================= A · Editorial split ======================= -->
+<section class="variant va" id="v-a" role="tabpanel" aria-labelledby="tab-a">
+  <header class="a-head wrap">
+    <a class="a-logo" href="#"><i aria-hidden="true"></i>CloudCadre</a>
+    <nav class="a-nav" aria-label="Main"><a href="#">Program</a><a href="#">How we teach</a><a href="#">Placements</a><a href="#">FAQ</a></nav>
+    <a class="a-talk" href="#">Talk to us</a>
+    <button class="menu-btn" type="button">Menu</button>
+  </header>
+  <div class="wrap">
+    <div class="a-hero">
+      <div class="a-copy">
+        <!-- placeholder: batch number and date -->
+        <p class="a-kicker">CloudCadre Elite Architect Program<span class="sep" aria-hidden="true"></span><strong>Batch 08 starts 12 Jan</strong></p>
+        <h1>Become a cloud architect in four months.</h1>
+        <p class="a-lead">Live online classes with working architects. Every week you design, build and defend a real system on AWS, Azure and Google Cloud.</p>
+        <div class="a-actions">
+          <a class="a-btn" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+          <a class="a-link" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask a counsellor on WhatsApp</a>
+        </div>
+      </div>
+      <figure class="a-photo">
+        <!-- stock placeholder: replace with a real CloudCadre lab photo -->
+        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1100&q=75" alt="Five learners working on laptops around one table during a lab session">
+        <figcaption><b>Saturday lab</b><span>Batch 07 reviewing each other's AWS designs before the trainer grades them.</span></figcaption>
+      </figure>
+    </div>
+    <!-- placeholder: hours, lab count -->
+    <ul class="a-facts" aria-label="Program facts">
+      <li><strong>16 weeks</strong><span>Live online, weekday evenings and a Saturday lab</span></li>
+      <li><strong>3 clouds</strong><span>AWS, Azure and Google Cloud, plus Terraform and Kubernetes</span></li>
+      <li><strong>42 labs</strong><span>Each one checked by a trainer, not an auto-grader</span></li>
+      <li><strong>1 capstone</strong><span>You defend it to a panel, then do mock interviews</span></li>
+    </ul>
+  </div>
+  <aside class="notes" aria-label="Design notes for A">
+    <h2>A · Editorial split</h2>
+    <ul>
+      <li>Reads like a good magazine or a university program page: big headline left, one tall photo right, a fact strip under a heavy rule.</li>
+      <li>Reading order: program name and date → headline → one sentence → button → the four facts. The photo confirms "this is a real class".</li>
+      <li>The photo caption carries information (what happens in the lab), so the picture is not decoration.</li>
+    </ul>
+    <dl>
+      <dt>Type</dt><dd>Archivo, headline at 80% width for a tall, confident shape. One family only.</dd>
+      <dt>Colour</dt><dd>Warm paper <code>#F3F1EB</code>, ink <code>#111614</code>, forest <code>#1C4A3C</code> on the button and date only.</dd>
+      <dt>Best when</dt><dd>You have one great real photo of a class.</dd>
+      <dt>Risk</dt><dd>Quiet. If the photo is weak, the page feels plain.</dd>
+    </dl>
+  </aside>
+</section>
+
+<!-- ======================= B · Photo-led ======================= -->
+<section class="variant vb" id="v-b" role="tabpanel" aria-labelledby="tab-b" hidden>
+  <div class="b-hero">
+    <!-- stock placeholder: replace with a real photo of a CloudCadre learner or trainer -->
+    <img class="b-img" src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=2000&q=75" alt="An engineer holding a laptop walks along a row of server racks">
+    <div class="b-scrim" aria-hidden="true"></div>
+    <header class="b-head wrap">
+      <a class="b-logo" href="#">CloudCadre</a>
+      <nav class="b-nav" aria-label="Main"><a href="#">Program</a><a href="#">How we teach</a><a href="#">Placements</a><a href="#">FAQ</a></nav>
+      <a class="b-talk" href="#">Talk to us</a>
+      <button class="menu-btn" type="button">Menu</button>
+    </header>
+    <div class="b-copy wrap">
+      <p class="b-kicker">CloudCadre Elite Architect Program</p>
+      <h1>Learn to design cloud systems, not just run them.</h1>
+      <p class="b-lead">A 4-month live program for freshers, IT professionals and career switchers. AWS, Azure, Google Cloud, Terraform, Kubernetes and CI/CD.</p>
+      <div class="b-actions">
+        <a class="b-btn" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+        <a class="b-link" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask a counsellor on WhatsApp</a>
+      </div>
+    </div>
+    <p class="b-credit">Deepa, batch 05 trainer, at a data centre visit</p><!-- placeholder caption -->
+  </div>
+  <!-- placeholder: date, times, rating, placed count, EMI -->
+  <ul class="b-bar wrap" aria-label="Next batch and track record">
+    <li><span class="b-label">Next batch</span><strong>12 Jan, live online</strong><small>Mon–Thu 8–10 pm · Sat 10 am lab</small></li>
+    <li><span class="b-label">Rated</span><strong>4.8 on Google</strong><small>from 1,200+ reviews</small></li>
+    <li><span class="b-label">Placed</span><strong>420+ learners</strong><small>since 2021</small></li>
+    <li><span class="b-label">Fee</span><strong>Pay monthly</strong><small>No-cost EMI on UPI and cards</small></li>
+  </ul>
+  <aside class="notes" aria-label="Design notes for B">
+    <h2>B · Photo-led</h2>
+    <ul>
+      <li>One big photo of a real person in a real cloud setting does the emotional work; the copy sits on the dark side of it.</li>
+      <li>The strip under the photo answers the next three questions in order: when, is it any good, can I afford it.</li>
+      <li>Headline says what is different about the program (design, not operate) instead of repeating the program name.</li>
+    </ul>
+    <dl>
+      <dt>Type</dt><dd>Hanken Grotesk 600 for the headline, 400–500 for the rest.</dd>
+      <dt>Colour</dt><dd>Near-black ink <code>#0C1312</code>, white, saffron <code>#F2B33D</code> on the button only.</dd>
+      <dt>Best when</dt><dd>You can shoot one strong photo of a trainer or learner. It is the most "premium" of the four.</dd>
+      <dt>Risk</dt><dd>Everything depends on that photo. Stock here looks like stock.</dd>
+    </dl>
+  </aside>
+</section>
+
+<!-- ======================= C · Syllabus-led ======================= -->
+<section class="variant vc" id="v-c" role="tabpanel" aria-labelledby="tab-c" hidden>
+  <header class="c-head wrap">
+    <a class="c-logo" href="#">CloudCadre</a>
+    <nav class="c-nav" aria-label="Main"><a href="#">Program</a><a href="#">How we teach</a><a href="#">Placements</a><a href="#">FAQ</a></nav>
+    <a class="c-talk" href="#">Talk to us</a>
+    <button class="menu-btn" type="button">Menu</button>
+  </header>
+  <div class="wrap">
+    <div class="c-hero">
+      <div class="c-copy">
+        <p class="c-kicker">CloudCadre Elite Architect Program · <strong>Next batch 12 Jan</strong></p><!-- placeholder: date -->
+        <h1>Become a cloud architect in four months.</h1>
+        <p class="c-lead">A live program with a fixed plan: 16 weeks, 42 graded labs and one capstone you defend in front of a panel.</p>
+        <div class="c-actions">
+          <a class="c-btn" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+          <a class="c-link" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask a counsellor on WhatsApp</a>
+        </div>
+        <!-- placeholder: trainer name, bio and photo (stock) -->
+        <div class="c-trainer">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&h=160&crop=faces&q=75" alt="">
+          <p><strong>Arjun Nair</strong> leads your batch<br>Principal cloud architect, 14 years on AWS</p>
+        </div>
+      </div>
+      <!-- placeholder: month split, tools per month, lab counts -->
+      <section class="c-index" aria-labelledby="c-index-h">
+        <div class="c-index-head">
+          <h2 id="c-index-h">Your 16 weeks</h2>
+          <span>Live online · Mon–Thu evenings + Sat lab</span>
+        </div>
+        <ol>
+          <li><span class="c-num">01</span><div><h3>Cloud foundations</h3><span class="c-tools">Linux, networking, AWS core services</span></div><p class="c-meta"><b>Weeks 1–4</b>10 labs</p></li>
+          <li><span class="c-num">02</span><div><h3>Multi-cloud</h3><span class="c-tools">Azure, Google Cloud, identity and access</span></div><p class="c-meta"><b>Weeks 5–8</b>10 labs</p></li>
+          <li><span class="c-num">03</span><div><h3>Automate and ship</h3><span class="c-tools">Terraform, Docker, Kubernetes, CI/CD</span></div><p class="c-meta"><b>Weeks 9–12</b>12 labs</p></li>
+          <li><span class="c-num">04</span><div><h3>Think like an architect</h3><span class="c-tools">FinOps, capstone, mock interviews, CV review</span></div><p class="c-meta"><b>Weeks 13–16</b>10 labs</p></li>
+        </ol>
+        <a class="c-more" href="#">See the full syllabus<span class="arrow" aria-hidden="true">→</span></a>
+      </section>
+    </div>
+  </div>
+  <aside class="notes" aria-label="Design notes for C">
+    <h2>C · Syllabus-led</h2>
+    <ul>
+      <li>The hero shows the product itself: the whole 16-week plan at a glance. Serious learners (and their parents) want to see what they will actually study before they talk to anyone.</li>
+      <li>A serif headline reads as "institution", not "startup". It is the most trustworthy-looking of the four.</li>
+      <li>The trainer's face and name replace a generic "expert-led" claim.</li>
+    </ul>
+    <dl>
+      <dt>Type</dt><dd>Source Serif 4 for the headline, panel title and month numbers; Public Sans for everything else.</dd>
+      <dt>Colour</dt><dd>White, ink <code>#13201E</code>, deep teal <code>#0F5C56</code>, one pale panel <code>#F2F5F4</code>.</dd>
+      <dt>Best when</dt><dd>Ads send people looking for "AWS + DevOps course" who compare syllabuses.</dd>
+      <dt>Risk</dt><dd>Least emotional: no big photo. Needs the real month split from the owner.</dd>
+    </dl>
+  </aside>
+</section>
+
+<!-- ======================= D · Proof-led ======================= -->
+<section class="variant vd" id="v-d" role="tabpanel" aria-labelledby="tab-d" hidden>
+  <header class="d-head wrap">
+    <a class="d-logo" href="#">Cloud<span>Cadre</span></a>
+    <nav class="d-nav" aria-label="Main"><a href="#">Program</a><a href="#">How we teach</a><a href="#">Placements</a><a href="#">FAQ</a></nav>
+    <a class="d-talk" href="#">Talk to us</a>
+    <button class="menu-btn" type="button">Menu</button>
+  </header>
+  <div class="wrap">
+    <div class="d-hero">
+      <div class="d-copy">
+        <p class="d-kicker">CloudCadre Elite Architect Program · <strong>Next batch 12 Jan</strong></p><!-- placeholder: date -->
+        <h1>Become a cloud architect in four months.</h1>
+        <p class="d-lead">Live classes, 42 graded labs and a capstone on AWS, Azure and Google Cloud. Then mock interviews and a CV review until you are ready to apply.</p>
+        <div class="d-actions">
+          <a class="d-btn" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+          <a class="d-link" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask a counsellor on WhatsApp</a>
+        </div>
+        <!-- placeholder: rating, reviews, placed count -->
+        <p class="d-trust"><b>★ 4.8</b> on Google from 1,200+ reviews · <b>420+</b> learners placed since 2021</p>
+      </div>
+      <!-- placeholder: all three stories, names, roles, LPA and photos (stock) -->
+      <section class="d-story" aria-labelledby="d-story-h" aria-roledescription="carousel">
+        <h2 id="d-story-h" hidden>Learners who made the move</h2>
+        <div class="d-fade" id="d-slide" aria-live="polite">
+          <div class="d-story-photo">
+            <img id="d-img" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1000&q=75" alt="">
+            <p id="d-batch">Batch 05</p>
+          </div>
+          <div class="d-story-body">
+            <blockquote id="d-quote">“I reset passwords for three years. Now I design the AWS setup for a payments team.”</blockquote>
+            <p class="d-who" id="d-who">Ananya R., Pune</p>
+            <dl class="d-move">
+              <dt>Was</dt><dd id="d-was">IT support engineer · ₹3.2 LPA</dd>
+              <dt>Now</dt><dd class="now" id="d-now">Cloud engineer at a fintech · ₹9 LPA</dd>
+            </dl>
+          </div>
+        </div>
+        <div class="d-story-body" style="padding-top:0">
+          <div class="d-pager">
+            <button type="button" id="d-prev" aria-label="Previous story">←</button>
+            <button type="button" id="d-next" aria-label="Next story">→</button>
+            <span class="d-count" id="d-count">1 of 3</span>
+            <a class="d-all" href="#">All 40 stories</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <aside class="notes" aria-label="Design notes for D">
+    <h2>D · Proof-led</h2>
+    <ul>
+      <li>Left side says what the program is; right side shows one person it already worked for, with the move written as Was → Now.</li>
+      <li>This keeps your brand teal and yellow, but uses yellow once (the "Now" line) instead of as highlight bars.</li>
+      <li>Career switchers decide on "people like me did it", so the proof sits in the first screen, not halfway down the page.</li>
+    </ul>
+    <dl>
+      <dt>Type</dt><dd>Instrument Sans: crisp and slightly narrow, reads well at large and small sizes.</dd>
+      <dt>Colour</dt><dd>Stone <code>#EEECE6</code>, ink, teal <code>#0F5C56</code> / deep <code>#0A3F3B</code>, yellow <code>#FFC845</code> once.</dd>
+      <dt>Best when</dt><dd>You have 3 real learners willing to share photo, old job and new job.</dd>
+      <dt>Risk</dt><dd>Fake or vague stories would hurt trust badly. Only ship with real, consented ones.</dd>
+    </dl>
+  </aside>
+</section>
+
+</main>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
+  var stage=document.getElementById('stage');
+  function show(id,focus){
+    tabs.forEach(function(t){
+      var on=t.getAttribute('aria-controls')===id;
+      t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden=!on;
+      if(on&&focus)t.focus();
+    });
+    try{localStorage.setItem('hero-dir',id)}catch(e){}
+    if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){show(t.getAttribute('aria-controls'))});
+    t.addEventListener('keydown',function(e){
+      var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+      if(e.key==='Home')d=-i; if(e.key==='End')d=tabs.length-1-i;
+      if(!d)return;e.preventDefault();
+      show(tabs[(i+d+tabs.length)%tabs.length].getAttribute('aria-controls'),true);
+    });
+  });
+  var start=location.hash.slice(1);
+  if(!/^v-[abcd]$/.test(start)){try{start=localStorage.getItem('hero-dir')}catch(e){start=null}}
+  if(/^v-[abcd]$/.test(start||''))show(start);
+
+  function toggle(btn,fn){btn.addEventListener('click',function(){var on=btn.getAttribute('aria-pressed')!=='true';btn.setAttribute('aria-pressed',on);fn(on)})}
+  toggle(document.getElementById('t-phone'),function(on){stage.classList.toggle('phone',on)});
+  toggle(document.getElementById('t-notes'),function(on){document.body.classList.toggle('notes-on',on)});
+
+  /* D: story pager. All stories are placeholders (stock photos, invented people). */
+  var img=function(id){return 'https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w=1000&q=75'};
+  var stories=[
+    {p:'1573496359142-b8d87734a5a2',b:'Batch 05',q:'“I reset passwords for three years. Now I design the AWS setup for a payments team.”',w:'Ananya R., Pune',was:'IT support engineer · ₹3.2 LPA',now:'Cloud engineer at a fintech · ₹9 LPA'},
+    {p:'1500648767791-00dcc994a43e',b:'Batch 04',q:'“I was writing Java for one client. The capstone got me my first DevOps interview.”',w:'Karthik S., Chennai',was:'Java developer · ₹5.5 LPA',now:'DevOps engineer at a SaaS company · ₹11 LPA'},
+    {p:'1580489944761-15a19d654956',b:'Batch 06',q:'“I came from bank operations with no coding. Month 3 was hard, the Saturday labs got me through.”',w:'Meera K., Hyderabad',was:'Operations analyst, bank · ₹4 LPA',now:'Cloud support associate · ₹7 LPA'}
+  ];
+  var i=0,slide=document.getElementById('d-slide');
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function render(){
+    var s=stories[i];
+    document.getElementById('d-img').src=img(s.p);
+    document.getElementById('d-batch').textContent=s.b;
+    document.getElementById('d-quote').textContent=s.q;
+    document.getElementById('d-who').textContent=s.w;
+    document.getElementById('d-was').textContent=s.was;
+    document.getElementById('d-now').textContent=s.now;
+    document.getElementById('d-count').textContent=(i+1)+' of '+stories.length;
+  }
+  function go(d){
+    i=(i+d+stories.length)%stories.length;
+    if(reduce){render();return}
+    slide.classList.add('out');
+    setTimeout(function(){render();slide.classList.remove('out')},220);
+  }
+  document.getElementById('d-prev').addEventListener('click',function(){go(-1)});
+  document.getElementById('d-next').addEventListener('click',function(){go(1)});
+  stories.forEach(function(s){var im=new Image();im.src=img(s.p)});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo-led home</title>
+<!--
+  CloudCadre home page, "photo-led" direction (picked from hero-redesign.html, direction B), full page.
+  Content comes from apps/academy/lib/aurora-content.ts (the live home), restyled from scratch.
+  Rules kept: plan/15 §0, §2, §11, §13. Visuals (palette, type, shapes) are new.
+
+  REAL data: the 15 placements (names, photos, packages, roles, companies), employer logos, FAQ wording.
+  PLACEHOLDERS (invented, replace before launch):
+  - every Unsplash photo (marked `stock placeholder`)
+  - next batch "12 Jan", class times, seat count, lab counts, the month split and topics (syllabus not confirmed)
+  - the counsellor (name, photo, hours), phone number and email in the footer
+  - hero photo captions, the certificate holder's name and ID
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:#D6D5D0;font-family:system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+h1,h2,h3,p,ul,ol,figure,dl,dd,blockquote{margin:0}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #FFC845;outline-offset:3px}
+h1,h2{text-wrap:balance}
+
+/* ---------------- review toolbar (not part of the design) ---------------- */
+.tb{position:sticky;top:0;z-index:60;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:9px 16px;background:#18181B;color:#A1A1AA;font:500 12.5px/1.2 system-ui,sans-serif}
+.tb-g{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.tb-g > span{margin-right:4px}
+.tb button{color:#D4D4D8;background:transparent;border:1px solid #3F3F46;border-radius:6px;padding:6px 10px;cursor:pointer;min-height:32px}
+.tb button:hover{border-color:#71717A;color:#fff}
+.tb button[aria-pressed="true"]{background:#F4F4F5;color:#18181B;border-color:#F4F4F5}
+.tb-end{margin-left:auto}
+
+/* ---------------- stage + tokens ---------------- */
+.stage{container:stage/inline-size;max-width:1440px;margin:0 auto;overflow:clip;
+  --dark:#0C1312;--dark-2:#151F1D;--text:#0F1716;--body:#3A4240;--muted:#5A625F;--paper:#F5F4F0;--rule:#DAD8D0;
+  --strong:#0C1312;--acc:#F2B33D;--acc-h:#FFC45A;--on-acc:#0C1312;--on-dark-muted:rgba(255,255,255,.72);--on-dark-rule:rgba(255,255,255,.16);
+  background:#fff;color:var(--text);font-family:"Hanken Grotesk",sans-serif;font-size:17px;line-height:1.55}
+.stage[data-theme="teal"]{--dark:#0A3F3B;--dark-2:#0D4A45;--strong:#0F5C56;--acc:#FFC845;--acc-h:#FFD46B;--paper:#F4F4F0}
+.stage.phone{max-width:390px;margin:28px auto 56px;border-radius:28px;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 60px rgba(0,0,0,.18)}
+.wrap{padding-inline:clamp(16px,4cqi,56px)}
+.sec{padding-block:clamp(64px,8cqi,120px)}
+.sh{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:16px 40px;margin-bottom:clamp(32px,4cqi,56px)}
+.h2{font-size:clamp(32px,3.6cqi,50px);line-height:1.05;letter-spacing:-.03em;font-weight:600;max-width:18ch}
+.lead{margin-top:14px;font-size:clamp(17px,1.4cqi,19px);color:var(--body);max-width:52ch}
+.tlink{display:inline-flex;align-items:center;min-height:44px;font-weight:600;font-size:16px;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px;color:var(--strong)}
+.arrow{display:inline-block;margin-left:10px;transition:transform .15s}
+a:hover .arrow,button:hover .arrow{transform:translateX(3px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:3px;font-weight:700;font-size:16px;text-decoration:none;cursor:pointer;border:0}
+.btn-acc{background:var(--acc);color:var(--on-acc)}
+.btn-acc:hover{background:var(--acc-h)}
+.btn-dark{background:var(--dark);color:#fff}
+.btn-dark:hover{background:var(--dark-2)}
+.btn-line{background:transparent;border:1px solid var(--text);color:var(--text);font-weight:600}
+.btn-line:hover{background:var(--text);color:#fff}
+.wa{width:18px;height:18px;fill:currentColor;flex:none}
+.on-dark .muted{color:var(--on-dark-muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* design notes */
+.note{display:none;margin-top:32px;padding:16px 20px;background:#FFFBEA;border:1px solid #EAD9A0;border-radius:6px;color:#3F3A26;font:400 14px/1.55 system-ui,sans-serif;max-width:110ch}
+.note b{color:#1F1B0E}
+.note ul{list-style:disc;padding-left:20px;display:grid;gap:3px;margin-top:6px}
+.notes-on .note{display:block}
+.note-bar{margin:0;border-radius:0;border-inline:0;max-width:none}
+
+/* ---------------- header ---------------- */
+.hd{position:sticky;top:var(--tbh,0px);z-index:40;height:72px;margin-bottom:-72px;color:#fff;transition:background .2s,box-shadow .2s}
+.hd.solid,.stage[data-hero="3"] .hd,.stage[data-hero="4"] .hd{background:var(--dark);box-shadow:0 1px 0 var(--on-dark-rule)}
+.hd-in{display:flex;align-items:center;gap:36px;height:100%}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;letter-spacing:-.02em;text-decoration:none}
+.logo img{width:34px;height:auto}
+.nav{display:flex;gap:28px;font-size:15px}
+.nav a{text-decoration:none;color:rgba(255,255,255,.78)}
+.nav a:hover{color:#fff}
+.hd-end{margin-left:auto;display:flex;align-items:center;gap:20px;font-size:15px}
+.hd-login{text-decoration:none;color:rgba(255,255,255,.85)}
+.hd-talk{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid rgba(255,255,255,.5);border-radius:3px;text-decoration:none;font-weight:500}
+.hd-talk:hover{border-color:#fff}
+.menu-btn{display:none;min-height:44px;padding:0 16px;background:transparent;border:1px solid rgba(255,255,255,.55);border-radius:3px;font-weight:500;font-size:15px;cursor:pointer}
+
+/* floating WhatsApp on phones only */
+.fab-wrap{position:sticky;top:calc(100vh - 76px);height:0;z-index:35;display:none;justify-content:flex-end;padding-right:16px}
+.fab{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:#1FA855;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.fab .wa{width:26px;height:26px}
+
+/* ---------------- heroes (shared) ---------------- */
+.hero{position:relative;background:var(--dark);color:#fff;overflow:hidden}
+.hero[hidden]{display:none}
+.kicker{font-size:15px;font-weight:500;color:rgba(255,255,255,.82);margin-bottom:22px}
+.kicker b{color:var(--acc);font-weight:600;white-space:nowrap}
+.h1{font-size:clamp(40px,4.9cqi,70px);line-height:1.02;letter-spacing:-.035em;font-weight:600}
+.hero .lead{color:rgba(255,255,255,.84);max-width:46ch;margin-top:22px}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:34px}
+.alink{font-size:16px;font-weight:500;text-underline-offset:5px;text-decoration-thickness:1px;display:inline-flex;align-items:center;min-height:44px}
+.cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cap{font-size:13px;color:rgba(255,255,255,.72)}
+
+/* H1 · person, scrim left */
+.h-person{display:flex;flex-direction:column;min-height:clamp(620px,50cqi,740px);padding-top:72px}
+.h-person .cover{object-position:70% 35%}
+.h-person .scrim{position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--dark) 92%,transparent) 0%,color-mix(in srgb,var(--dark) 74%,transparent) 38%,color-mix(in srgb,var(--dark) 10%,transparent) 72%,transparent 100%)}
+.h-person .copy{position:relative;margin-top:auto;padding-block:48px clamp(48px,5.5cqi,80px);max-width:min(820px,64cqi)}
+.h-person .cap{position:absolute;right:clamp(16px,4cqi,56px);bottom:20px}
+
+/* H2 · class, cover layout */
+.h-class{display:flex;flex-direction:column;min-height:clamp(660px,56cqi,800px);padding-top:72px}
+.h-class .cover{object-position:50% 30%}
+.h-class .scrim{position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--dark) 70%,transparent) 0%,color-mix(in srgb,var(--dark) 8%,transparent) 26%,color-mix(in srgb,var(--dark) 30%,transparent) 50%,color-mix(in srgb,var(--dark) 94%,transparent) 84%)}
+.h-class .cap{position:relative;text-align:right;padding-top:16px}
+.h-class .copy{position:relative;margin-top:auto;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 24px;align-items:end;padding-bottom:clamp(48px,5cqi,72px)}
+.h-class .c-l{grid-column:1/8}
+.h-class .c-r{grid-column:8/13}
+.h-class .h1{font-size:clamp(44px,5.8cqi,84px);line-height:.98}
+.h-class .lead{margin-top:0}
+
+/* H3 · split, photo bleeds right */
+.h-split{display:grid;grid-template-columns:1fr 1fr;min-height:clamp(600px,48cqi,720px);padding-top:72px}
+.h-split .copy{display:flex;flex-direction:column;justify-content:center;padding-block:56px 72px;padding-right:clamp(24px,4cqi,64px)}
+.h-split .ph{position:relative;min-height:100%}
+.h-split .ph .cover{object-position:40% 50%}
+.h-split .ph .cap{position:absolute;left:20px;bottom:20px;padding:6px 10px;background:var(--dark);color:#fff;border-radius:3px}
+
+/* H4 · real learners */
+.h-faces{display:grid;grid-template-columns:1fr 1fr;min-height:clamp(620px,50cqi,740px);padding-top:72px}
+.h-faces .copy{display:flex;flex-direction:column;justify-content:center;padding-block:56px 64px;padding-right:clamp(24px,4cqi,64px)}
+.h-faces .fine{margin-top:28px;font-size:14px;color:rgba(255,255,255,.62)}
+.faces{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:2px;background:var(--dark)}
+.faces li{position:relative;overflow:hidden;min-height:220px}
+.faces img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);transition:filter .3s}
+.faces li:hover img{filter:none}
+.faces .fc{position:absolute;inset:auto 0 0 0;padding:40px 14px 12px;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--dark) 92%,transparent));font-size:13px;line-height:1.35;color:rgba(255,255,255,.8)}
+.faces .fc b{display:block;font-size:20px;font-weight:650;color:#fff;letter-spacing:-.01em}
+
+/* ---------------- facts bar + logos ---------------- */
+.bar{background:#fff;border-bottom:1px solid var(--rule)}
+.bar-cells{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.bar-cells li{padding:24px 24px 26px 0}
+.bar-cells li+li{padding-left:24px;border-left:1px solid var(--rule)}
+.bar-cells .lbl{display:block;font-size:14px;color:var(--muted);margin-bottom:2px}
+.bar-cells strong{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.25}
+.bar-cells small{display:block;margin-top:2px;font-size:15px;color:var(--muted)}
+.logos{display:flex;align-items:center;gap:16px 40px;flex-wrap:wrap;padding-block:22px 26px;border-top:1px solid var(--rule)}
+.logos > span{font-size:14px;color:var(--muted)}
+.logos ul{display:flex;align-items:center;gap:18px 40px;flex-wrap:wrap}
+.logos img{height:22px;width:auto;filter:grayscale(1);opacity:.7}
+.logos li.tall img{height:28px}
+
+/* ---------------- built for ---------------- */
+.for{background:var(--paper)}
+.for-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.for-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px}
+.for-card h3{margin-top:18px;font-size:22px;font-weight:600;letter-spacing:-.02em}
+.for-card p{margin-top:6px;color:var(--body);font-size:16px}
+.for-card .to{display:flex;justify-content:space-between;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--text);font-size:15px}
+.for-card .to span{color:var(--muted)}
+.for-card .to b{font-weight:650}
+
+/* ---------------- program ---------------- */
+.prog{background:#fff}
+.prog-v[hidden]{display:none}
+.climb-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end;border-bottom:1px solid var(--text)}
+.step{display:block;text-align:left;background:none;border:0;border-top:3px solid var(--rule);padding:14px 8px 18px 0;cursor:pointer;color:var(--muted)}
+/* the top lines rise left to right: equal bottoms, growing top padding */
+.step:nth-child(2){padding-top:42px}.step:nth-child(3){padding-top:70px}.step:nth-child(4){padding-top:98px}
+.step:hover{color:var(--text)}
+.step.done{border-top-color:var(--text)}
+.step[aria-selected="true"]{border-top-color:var(--strong);border-top-width:5px;color:var(--text)}
+.st-n{display:block;font-size:clamp(28px,2.8cqi,40px);font-weight:600;letter-spacing:-.03em;line-height:1}
+.st-t{display:block;margin-top:10px;font-size:17px;font-weight:600;line-height:1.3}
+.st-w{display:block;margin-top:4px;font-size:14px}
+.panel{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;padding-top:36px;transition:opacity .25s}
+.panel.out{opacity:0}
+.pn-l{grid-column:1/8}
+.pn-k{font-size:15px;color:var(--muted)}
+.pn-o{margin-top:6px;font-size:clamp(22px,2cqi,28px);line-height:1.3;font-weight:500;letter-spacing:-.015em;max-width:30ch}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin-top:28px}
+.checks li{display:flex;gap:10px;align-items:flex-start;font-size:16px}
+.checks svg{flex:none;width:18px;height:18px;margin-top:4px;stroke:var(--strong);fill:none;stroke-width:2.2}
+.pn-nav{display:flex;gap:10px;margin-top:32px}
+.pn-r{grid-column:8/13;align-self:start;background:var(--paper);border-radius:4px;padding:24px}
+.pn-r .k{font-size:14px;color:var(--muted)}
+.pn-r h3{margin-top:4px;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.tools li{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;background:#fff;border:1px solid var(--rule);border-radius:3px;font-size:14px;font-weight:500}
+.tools img{height:20px;width:auto}
+.pn-r .meta{margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);font-size:15px;color:var(--body)}
+.rows{border-top:1px solid var(--text)}
+.rows > li{display:grid;grid-template-columns:120px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:24px;padding:28px 0;border-bottom:1px solid var(--rule)}
+.r-m b{display:block;font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.r-m span{display:block;margin-top:8px;font-size:14px;color:var(--muted)}
+.r-t h3{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.25}
+.r-t p{margin-top:8px;font-size:16px;color:var(--body)}
+.r-topics{font-size:15px;color:var(--body);display:grid;gap:4px}
+.r-b .k{font-size:14px;color:var(--muted)}
+.r-b p{font-size:16px;font-weight:600;line-height:1.35;margin-top:2px}
+.r-b .tools{margin-top:12px}
+.r-b .tools li{height:34px;padding:0 10px;font-size:13px}
+.r-b .tools img{height:17px}
+.r-b small{display:block;margin-top:10px;font-size:14px;color:var(--muted)}
+
+/* ---------------- how we teach ---------------- */
+.how{background:var(--dark);color:#fff}
+.how .lead{color:var(--on-dark-muted)}
+.how .tlink{color:#fff}
+.mz{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:40px 24px}
+.mz figure:nth-child(1){grid-column:1/8}.mz figure:nth-child(2){grid-column:8/13}
+.mz figure:nth-child(3){grid-column:1/6}.mz figure:nth-child(4){grid-column:6/13}
+.mz-img{height:clamp(240px,27cqi,390px);border-radius:3px;overflow:hidden;background:var(--dark-2)}
+.mz-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.mz figure:hover .mz-img img{transform:scale(1.03)}
+.mz figcaption{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;margin-top:14px}
+.mz figcaption b{font-size:18px;font-weight:600}
+.mz figcaption span{font-size:15px;color:var(--on-dark-muted)}
+.cert{display:grid;place-items:center;background:#ECEBE6 !important;padding:24px}
+.cert-in{width:min(100%,520px);aspect-ratio:3/2;background:#fff;color:var(--text);border:1px solid #D9D6CC;outline:1px solid #D9D6CC;outline-offset:-10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.cert-in .logo{font-size:15px;gap:7px}
+.cert-in .logo img{width:24px}
+.cert-in .t{margin-top:14px;font-size:12px;color:var(--muted)}
+.cert-in .n{margin-top:6px;font-size:clamp(20px,2.2cqi,30px);font-weight:600;letter-spacing:-.02em}
+.cert-in .p{margin-top:4px;font-size:13px;color:var(--body)}
+.cert-in .id{margin-top:16px;padding-top:10px;border-top:1px solid #E5E2DA;font-size:11.5px;color:var(--muted)}
+
+/* ---------------- placements ---------------- */
+.place{background:var(--paper)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 32px;margin-top:16px}
+.stats li{font-size:16px;color:var(--body)}
+.stats b{font-size:clamp(24px,2.4cqi,32px);font-weight:650;letter-spacing:-.02em;color:var(--text);margin-right:6px}
+.pl-v[hidden]{display:none}
+.wall{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+.pc{background:#fff;border-radius:4px;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.pc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.pc img.f{width:100%;aspect-ratio:1;object-fit:cover}
+.pc-b{padding:14px 16px 16px}
+.pc-l{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.1}
+.pc-l small{font-size:14px;font-weight:500;color:var(--muted);margin-left:4px}
+.pc-n{margin-top:8px;font-size:15px;font-weight:600}
+.pc-r{margin-top:2px;font-size:14px;line-height:1.4;color:var(--muted);min-height:2.8em}
+.co{display:flex;align-items:center;height:26px;margin-top:10px;font-size:14px;font-weight:600}
+.co img{height:17px;width:auto;max-width:92px}
+.feat{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:start}
+.ft-card{grid-column:1/6;background:#fff;border-radius:4px;overflow:hidden}
+.ft-card img.f{width:100%;aspect-ratio:5/4;object-fit:cover;object-position:50% 20%}
+.ft-b{padding:24px 28px 28px}
+.ft-b .pc-l{font-size:44px}
+.ft-b .pc-n{font-size:20px;margin-top:12px}
+.ft-b .pc-r{font-size:16px;min-height:0}
+.ft-list{grid-column:6/13;background:#fff;border-radius:4px;padding:8px 24px}
+.ft-list li{display:grid;grid-template-columns:44px minmax(0,1fr) 120px 84px;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
+.ft-list li:last-child{border-bottom:0}
+.ft-list li[hidden]{display:none}
+.ft-list img.f{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.ft-list .nm{font-size:15px;font-weight:600;line-height:1.3}
+.ft-list .nm span{display:block;font-weight:400;font-size:14px;color:var(--muted)}
+.ft-list .co{margin:0}
+.ft-list .lpa{text-align:right;font-size:17px;font-weight:650}
+.ft-more{width:100%;min-height:48px;margin:4px 0 8px;background:transparent;border:1px solid var(--rule);border-radius:3px;font-weight:600;cursor:pointer}
+.ft-more:hover{border-color:var(--text)}
+.fine{margin-top:20px;font-size:14px;color:var(--muted)}
+
+/* ---------------- talk + faq ---------------- */
+.talk{background:#fff}
+.talk-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:start}
+.person{grid-column:1/6;background:var(--paper);border-radius:4px;padding:28px}
+.p-top{display:flex;align-items:center;gap:16px}
+.p-top img{width:72px;height:72px;border-radius:50%;object-fit:cover}
+.p-top b{display:block;font-size:19px;font-weight:600}
+.p-top span{font-size:15px;color:var(--muted)}
+.person > p{margin-top:18px;font-size:16px;color:var(--body)}
+.person .btn{width:100%;margin-top:22px}
+.asks{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.asks a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;background:#fff;border:1px solid var(--rule);border-radius:3px;font-size:14px;font-weight:500;text-decoration:none}
+.asks a:hover{border-color:var(--text)}
+.person .hrs{margin-top:16px;font-size:14px;color:var(--muted)}
+.faq{grid-column:7/13;border-top:1px solid var(--text)}
+.faq details{border-bottom:1px solid var(--rule)}
+.faq summary{display:flex;justify-content:space-between;gap:16px;align-items:center;min-height:64px;padding:12px 0;font-size:18px;font-weight:500;cursor:pointer;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:24px;font-weight:400;color:var(--muted);flex:none}
+.faq details[open] summary::after{content:"–"}
+.faq details p{padding:0 40px 20px 0;color:var(--body);font-size:16px}
+
+/* ---------------- final strip + footer ---------------- */
+.final{background:var(--acc);color:var(--on-acc)}
+.final-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px 40px;padding-block:clamp(48px,5cqi,72px)}
+.final h2{font-size:clamp(32px,3.6cqi,52px);font-weight:600;letter-spacing:-.03em;line-height:1.05}
+.final p{margin-top:8px;font-size:17px}
+.final-a{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px}
+.ft{background:var(--dark);color:#fff;font-size:15px}
+.ft-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;padding-block:56px 40px}
+.ft-top p{margin-top:14px;color:var(--on-dark-muted);max-width:34ch}
+.ft h3{font-size:14px;font-weight:600;margin-bottom:12px}
+.ft ul{display:grid;gap:8px}
+.ft ul a{text-decoration:none;color:var(--on-dark-muted)}
+.ft ul a:hover{color:#fff}
+.ft-bot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;padding-block:20px 28px;border-top:1px solid var(--on-dark-rule);font-size:13px;color:rgba(255,255,255,.6)}
+
+/* ---------------- tablet ---------------- */
+@container stage (max-width:1000px){
+  .nav,.hd-login{display:none}
+  .wall{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rows > li{grid-template-columns:90px minmax(0,1fr) minmax(0,1fr)}
+  .r-topics{display:none}
+  .ft-list li{grid-template-columns:44px minmax(0,1fr) 72px}
+  .ft-list .co{display:none}
+}
+@container stage (max-width:820px){
+  .h-class .c-l,.h-class .c-r{grid-column:1/-1}
+  .h-class .c-r{margin-top:20px}
+  .h-split,.h-faces{grid-template-columns:1fr}
+  .h-split .ph{min-height:0;aspect-ratio:4/3}
+  .h-split .copy,.h-faces .copy{padding:48px clamp(16px,4cqi,56px) 48px}
+  .faces{grid-template-rows:none}
+  .faces li{min-height:0;aspect-ratio:1}
+  .bar-cells{grid-template-columns:1fr 1fr}
+  .bar-cells li:nth-child(3){padding-left:0;border-left:0}
+  .bar-cells li:nth-child(n+3){border-top:1px solid var(--rule)}
+  .for-grid{grid-template-columns:1fr 1fr}
+  .pn-l,.pn-r{grid-column:1/-1}
+  .mz figure:nth-child(n){grid-column:1/-1}
+  .ft-card,.ft-list,.person,.faq{grid-column:1/-1}
+  .ft-top{grid-template-columns:1fr 1fr}
+  .ft-top > div:first-child{grid-column:1/-1}
+}
+/* ---------------- phone ---------------- */
+@container stage (max-width:560px){
+  .stage{font-size:16px}
+  .hd{height:64px;margin-bottom:-64px}
+  .hd-talk{display:none}
+  .menu-btn{display:inline-flex;align-items:center}
+  .fab-wrap{display:flex}
+  .h1{font-size:40px}
+  .h-class .h1{font-size:42px}
+  .actions{flex-direction:column;align-items:stretch;gap:12px}
+  .actions .btn{width:100%}
+  .alink{justify-content:center}
+  .h-person{min-height:690px}
+  .h-person .cover{object-position:78% center}
+  .h-person .scrim{background:linear-gradient(180deg,color-mix(in srgb,var(--dark) 55%,transparent) 0%,color-mix(in srgb,var(--dark) 10%,transparent) 22%,color-mix(in srgb,var(--dark) 62%,transparent) 46%,color-mix(in srgb,var(--dark) 95%,transparent) 68%)}
+  .h-person .copy{max-width:none;padding-bottom:40px}
+  .h-person .cap{display:none}
+  .h-class{min-height:720px}
+  .h-class .cap{display:none}
+  .h-split,.h-faces{padding-top:64px}
+  .h-split .copy,.h-faces .copy{padding:36px 16px 40px}
+  .faces .fc{padding:28px 8px 8px;font-size:11.5px}
+  .faces .fc b{font-size:16px}
+  .faces .fc span{display:none}
+  .bar-cells li,.bar-cells li+li{padding:16px 12px 18px 0}
+  .bar-cells li:nth-child(even){padding-left:12px}
+  .bar-cells strong{font-size:18px}
+  .bar-cells small{font-size:14px}
+  .logos{gap:12px}
+  .logos ul{gap:14px 26px}
+  .logos img{height:18px}
+  .logos li.tall img{height:22px}
+  .for-grid{grid-template-columns:1fr;gap:36px}
+  .climb-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .step{padding:10px 0 12px}
+  .step:nth-child(2){padding-top:26px}.step:nth-child(3){padding-top:42px}.step:nth-child(4){padding-top:58px}
+  .st-t,.st-w{display:none}
+  .step::after{content:attr(data-short);display:block;margin-top:6px;font-size:12px;line-height:1.3}
+  .checks{grid-template-columns:1fr}
+  .pn-nav .btn{flex:1;padding:0 12px}
+  .rows > li{grid-template-columns:1fr;gap:12px}
+  .r-m{display:flex;align-items:baseline;gap:12px}
+  .r-m span{margin:0}
+  .wall{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin-inline:-16px;padding:0 16px 8px;scrollbar-width:none}
+  .wall .pc{flex:0 0 200px;scroll-snap-align:start}
+  .ft-b{padding:20px}
+  .ft-list{padding:4px 16px}
+  .person{padding:22px}
+  .faq summary{font-size:17px}
+  .final-a{width:100%;flex-direction:column;align-items:stretch}
+  .final-a .btn{width:100%}
+  .final-a .alink{justify-content:center}
+  .ft-top{grid-template-columns:1fr 1fr;gap:28px 16px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="tb" id="tb" role="toolbar" aria-label="Review controls">
+  <div class="tb-g" data-group="hero"><span>Hero</span>
+    <button data-v="1" aria-pressed="true">1 Person</button><button data-v="2" aria-pressed="false">2 Class</button><button data-v="3" aria-pressed="false">3 Split</button><button data-v="4" aria-pressed="false">4 Real learners</button>
+  </div>
+  <div class="tb-g" data-group="prog"><span>Program</span>
+    <button data-v="climb" aria-pressed="true">Climb</button><button data-v="rows" aria-pressed="false">Rows</button>
+  </div>
+  <div class="tb-g" data-group="pl"><span>Placements</span>
+    <button data-v="wall" aria-pressed="true">Wall</button><button data-v="feat" aria-pressed="false">Featured + list</button>
+  </div>
+  <div class="tb-g" data-group="theme"><span>Colour</span>
+    <button data-v="ink" aria-pressed="true">Ink + saffron</button><button data-v="teal" aria-pressed="false">Teal + yellow</button>
+  </div>
+  <div class="tb-g tb-end">
+    <button id="t-phone" aria-pressed="false">Phone width</button>
+    <button id="t-notes" aria-pressed="false">Design notes</button>
+  </div>
+</div>
+
+<main class="stage" id="stage" data-theme="ink">
+
+  <div class="fab-wrap"><a class="fab" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Message CloudCadre on WhatsApp"><svg class="wa"><use href="#i-wa"/></svg></a></div>
+
+  <header class="hd" id="hd">
+    <div class="wrap hd-in">
+      <a class="logo" href="#"><img src="assets/cloudcadre-mark.svg" alt="" width="34" height="26">CloudCadre</a>
+      <nav class="nav" aria-label="Main"><a href="#program">Program</a><a href="#how">How we teach</a><a href="#placements">Placements</a><a href="#talk">FAQ</a></nav>
+      <div class="hd-end">
+        <a class="hd-login" href="#">Log in</a>
+        <a class="hd-talk" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Talk to us</a>
+        <button class="menu-btn" type="button">Menu</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== HERO 1 · person, scrim left ===================== -->
+  <section class="hero h-person" data-h="1" aria-label="Introduction">
+    <!-- stock placeholder: replace with a real photo of a CloudCadre trainer or learner -->
+    <img class="cover" src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=2000&q=75" alt="An engineer holding a laptop walks along a row of server racks" fetchpriority="high">
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="copy wrap">
+      <p class="kicker">CloudCadre Elite Architect Program</p>
+      <h1 class="h1">Learn to design cloud systems, not just run them.</h1>
+      <p class="lead">A 4-month live program in cloud, FinOps and DevOps, taught by engineers who run it.</p>
+      <div class="actions">
+        <a class="btn btn-acc" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+        <a class="alink" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask a counsellor on WhatsApp</a>
+      </div>
+    </div>
+    <p class="cap">Placeholder caption: a CloudCadre trainer at a data centre visit</p>
+  </section>
+
+  <!-- ===================== HERO 2 · class, cover layout ===================== -->
+  <section class="hero h-class" data-h="2" aria-label="Introduction" hidden>
+    <!-- stock placeholder: replace with a real CloudCadre live-class or lab photo -->
+    <img class="cover" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=2000&q=75" alt="A learner points at notes on a whiteboard while the batch watches from their laptops">
+    <div class="scrim" aria-hidden="true"></div>
+    <p class="cap wrap">Design review, Saturday lab</p>
+    <div class="copy wrap">
+      <div class="c-l">
+        <p class="kicker">CloudCadre Elite Architect Program · <b>Next batch 12 Jan</b></p>
+        <h1 class="h1">Become a cloud architect in four months.</h1>
+      </div>
+      <div class="c-r">
+        <p class="lead">Live classes in cloud, FinOps and DevOps. Every month ends with something you build, and the last one ends with a capstone you defend.</p>
+        <div class="actions">
+          <a class="btn btn-acc" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+          <a class="alink" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HERO 3 · split ===================== -->
+  <section class="hero h-split" data-h="3" aria-label="Introduction" hidden>
+    <div class="copy wrap">
+      <p class="kicker">CloudCadre Elite Architect Program · <b>Next batch 12 Jan</b></p>
+      <h1 class="h1">Cloud, FinOps and DevOps, taught live by people who do it daily.</h1>
+      <p class="lead">Four months on AWS, Azure and Google Cloud, Terraform and Kubernetes. You finish with a capstone you defend, two mock interviews and a CV review.</p>
+      <div class="actions">
+        <a class="btn btn-acc" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+        <a class="alink" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask a counsellor on WhatsApp</a>
+      </div>
+    </div>
+    <div class="ph">
+      <!-- stock placeholder: replace with a real mentor-and-learner photo -->
+      <img class="cover" src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1400&q=75" alt="A mentor and a learner look at code on a laptop together">
+      <p class="cap">A mentor checks a lab, line by line</p>
+    </div>
+  </section>
+
+  <!-- ===================== HERO 4 · real learners ===================== -->
+  <section class="hero h-faces" data-h="4" aria-label="Introduction" hidden>
+    <div class="copy wrap">
+      <p class="kicker">CloudCadre Elite Architect Program · <b>Next batch 12 Jan</b></p>
+      <h1 class="h1">Become a cloud architect in four months.</h1>
+      <p class="lead">Live classes in cloud, FinOps and DevOps. These six finished the program and now work at Capgemini, Zensar, NICE and more.</p>
+      <div class="actions">
+        <a class="btn btn-acc" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+        <a class="alink" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask a counsellor on WhatsApp</a>
+      </div>
+      <p class="fine">Real CloudCadre learners. Packages are CTC per year.</p>
+    </div>
+    <ul class="faces" id="faces" aria-label="Six CloudCadre learners and their packages"></ul>
+  </section>
+
+  <!-- ===================== facts bar + employer logos ===================== -->
+  <section class="bar" aria-label="Program facts">
+    <div class="wrap">
+      <ul class="bar-cells">
+        <li><span class="lbl">Next batch</span><strong>12 Jan, live online</strong><small>2–3 evening classes a week</small></li><!-- placeholder: date -->
+        <li><span class="lbl">Length</span><strong>4 months</strong><small>Every class recorded the same night</small></li>
+        <li><span class="lbl">Placements</span><strong>Up to ₹29 LPA</strong><small>15 learners, 12 companies</small></li>
+        <li><span class="lbl">Fee</span><strong>Pay monthly</strong><small>UPI, card or net banking</small></li>
+      </ul>
+      <div class="logos">
+        <span>Our learners now work at</span>
+        <ul>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/infosys.svg" alt="Infosys"></li>
+          <li class="tall"><img src="../../apps/academy/public/cloudcadre/logos/capgemini.svg" alt="Capgemini"></li>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/hcltech.svg" alt="HCLTech"></li>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/amdocs.svg" alt="Amdocs"></li>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/persistent.svg" alt="Persistent Systems"></li>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/zensar.svg" alt="Zensar"></li>
+          <li class="tall"><img src="../../apps/academy/public/cloudcadre/logos/zs.svg" alt="ZS Associates"></li>
+        </ul>
+      </div>
+    </div>
+    <div class="note note-bar wrap" id="note-hero"></div>
+  </section>
+
+  <!-- ===================== built for ===================== -->
+  <section class="sec for" aria-labelledby="for-h">
+    <div class="wrap">
+      <div class="sh">
+        <div>
+          <h2 class="h2" id="for-h">Who joins CEAP</h2>
+          <p class="lead">Three kinds of people join. Each one leaves for a different job.</p>
+        </div>
+      </div>
+      <ul class="for-grid">
+        <!-- stock placeholders -->
+        <li class="for-card">
+          <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=900&q=75" alt="Young graduates studying together at a table" loading="lazy">
+          <h3>Freshers</h3>
+          <p>No IT job yet. Month 1 starts from cloud basics.</p>
+          <p class="to"><span>Common next role</span><b>Cloud engineer</b></p>
+        </li>
+        <li class="for-card">
+          <img src="https://images.unsplash.com/photo-1580894908361-967195033215?auto=format&fit=crop&w=900&q=75" alt="An engineer working at a desk with two monitors of code" loading="lazy">
+          <h3>IT professionals</h3>
+          <p>Support, sysadmin or developer, ready for the next step.</p>
+          <p class="to"><span>Common next role</span><b>Cloud or DevOps engineer</b></p>
+        </li>
+        <li class="for-card">
+          <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=900&q=75" alt="Two colleagues from finance talking over a laptop" loading="lazy">
+          <h3>Finance and ops</h3>
+          <p>You know budgets. FinOps turns that into a cloud career.</p>
+          <p class="to"><span>Common next role</span><b>FinOps analyst</b></p>
+        </li>
+      </ul>
+      <div class="note"><b>Who joins.</b> The same three groups as today, but as plain photo cards with one line and one outcome, instead of overlay text on photos. "Common next role" is honest wording: it describes, it does not promise.</div>
+    </div>
+  </section>
+
+  <!-- ===================== program ===================== -->
+  <section class="sec prog" id="program" aria-labelledby="prog-h">
+    <div class="wrap">
+      <div class="sh">
+        <div>
+          <h2 class="h2" id="prog-h">Four months, one step at a time</h2>
+          <p class="lead">Each month builds on the last. You finish by designing and defending a real architecture.</p>
+        </div>
+        <a class="tlink" href="#">Download the syllabus<span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+
+      <div class="prog-v" data-pv="climb">
+        <div class="climb-tabs" role="tablist" aria-label="Months" id="climb-tabs"></div>
+        <div class="panel" id="climb-panel" role="tabpanel"></div>
+      </div>
+      <div class="prog-v" data-pv="rows" hidden>
+        <ol class="rows" id="rows"></ol>
+      </div>
+      <div class="note" id="note-prog"></div>
+    </div>
+  </section>
+
+  <!-- ===================== how we teach ===================== -->
+  <section class="sec how on-dark" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="sh">
+        <div>
+          <h2 class="h2" id="how-h">How we teach</h2>
+          <p class="lead">Small live batches, real labs, and a project you defend.</p>
+        </div>
+      </div>
+      <div class="mz">
+        <!-- stock placeholders: swap for CloudCadre's own class and lab photos -->
+        <figure>
+          <div class="mz-img"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=75" alt="A small group of learners in a live class with laptops" loading="lazy"></div>
+          <figcaption><b>Live classes, 30 seats</b><span>Your trainer knows your name</span></figcaption><!-- placeholder: seat count -->
+        </figure>
+        <figure>
+          <div class="mz-img"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1000&q=75" alt="Learners working through a lab on their laptops" loading="lazy"></div>
+          <figcaption><b>Labs a mentor checks</b><span>On a real cloud account</span></figcaption>
+        </figure>
+        <figure>
+          <div class="mz-img"><img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1000&q=75" alt="A learner explains a design on a laptop to a reviewer" loading="lazy"></div>
+          <figcaption><b>Defend your project</b><span>Like a real interview</span></figcaption>
+        </figure>
+        <figure>
+          <!-- placeholder certificate, drawn in code. The old image printed a banned brand name. -->
+          <div class="mz-img cert">
+            <div class="cert-in" role="img" aria-label="Sample CEAP certificate with a certificate ID that employers can verify online">
+              <span class="logo"><img src="assets/cloudcadre-mark.svg" alt="">CloudCadre</span>
+              <span class="t">Certificate of completion</span>
+              <span class="n">Rohan Mehta</span>
+              <span class="p">CloudCadre Elite Architect Program (CEAP)</span>
+              <span class="id">ID CC-CEAP-2026-0147 · verify at cloudcadre.in/verify</span>
+            </div>
+          </div>
+          <figcaption><b>A certificate employers verify</b><span>Every certificate has an ID anyone can check online</span></figcaption>
+        </figure>
+      </div>
+      <div class="note"><b>How we teach</b> sits on the dark surface so the photos pop. Two big, two small, alternating, with captions under the photo instead of on it. The certificate is drawn in code as a stand-in. The current image prints "CloudEdufy", so it can't ship.</div>
+    </div>
+  </section>
+
+  <!-- ===================== placements (REAL) ===================== -->
+  <section class="sec place" id="placements" aria-labelledby="pl-h">
+    <div class="wrap">
+      <div class="sh">
+        <div>
+          <h2 class="h2" id="pl-h">Where our learners work now</h2>
+          <ul class="stats"><li><b>15</b>placement stories</li><li><b>12</b>companies</li><li><b>₹29 LPA</b>highest package</li></ul>
+        </div>
+      </div>
+      <div class="pl-v" data-plv="wall"><ul class="wall" id="wall"></ul></div>
+      <div class="pl-v" data-plv="feat" hidden>
+        <div class="feat">
+          <article class="ft-card" id="ft-card"></article>
+          <div class="ft-list"><ul id="ft-list"></ul><button class="ft-more" id="ft-more" type="button">Show all 14</button></div>
+        </div>
+      </div>
+      <p class="fine">Packages are CTC per year, as shared by each learner.</p>
+      <div class="note" id="note-pl"></div>
+    </div>
+  </section>
+
+  <!-- ===================== talk + faq ===================== -->
+  <section class="sec talk" id="talk" aria-labelledby="talk-h">
+    <div class="wrap">
+      <div class="sh">
+        <div>
+          <h2 class="h2" id="talk-h">Still deciding? Ask a person.</h2>
+          <p class="lead">Message Ananya on WhatsApp, or find your answer below.</p>
+        </div>
+      </div>
+      <div class="talk-grid">
+        <!-- placeholder: counsellor name, photo (stock), hours -->
+        <aside class="person" aria-label="Talk to an admissions counsellor">
+          <div class="p-top">
+            <img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=160&h=160&crop=faces&q=75" alt="">
+            <div><b>Ananya Rao</b><span>Admissions counsellor, CloudCadre</span></div>
+          </div>
+          <p>Ask about the program, batch dates or fees. She usually replies within 15 minutes.</p>
+          <a class="btn btn-line" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Message Ananya on WhatsApp</a>
+          <div class="asks" aria-label="Quick questions">
+            <a href="https://wa.me/?text=When%20does%20the%20next%20CEAP%20batch%20start%3F" target="_blank" rel="noopener noreferrer">When is the next batch?</a>
+            <a href="https://wa.me/?text=What%20is%20the%20CEAP%20fee%3F" target="_blank" rel="noopener noreferrer">What is the fee?</a>
+            <a href="https://wa.me/?text=Is%20CEAP%20right%20for%20me%3F" target="_blank" rel="noopener noreferrer">Is it right for me?</a>
+          </div>
+          <p class="hrs">9 am to 9 pm, Mon to Sat</p>
+        </aside>
+        <div class="faq">
+          <details><summary>Do I need an IT background?</summary><p>No. Month 1 starts from cloud basics. If you are completely new to IT, a counsellor will suggest a short warm-up first.</p></details>
+          <details><summary>How many hours a week?</summary><p>About 8 to 10: two or three live evening classes, plus labs in your own time.</p></details>
+          <details><summary>What if I miss a class?</summary><p>Every class is recorded and up the same night, and your mentor helps you catch up on the lab.</p></details>
+          <details><summary>Can I pay in instalments?</summary><p>Yes. Pay by UPI, card or net banking, in one go or monthly.</p></details>
+          <details><summary>Do I get a certificate?</summary><p>Yes, a CEAP certificate employers can verify online. AWS, Azure and Google Cloud exam fees are paid to the exam provider.</p></details>
+          <details><summary>Do you guarantee a job?</summary><p>No, and be wary of anyone who does. We give you the skills, a capstone, mock interviews, CV and LinkedIn help, and introductions.</p></details>
+        </div>
+      </div>
+      <div class="note"><b>Talk.</b> The WhatsApp button here is an outline on purpose: the filled button on this screen is the yellow one in the strip below. The three quick questions open WhatsApp with the message already typed.</div>
+    </div>
+  </section>
+
+  <!-- ===================== final strip ===================== -->
+  <section class="final" aria-labelledby="fin-h">
+    <div class="wrap final-in">
+      <div>
+        <h2 id="fin-h">Next batch starts 12 Jan.</h2><!-- placeholder: date -->
+        <p>4 months · live online · capstone and interview prep</p>
+      </div>
+      <div class="final-a">
+        <a class="btn btn-dark" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>
+        <a class="alink" href="https://wa.me/" target="_blank" rel="noopener noreferrer">or ask on WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ft on-dark">
+    <div class="wrap">
+      <div class="ft-top">
+        <div>
+          <a class="logo" href="#"><img src="assets/cloudcadre-mark.svg" alt="" width="34" height="26">CloudCadre</a>
+          <p>The Elite Architect Program: cloud, FinOps and DevOps, taught live by working engineers.</p>
+        </div>
+        <div><h3>Program</h3><ul><li><a href="#program">Curriculum</a></li><li><a href="#how">How we teach</a></li><li><a href="#placements">Placements</a></li></ul></div>
+        <div><h3>Academy</h3><ul><li><a href="#talk">FAQ</a></li><li><a href="#">Download the syllabus</a></li><li><a href="#">Log in</a></li></ul></div>
+        <!-- placeholder: phone and email -->
+        <div><h3>Help</h3><ul><li><a href="https://wa.me/" target="_blank" rel="noopener noreferrer">WhatsApp +91 98765 43210</a></li><li><a href="#">hello@cloudcadre.in</a></li></ul></div>
+      </div>
+      <div class="ft-bot"><span>© 2026 CloudCadre. AWS, Azure, Google Cloud, Kubernetes and other marks belong to their owners.</span><span>Privacy · Terms · Refunds</span></div>
+    </div>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'), tb=document.getElementById('tb'), hd=document.getElementById('hd');
+  function setTbh(){document.documentElement.style.setProperty('--tbh',tb.offsetHeight+'px')}
+  setTbh(); addEventListener('resize',setTbh);
+
+  /* ---------- data ---------- */
+  var dv='https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/';
+  var TOOLS={aws:['AWS',dv+'amazonwebservices/amazonwebservices-original-wordmark.svg'],azure:['Azure',dv+'azure/azure-original.svg'],gcp:['Google Cloud',dv+'googlecloud/googlecloud-original.svg'],
+    terraform:['Terraform',dv+'terraform/terraform-original.svg'],docker:['Docker',dv+'docker/docker-original.svg'],kubernetes:['Kubernetes',dv+'kubernetes/kubernetes-original.svg'],cicd:['GitHub Actions',dv+'githubactions/githubactions-original.svg'],
+    finops:['FinOps',null],bills:['Cloud bills',null],panel:['Review panel',null],interview:['2 mock interviews',null]};
+  // INVENTED syllabus (copied from aurora-content.ts): confirm months, topics and lab counts with the owner
+  var MONTHS=[
+    {t:'Three clouds, one architecture',s:'3 clouds',w:[1,4],o:'run the same app on AWS, Azure and Google Cloud, and explain which fits when.',tp:['Core services on AWS','Core services on Azure','Google Cloud basics','Networking and identity','Security foundations'],b:'The same 3-tier app on all three clouds',tools:['aws','azure','gcp'],m:'12 hands-on labs'},
+    {t:'FinOps and cloud costs',s:'FinOps',w:[5,8],o:'find the waste in a cloud bill and show finance what it saves.',tp:['Reading cloud bills','Cost optimisation','Budgets and accountability','Tagging and governance','Unit economics'],b:'A savings plan for a real cloud bill',tools:['finops','aws','azure'],m:'8 hands-on labs'},
+    {t:'Automate and ship',s:'Automate',w:[9,12],o:'ship an app to Kubernetes through one pipeline, with every server built from code.',tp:['Terraform and IaC','Docker','Kubernetes','CI/CD pipelines','Automated provisioning'],b:'A pipeline that ships an app to Kubernetes, built with Terraform',tools:['terraform','docker','kubernetes','cicd'],m:'14 hands-on labs'},
+    {t:'Design, defend, get hired',s:'Capstone',w:[13,16],o:'design an enterprise architecture, defend it in a review, and interview for the job.',tp:['Architecture design','Migration strategies','Security and governance','Mock interviews','CV and LinkedIn'],b:'Capstone: design and defend a multi-cloud migration',tools:['panel','interview'],m:'Capstone review and 2 mock interviews'}
+  ];
+  var cld=function(p,t){return 'https://res.cloudinary.com/dqw5bkqgz/image/upload/f_auto,q_auto,'+t+'/'+p+'.jpg'};
+  var logo=function(f){return '../../apps/academy/public/cloudcadre/logos/'+f+'.svg'};
+  // REAL placements (aurora-content.ts). Confirm consent with each learner before launch.
+  var PEOPLE=[
+    ['Swapnil Khandare','v1779696875/finops/partners/wq8vsntaol8qea1jijb8','17','Cloud Engineer','Infosys','infosys'],
+    ['Shubham Kulkarni','v1779774796/finops/partners/eoctu1xlij4zjufqy010','14','Cloud Engineer','Infosys','infosys'],
+    ['Shrinath Gaikwad','v1779775162/finops/partners/inih6zmlzkcrvwmq7jqy','8','DevOps Engineer','HCL Technologies','hcltech','Pune'],
+    ['Rupali Janapure','v1779775550/finops/partners/vdycpmti6ndbv4fnnlck','12','Cloud FinOps Specialist','Amdocs','amdocs','Pune'],
+    ['Priyanka Dhavle','v1779775797/finops/partners/pkws9p6zmrfb1wmzdn9e','27','AWS DevOps Engineer','Capgemini','capgemini'],
+    ['Prashant Jawalkar','v1779775977/finops/partners/rxb2j3nfydwzcsvchi6s','18','Cloud FinOps Engineer','Infosys','infosys','Pune'],
+    ['Prasad Suryawanshi','v1779776202/finops/partners/lbotu68t8kupfwqwrjyh','12.5','Cloud FinOps Admin','ZS Associates','zs'],
+    ['Prakash Gulbhele','v1779776432/finops/partners/blck4mtyzs7rujlbor7y','16','AWS FinOps Engineer','Truetech'],
+    ['Ninand Bhoir','v1779776610/finops/partners/bq3rw6vjqcokhwvaz50s','13','AWS Developer','SA Technologies',null,'Mumbai'],
+    ['Monika Singh','v1779776907/finops/partners/ot1kjhdy0fjn8cym60q6','27','Senior Program Manager, AWS and Cloud','NICE',null,'Pune'],
+    ['Mayuri Fate','v1779777079/finops/partners/d9hfe13d8rrbe1j1okef','13','Cloud Engineer','HCLTech','hcltech'],
+    ['Lalit Borse','v1779777581/finops/partners/pqtkm6wpsvd8zdjysg4t','29','Technical Specialist, Cloud and FinOps','Zensar','zensar','Pune'],
+    ['Abhilesh Jadhao','v1779777941/finops/partners/xeqthvtjcqo4pbk4tcgm','19','Project Manager, Cloud and DC','Fabutech',null,'Mumbai'],
+    ['Atish Sonwane','v1779778117/finops/partners/ipu40he74efuwwiocpzu','20','Senior Cloud Engineer, FinOps','Persistent Systems','persistent','Pune'],
+    ['Ashish Kumbhojkar','v1779696513/finops/partners/bmphc8rteevycsbqc1i7','14','Cloud FinOps Engineer','Cencora',null,'Pune']
+  ].map(function(r){return {n:r[0],p:r[1],l:r[2],r:r[3],c:r[4],lg:r[5],city:r[6]}});
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function co(p){return '<span class="co">'+(p.lg?'<img src="'+logo(p.lg)+'" alt="'+esc(p.c)+'" loading="lazy">':esc(p.c))+'</span>'}
+  function first(n){var a=n.split(' ');return a[0]+' '+a[1][0]+'.'}
+
+  /* ---------- hero 4 faces: six real learners (the group photo is left out) ---------- */
+  var FACE_IDX=[4,11,9,13,3,0];
+  document.getElementById('faces').innerHTML=FACE_IDX.map(function(i){var p=PEOPLE[i];
+    return '<li><img src="'+cld(p.p,'w_520,h_560,c_fill,g_face')+'" alt="'+esc(p.n)+'"><p class="fc"><b>₹'+p.l+' LPA</b>'+esc(first(p.n))+'<span> · '+esc(p.c)+'</span></p></li>'}).join('');
+
+  /* ---------- program: climb ---------- */
+  function toolsHtml(keys){return '<ul class="tools">'+keys.map(function(k){var t=TOOLS[k];return '<li>'+(t[1]?'<img src="'+t[1]+'" alt="" loading="lazy">':'')+esc(t[0])+'</li>'}).join('')+'</ul>'}
+  var tabs=document.getElementById('climb-tabs'), panel=document.getElementById('climb-panel'), cur=0;
+  tabs.innerHTML=MONTHS.map(function(m,i){
+    return '<button class="step" role="tab" id="st-'+i+'" aria-controls="climb-panel" data-short="'+esc(m.s)+'" aria-selected="'+(i===0)+'" tabindex="'+(i===0?0:-1)+'"><span class="st-n">0'+(i+1)+'</span><span class="st-t">'+esc(m.t)+'</span><span class="st-w">Weeks '+m.w[0]+'–'+m.w[1]+'</span></button>'}).join('');
+  var steps=[].slice.call(tabs.children);
+  function renderPanel(){
+    var m=MONTHS[cur], last=cur===MONTHS.length-1;
+    panel.setAttribute('aria-labelledby','st-'+cur);
+    panel.innerHTML='<div class="pn-l"><p class="pn-k">Month '+(cur+1)+' · by week '+m.w[1]+' you can</p><p class="pn-o">'+esc(m.o.charAt(0).toUpperCase()+m.o.slice(1))+'</p>'+
+      '<ul class="checks">'+m.tp.map(function(t){return '<li><svg aria-hidden="true"><use href="#i-check"/></svg>'+esc(t)+'</li>'}).join('')+'</ul>'+
+      '<div class="pn-nav">'+(cur>0?'<button class="btn btn-line" type="button" data-go="-1">← Month '+cur+'</button>':'')+
+      (last?'<a class="btn btn-line" href="#">Join the next batch<span class="arrow" aria-hidden="true">→</span></a>':'<button class="btn btn-line" type="button" data-go="1">Month '+(cur+2)+' →</button>')+'</div></div>'+
+      '<div class="pn-r"><p class="k">You build</p><h3>'+esc(m.b)+'</h3>'+toolsHtml(m.tools)+'<p class="meta">'+esc(m.m)+'</p></div>';
+  }
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function select(i,focus){
+    cur=i;
+    steps.forEach(function(s,k){s.setAttribute('aria-selected',k===i);s.tabIndex=k===i?0:-1;s.classList.toggle('done',k<i)});
+    if(focus)steps[i].focus();
+    if(reduce){renderPanel();return}
+    panel.classList.add('out');setTimeout(function(){renderPanel();panel.classList.remove('out')},180);
+  }
+  steps.forEach(function(s,i){
+    s.addEventListener('click',function(){select(i)});
+    s.addEventListener('keydown',function(e){var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(!d)return;e.preventDefault();select((i+d+4)%4,true)});
+  });
+  panel.addEventListener('click',function(e){var b=e.target.closest('[data-go]');if(b)select(cur+Number(b.dataset.go))});
+  renderPanel();
+
+  /* ---------- program: rows ---------- */
+  document.getElementById('rows').innerHTML=MONTHS.map(function(m,i){
+    return '<li><div class="r-m"><b>0'+(i+1)+'</b><span>Weeks '+m.w[0]+'–'+m.w[1]+'</span></div>'+
+      '<div class="r-t"><h3>'+esc(m.t)+'</h3><p>By week '+m.w[1]+' you can '+esc(m.o)+'</p></div>'+
+      '<ul class="r-topics">'+m.tp.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>'+
+      '<div class="r-b"><p class="k">You build</p><p>'+esc(m.b)+'</p>'+toolsHtml(m.tools)+'<small>'+esc(m.m)+'</small></div></li>'}).join('');
+
+  /* ---------- placements ---------- */
+  document.getElementById('wall').innerHTML=PEOPLE.map(function(p){
+    return '<li class="pc"><img class="f" src="'+cld(p.p,'w_400,h_400,c_fill,g_face')+'" alt="" loading="lazy"><div class="pc-b"><p class="pc-l">₹'+p.l+'<small>LPA</small></p><h3 class="pc-n">'+esc(p.n)+'</h3><p class="pc-r">'+esc(p.r)+(p.city?' · '+esc(p.city):'')+'</p>'+co(p)+'</div></li>'}).join('');
+  var F=PEOPLE[4], rest=PEOPLE.filter(function(p){return p!==F}), SHOW=7;
+  document.getElementById('ft-card').innerHTML='<img class="f" src="'+cld(F.p,'w_800,h_640,c_fill,g_face')+'" alt="" loading="lazy"><div class="ft-b"><p class="pc-l">₹'+F.l+'<small>LPA</small></p><h3 class="pc-n">'+esc(F.n)+'</h3><p class="pc-r">'+esc(F.r)+'</p>'+co(F)+'</div>';
+  var list=document.getElementById('ft-list');
+  list.innerHTML=rest.map(function(p,i){
+    return '<li'+(i>=SHOW?' hidden':'')+'><img class="f" src="'+cld(p.p,'w_96,h_96,c_fill,g_face')+'" alt="" loading="lazy"><p class="nm">'+esc(p.n)+'<span>'+esc(p.r)+'</span></p>'+co(p)+'<p class="lpa">₹'+p.l+' LPA</p></li>'}).join('');
+  var more=document.getElementById('ft-more'), open=false;
+  more.addEventListener('click',function(){open=!open;[].forEach.call(list.children,function(li,i){if(i>=SHOW)li.hidden=!open});more.textContent=open?'Show fewer':'Show all 14'});
+
+  /* ---------- design notes that change with the toggles ---------- */
+  var NOTES={
+    hero:{
+      '1':'<b>Hero 1 · Person.</b> One person in a real cloud setting does the emotional work; copy sits on the dark side of the photo. The headline says what is different about CEAP (design, not operate). Needs one strong portrait shoot.',
+      '2':'<b>Hero 2 · Class.</b> A magazine-cover layout: the class photo fills the screen, the headline sits bottom-left and the lead and buttons bottom-right. It says "this is a live class with real people" faster than any sentence. Needs a wide, well-lit photo of a real CloudCadre class.',
+      '3':'<b>Hero 3 · Split.</b> Copy on solid colour, photo bleeding off the right edge. The safest option: text is always readable, and any decent photo works. The headline leads with FinOps, because 9 of your 15 real placements are FinOps roles. That is your real edge.',
+      '4':'<b>Hero 4 · Real learners.</b> The photo is your proof: six real learners with their packages. Shown in grey so the mixed backgrounds of the photos look like one set (they turn to colour on hover). Works today with no photo shoot. Check that each learner agrees to be shown, and note the photos carry a small AI-tool sparkle mark in one corner.'
+    },
+    prog:{
+      climb:'<b>Program · Climb.</b> Your loved month climb, grown up: thin step lines rising left to right instead of coloured blocks, big 01–04 numerals, months already passed marked in ink. The panel reads: outcome → topics → what you build (with real tool logos) → next month.',
+      rows:'<b>Program · Rows.</b> All four months visible at once, like a printed brochure: month and weeks, outcome, topics, what you build. No clicking needed and easy to scan for people comparing syllabuses. On phones it becomes a simple stack.'
+    },
+    pl:{
+      wall:'<b>Placements · Wall.</b> All 15 real people as equal cards: face, package, name, role, employer logo. On phones it becomes a swipe row. The package is the biggest text because that is what people look for first.',
+      feat:'<b>Placements · Featured + list.</b> One story large (Priyanka, ₹27 LPA, Capgemini), the other 14 as a clean list like a results table. Calmer than the wall, and it scales when you have 50 stories.'
+    }
+  };
+  var state={hero:'1',prog:'climb',pl:'wall',theme:'ink'};
+  function paintNotes(){
+    document.getElementById('note-hero').innerHTML=NOTES.hero[state.hero]+'<ul><li>Colour: '+(state.theme==='ink'?'near-black + saffron. Most premium, least "brand".':'your deep teal + yellow. Keeps the brand you already chose and the new logo.')+'</li><li>Under every hero: the four facts people ask first (when, how long, does it work, can I pay), then the real employer logos.</li></ul>';
+    document.getElementById('note-prog').innerHTML=NOTES.prog[state.prog];
+    document.getElementById('note-pl').innerHTML=NOTES.pl[state.pl];
+  }
+
+  /* ---------- toolbar ---------- */
+  function apply(g,v){
+    state[g]=v;
+    if(g==='hero')[].forEach.call(document.querySelectorAll('.hero'),function(h){h.hidden=h.dataset.h!==v});
+    if(g==='prog')[].forEach.call(document.querySelectorAll('.prog-v'),function(x){x.hidden=x.dataset.pv!==v});
+    if(g==='pl')[].forEach.call(document.querySelectorAll('.pl-v'),function(x){x.hidden=x.dataset.plv!==v});
+    if(g==='theme')stage.dataset.theme=v;
+    if(g==='hero')stage.dataset.hero=v;
+    [].forEach.call(document.querySelectorAll('[data-group="'+g+'"] button'),function(b){b.setAttribute('aria-pressed',b.dataset.v===v)});
+    paintNotes();
+    try{localStorage.setItem('pl-home',JSON.stringify(state))}catch(e){}
+  }
+  [].forEach.call(document.querySelectorAll('[data-group]'),function(grp){
+    grp.addEventListener('click',function(e){var b=e.target.closest('button');if(b)apply(grp.dataset.group,b.dataset.v)});
+  });
+  try{var saved=JSON.parse(localStorage.getItem('pl-home')||'null');if(saved)Object.keys(state).forEach(function(k){if(saved[k])state[k]=saved[k]})}catch(e){}
+  Object.keys(state).forEach(function(k){apply(k,state[k])});
+
+  function toggle(id,fn){var b=document.getElementById(id);b.addEventListener('click',function(){var on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);fn(on);setTbh()})}
+  toggle('t-phone',function(on){stage.classList.toggle('phone',on)});
+  toggle('t-notes',function(on){document.body.classList.toggle('notes-on',on)});
+
+  /* ---------- header turns solid once you scroll ---------- */
+  function onScroll(){hd.classList.toggle('solid',stage.getBoundingClientRect().top<tb.offsetHeight-24)}
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>

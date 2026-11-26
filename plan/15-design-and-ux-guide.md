@@ -1,455 +1,464 @@
-# 15 · Design and UX guide (CloudCadre, `aurora` theme)
+# 15 · Design and UX guide (CloudCadre) — version 11
 
-> **Who this is for:** any AI agent or developer building a CloudCadre screen.
+> **Who this is for:** any AI agent or developer building a CloudCadre screen, marketing or app.
 > Read it fully before any UI work. It is the single source of truth for how CloudCadre looks, reads and behaves.
-> **Mockups on disk (the only two places):** `plan/mockups/homepage-v9.html` (the visual reference) and `plan/mockups-learner-flows/` (24 screens: join, learn, account, admin; logic in `plan/16-learner-flows-logic.md`).
-> The older mockups (`aurora-flows*.html`, `homepage-v2` to `v8` and others) were deleted from the tree on 2026-11-25. Screens that are not redrawn yet point at them in `plan/tracker.json`; read one with `git show 642c215:plan/mockups/aurora-flows.html`. Where one disagrees with this guide on **visuals**, this guide wins; they are only a hint for **structure** (which screens exist, what is on them, which states they need).
-
-**Reference build:** [`plan/mockups/homepage-v9.html`](mockups/homepage-v9.html). Open it in a browser.
-Its toolbar has **Phone width** (real phone layout via container queries) and **Design notes** (the reasoning per section).
-When a rule here is unclear, copy what v9 does.
-
----
-
-## 0. Ten rules that override everything else
-
-1. **Hierarchy first, styling second.** For every section, write down its job, its reading order and its one main action before choosing colours.
-2. **One filled button per view.** Everything else is an outline button or a text link.
-3. **Show, don't tell.** Prefer a photo, logo, icon fact or diagram over a sentence. Aim for one line of text per item.
-4. **Images must carry information.** A picture of *what you build*, a real face, a real certificate: yes. Decoration: never. People ignore decorative images (NN/g eye-tracking).
-5. **Every section is its own region.** Two sections that touch must never share a background (see §3).
-6. **Human-made, not AI-made.** Nothing from the banned list in §2, ever.
-7. **Specific beats generic.** Week numbers, lab counts, names, dates and outcomes. No claims every academy makes.
-8. **Two jobs on every marketing page:** (a) go deeper into the program or join it, (b) WhatsApp a real person. Do not push marketing beyond that.
-9. **Honest.** Never promise a job. Mark every invented number, name, quote or photo as a placeholder in code comments.
-10. **Phone is a first-class layout.** Design both widths. Nothing may overflow sideways.
+>
+> | | |
+> |---|---|
+> | **Guide version** | **11**, 2026-11-26 |
+> | **Reference build** | [`plan/mockups/home-v11.html`](mockups/home-v11.html). Open it in a browser. Toolbar: **Desktop / Tablet 820 / Phone 390** and **Design notes** |
+> | **Replaces** | Version 9 (teal + Schibsted Grotesk, rounded inset panels, slanted frame). Archived at [`plan/archive/15-design-and-ux-guide-v9.md`](archive/15-design-and-ux-guide-v9.md) |
+> | **History** | §19 lists every version and the mockup file behind it |
+>
+> When a rule here is unclear, copy what `home-v11.html` does. Where any older mockup (`homepage-v9.html`, `plan/mockups-learner-flows/`, files in git history) disagrees on **visuals**, this guide wins. Older mockups are still valid for **structure**: which screens exist, what is on them, which states they need.
+>
+> **The app is partly on v11.** The home page, header, footer and font were ported on 2026-11-26 (§16 steps 1, 3, 4). The catalog and course pages, tenant branding tokens and the learner area are still open (§16).
 
 ---
 
-## 1. Product context agents must keep in mind
+## 0. The rules that override everything else
+
+1. **Picture, number, line.** Every unit on a marketing screen is one picture (real face, photo or code-drawn diagram), one big value, and one short line. No paragraphs. This is the formula of the placement card, the one section the owner loved; every other section was rebuilt to match it (§3).
+2. **Clear in 5 seconds.** A first-time visitor must be able to say what this is, who it is for, when it starts and what it costs from the first screen. The H1 names the thing in plain words, not a slogan.
+3. **Hierarchy first, styling second.** For every section write down its job, its reading order and its one main action before choosing anything visual.
+4. **One filled button per view.** Everything else is an outline button or a text link.
+5. **Images must carry information.** A real learner, the thing you build, the timetable. Decoration never. People skip decorative and stock people photos and study real ones ([NN/g](https://www.nngroup.com/articles/photos-as-web-content/)).
+6. **Real proof beats claims.** The 15 real placements are the strongest content on the site. Use real people, real numbers and real employer logos before any sentence about quality.
+7. **Every section is its own region.** Two sections that touch never share a background (§4).
+8. **Human-made, not AI-made.** Nothing from the banned list (§2), ever.
+9. **Two jobs on every marketing page:** (a) see the program or join it, (b) WhatsApp a real person. Nothing else is pushed.
+10. **Honest.** Never promise a job. Mark every invented number, name, photo or price as a placeholder in code comments and in §17.
+11. **Phone and tablet are designed, not shrunk.** They get their own patterns (§8). Nothing may overflow sideways.
+
+---
+
+## 1. Product context
 
 - **CloudCadre** is a cloud training academy, the first client of the EduCore platform. The site is themed by `packages/themes/aurora`.
-- **For now it sells one program only:** the **CloudCadre Elite Architect Program (CEAP)**.
-  - 4 months, live online.
-  - Covers AWS, Azure, Google Cloud, FinOps, Terraform, Docker, Kubernetes and CI/CD.
-  - Ends with a capstone, mock interviews, and CV and LinkedIn help.
-- **More programs may come later.** Design list pages so they work with one item today and many later. Never show an empty catalog.
-- **The brand name on every surface is "CloudCadre".** The program is "CloudCadre Elite Architect Program" or "CEAP". Do not use "CloudEdufy" anywhere.
-- **Audience:** Indian learners, in three groups:
-  - freshers;
-  - IT professionals (support, sysadmin, developers);
-  - career switchers from finance or ops.
-- **Money and numbers:** ₹, LPA, UPI, instalments. Write dates like "12 Jan".
+- **It sells one program for now:** the **CloudCadre Elite Architect Program (CEAP)**: 4 months, live online, AWS, Azure, Google Cloud, FinOps, Terraform, Docker, Kubernetes and CI/CD, ending with a capstone, mock interviews and CV help.
+- **More programs may come later.** List pages must work with one item today and many later. Never show an empty catalog.
+- **Brand name:** "CloudCadre" on every surface. The program is "CloudCadre Elite Architect Program" or "CEAP". Never "CloudEdufy".
+- **Audience:** Indian learners: freshers, IT professionals (support, sysadmin, developers), and career switchers from finance or ops. Many read English as a second language.
+- **The real edge is FinOps.** 9 of the 15 real placements are FinOps roles. Keep FinOps visible in headlines and the program.
+- **Money and dates:** ₹, LPA, UPI, monthly instalments. Write dates like "12 Jan".
+- **Real data available:** 15 placements (name, photo, package, role, company) and 7 employer logos in `apps/academy/lib/aurora-content.ts` and `apps/academy/public/cloudcadre/logos/`. Confirm each learner's consent before launch.
 
 ---
 
-## 2. Banned: what makes a page look AI-made
+## 2. Banned: what makes a page look AI-made or childish
 
-**Never use any of these.** The owner rejected each one explicitly.
+**Never use any of these.** The owner rejected each one.
 
 | Banned | Use instead |
 |---|---|
-| Gradient text, aurora or blurred colour blobs, glow, neon | Flat solid colour; one yellow highlight bar |
-| Glassmorphism, frosted panels, floating overlapping cards | Solid surfaces that sit on the grid |
-| Fake dashboards, terminal windows or progress rings used as decoration | A drawing of what the learner actually builds (§9) |
-| Pill badges with pulsing dots, avatar stacks, "10,000+ students" bars | One quiet trust line (★ 4.8 · 1,200+ reviews · 420+ placed) |
-| Monospace or letter-spaced ALL-CAPS labels | Sentence-case labels in the site font, 13–16px, weight 600–700 |
-| Emoji | Line icons (§8) or nothing |
+| Gradient text, aurora or blurred colour blobs, glow, neon | Flat solid colour |
+| Glassmorphism, frosted panels, floating or overlapping cards | Solid surfaces on the grid; text on a photo sits on a bottom scrim, inside the photo |
+| Fake dashboards, terminal windows, progress rings as decoration | A code-drawn diagram of what the learner builds (§11) |
+| Pill badges with pulsing dots, avatar stacks, "10,000+ students" bars | Real counted numbers next to real faces |
+| Eyebrow or kicker labels above the H1 | Let the H1 say it |
+| Monospace or letter-spaced ALL-CAPS labels | Sentence-case labels, 14px, regular weight, muted colour |
+| Emoji | Nothing, or a real logo |
+| Arrows inside buttons ("Join →") | The verb is enough |
 | Several filled buttons competing | One filled button per view |
-| Swooshes, waves, diagonal stripes, 3D shapes | Straight edges; the slanted panel (§6.2) is the only angle |
-| AI-generated photos of people | Real photos of CloudCadre people; stock as a marked placeholder |
+| Big round corners (8px and up), pastel card tints, chunky 700–800 weights | 3–4px corners, one neutral tint, weights 400 and 600 only |
+| Yellow highlighter bars on headline words, teal-coloured headline phrases | One colour per headline |
+| Swooshes, waves, diagonal stripes, 3D shapes, the slanted frame on pages | Straight edges (the slant now lives only in the logo mark) |
+| Paragraphs, benefit lists, "What you get" blocks, 3-column text sections | Picture + number + line units (§3) |
+| Stock photos of "a fresher" or "a professional" as persona cards | Drop the section, or show real people |
+| Chips and pill buttons (quick-reply chips, tool chips with borders) | One clear action; logos without boxes |
+| Grey-to-colour hover effects, hover lift on things that are not links, photo zoom on hover | No hover effect on static content |
+| Auto-scrolling marquees, carousels, swipe rows on phones | A grid with "Show all" (§8) |
+| Hamburger menu on phones | A visible row of 4 links (§8) |
+| A full-width yellow "Next batch" band | The batch ticket (§10.8) |
+| AI-generated photos of people | Real CloudCadre people; stock only as a marked placeholder |
 | Grey "image goes here" boxes in mockups | A real stand-in photo, marked as placeholder |
-| Generic benefit lists ("What you get with every course" with 4 icons) | Specific content: weeks, labs, the thing you build |
-| Four pastel card tints competing on one screen | One neutral panel colour plus white cards |
-| Saturated cobalt or blue as the brand colour | Deep teal (§4) |
 
-**The opposite also fails.** A plain white, single-colour, table-heavy "editorial minimal" page was rejected too. Keep warmth: real people, photos, the teal + yellow pair, and confident type.
+**The opposite also fails.** A plain white, text-heavy "editorial minimal" page was rejected twice (v10 included). Warmth comes from real faces, photos, big numbers and the saffron button, not from decoration.
 
 ---
 
-## 3. Page structure: the surface rhythm
+## 3. The core pattern: picture, number, line
 
-Pages are a stack of sections. Each section sits on exactly one surface:
+The placement card is the model for every unit on a marketing screen:
 
-| Surface | Colour | Shape | Use |
+```
+┌──────────────┐
+│   picture    │  real face / photo / code-drawn diagram (carries information)
+├──────────────┤
+│ ₹27 LPA      │  one big value (H3 or Number role)
+│ Monika Singh │  one name or title (600)
+│ Sr PM, NICE  │  one short line (Small role, muted)
+│ [logo]       │  optional: a logo instead of a word
+└──────────────┘
+```
+
+How v11 applies it:
+
+| Section | Picture | Big value | Line |
 |---|---|---|---|
-| **Page** | `#FFFFFF` | Full width, no edges | Hero, "How we teach", trainers. Content with photos that needs air |
-| **Stone panel** | `#F2F2EF` | **Inset**: rounded block, page edge visible around it | Collections of white cards; the closing section |
-| **Mist panel** | `#E4EFEB` | Inset | **The program only** (CEAP curriculum). Never use it for anything else |
-| **Dark panel** | `#0B3F3B` | Inset | **One per page at most.** The strongest proof (placements) |
-| **Footer** | `#14201F` | Full width | Footer only |
+| Hero | A real learner, full height | "₹27 LPA" on the photo's scrim | Name, role, company |
+| Placements | Learner photo, square | "₹27 LPA" | Name, role, logo |
+| Program | Diagram of what you build that month | Month title | "Month 1 · 12 labs" and one line |
+| How classes work | Class photo | "30", "34", "1", "2" | "seats in a batch" … |
+| Next batch | Calendar date, weekly timetable | "12", "₹15,000" | "/ month × 4" |
 
-**Inset panels:**
-- margin `clamp(10px, 1.6vw, 24px)` on all sides;
-- radius `clamp(22px, 2.6vw, 36px)`;
-- the white page shows around them. That is what tells the eye "this block is one unit" (NN/g common region) without the page looking finished early (false floor).
+**Text budget per marketing section:** one H2, at most one short line under it, and at most 12 words per unit. If a section needs more, it belongs on another page (the program page, the syllabus PDF) or behind a tap.
 
-**Rhythm rules:**
-- Two touching sections never share a surface.
-- Alternate page → panel → page → panel.
-- If two panels must touch, use different panel colours and a gap of at least `24px`.
+---
 
-**Homepage order (v9), for reference:**
+## 4. Page structure and surfaces
 
-| # | Section | Surface |
+Sections are **full-width bands**. No inset panels, no rounded section blocks.
+
+| Surface | Colour | Use |
 |---|---|---|
-| — | Sticky header | page |
-| 1 | Hero + "Built for" photo cards | page |
-| 2 | Program climb (the 4 months) | mist panel |
-| 3 | How we teach (photo mosaic) | page |
-| 4 | Placements | dark panel |
-| 5 | Talk to a person + FAQ + "Next batch" strip | stone panel |
-| — | Footer | ink |
+| **Dark** | `#0C1312` | Header, hero, one mid-page band ("How classes work"), footer |
+| **White** | `#FFFFFF` | Content sections |
+| **Paper** | `#F5F4F0` | Collections of white cards (placements), the batch ticket |
 
-The v9 mockup also has a Trainers section between Placements and Talk. It is removed from the live homepage and its menu links (26 Nov 2026).
+**Rhythm:** two touching sections never share a surface. Alternate dark / paper / white. Header and hero are both dark and read as one unit; that is the only allowed touch.
 
----
+**Home page order (v11):**
 
-## 4. Colour
-
-| Token (v9 name) | Hex | Platform token | Use |
+| # | Section | Surface | Job |
 |---|---|---|---|
-| `--brand` | `#0F5C56` | `--color-primary` | Filled buttons, links, headline accent, icons, diagram lines |
-| `--deep` | `#0A3F3B` | derived (`primary` mixed 68% with black) | Button hover, selected states, photo tag bar, final strip |
-| `--accent` | `#FFC845` | `--color-accent` | **Highlight only:** the headline marker bar, one yellow element per drawing, goal flag, outcome tags, the final "Join" button. Never body text |
-| `--ink` | `#14201F` | `--color-fg` | Headings, body text on white, outline-button border |
-| `--grey` | `#46514F` | — | Lead and body copy |
-| `--mute` | `#67716F` | — | Small print, meta |
-| `--base` | `#FFFFFF` | `--color-bg` | Page |
-| `--alt` | `#F2F2EF` | `--color-muted` | Stone panel, logo tiles, chips |
-| mist | `#E4EFEB` | — | Program panel, icon wells |
-| `--line` | `#E2E3DF` | `--color-border` | Hairlines, card outlines |
-| `--dark` / `--dark-card` | `#0B3F3B` / `#11514B` | — | Dark panel and the cards on it |
-| on-dark text | `rgba(255,255,255,.80)` | — | Secondary text on dark |
-| WhatsApp | `#25D366` | — | The WhatsApp glyph and the floating button only |
+| — | Sticky header (+ link row on phone and tablet) | dark | Navigate, WhatsApp |
+| 1 | Hero: H1, one line, 3 facts, Join + WhatsApp, real learner photo | dark | Say what this is; start |
+| 2 | Where our learners work now (15 real cards + logos) | paper | Prove it works |
+| 3 | What you build in 4 months (4 month cards) | white | Show the program |
+| 4 | How classes work (4 number tiles) | dark | Show how it's taught |
+| 5 | Next batch (ticket: date, week, fee, Join) | paper | When and how much; join |
+| 6 | Questions before you join (FAQ + counsellor) | white | Remove doubts; talk to a person |
+| — | Footer | dark | |
 
-**Rules:**
-- **60/30/10.** Neutrals carry about 90% of every screen. Teal is the brand. Yellow appears in at most one or two spots per view.
-- **Teal is final.** The owner chose teal over blue twice. Do not suggest blue, even though the temporary logo was blue.
-- **Text contrast:** at least 4.5:1. `--mute` is the lightest text allowed on white or stone.
-- **Platform defaults differ from this guide:** `packages/ui/src/tokens.ts` has accent `#F2B705`, bg `#FBFAF7` and muted `#F0EEE8`. CloudCadre's tenant branding must set accent `#FFC845`, bg `#FFFFFF` and muted `#F2F2EF`; do it through the branding tokens, not by editing the platform defaults.
+Section order on any marketing page follows the visitor's questions: **what is it → does it work → what will I learn → how → when and how much → my doubts.**
 
 ---
 
-## 5. Type
+## 5. Colour
 
-**Font:** **Schibsted Grotesk** only, weights 400–800, loaded with `next/font` (`packages/themes/aurora/src/font.ts`). Never add a second family. Never use a monospace font for labels.
+Palette name: **Ink + saffron**.
 
-| Role | Size (desktop → phone) | Weight | Line height | Letter spacing | Colour |
-|---|---|---|---|---|---|
-| H1 (one per page) | `clamp(40px, 4.4vw, 62px)` | 800 | 1.0 | −0.042em | ink, with a teal phrase |
-| H2 (section title) | `clamp(30px, 3.1vw, 42px)` | 750 | 1.1 | −0.03em | ink |
-| H3 (card or step title) | 19–21px | 700 | 1.25 | −0.02em | ink |
-| Lead | `clamp(18px, 1.45vw, 20px)`, max 34em | 400 | 1.5 | 0 | grey |
-| Body | 16–17px | 400 | 1.55 | 0 | grey |
-| Label, meta, facts | 13–15.5px | 600–700 | 1.4 | 0 | brand, grey or mute |
-| Big numerals (month steps, stats) | 26–44px | 800 | 0.9–1 | −0.045em | brand, or yellow when selected |
+| Token | Hex | Use |
+|---|---|---|
+| `--dark` | `#0C1312` | Dark surfaces, the text on a saffron button |
+| `--dark-2` | `#16201E` | Image placeholders on dark |
+| `--ink` | `#0F1716` | Headings and strong text on light surfaces, 1px strong rules |
+| `--body` | `#3A4240` | Body text and lead lines |
+| `--muted` | `#5F6764` | Labels, meta, small print (the lightest text allowed) |
+| `--paper` | `#F5F4F0` | Paper surface |
+| `--tile` | `#EEEDE8` | Diagram backgrounds, empty timetable cells |
+| `--rule` | `#DCDAD3` | Hairlines, card and tile borders |
+| `--acc` (saffron) | `#F2B33D` | **The one filled button**, the one highlighted element in a diagram, the lab cell in the timetable, the focus ring |
+| `--acc-h` | `#FFC25A` | Saffron button hover |
+| on-dark text | `rgba(255,255,255,.82)` / `.64` | Secondary / tertiary text on dark |
+| on-dark rule | `rgba(255,255,255,.16)` | Hairlines on dark |
+| WhatsApp green | `#128C4A` | The WhatsApp glyph in the phone action bar only |
 
 **Rules:**
-- Use `text-wrap: balance` on H1 and H2.
-- **Sentence case everywhere.** No ALL CAPS, no letter-spacing on labels.
-- **The yellow marker:** one phrase per page (usually in the H1) gets `background: linear-gradient(transparent 64%, #FFC845 64% 92%, transparent 92%)`. Keep it on one line (`white-space: nowrap`).
-- **The headline pattern:** one ink line, then a teal phrase, then the marked phrase. Example: "Become a" (ink) / "**cloud architect**" (teal) / "in 4 months." (ink, on the yellow marker).
+- Neutrals carry about 95% of every screen. Saffron appears on the one filled button and at most one more spot per view.
+- Saffron is never text colour and never a section background.
+- Text contrast at least 4.5:1. Saffron with ink text passes; white text on saffron does not, so never use it.
+- **Platform tokens:** set CloudCadre's tenant branding to primary `#0C1312`, accent `#F2B33D`, bg `#FFFFFF`, muted `#F5F4F0`, border `#DCDAD3`, through `tenant_branding.tokens`. Don't edit the platform defaults in `packages/ui/src/tokens.ts`.
 
 ---
 
-## 6. Layout, spacing and shape
+## 6. Type
+
+**One family: Hanken Grotesk. Two weights: 400 and 600.** Nothing else, anywhere. No 500, 700 or 800, no second family, no monospace. In the app load it with `next/font`.
+
+Eight roles. Every piece of text on a page uses exactly one of them.
+
+| Role | Size | Weight | Line height | Letter spacing | Colour | Use |
+|---|---|---|---|---|---|---|
+| **Display** | `clamp(40px, 4.8cqi, 66px)` | 600 | 1.02 | −0.034em | ink / white | The H1, one per page |
+| **H2** | `clamp(28px, 3cqi, 40px)` | 600 | 1.1 | −0.025em | ink / white | Section titles |
+| **Number** | `clamp(28px, 2.6cqi, 36px)`; 36–48px in number tiles and the fee | 600 | 1.0 | −0.03em | ink / white | Big values: ₹ LPA, 30, ₹15,000. The calendar day is the one exception at `clamp(72px, 7cqi, 104px)` |
+| **H3** | `clamp(19px, 1.5cqi, 21px)` | 600 | 1.3 | −0.01em | ink | Card titles, card values, facts values |
+| **Lead** | `clamp(17px, 1.4cqi, 19px)`, max 44ch | 400 | 1.5 | 0 | body | The one line under the H1 or an H2 |
+| **Body** | 17px (16px on phones) | 400 | 1.55 | 0 | body | FAQ answers, app text |
+| **Small** | 15px | 400 (600 for a name) | 1.45 | 0 | muted | Card lines, captions, meta |
+| **Label** | 14px | 400 | 1.4 | 0 | muted | Field and fact labels ("Next batch", "Month 1 · 12 labs") |
+
+**Rules:**
+- Hierarchy comes from size **and** weight **and** colour together: a value is 600 ink, its label is 400 muted.
+- `text-wrap: balance` on Display and H2.
+- Sentence case everywhere. No ALL CAPS, no letter-spacing on small text.
+- A unit of value plus unit ("₹27 LPA", "₹15,000 / month") shows the unit in Label size, 400, muted.
+- The H1 is at most 8 words. It names the category or the outcome, in plain words: "Become a cloud engineer in 4 months."
+
+---
+
+## 7. Layout, spacing and shape
 
 | Thing | Value |
 |---|---|
-| Content width | `max-width: 1280px`, side gutters `clamp(16px, 5vw, 72px)` |
-| Section padding | `clamp(56px, 6.2vw, 92px)` top and bottom |
-| Section head to content | `clamp(28px, 3.4vw, 44px)` |
-| Grid gaps | 12–24px (cards 14–20px) |
-| Spacing scale | Multiples of 4, mostly 8 / 12 / 16 / 24 / 32 / 48 |
-| Radius | Cards 20px, inner tiles 10–16px, buttons 12px (small 10px), chips and pills 99px |
-| Card shadow | `0 1px 2px rgba(20,32,31,.06)`; hover `0 8px 24px rgba(20,32,31,.10)` and `translateY(-2px)` |
-| Hairlines | 1px `--line`. 2px `--ink` only as a strong top rule (FAQ list, step baseline) |
+| Page width | `max-width: 1440px`; side gutter `clamp(16px, 4cqi, 56px)` |
+| Section padding | `clamp(64px, 8cqi, 112px)` top and bottom |
+| Section head to content | `clamp(24px, 3cqi, 40px)` |
+| Grid gaps | 16px between cards (10px on phones); 32px between tiles with captions |
+| Spacing scale | Multiples of 4: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 |
+| Radius | **3px** for cards, photos, buttons and tiles; 50% only for round avatars |
+| Shadows | None, except the phone action bar (`0 -6px 20px rgba(0,0,0,.06)`) |
+| Rules | 1px `--rule` between items; 1px `--ink` as a strong top rule (FAQ list); dashed `--rule` inside the batch ticket |
 
-**Breakpoints (v9 uses container queries; in the app use the same values in `@media`):**
-- `≤ 1100px`: 3 or 4 column grids become 2 columns.
-- `≤ 820px`: phone layout. One column, menu button, full-width buttons, swipe rows.
+**Section head:** H2 on the left, an optional Lead line under it, an optional text link on the right ("Full syllabus (PDF)"). Nothing else.
 
-### 6.1 Section head (every section uses it)
-- H2 on the left, with an optional one-line lead under it.
-- An optional text link on the right, aligned to the baseline (for example "Download the syllabus →").
-- Nothing else goes in the head.
-
-### 6.2 The slanted panel (brand shape)
-- A rounded parallelogram leaning right (horizontal shift = 0.33 × height), with a yellow copy offset down and to the right.
-- It appears in three places: the **logo**, the **hero photo frame** and the **CEAP drawing**.
-- It is the *only* angled shape in the system. Do not invent other angles, waves or swooshes.
-- Hero frame CSS: `clip-path: url(#slant)` from the shared sprite (`packages/ui/src/sprite.ts`).
+**Grids:** use explicit column counts that divide the content evenly: 4 → 2 for four items, `auto-fill, minmax(220px, 1fr)` for the placement wall (5 per row at full width, so 15 makes 3 full rows). Never leave a single orphan card on a row.
 
 ---
 
-## 7. Components
+## 8. Responsive: components, not breakpoints
 
-Every component below is in v9; copy the markup and CSS from there.
+**The approach.** Every section is a container (`container-type: inline-size`) and changes its layout from its own width, not the device's. Type and space are fluid (`clamp` with `cqi` units), so nothing jumps. Only real structure changes get a container query. Check every screen at **1440, 820 and 390** wide.
 
-### 7.1 Buttons and links
+| Component | Wide | ≤ 900px | ≤ 560px (phone) |
+|---|---|---|---|
+| Header | Logo, 4 links, Log in, "WhatsApp us" | Links move to a **visible link row** under the header | WhatsApp becomes a 44px icon button |
+| Hero | Copy left, photo right (50/50) | Copy first, photo below at 4:3 | Facts in one row of 3, buttons full width, photo 1:1 |
+| Placement wall | 5 per row | 3 per row | 2 per row, **first 6 + "Show all 15 learners"** |
+| Month cards / number tiles | 4 per row | 2 per row | 2 per row, card's last line hidden |
+| Batch ticket | Date · week · fee in 3 columns | Date + week, fee below | Stacked; date beside its label |
+| FAQ + person | Person left, FAQ right | FAQ first, person after | Same, person photo 16:10 |
+| Footer | 4 columns | 2 columns | 2 columns |
 
-| Type | Look | When |
-|---|---|---|
-| **Filled** (`btn-brand`) | Teal fill, white text, 54px tall (small 42px) | The one main action of the view |
-| **Outline** (`btn-line`) | 2px ink ring, ink text | The second action, usually WhatsApp |
-| **Yellow** (`btn-accent`) | Yellow fill, ink text | **Only** in the final dark "Next batch" strip, where it is the single filled action of that view |
-| **Text link** (`tlink`) | Teal, weight 650, underline on hover, trailing "→" | "See all", "Download the syllabus", "More stories" |
-
-Button and link labels are verbs plus objects: "Join the next batch", "Ask on WhatsApp", "Message Ananya on WhatsApp". Never "Click here" or "Submit".
-
-### 7.2 Header (sticky)
-- Logo, then nav links (Program · How we teach · Placements · FAQ), then on the right "Log in" and an outline "WhatsApp us".
-- **Stays visible while scrolling.** It gets a hairline shadow once scrolled. The link for the section on screen gets a yellow underline.
-- Phone: logo and a "Menu" button that opens a dropdown panel.
-
-### 7.3 Logo
-- **Mark:** the slanted teal panel with the yellow offset and a white "C" whose tips are cut on the panel's lean. File: [`plan/mockups/assets/cloudcadre-mark.svg`](mockups/assets/cloudcadre-mark.svg).
-- **Wordmark:** typed text, not an image. "Cloud" in ink and "Cadre" in teal, Schibsted Grotesk 800, 24px, letter-spacing −0.035em. On the dark footer it is all white.
-- **In code:** replace the `#logo` symbol in `packages/ui/src/sprite.ts` with this mark. The aurora `Brand` component already renders the symbol plus `brand.name`.
-
-### 7.4 CEAP tag
-A small teal block reading **CEAP** in white, 800 weight, then "CloudCadre Elite Architect Program" in teal 700. Use it where the program is named as a product (for example on the program page). **Not in the home hero:** the owner removed it there (it looked AI-made), and the H1 already names the outcome.
-
-### 7.5 Facts row
-Three or four short facts, each with a teal line icon: "4 months, live online" · "Next batch: 12 Jan" · "Capstone + interview prep". 15–16px, weight 650. **Use it instead of a paragraph.**
-
-### 7.6 Trust line
-"★★★★★ **4.8** · 1,200+ reviews | **420+** learners placed": one quiet line under the hero buttons. Never a big stats bar in the hero.
-
-### 7.7 Photo card with outcome tag ("Built for")
-- 16:10 photo, radius 18px, a dark scrim at the bottom (`linear-gradient(transparent, rgba(8,24,22,.86))`).
-- On the scrim, bottom left: small "If you are a" and a big label ("Fresher"). Bottom right: a yellow tag with the outcome ("→ Cloud engineer").
-- Three in a row. On phones they become a swipe row (cards 80% wide, scroll-snap).
-
-### 7.8 Program climb (stepped tabs + detail panel)
-The signature component, rated 10/10 by the owner. Reuse it for any staged journey: program months, onboarding steps, the learner's own progress.
-
-**The steps:**
-- 4 steps rising onto one 2px ink baseline. Step heights 168 / 204 / 240 / 276px; on phones 62 / 76 / 90 / 104px.
-- Inside each step:
-  - a big numeral "01"–"04";
-  - "Weeks 1–4" on the right;
-  - the title;
-  - tool logos at the bottom.
-- A yellow goal pill ("⚑ Cloud architect") sits on top of the last step.
-- **Selected step:** dark teal, yellow numeral, and a small triangle pointing down at the panel.
-- **Earlier steps** (already climbed): pale fill `#F2F7F5`, muted numeral and a teal tick.
-- **Accessibility:** it is an ARIA `tablist`. Steps are `role="tab"` with `aria-selected`; the panel is `role="tabpanel"`. Arrow keys, Home and End move between steps.
-
-**The detail panel (white, radius 20), read top to bottom:**
-1. A 4-segment progress bar and "Month 3 of 4 · Weeks 9–12".
-2. The H3 title.
-3. The outcome: "**By week 12** you can …" (outcome first, with a flag icon).
-4. Topics as a two-column checklist, each with a logo or a tick.
-5. On the right, **You build**: the caption first, then the diagram (§9).
-6. Footer: lab count on the left; on the right "← Month N" and "Next: {title} →". **The last step ends with the filled "Join the next batch".**
-
-**Never:**
-- show all four months' detail at once;
-- auto-advance;
-- use carousels with dots instead of this.
-
-### 7.9 Photo mosaic ("How we teach")
-- An asymmetric grid: one tall photo, one wide photo, one small photo and one drawn certificate.
-- Each tile has a yellow number badge (1–4) and a caption on the photo: a title of at most 5 words and one short line.
-- On phones the tiles stack, 210px tall each.
-
-### 7.10 Placement wall (on the dark panel)
-Built for trust with new visitors: many real faces at once, not a few big cards.
-1. Heading, and one line of counted numbers under it ("15 placement stories · 12 companies · ₹29 LPA highest package"). Count them from the list; never an "average" of hand-picked stories.
-2. Two lanes of **white** horizontal cards drifting in opposite directions (lane 1 left, lane 2 right), full width of the panel, alternating people between lanes so no face is on screen twice at once.
-3. Card: square photo on the left, shown whole (square frame, `object-fit: cover`, top-aligned); on the right the package in teal ("₹17 LPA", city after it in grey), then the name, the company (its **logo** when there is an official vector file, fitted into one 124×26px box with `object-fit: contain`; otherwise the name in bold text), and the role in grey (2 lines at most). Never use scraped favicons as logos. No "Was / Now" unless the previous job is known.
-4. Motion: ~6s per card, linear, seamless loop (list drawn twice, track slides 50%). It stops on hover or focus and has a visible Pause / Play button. Under `prefers-reduced-motion` nothing moves and the lanes become plain rows to swipe or scroll. The duplicate list is `aria-hidden` and `inert`.
-**Only real, consented placements may go live.**
-
-### 7.11 Trainer card
-- A portrait (4:4.6, radius 20) with white logo badges for what they teach (bottom left) and a dark "9 yrs" tag (top right).
-- Below: the name, a LinkedIn icon link (so buyers can check the person is real) and one short role line.
-
-### 7.12 Counsellor card (keep it simple)
-- A 56px round natural portrait, the name and the role.
-- One line: "Ask about the program, batch dates or fees. She usually replies within 15 minutes."
-- One filled "Message {name} on WhatsApp" button.
-- One small line: "Or call +91 … · 9am to 9pm, Mon to Sat".
-
-**Nothing else.** The owner removed the example chat and the question chips as "too much happening". On desktop the card is sticky next to the FAQ.
-
-### 7.13 FAQ
-- Native `<details>`, all closed. A 2px ink top rule, then 1px hairlines.
-- Question 19px/650 on the left. On the right a round "+" that turns into a yellow "–" when open.
-- 5 to 6 questions; answers of at most 2 sentences.
-- Must include "Do you guarantee a job?", answered honestly (no).
-
-### 7.14 Final strip
-A dark teal rounded strip at the end of the last section: "**Next batch starts 12 Jan**" with "4 months · live online · capstone and interview prep", and a yellow "Join the next batch →" button. The page ends once, on this.
-
-### 7.15 Floating WhatsApp button
-Phones only (on desktop the header already has WhatsApp). A green pill, bottom right, shown only after the hero has scrolled out of view.
+**Phone patterns (researched, keep them):**
+- **No hamburger.** With 4 main links, keep them visible in a row of equal tabs under the header. Hidden navigation is found less often ([NN/g](https://www.nngroup.com/articles/hamburger-menus/)).
+- **No carousels or swipe rows.** People skip them ([NN/g](https://www.nngroup.com/articles/mobile-carousels/)). Show a grid with "Show all".
+- **The first screen holds the H1, the facts and the Join button.** The photo comes after them.
+- **Sticky action bar:** a slim white bar at the bottom ("Next batch 12 Jan" · WhatsApp icon · "Join batch"). It appears only after the hero button scrolls away and hides once the batch section is reached. Show it on phones only.
+- **Progressive disclosure:** when a unit has detail that doesn't fit, hide it behind a text-button toggle with `aria-expanded` ("Topics and project"), never behind a hover.
+- **Targets:** at least 44px tall. Main buttons are full width on phones.
 
 ---
 
-## 8. Icons and logos
+## 9. Motion
 
-- **Line icons:**
-  - 24-unit viewBox, 1.9 stroke, round caps and joins, `currentColor`, usually teal;
-  - drawn at 18–24px;
-  - set used: clock, lab (terminal), calendar, check, flag, briefcase, plus the ones in `packages/ui/src/marks.tsx`.
-- **Platform logos** come from the shared sprite: Devicon marks (MIT), plus WhatsApp from Simple Icons.
-  - Show them in white or stone tiles, radius 10–14px.
-  - Google Cloud (`lg-gcp`) is in v9 and **must be added to `packages/ui/src/sprite.ts`**.
-  - The FinOps mark is a placeholder; swap in the official one before launch.
-- **Use logos instead of words wherever the logo is well known** (AWS, Azure, Kubernetes). In filters, show only the logo, with the label shown on the selected item, in a tooltip, and for screen readers via `aria-label`.
-
----
-
-## 9. Diagrams ("You build" and course art)
-
-Diagrams are **built in code (SVG), never generated images.** Generated images cannot show an exact claim, never match each other in style, and garble labels.
-
-**Style:**
-- Teal lines, stroke 2 (2.4 in small art), white fills, round joins.
-- **Exactly one yellow element** per drawing: the thing that matters (the App tier, the "After" bar, "Live").
-- Real tool logos inside (`<use href="#lg-aws">`).
-- Labels in the site font, 11.5px/650.
-- Lines run in `currentColor`, so a drawing follows the brand colour.
-
-**Content:** each drawing shows its claim literally:
-- "the same app on three clouds" → three cloud boxes, each with the same Web / App / Data stack;
-- "a savings plan" → a bill with the waste highlighted and Before / After bars with "−32%";
-- "a pipeline" → GitHub → Terraform → Docker → Kubernetes → Live.
-
-**Motion:**
-- Dashes may flow slowly along connector lines (`stroke-dashoffset` animation, 1s loop).
-- Turn it off under `prefers-reduced-motion`.
-
-**Caption first:** "You build" plus one line above the drawing, so the reader knows what they are looking at.
-
----
-
-## 10. Photography
-
-- **Best:** real CloudCadre photos, real classes, trainers, learners, the counsellor. Plan one phone photo session. It feeds the hero, the mosaic, trainers, placements and the counsellor card.
-- **Stock photos** (Unsplash) are allowed as **placeholders only**. Mark them in code (`// stock placeholder`). Pick natural, warm, real-workplace shots. No posed models, no glamour portraits, no handshakes. Prefer people who look Indian.
-- **No AI-generated people, ever.** Generated images are fine only without people or hands (for example a top-down desk flat-lay for the hero).
-- **Framing:** radius 18–20px, `object-fit: cover`, and a dark bottom scrim when text sits on the photo.
-- **Alt text:** describe what is in the photo. Faces next to a name use `alt=""` when the name is already printed.
-
----
-
-## 11. Writing (microcopy)
-
-- **Short:** one line per item. A section lead is one sentence. Answers are at most 2 sentences.
-- **Outcome first:** "By week 12 you can ship an app to Kubernetes…", not "In this module we will cover…".
-- **Specific:** weeks, labs, dates, names, ₹. No "world-class", "cutting-edge", "unlock your potential", "transform your career".
-- **Sentence case** for every heading, button and label.
-- **Second person, plain English.** Assume readers are Indian professionals and students reading in their second language. Avoid idioms.
-- **Honest:** no job guarantee, no fake urgency ("only 3 seats left!") unless it is true and maintained.
-- **Placeholders:** every invented figure is marked in a code comment, and listed in §15 until real data replaces it.
-
----
-
-## 12. Motion
+Almost none. The page must work and look finished with no animation.
 
 | Motion | Spec |
 |---|---|
-| Section reveal | Opacity 0 → 1 and `translateY(16px)` → 0, 0.5s ease, once, when 8% of the element is in view |
-| Card hover | Lift 2px and a stronger shadow, 0.15s |
-| Photo hover | `scale(1.03)`, 0.5s |
-| Panel swap (climb) | Fade and rise 6px, 0.3s |
-| Diagram flow | Dash offset loop, 1s |
+| Button hover | Background colour change only |
+| Phone action bar | Slide up `translateY(110%) → 0`, 0.25s |
+| Swapping content in place | Opacity fade, 0.2–0.3s |
+| Diagram connectors | May flow slowly (`stroke-dashoffset`, 1s loop); optional |
 
-**Everything is off under `prefers-reduced-motion: reduce`.** Content must be fully visible without JavaScript; add the reveal class only from JS.
-
----
-
-## 13. Accessibility (must pass)
-
-- **Focus ring:** `outline: 3px solid #FFC845; outline-offset: 3px` on every interactive element.
-- **Targets:** at least 44×44px on phones.
-- **Contrast:** at least 4.5:1 for text (checked for the tokens in §4).
-- **Semantics:**
-  - one H1 per page, headings in order;
-  - sections labelled by their H2 (`aria-labelledby`);
-  - lists as `ul` or `ol`;
-  - FAQ with `<details>`.
-- **The climb** is a proper ARIA tablist with keyboard support (§7.8).
-- **External links** (`wa.me`) use `target="_blank" rel="noopener noreferrer"`.
-- **No text inside images** that is not also present as real text.
+No reveal-on-scroll, no hover lift, no photo zoom, no marquee. **Everything is off under `prefers-reduced-motion: reduce`.**
 
 ---
 
-## 14. How to build a new screen (the process)
+## 10. Components (all in `home-v11.html`)
 
-1. **Find the screen's structure** with `node scripts/track.mjs` (its `mockup` field). Groups A to D are in `plan/mockups-learner-flows/`; older items point at deleted files in git history (see the note at the top of this guide).
-2. **Write the brief** (in your head or a comment):
-   - the screen's **one job**;
-   - its **one filled action**;
-   - its reading order;
-   - which surfaces its sections use (§3).
-3. **Pick components from §7.** Make a new component only when none fits, and match the tokens in §4–6.
-4. **Replace paragraphs** with facts rows, logos, icons, checklists or a diagram (§0 rule 3).
-5. **Build both widths.** Check at 390px for no sideways overflow and 44px targets.
-6. **Run the checklist in §16.**
+### 10.1 Buttons and links
 
-### Page recipes for the rest of the site
-
-These are the starting points; the older mockups have the full states.
-
-| Route | Job | Structure |
+| Type | Look | When |
 |---|---|---|
-| `/courses` (catalog) | While CEAP is the only program, send people to it | Show the CEAP program (or redirect to its page). When there are 2 or more programs: program cards with a "what you build" drawing on top, logos as filters, no prices on cards |
-| `/courses/[slug]` (program page) | Help someone decide to join | Hero (CEAP tag, outcome H1, facts row, **price with instalment line** and "Join the next batch") → the climb with full syllabus detail → how we teach → trainers for this program → placements → FAQ → final strip. **This is where the price lives** |
-| `/checkout/[orderId]` | Pay with confidence | Focus layout (logo only, no nav). Order summary card on the right (program, batch date, price, instalment option). Payment on the left. One filled "Pay ₹…" button. WhatsApp help line under it |
-| `/login`, `/signup` | Get in fast | Split layout: slanted photo panel on the left (hidden on phones), form on the right. One filled button. WhatsApp help line |
-| `/learn` (learner home) | Resume where you left off | "Continue" card first (the next lesson, one filled button). Then the climb reused as **your** progress, with completed months ticked. Then upcoming live classes |
-| `/learn/[slug]` (lesson) | Learn without distraction | Focus layout. Video or content first, lesson list in a side panel (a sheet on phones). "Mark complete" and Next as the actions |
-| `/progress`, `/certificates`, `/verify/[code]` | Show proof | Big numerals for progress, the certificate drawn as in the mosaic, and the verify page as a plain trust page (name, program, date, valid ✓) |
-| `/admin/*` | Get work done | Functional UI on the same tokens (colour, type, radius, focus). No marketing patterns, no reveal animations. Dense tables are fine here |
+| **Filled** (`.btn`) | Saffron, ink text, 600, 52px tall (48px in the phone bar), radius 3 | The one main action of the view |
+| **Outline** (`.btn.btn-line`) | 1px ink border, ink text; fills ink on hover | The second action ("Message Ananya", "Show all 15 learners") |
+| **Text link** (`.link`) | 600, underlined (offset 5px), optional WhatsApp glyph before | "Ask on WhatsApp", "Full syllabus (PDF)" |
+
+Labels are a verb plus an object: "Join the 12 Jan batch", "Ask on WhatsApp", "Message Ananya". No arrows, no "Click here", no "Submit".
+
+### 10.2 Header
+- Dark, sticky, 64px (56px on phones), 1px on-dark rule at the bottom.
+- Logo mark + "CloudCadre" (600, 19px) · links: Placements, Program, Fees and dates, FAQ · right: "Log in" and an outline "WhatsApp us".
+- At ≤ 900px the links move to the **link row**: 4 equal tabs, 44px tall, on dark, under the header (it scrolls away; only the header row is sticky).
+
+### 10.3 Hero (split, real learner)
+- Left, on dark: Display H1 → one Lead line → **facts row** → filled "Join the {date} batch" + WhatsApp text link.
+- **Facts row:** 3 items, each a Label ("Next batch") over an H3 value ("12 Jan"). Values must be the answers to when, what time and how much.
+- Right: a **real learner's photo**, full height, `object-fit: cover`, with a bottom scrim (`linear-gradient(180deg, transparent, rgba(8,12,12,.88) 70%)`). On the scrim: "₹27 LPA" (Number, white), then "Name, CloudCadre learner · Role, Company" (Small).
+- Only with the learner's written consent. Until then a stock photo, marked.
+
+### 10.4 Placement card and wall (the model component)
+- White card, radius 3, on the paper surface. Square photo (`c_fill,g_face` crop from Cloudinary), then: "₹27" in H3 + "LPA" in Label → name (Small, 600) → role (Label, muted, 2 lines reserved) → company **logo** (17px tall, max 92px wide) or the company name in 600 when there is no official vector logo. Never scraped favicons.
+- The section head shows counted numbers ("**15** learners · **12** companies · up to **₹29 LPA**") and the employer logos in grey. Count from the list; never an average of hand-picked stories.
+- Footnote: "Packages are CTC per year, as shared by each learner."
+- Only real, consented placements go live. No "Was / Now" unless the previous job is known.
+
+### 10.5 Month card (program)
+- Paper card, radius 3. On top a **diagram** (8:5, on `--tile`, §11) showing what you build that month.
+- Then a Label "**Month 1** · 12 labs" → H3 title of what you build ("One app on three clouds") → one Small line (the topics in 6 words).
+- 4 cards = 4 months. The full syllabus lives in a PDF and on the program page, not on the home page.
+
+### 10.6 Number tile ("How classes work")
+- Photo 4:3, radius 3 → big Number ("30") → one Small line ("seats in a batch"), 3–4 words.
+- Four tiles. Each number must be specific and true (or marked placeholder).
+
+### 10.7 Facts
+A value is always H3/600 ink with a Label/400 muted above it. Use for the hero facts, the batch details and app summaries.
+
+### 10.8 Batch ticket ("Next batch")
+One white block on paper with three parts separated by dashed rules:
+1. **Calendar:** month and year (Small, 600) → the day as a huge numeral → "4 months, live online" (Label).
+2. **Your week:** a 7-day row (Mon–Sun). Class days are ink cells ("8–10 pm"), the lab day is a saffron cell ("Lab 10–1"), free days are `--tile` with "–". A legend under it, plus "Every class is recorded".
+3. **Fee:** "₹15,000" (Number) + "/ month × 4" (Label) → "or ₹60,000 once · UPI, card, net banking" → the filled Join button → WhatsApp text link.
+This is where the price lives on the home page. Never hide the price behind "ask us".
+
+### 10.9 FAQ and counsellor
+- **Person:** a real photo (4:3, radius 3), name (600), "Admissions counsellor · replies in about 15 min" (Small), one **outline** "Message {name}" WhatsApp button. Nothing else (no chips, no example chat).
+- **FAQ:** native `<details>`, all closed, 1px ink top rule, 1px hairlines, question in Body/600, "+" / "–" on the right. 5–6 questions, answers of at most 2 sentences. Must include "Do you guarantee a job?" answered honestly (no).
+
+### 10.10 Phone action bar
+See §8. White, 1px top rule, soft shadow. Left: "Next batch 12 Jan" (Small, 600) over the fee (Label). Right: a 48px WhatsApp icon button and a filled "Join batch". Its links are `tabindex="-1"` and `aria-hidden` while it is hidden.
+
+### 10.11 Footer
+Dark. Logo + one line ("Live online training in cloud, DevOps and FinOps.") · Program · Help · Contact columns · bottom rule with the trademark line and Privacy · Terms · Refunds.
+
+### 10.12 Logo
+- **Mark:** [`plan/mockups/assets/cloudcadre-mark.svg`](mockups/assets/cloudcadre-mark.svg) (the slanted panel "C"). **Wordmark:** "CloudCadre" typed in the site font, 600.
+- **Open question:** the mark is still teal + yellow from the v9 palette. Ask the owner whether to recolour it to ink + saffron (§17).
 
 ---
 
-## 15. Open placeholders (replace before launch)
+## 11. Diagrams
 
-- **Syllabus:**
-  - the month split, the topics per month, lab counts and "8–10 hours a week";
-  - the batch date "12 Jan";
-  - the "−32%" in the month 2 diagram;
-  - a syllabus PDF for "Download the syllabus".
-- **Social proof:** the review score and count, every placement (people, employers, packages, photos), the stats row.
-- **People:** trainer names, bios and photos, plus LinkedIn URLs; the counsellor's name, photo, phone number, reply hours and the WhatsApp number in every `wa.me` link.
-- **Images:** the hero image (prompt: a top-down architect's desk flat-lay, no people, teal and yellow props), and the stock photos in "Built for" and the mosaic.
-- **Logos:** the official FinOps mark.
+Diagrams are **built in code (inline SVG), never generated images**: generated images can't show an exact claim, don't match each other and garble labels.
 
----
-
-## 16. Before you hand a screen over
-
-- [ ] One H1; each section has one job and **one filled button per view**.
-- [ ] Touching sections never share a surface; at most one dark panel.
-- [ ] Nothing from the banned list (§2). No emoji, caps labels, gradients or glow.
-- [ ] Every image carries information; people in photos are real (or a marked stock placeholder); there are no AI faces.
-- [ ] Text is short, specific and outcome-first; placeholders are marked.
-- [ ] Only Schibsted Grotesk, with the type scale in §5. Colours are from §4 only.
-- [ ] 390px wide: no sideways overflow, 44px targets, full-width buttons.
-- [ ] Keyboard focus visible; reduced motion respected; contrast at least 4.5:1.
-- [ ] Compared side by side with `plan/mockups/homepage-v9.html`: it looks like the same product.
+- `viewBox="0 0 320 200"`, shown at 8:5 on a `--tile` background.
+- Lines `#0F1716`, stroke 1.5. Tiles white with a `--rule` border, radius 3. Arrows use one shared marker.
+- **Exactly one saffron element** per drawing: the thing that matters (the "After" bar, the capstone block).
+- **Real tool logos** inside white tiles (Devicon via the shared sprite `packages/ui/src/sprite.ts` in the app; jsDelivr in mockups).
+- Labels in the site font, 12–13px, ink or muted. Each label is also in the card's text or the SVG's `aria-label`.
+- Each drawing shows its claim literally: "One app on three clouds" = one app box wired to AWS, Azure and Google Cloud; "A smaller cloud bill" = Before and After bars; "Code to Kubernetes" = Code → Terraform → Docker → Kubernetes; "Design it, defend it" = your architecture → panel review → 2 mock interviews.
+- No invented numbers inside drawings (no "−32%") unless confirmed.
 
 ---
 
-## 17. Decision log (do not reopen these)
+## 12. Photography
+
+- **Best:** real CloudCadre people: placed learners (with consent), live classes, trainers, the counsellor. Plan one photo session.
+- **Real learners lead.** The hero uses a real learner photo. Stock is only a marked placeholder (`<!-- stock placeholder -->`).
+- **Stock rules (placeholders only):** natural, warm, real workplaces; no posed models, no handshakes; prefer people who look Indian.
+- **No AI-generated people, ever.**
+- **Framing:** radius 3, `object-fit: cover`. Text on a photo only on a bottom scrim inside the photo.
+- **Alt text** describes the photo. Faces next to a printed name use `alt=""`.
+- **Known issue:** several placement photos carry a small AI-tool sparkle mark in one corner, and Shubham Kulkarni's photo shows three people. Ask for clean originals.
+
+---
+
+## 13. Writing
+
+- **Clear first:** the H1 names the thing; facts answer when, what time and how much.
+- **Short:** at most 12 words per unit; one line under a heading; FAQ answers at most 2 sentences.
+- **Outcome first:** "One app on three clouds", not "Introduction to multi-cloud".
+- **Specific:** weeks, labs, dates, names, ₹. No "world-class", "cutting-edge", "unlock your potential", "transform your career".
+- **Sentence case** for every heading, button and label.
+- **Plain English** for second-language readers; no idioms.
+- **Honest:** no job guarantee, no fake urgency. Placeholders are marked in code and listed in §17.
+
+---
+
+## 14. Accessibility (must pass)
+
+- **Focus ring:** `outline: 3px solid #F2B33D; outline-offset: 3px` on every interactive element.
+- **Targets:** at least 44×44px.
+- **Contrast:** at least 4.5:1 for text. `--muted` is the lightest text on white or paper.
+- **Semantics:** one H1, headings in order, sections labelled by their H2 (`aria-labelledby`), lists as `ul`/`ol`, FAQ as `<details>`, toggles with `aria-expanded`.
+- **Diagrams:** `role="img"` and an `aria-label` that states the claim.
+- **External links** (`wa.me`) use `target="_blank" rel="noopener noreferrer"`.
+- **Reduced motion** respected; content fully visible without JavaScript.
+
+---
+
+## 15. How to build any new screen
+
+1. **Find its structure** with `node scripts/track.mjs` (the `mockup` field) or `plan/mockups-learner-flows/`. Take structure and states from there; take every visual from this guide.
+2. **Write the brief** as a comment: the screen's one job, its one filled action, the visitor's questions in order, and which surface each section uses (§4).
+3. **Build units, not paragraphs.** For each section ask: what is the picture, what is the big value, what is the one line (§3)? If there is no picture, use facts (§10.7) or a diagram (§11).
+4. **Pick components from §10.** Make a new one only when none fits, using the tokens in §5–7.
+5. **Lay it out with containers** (§8) and check at 1440, 820 and 390 wide.
+6. **Run the checklist** in §18.
+
+### Page recipes
+
+| Route | Job | Structure (in v11 units) |
+|---|---|---|
+| `/courses` (catalog) | Send people to CEAP while it's the only program | Redirect to the program page, or one program card (diagram + title + facts). With 2+ programs: month-card-style program cards, logos as filters, no prices on cards |
+| `/courses/[slug]` (program page) | Help someone decide | Split hero (H1, facts with price, Join) → month cards, each expanding to full topics → number tiles → placement wall (filtered to this program) → batch ticket → FAQ + person |
+| `/checkout/[orderId]` | Pay with confidence | Focus layout (logo only). Order summary as facts (program, batch date, price, instalments) beside the payment block. One filled "Pay ₹…" button, WhatsApp help line |
+| `/login`, `/signup` | Get in fast | Split: real-learner photo with the ₹ LPA scrim on one side (hidden on phones), form on the other. One filled button |
+| Learner area (`/learn` and the app frame) | Resume, then learn | Same tokens, type roles and 3px radius. Home: Continue card (one filled button) → next class → your months. Denser layouts are fine; still no paragraphs where a fact or progress number works |
+| Lesson | Learn without distraction | Focus layout, content first, one big forward button |
+| `/progress`, `/certificates`, `/verify/[code]` | Show proof | Big Numbers for progress; the certificate as a code-drawn card; verify as a plain facts page (name, program, date, valid) |
+| `/admin/*` | Get work done | Functional UI on the same tokens, type and focus ring. Tables are fine. No marketing patterns |
+
+---
+
+## 16. Porting v11 into the app
+
+**Done 2026-11-26:** step 1 (Hanken Grotesk, `font.ts`), step 3 (home in `home.tsx`, `home.css`, `diagrams.tsx`; content keys in `aurora-content.ts`) and step 4 (header with link row, phone action bar, footer in `site.css`; the floating WhatsApp button is gone). The home page uses fixed v11 hex values in `site.css`, not tenant tokens, so step 2's branding tokens are still open, and so is step 5. The catalog and course pages still use the v9 `.au` rules in `aurora.css`. Steps as originally written:
+1. **Font:** swap Schibsted Grotesk for Hanken Grotesk (400, 600) in `packages/themes/aurora/src/font.ts`.
+2. **Tokens:** set the tenant branding values in §5; replace aurora CSS radii (12–36px) with 3px; drop inset panels, the slanted hero frame, the yellow marker and reveal animations.
+3. **Home:** rebuild `packages/themes/aurora/src/home.tsx` and `home.css` to the v11 order (§4). Content keys in `apps/academy/lib/aurora-content.ts`: the hero gets a `learner` (photo, package, name, role, company); `program.months` gets a `diagram` id and a short `line`; `how.tiles` becomes number tiles; `talk.nextBatch` grows into the batch ticket (date, week, fee). Remove `builtFor` and the climb from the home page.
+4. **Header:** replace the phone "Menu" dropdown with the link row; add the phone action bar; remove the floating WhatsApp button.
+5. **Learner area:** keep its structure (session of 2026-11-26), move it to the v11 tokens and type roles.
+6. Update `plan/tracker.json` and PROGRESS.md as each step lands.
+
+---
+
+## 17. Open placeholders and questions (resolve before launch)
+
+- **Batch and price:** the date "12 Jan", class times (Mon–Thu 8–10 pm, Sat lab 10–1), the fee (₹15,000 × 4 or ₹60,000), seats (30).
+- **Program:** the month split, topics, lab counts (12 / 8 / 14 / "34 labs"), and a real syllabus PDF.
+- **People:** the counsellor's name, photo and hours; the WhatsApp number, phone and email.
+- **Consent:** every placement learner, and Monika Singh for the hero photo.
+- **Photos:** all class photos are stock; clean versions of the placement photos (no sparkle mark, one person each).
+- **Logo:** recolour the mark to ink + saffron, or keep teal + yellow? (owner)
+- **Logos:** official vector logos for NICE, Cencora, Truetech, Fabutech and SA Technologies.
+- **Certificate:** the existing image prints "CloudEdufy" and must be redrawn.
+
+---
+
+## 18. Before you hand a screen over
+
+- [ ] A stranger can tell what this screen is and what to do in 5 seconds.
+- [ ] Every unit is picture + number + line; no paragraphs on marketing screens.
+- [ ] One H1 (≤ 8 words); one filled button per view; button labels without arrows.
+- [ ] Touching sections never share a surface.
+- [ ] Nothing from §2: no eyebrows, chips, arrows, big radii, gradients, carousels, hamburger, AI faces.
+- [ ] Only Hanken Grotesk 400/600, only the 8 type roles in §6, only the colours in §5, radius 3px.
+- [ ] Images carry information; people are real or marked stock placeholders.
+- [ ] Checked at 1440, 820 and 390 wide: no sideways overflow, no orphan card, 44px targets, H1 + facts + Join in the phone's first screen.
+- [ ] Focus ring visible, reduced motion respected, contrast at least 4.5:1.
+- [ ] Placeholders marked in code and listed in §17.
+- [ ] Side by side with `plan/mockups/home-v11.html`, it looks like the same product.
+
+---
+
+## 19. Version history
+
+| Guide version | Date | Reference mockup | What it was | Status |
+|---|---|---|---|---|
+| 9 | 2026-11-25 | [`mockups/homepage-v9.html`](mockups/homepage-v9.html) | Teal + yellow, Schibsted Grotesk 800, inset rounded panels, slanted hero frame, month climb, marquee placements | **Superseded.** Owner: "looks AI made, a bit childish". Guide archived at `archive/15-design-and-ux-guide-v9.md`. Still what the app renders |
+| — | 2026-11-26 | [`mockups/hero-redesign.html`](mockups/hero-redesign.html) | Four hero directions from scratch: A Editorial, B Photo-led, C Syllabus-led, D Proof-led | Exploration. **B Photo-led picked** |
+| — | 2026-11-26 | [`mockups/home-photo-led.html`](mockups/home-photo-led.html) | Full photo-led page with options: 4 heroes, climb/rows, wall/featured, ink/teal | Exploration. Picked **Split hero, Rows, Wall, Ink + saffron** |
+| 10 | 2026-11-26 | [`mockups/home-v10.html`](mockups/home-v10.html) | Research-backed refinement: clarity-first hero, strict type scale, AI tropes removed, container-query layout, visible phone nav, sticky phone bar | **Superseded.** Owner loved only the placement wall; the rest was "too text heavy" |
+| **11** | **2026-11-26** | [`mockups/home-v11.html`](mockups/home-v11.html) | Every section rebuilt as picture + number + line units, modelled on the placement wall; real learner in the hero; month cards with code diagrams; number tiles; batch ticket | **Current.** This guide |
+
+**How to version from now on:** a new mockup gets the next number (`home-v12.html`). When the owner approves it, update this guide, bump its version in the header, add a row here and to §20, and archive the previous guide under `plan/archive/`.
+
+---
+
+## 20. Decision log (do not reopen these)
+
+Rows marked *superseded* are kept for history.
 
 | Date | Decision | Why |
 |---|---|---|
-| 2026-11-23 | No AI-slop tropes; real photos; one yellow accent; hierarchy before styling | The owner rejected a gradient, aurora-style hero and a plain table-heavy one |
-| 2026-11-24 | Teal `#0F5C56` + yellow `#FFC845`, Schibsted Grotesk, slanted hero panel | Picked from palette and frame variants; saturated cobalt "stuck the eye" |
-| 2026-11-25 | Inset panels on a white page with stone `#F2F2EF` neutrals | The old page's sections blurred together; this was picked from variants |
+| 2026-11-23 | No AI-slop tropes; real photos; hierarchy before styling | The owner rejected a gradient, aurora-style hero and a plain table-heavy one |
+| 2026-11-24 | *Superseded 2026-11-26:* teal + yellow, Schibsted Grotesk, slanted hero panel | Replaced by ink + saffron, Hanken Grotesk, straight edges |
+| 2026-11-25 | *Superseded 2026-11-26:* inset panels on a white page | Replaced by full-width bands |
 | 2026-11-25 | "What you get with every course" removed for good; specific content instead | The owner's most disliked section |
-| 2026-11-25 | Visual over text; images must carry information | Text-heavy sections cause overload (NN/g: decorative images are ignored) |
-| 2026-11-25 | Filters show logos only (label on the active one); no prices on cards | Owner request; the price lives on the program page |
-| 2026-11-25 | New logo: slanted panel "C", wordmark typed in the site font; teal stays | The blue logo is temporary; the logo follows the site, not the other way round |
-| 2026-11-25 | The site sells only CEAP; "Built for" uses photo cards; the month "climb" | Owner direction; the climb was rated 10/10 |
-| 2026-11-25 | "You build" diagrams in code, not generated images | Exact claims, consistent style, readable labels |
-| 2026-11-25 | Counsellor card kept minimal (no example chat or chips) | "Too much happening, keep it simple and to the point" |
-| 2026-11-25 | The home hero has no CEAP tag line above the H1 | Owner: "looks too AI made"; the H1 and facts row already say what the program is |
-| 2026-11-25 | Placements are a two-lane auto-scrolling wall of white cards, not a few large photo cards | Owner: the first version "looks ugly"; more faces at once builds trust faster, and white cards on the dark panel are clearer than dark-on-dark |
+| 2026-11-25 | Visual over text; images must carry information | Text-heavy sections cause overload; decorative images are ignored |
+| 2026-11-25 | No prices on catalog cards; the price lives on the program page and the batch ticket | Owner request |
+| 2026-11-25 | The site sells only CEAP | Owner direction |
+| 2026-11-25 | Diagrams in code, not generated images | Exact claims, consistent style, readable labels |
+| 2026-11-25 | Counsellor card kept minimal (no example chat, no chips) | "Too much happening, keep it simple and to the point" |
+| 2026-11-25 | *Superseded 2026-11-26:* the month climb as tabs; the two-lane placement marquee | Replaced by month cards and the static placement wall |
+| 2026-11-26 | Redesign from scratch; **Photo-led** direction | Owner: v9 "looks such AI made, a bit childish, not like a real designer built it" |
+| 2026-11-26 | **Split hero, Ink + saffron** palette, Hanken Grotesk 400/600, 3px radius | Picked from `home-photo-led.html` |
+| 2026-11-26 | Clarity-first H1; visible link row instead of a hamburger; grids instead of swipe rows; sticky phone bar after the hero button | Research: NN/g homepage, navigation and carousel studies; sticky CTA guidance |
+| 2026-11-26 | **Picture + number + line** for every marketing unit; the placement wall is the model | Owner loved only the placement wall in v10; the rest was "too text heavy" |
+| 2026-11-26 | A real learner (with consent) is the hero photo; "Who joins" persona section dropped | Real faces are studied, stock personas are skipped |
+| 2026-11-26 | The price is shown on the home page in the batch ticket | When and how much are the two questions every visitor has |

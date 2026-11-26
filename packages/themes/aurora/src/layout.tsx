@@ -1,10 +1,10 @@
 import type { CSSProperties } from 'react'
 import type { AuthLayoutProps, FocusLayoutProps, SiteLayoutProps } from '@educore/ui/theme'
-import { WhatsAppFab } from './client'
 import { SiteHeader } from './header'
-import { schibsted } from './font'
+import { hanken } from './font'
 import { A, Brand, WhatsAppIcon, waLink } from './parts'
 import './aurora.css'
+import './site.css'
 import './home.css'
 
 export function SiteLayout({ brand, nav, account, site, children }: SiteLayoutProps) {
@@ -13,7 +13,7 @@ export function SiteLayout({ brand, nav, account, site, children }: SiteLayoutPr
   const columns = [...(site?.footerColumns ?? [])]
 
   return (
-    <div className={`${schibsted.variable} au-shell flex min-h-screen flex-col`}>
+    <div className={`${hanken.variable} au-shell flex min-h-screen flex-col`}>
       {site?.announcement && wa && (
         <div className="au">
           <div className="ann">
@@ -26,39 +26,43 @@ export function SiteLayout({ brand, nav, account, site, children }: SiteLayoutPr
 
       <main className="flex-1">{children}</main>
 
-      <footer className="au">
-        <div className="foot"><div className="wrap">
-          <div className="foot-in" style={{ '--cols': columns.length + 1 } as CSSProperties}>
+      {/* Footer (plan/15 §10.11): logo and one line, the content's columns, then Contact. The account link ends the last
+          content column, so "Log in" sits under Help. */}
+      <footer className="cc">
+        <div className="ft dark"><div className="wrap">
+          <div className="ft-top" style={{ '--cols': columns.length + 1 } as CSSProperties}>
             <div>
               <Brand brand={brand} />
-              {brand.tagline && <p className="about">{brand.tagline}</p>}
+              {brand.tagline && <p>{brand.tagline}</p>}
             </div>
-            {columns.map((c) => (
+            {columns.map((c, i) => (
               <div key={c.title}>
                 <h2>{c.title}</h2>
-                <ul>{c.links.map((l) => <li key={l.href + l.label}><A href={l.href}>{l.label}</A></li>)}</ul>
+                <ul>
+                  {c.links.map((l) => <li key={l.href + l.label}><A href={l.href}>{l.label}</A></li>)}
+                  {i === columns.length - 1 && <li><A href={account.href}>{account.label}</A></li>}
+                </ul>
               </div>
             ))}
-            <div>
-              <h2>Help</h2>
-              <ul>
-                {wa && <li><a href={wa} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />{phone ?? 'Chat on WhatsApp'}</a></li>}
-                {!wa && phone && <li><a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a></li>}
-                {brand.contact?.email && <li><a href={`mailto:${brand.contact.email}`}>{brand.contact.email}</a></li>}
-                <li><A href={account.href}>{account.label}</A></li>
-              </ul>
-            </div>
+            {(wa || phone || brand.contact?.email) && (
+              <div>
+                <h2>Contact</h2>
+                <ul>
+                  {wa && <li><a href={wa} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />{phone ?? 'Chat on WhatsApp'}</a></li>}
+                  {!wa && phone && <li><a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a></li>}
+                  {brand.contact?.email && <li><a href={`mailto:${brand.contact.email}`}>{brand.contact.email}</a></li>}
+                </ul>
+              </div>
+            )}
           </div>
-          <div className="foot-base">
-            <span>&copy; {brand.year} {brand.name}. All rights reserved.{site?.disclaimer ? ` ${site.disclaimer}` : ''}{brand.showPoweredBy ? ` Powered by ${brand.platformName}.` : ''}</span>
+          <div className="ft-bot">
+            <span>&copy; {brand.year} {brand.name}.{site?.disclaimer ? ` ${site.disclaimer}` : ''}{brand.showPoweredBy ? ` Powered by ${brand.platformName}.` : ''}</span>
             {site?.legal && site.legal.length > 0 && (
               <span>{site.legal.map((l, i) => <span key={l.href}>{i > 0 && ' · '}<A href={l.href}>{l.label}</A></span>)}</span>
             )}
           </div>
         </div></div>
       </footer>
-
-      {wa && <WhatsAppFab href={wa} />}
     </div>
   )
 }
@@ -67,7 +71,7 @@ export function AuthLayout({ brand, site, children }: AuthLayoutProps) {
   const wa = waLink(brand)
   const art = site?.authArt
   return (
-    <div className={`${schibsted.variable} au-shell au-split`}>
+    <div className={`${hanken.variable} au-shell au-split`}>
       <aside className="au-split-art">
         <div className="au" style={{ background: 'none' }}>
           <Brand brand={brand} />
@@ -98,7 +102,7 @@ export function AuthLayout({ brand, site, children }: AuthLayoutProps) {
 
 export function FocusLayout({ brand, bar, children }: FocusLayoutProps) {
   return (
-    <div className={`${schibsted.variable} au-shell min-h-screen`}>
+    <div className={`${hanken.variable} au-shell min-h-screen`}>
       {bar && (
         <div className="au">
           <header className="focus-bar wrap">

@@ -16,6 +16,8 @@ export interface BrandInfo {
 export interface NavItem {
   label: string
   href: string
+  /** A shorter label for the phone link row, where four tabs share 390px. */
+  shortLabel?: string
 }
 
 /** Marks of the platforms the academy teaches. Themes ship the artwork; content only names it. */
@@ -70,97 +72,88 @@ export interface AuthLayoutProps {
 
 export interface HomeImage { src: string; alt: string }
 
-/** Line icons the home page may name. Themes ship the artwork. */
-export type HomeIcon = 'clock' | 'calendar' | 'flag' | 'briefcase' | 'lab' | 'check'
-/** The "You build" drawings. Built in code by the theme; content only picks one. */
+/** The "What you build" drawings. Built in code by the theme; content only picks one (plan/15 §11). */
 export type DiagramKey = 'clouds' | 'bill' | 'pipeline' | 'review'
 
-/** One month of the program: a step in the climb and the panel that opens under it. */
+/** One month of the program: a card with a drawing of what you build, a label, a title and one short line (plan/15 §10.5). */
 export interface ProgramMonth {
-  title: string
-  /** First and last week, e.g. [1, 4]. */
-  weeks: [number, number]
-  /** What the step shows at the bottom: tool logos, or (for a month with no tools) icons. */
-  logos?: LogoKey[]
-  icons?: HomeIcon[]
-  diagram: DiagramKey
-  /** Completes "By week N you can …" (outcome first). */
-  outcome: string
-  topics: Array<{ label: string; logo?: LogoKey }>
-  /** Caption above the drawing, after "You build". */
-  build: string
-  /** Footer of the panel, e.g. "12 hands-on labs". */
+  /** 1 to 4. Shown as "Month 1". */
+  n: number
+  /** After the dot in the label, e.g. "12 labs" or "capstone". */
   meta: string
+  /** What you build, outcome first: "One app on three clouds". */
+  title: string
+  /** The topics in about six words. Hidden on phones. */
+  line: string
+  diagram: DiagramKey
 }
 
+/** One day of the week in the batch ticket. `class` and `lab` carry a short time; a `free` day shows a dash. */
+export interface BatchDay { day: string; kind: 'class' | 'lab' | 'free'; time?: string[] }
+
 /**
- * Home page copy as one typed object (CloudCadre sells one program, CEAP; plan/15). Every section is optional
- * and is skipped when absent, so an academy never shows a section it has no verified content for
- * (placements, trainers, reviews). These sections map one to one onto the CMS block types in plan/05 §4.
+ * Home page copy as one typed object (CloudCadre sells one program, CEAP; plan/15 v11). Every section is optional
+ * and is skipped when absent, so an academy never shows a section it has no verified content for. These sections map
+ * one to one onto the CMS block types in plan/05 §4. Every unit is a picture, one big value and one short line.
  */
 export interface HomeContent {
   hero: {
-    /** Three parts of the headline: plain, in the brand colour, and on the accent marker. */
-    headline: { lead: string; accent: string; mark: string }
+    /** The H1: at most 8 words, plain, names the outcome. */
+    headline: string
     lead: string
-    /** Short facts with an icon each. Used instead of a paragraph. */
-    facts: Array<{ icon: HomeIcon; text: string }>
-    /** The one filled button of the page. Every "Join the next batch" button points here. */
+    /** Three facts that answer when, what time and how much. */
+    facts: Array<{ label: string; value: string }>
+    /** The one filled button of the page. Every "Join" button points here or to the batch ticket. */
     primaryCta: NavItem
-    /** One quiet line under the buttons. */
-    trust?: { stars: number; score: string; reviews: string; placed: { value: string; label: string } }
-    /** Photo in the slanted frame. Absent: the page draws the CEAP architecture instead. */
-    image?: HomeImage
-    imageTag?: { text: string; link: NavItem }
-    /** Who the program is for: photo cards with the outcome as a tag. */
-    builtFor?: { title: string; items: Array<{ image: HomeImage; intro: string; label: string; outcome: string }> }
+    /** A real learner: the hero picture. Needs the learner's written consent. */
+    learner: { photo: string; alt: string; package: string; name: string; role: string; company: string }
   }
-  /** Where the syllabus PDF can be downloaded. Every "Download the syllabus" link is hidden until this is set. */
+  /** Where the syllabus PDF can be downloaded. The "Full syllabus (PDF)" link is hidden until this is set. */
   syllabusHref?: string
-  program?: {
-    title: string
-    lead: string
-    /** The yellow flag on the last step: where the program ends, e.g. "Cloud architect". */
-    goal: string
-    months: ProgramMonth[]
-  }
-  how?: {
-    title: string
-    lead: string
-    /** The first tile is tall, the second wide, the rest small. Numbered 1..n, then the certificate. */
-    tiles: Array<{ image: HomeImage; title: string; line: string }>
-    certificate: { image: HomeImage; title: string; line: string }
-  }
   placements?: {
     title: string
-    link?: NavItem
-    stats: Array<{ value: string; label: string }>
+    /** Counted from the list: "15 learners · 12 companies · up to ₹29 LPA". `prefix` goes before the bold value. */
+    stats: Array<{ prefix?: string; value: string; label?: string }>
+    /** Employer logos for the section head, in grey. */
+    logos: Array<{ src: string; alt: string; size?: 'tall' | 'heavy' }>
+    footnote: string
     items: Array<{
       name: string
+      /** Square photo, cropped on the face. */
       photo: string
       /** Package in lakhs per annum, e.g. "9.5". */
       lpa: string
-      /** What they did before. Optional: shown as a "Was" row only when known. */
-      was?: string
       now: string
       company: string
       /** The employer's logo (an image URL). Optional: the company name is shown in text when there is none. */
       logo?: string
-      city?: string
     }>
   }
-  trainers?: {
+  /** `goal` is not shown on the home page: the learner dashboard uses it for the flag on the last step of its climb. */
+  program?: { title: string; goal?: string; months: ProgramMonth[] }
+  how?: {
     title: string
-    items: Array<{ name: string; role: string; years: number; photo: string; teaches: LogoKey[]; linkedin?: string }>
+    /** Four number tiles: photo, one big number, three or four words. */
+    tiles: Array<{ image: HomeImage; value: string; line: string }>
+  }
+  batch?: {
+    title: string
+    /** "January 2027" */
+    month: string
+    /** "12" */
+    day: string
+    length: string
+    week: BatchDay[]
+    fee: { amount: string; per: string; alt: string }
+    join: NavItem
+    /** Phone action bar: "Next batch 12 Jan" over "₹15,000 a month", and the short button label. */
+    bar: { title: string; line: string; label: string }
   }
   talk?: {
-    title: string
-    lead: string
+    faqTitle: string
     /** The person behind the WhatsApp number. The number itself comes from the academy's contact settings. */
-    counsellor?: { name: string; role: string; photo: string; line: string; message: string; hours?: string }
+    counsellor?: { name: string; role: string; photo: string; message: string }
     faq: Array<{ question: string; answer: string }>
-    /** The strip that ends the page. */
-    nextBatch: { title: string; meta: string }
   }
 }
 

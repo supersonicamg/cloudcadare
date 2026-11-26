@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudCadre home v10</title>
+<!--
+  CloudCadre home v10. Picks from home-photo-led.html: Split hero, Rows program, Wall placements, Ink + saffron.
+  This pass: clarity first (a stranger knows what this is in 5 seconds), a strict type scale, AI tropes removed,
+  and a new responsive approach (components respond to their own width; phones get their own patterns).
+
+  REAL: the 15 placements (names, photos, packages, roles, companies), employer logos, FAQ wording.
+  PLACEHOLDERS (invented, replace before launch):
+  - every Unsplash photo (marked `stock placeholder`)
+  - batch date 12 Jan 2027, class times, seat count, fee and instalments, lab counts, month split and topics
+  - the counsellor (name, photo, hours), phone number and email
+  - the certificate holder's name and ID
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:#D6D5D0;font-family:system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+h1,h2,h3,p,ul,ol,figure,dl,dd{margin:0}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #F2B33D;outline-offset:3px}
+
+/* ================= review toolbar (not part of the design) ================= */
+.tb{position:sticky;top:0;z-index:60;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:9px 16px;background:#18181B;color:#A1A1AA;font:500 12.5px/1.2 system-ui,sans-serif}
+.tb-g{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.tb-g > span{margin-right:4px}
+.tb button{color:#D4D4D8;background:transparent;border:1px solid #3F3F46;border-radius:6px;padding:6px 10px;cursor:pointer;min-height:32px}
+.tb button:hover{border-color:#71717A;color:#fff}
+.tb button[aria-pressed="true"]{background:#F4F4F5;color:#18181B;border-color:#F4F4F5}
+.tb-title{color:#fff;font-weight:600}
+.research{display:none;max-width:1440px;margin:0 auto;padding:20px 24px 22px;background:#FFFBEA;border-bottom:1px solid #EAD9A0;font:400 14px/1.55 system-ui,sans-serif;color:#3F3A26}
+.notes-on .research{display:block}
+.research h2{font-size:15px;margin-bottom:8px;color:#1F1B0E}
+.research ol{list-style:decimal;padding-left:20px;display:grid;gap:4px;max-width:120ch}
+.research a{color:#6B4E00}
+
+/* ================= tokens ================= */
+.stage{
+  /* colour */
+  --dark:#0C1312;--dark-2:#16201E;--ink:#0F1716;--body:#3A4240;--muted:#5F6764;--paper:#F5F4F0;--rule:#DCDAD3;
+  --acc:#F2B33D;--acc-h:#FFC25A;--on-dark:rgba(255,255,255,.80);--on-dark-2:rgba(255,255,255,.64);--on-dark-rule:rgba(255,255,255,.16);
+  /* type scale: one family, two weights (400 / 600), seven steps */
+  --t-display:clamp(38px,4.6cqi,62px);
+  --t-h2:clamp(28px,3cqi,40px);
+  --t-h3:clamp(19px,1.5cqi,21px);
+  --t-lead:clamp(17px,1.4cqi,19px);
+  --t-body:17px;
+  --t-small:15px;
+  --t-label:14px;
+  /* space */
+  --gutter:clamp(16px,4cqi,56px);
+  --sec:clamp(64px,8cqi,112px);
+  container:stage/inline-size;max-width:1440px;margin:0 auto;overflow:clip;background:#fff;color:var(--ink);
+  font-family:"Hanken Grotesk",sans-serif;font-size:var(--t-body);line-height:1.6;font-weight:400}
+.stage.w-tablet{max-width:820px;margin:28px auto 56px;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 60px rgba(0,0,0,.18);border-radius:18px}
+.stage.w-phone{max-width:390px;margin:28px auto 56px;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 60px rgba(0,0,0,.18);border-radius:28px}
+.stage section,.stage header,.stage footer{container-type:inline-size}
+
+/* type roles (the only text styles on the page) */
+.t-display{font-size:var(--t-display);line-height:1.04;letter-spacing:-.032em;font-weight:600;text-wrap:balance}
+.t-h2{font-size:var(--t-h2);line-height:1.1;letter-spacing:-.025em;font-weight:600;text-wrap:balance}
+.t-h3{font-size:var(--t-h3);line-height:1.3;letter-spacing:-.01em;font-weight:600}
+.t-lead{font-size:var(--t-lead);line-height:1.55;color:var(--body);max-width:52ch}
+.t-small{font-size:var(--t-small);line-height:1.5;color:var(--muted)}
+.t-label{font-size:var(--t-label);line-height:1.4;color:var(--muted)}
+.dark .t-lead{color:var(--on-dark)}
+.dark .t-small,.dark .t-label{color:var(--on-dark-2)}
+
+.wrap{padding-inline:var(--gutter)}
+.sec{padding-block:var(--sec)}
+.sh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px 32px;margin-bottom:clamp(28px,3.6cqi,48px)}
+.sh .t-lead{margin-top:12px}
+
+/* actions: one filled button per view, everything else a text link */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:3px;font-weight:600;font-size:16px;text-decoration:none;cursor:pointer;border:0;background:var(--acc);color:var(--dark)}
+.btn:hover{background:var(--acc-h)}
+.btn-line{background:transparent;border:1px solid currentColor;color:var(--ink)}
+.btn-line:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.link{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-weight:600;font-size:16px;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px}
+.wa{width:18px;height:18px;fill:currentColor;flex:none}
+
+/* ================= header ================= */
+.hd{position:sticky;top:var(--tbh,0px);z-index:40;background:var(--dark);color:#fff;border-bottom:1px solid var(--on-dark-rule)}
+.hd-in{display:flex;align-items:center;gap:32px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:19px;letter-spacing:-.02em;text-decoration:none}
+.logo img{width:32px;height:auto}
+.nav{display:flex;gap:4px;font-size:15px;white-space:nowrap}
+.nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;text-decoration:none;color:var(--on-dark)}
+.nav a:hover{color:#fff}
+.hd-end{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:15px}
+.hd-end .login{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;text-decoration:none;color:var(--on-dark)}
+.hd-wa{white-space:nowrap;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid rgba(255,255,255,.45);border-radius:3px;text-decoration:none}
+.hd-wa:hover{border-color:#fff}
+.subnav{display:none;background:var(--dark);border-bottom:1px solid var(--on-dark-rule)}
+.subnav ul{display:grid;grid-template-columns:repeat(4,1fr)}
+.subnav a{display:flex;align-items:center;justify-content:center;min-height:44px;font-size:15px;color:var(--on-dark);text-decoration:none}
+
+/* ================= hero (split) ================= */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:var(--dark);color:#fff}
+.hero-copy{padding:clamp(48px,6.5cqi,96px) clamp(24px,4.5cqi,72px) clamp(48px,6cqi,88px) var(--gutter);display:flex;flex-direction:column;justify-content:center}
+.hero .t-lead{margin-top:20px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;margin-top:32px;padding-top:24px;border-top:1px solid var(--on-dark-rule);max-width:520px}
+.facts dt{font-size:var(--t-label);color:var(--on-dark-2)}
+.facts dd{font-size:var(--t-body);font-weight:600;line-height:1.4;margin-top:2px}
+.hero-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:36px}
+.hero-ph{position:relative;min-height:100%}
+.hero-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:40% 50%}
+.hero-ph figcaption{position:absolute;left:16px;bottom:16px;padding:6px 10px;border-radius:3px;background:var(--dark);font-size:var(--t-label);color:var(--on-dark)}
+
+/* ================= proof strip ================= */
+.proof{border-bottom:1px solid var(--rule)}
+.proof-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 48px;padding-block:28px}
+.proof p{font-size:var(--t-small);color:var(--body);max-width:36ch}
+.proof p b{font-weight:600;color:var(--ink)}
+.logos{display:flex;flex-wrap:wrap;align-items:center;gap:16px 36px}
+.logos img{height:20px;width:auto;filter:grayscale(1);opacity:.72}
+.logos .tall img{height:26px}
+.logos .heavy img{height:15px}
+
+/* ================= who joins ================= */
+.who{background:var(--paper)}
+.who-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:32px 32px}
+.who-grid li{border-top:2px solid var(--ink);padding-top:20px}
+.who-grid .t-h3{margin-bottom:8px}
+.who-grid p{color:var(--body);max-width:36ch}
+.who-to{margin-top:20px;display:grid;gap:2px}
+.who-to dd{font-weight:600}
+
+/* ================= program (rows) ================= */
+.rows{border-top:1px solid var(--ink)}
+.row{display:grid;grid-template-columns:140px minmax(0,1.4fr) minmax(0,1fr);gap:16px 40px;padding:32px 0;border-bottom:1px solid var(--rule)}
+.r-when b{display:block;font-size:var(--t-small);font-weight:600;color:var(--ink)}
+.r-what p{margin-top:8px;color:var(--body);max-width:56ch}
+.r-what .topics{margin-top:14px}
+.r-build{border-left:1px solid var(--rule);padding-left:32px}
+.r-build p{margin-top:4px;font-weight:600;line-height:1.4}
+.tools{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px}
+.tools li{display:flex;align-items:center;gap:7px;font-size:var(--t-label);color:var(--body)}
+.tools img{height:18px;width:auto}
+.r-build .t-small{margin-top:12px}
+.r-toggle{display:none}
+
+/* ================= how classes work ================= */
+.how{background:var(--dark);color:#fff}
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:40px 24px}
+.how-ph{aspect-ratio:4/3;border-radius:3px;overflow:hidden;background:var(--dark-2)}
+.how-ph img{width:100%;height:100%;object-fit:cover}
+.how-grid .t-h3{margin-top:16px}
+.how-grid .t-small{margin-top:4px}
+.cert{display:grid;place-items:center;background:#E9E8E3;padding:20px}
+.cert-in{width:100%;aspect-ratio:3/2;background:#fff;color:var(--ink);outline:1px solid #D9D6CC;outline-offset:-8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.18);font-size:11px;line-height:1.4;color:var(--muted)}
+.cert-in .logo{font-size:13px;gap:6px;color:var(--ink)}
+.cert-in .logo img{width:20px}
+.cert-in b{display:block;margin-top:8px;font-size:20px;font-weight:600;color:var(--ink);letter-spacing:-.02em}
+.cert-in .id{margin-top:10px;padding-top:6px;border-top:1px solid #E5E2DA}
+
+/* ================= placements (wall) ================= */
+.place{background:var(--paper)}
+.sum{margin-top:12px;font-size:var(--t-lead);color:var(--body)}
+.sum b{font-weight:600;color:var(--ink)}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.pc{background:#fff;border-radius:3px;overflow:hidden}
+.pc img.f{width:100%;aspect-ratio:1;object-fit:cover;background:#E7E6E1}
+.pc-b{padding:14px 16px 16px}
+.pc .t-h3 small{font-size:var(--t-label);font-weight:400;color:var(--muted);margin-left:4px;letter-spacing:0}
+.pc-n{margin-top:6px;font-size:var(--t-small);font-weight:600;line-height:1.4}
+.pc .t-small{font-size:var(--t-label);min-height:2.8em}
+.co{display:flex;align-items:center;height:24px;margin-top:10px;font-size:var(--t-label);font-weight:600}
+.co img{height:17px;width:auto;max-width:92px}
+.more{display:none}
+.place .fine{margin-top:20px}
+
+/* ================= batch and fees ================= */
+.batch-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:32px 64px;align-items:start}
+.bt{border-top:1px solid var(--ink)}
+.bt div{display:grid;grid-template-columns:180px 1fr;gap:4px 24px;padding:16px 0;border-bottom:1px solid var(--rule)}
+.bt dt{font-size:var(--t-small);color:var(--muted)}
+.bt dd{font-weight:600}
+.bt dd span{display:block;font-weight:400;font-size:var(--t-small);color:var(--muted)}
+.join{background:var(--paper);border-radius:3px;padding:28px}
+.join .btn{width:100%}
+.join .t-small{margin-top:14px}
+.join .link{margin-top:10px}
+
+/* ================= faq + counsellor ================= */
+.faq-s{background:var(--paper)}
+.faq-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:32px 64px;align-items:start}
+.faq{border-top:1px solid var(--ink)}
+.faq details{border-bottom:1px solid var(--rule)}
+.faq summary{display:flex;justify-content:space-between;gap:16px;align-items:center;min-height:60px;padding:12px 0;font-size:var(--t-body);font-weight:600;cursor:pointer;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:22px;font-weight:400;color:var(--muted);flex:none;width:24px;text-align:center}
+.faq details[open] summary::after{content:"–"}
+.faq details p{padding:0 40px 20px 0;color:var(--body)}
+.person{background:#fff;border-radius:3px;padding:28px}
+.p-top{display:flex;align-items:center;gap:16px}
+.p-top img{width:64px;height:64px;border-radius:50%;object-fit:cover}
+.p-top b{display:block;font-weight:600}
+.person > p{margin-top:16px;color:var(--body)}
+.person .btn{width:100%;margin-top:20px}
+.person .t-small{margin-top:12px}
+
+/* ================= footer ================= */
+.ft{background:var(--dark);color:#fff;font-size:var(--t-small)}
+.ft-top{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:32px;padding-block:56px 40px}
+.ft-top > div:first-child p{margin-top:12px;color:var(--on-dark-2);max-width:34ch}
+.ft h3{font-size:var(--t-label);font-weight:600;margin-bottom:10px}
+.ft ul{display:grid;gap:4px}
+.ft ul a{display:inline-flex;align-items:center;min-height:32px;text-decoration:none;color:var(--on-dark)}
+.ft ul a:hover{color:#fff}
+.ft-bot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;padding-block:20px 28px;border-top:1px solid var(--on-dark-rule);font-size:13px;color:var(--on-dark-2)}
+
+/* ================= phone action bar ================= */
+.mbar{position:sticky;bottom:0;z-index:45;display:none;align-items:center;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--rule);box-shadow:0 -6px 20px rgba(0,0,0,.06);transform:translateY(110%);transition:transform .25s}
+.mbar.show{transform:none}
+.mbar p{flex:1;font-size:var(--t-label);line-height:1.35;color:var(--muted)}
+.mbar p b{display:block;color:var(--ink);font-weight:600;font-size:var(--t-small)}
+.mbar .btn{min-height:48px;padding:0 18px}
+.mbar .wa-btn{display:grid;place-items:center;width:48px;height:48px;border:1px solid var(--rule);border-radius:3px;color:#128C4A}
+.mbar .wa-btn .wa{width:22px;height:22px}
+
+/* ================= design notes + type overlay ================= */
+.note{display:none;margin-top:32px;padding:14px 18px;background:#FFFBEA;border:1px solid #EAD9A0;border-radius:4px;color:#3F3A26;font:400 14px/1.55 system-ui,sans-serif;max-width:110ch}
+.note b{color:#1F1B0E}
+.notes-on .note{display:block}
+.type-on [data-t]{outline:1px dashed #E5484D;outline-offset:2px;position:relative}
+.type-on [data-t]::after{content:attr(data-t);position:absolute;left:0;top:-18px;z-index:5;padding:1px 5px;background:#E5484D;color:#fff;font:600 10px/1.4 system-ui,sans-serif;letter-spacing:0;white-space:nowrap;pointer-events:none}
+
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* =====================================================================
+   RESPONSIVE. Components respond to their own width (container queries),
+   type and space are fluid (clamp), grids are intrinsic (auto-fit).
+   Only real structure changes are listed here.
+   ===================================================================== */
+
+/* header: nav moves out of the bar when the bar gets narrow */
+@container (max-width:900px){
+  .hd .nav,.hd-end .login{display:none}
+}
+@container stage (max-width:900px){
+  .subnav{display:block}
+}
+@container (max-width:520px){
+  .hd-in{height:56px}
+  .hd-wa span{display:none}
+  .hd-wa{width:44px;height:44px;padding:0;justify-content:center}
+}
+
+/* hero: split side by side while each half has room, otherwise text first, photo after */
+@container (max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .hero-copy{padding:48px var(--gutter) 40px}
+  .hero-ph{min-height:0;aspect-ratio:16/9}
+}
+@container (max-width:520px){
+  .hero-copy{padding:32px var(--gutter) 32px}
+  .hero .t-lead{margin-top:14px}
+  .facts{margin-top:24px;padding-top:18px;gap:14px 16px}
+  .hero-act{flex-direction:column;align-items:stretch;gap:8px;margin-top:28px}
+  .hero-act .link{justify-content:center}
+  .hero-ph{aspect-ratio:4/3}
+}
+
+/* proof strip */
+@container (max-width:700px){
+  .proof-in{flex-direction:column;align-items:flex-start;gap:16px;padding-block:24px}
+  .logos{gap:14px 26px}
+  .logos img{height:17px}
+  .logos .tall img{height:22px}
+}
+
+/* program rows: three columns, then two, then a compact list with "topics and project" on demand */
+@container (max-width:980px){
+  .row{grid-template-columns:110px minmax(0,1fr)}
+  .r-build{grid-column:2;border-left:0;padding-left:0;padding-top:16px;border-top:1px solid var(--rule)}
+}
+@container (max-width:560px){
+  .row{grid-template-columns:1fr;gap:8px;padding:24px 0}
+  .r-when{display:flex;gap:10px;align-items:baseline}
+  .r-build{grid-column:auto}
+  .r-what .topics,.r-build{display:none}
+  .row.open .r-what .topics,.row.open .r-build{display:block}
+  .r-toggle{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:4px;padding:0;background:none;border:0;font-weight:600;font-size:var(--t-small);text-decoration:underline;text-underline-offset:4px;cursor:pointer;justify-self:start}
+}
+
+/* placements: grid stays a grid on phones (no swipe row); first 6, then "show all" */
+@container (max-width:560px){
+  .wall{grid-template-columns:1fr 1fr;gap:10px}
+  .pc-b{padding:12px}
+  .wall:not(.all) li:nth-child(n+7){display:none}
+  .more{display:flex;width:100%;margin-top:16px}
+}
+
+/* batch + faq: two columns, then one */
+@container (max-width:860px){
+  .batch-grid,.faq-grid{grid-template-columns:1fr}
+}
+@container (max-width:520px){
+  .bt div{grid-template-columns:1fr;gap:2px;padding:14px 0}
+  .join,.person{padding:20px}
+  .faq details p{padding-right:8px}
+}
+
+/* footer */
+@container (max-width:760px){
+  .ft-top{grid-template-columns:1fr 1fr}
+  .ft-top > div:first-child{grid-column:1/-1}
+}
+
+/* phone-only patterns */
+@container stage (max-width:560px){
+  .stage{--t-body:16px}
+  .mbar{display:flex}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
+</svg>
+
+<div class="tb" id="tb" role="toolbar" aria-label="Review controls">
+  <span class="tb-title">CloudCadre home v10</span>
+  <div class="tb-g" data-group="w"><span>Width</span>
+    <button data-v="desktop" aria-pressed="true">Desktop</button><button data-v="tablet" aria-pressed="false">Tablet 820</button><button data-v="phone" aria-pressed="false">Phone 390</button>
+  </div>
+  <div class="tb-g">
+    <button id="t-type" aria-pressed="false">Show type scale</button>
+    <button id="t-notes" aria-pressed="false">Design notes</button>
+  </div>
+</div>
+
+<section class="research" aria-label="Research behind this version">
+  <h2>What this version is built on</h2>
+  <ol>
+    <li><b>Say what you offer in the hero.</b> The homepage must state the value proposition in a plain tagline (<a href="https://nngroup.com/articles/homepage-design-principles/">NN/g, homepage design principles</a>). So the H1 names the thing: a live online course in cloud, DevOps and FinOps. The brand name and "CEAP" come second.</li>
+    <li><b>Real people get looked at, stock people get skipped.</b> Users ignore decorative feel-good images and study photos that carry information, like real people (<a href="https://www.nngroup.com/articles/photos-as-web-content/">NN/g, Photos as web content</a>). So stock photos are only stand-ins, and the 15 real placements carry the proof.</li>
+    <li><b>Visible navigation beats a hamburger.</b> Hidden navigation is less discoverable on phones and desktops; with 4–5 items you can keep them visible (<a href="https://www.nngroup.com/articles/hamburger-menus/">NN/g, Hamburger menus</a>, <a href="https://www.nngroup.com/articles/find-navigation-mobile-even-hamburger/">mobile study</a>). So phones get a visible 4-link row, no menu button.</li>
+    <li><b>Carousels and swipe rows get skipped.</b> You can't count on people seeing carousel content (<a href="https://www.nngroup.com/articles/mobile-carousels/">NN/g, Mobile carousels</a>; <a href="https://adrianroselli.com/horizontal-scrolling-containers">Adrian Roselli</a>). So placements stay a grid on phones, with "show all".</li>
+    <li><b>A sticky button only after the main one scrolls away, and slim.</b> Tall or animated bars feel like pressure (<a href="https://wiserreview.com/glossary/sticky-add-to-cart/">sticky CTA guidance</a>; mixed A/B results at <a href="https://cleancommit.io/ab-tests/mobile-bottom-sticky-add-to-cart-button/">Clean Commit</a>). So the phone bar appears after the hero button is gone and hides at the batch section.</li>
+    <li><b>Thumbs and targets.</b> People hold phones in three grips and reach the middle best (<a href="https://smashingmagazine.com/2016/09/the-thumb-zone-designing-for-mobile-users">Smashing, Thumb zone (Hoober)</a>). So main actions are full width, every target is at least 44px.</li>
+    <li><b>Few sizes, clear jumps.</b> A type scale should use a few sizes with clear relationships (<a href="https://fonts.google.com/knowledge/glossary/scale">Google Fonts, Scale</a>); size alone is weak hierarchy, so combine it with weight and colour (<a href="https://medium.com/eightshapes-llc/typography-in-design-systems-6ed771432f1e">EightShapes</a>). So: one family, two weights, seven text roles. Turn on "Show type scale" to see them.</li>
+    <li><b>Components respond to their own width.</b> Intrinsic grids and fluid type do most of the work; container queries handle real structural changes (<a href="https://frontendmasters.com/blog/building-a-ui-without-breakpoints/">Frontend Masters</a>, <a href="https://blog.logrocket.com/container-queries-2026/">LogRocket</a>). So every section here adapts by its own width, not by "phone" or "tablet" breakpoints.</li>
+  </ol>
+</section>
+
+<main class="stage" id="stage">
+
+  <header class="hd" id="hd">
+    <div class="wrap hd-in">
+      <a class="logo" href="#"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+      <nav class="nav" aria-label="Main"><a href="#program">Program</a><a href="#placements">Placements</a><a href="#batch">Fees and dates</a><a href="#faq">FAQ</a></nav>
+      <div class="hd-end">
+        <a class="login" href="#">Log in</a>
+        <a class="hd-wa" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"><svg class="wa"><use href="#i-wa"/></svg><span>WhatsApp us</span></a>
+      </div>
+    </div>
+  </header>
+  <nav class="subnav" aria-label="Main">
+    <ul><li><a href="#program">Program</a></li><li><a href="#placements">Placements</a></li><li><a href="#batch">Fees</a></li><li><a href="#faq">FAQ</a></li></ul>
+  </nav>
+
+  <!-- ===================== hero ===================== -->
+  <section class="hero dark" aria-labelledby="h1">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1" data-t="Display · 62 / 600">Live online training in cloud, DevOps and FinOps.</h1>
+      <p class="t-lead" data-t="Lead · 19 / 400">Four months of evening classes and real labs on AWS, Azure and Google Cloud. For freshers, IT staff and finance professionals who want a job in cloud.</p>
+      <!-- placeholder: date, times -->
+      <dl class="facts">
+        <div><dt data-t="Label · 14">Next batch</dt><dd data-t="Body · 17 / 600">12 Jan 2027</dd></div>
+        <div><dt>Classes</dt><dd>Mon to Thu, 8 to 10 pm</dd></div>
+        <div><dt>Length</dt><dd>4 months, live online</dd></div>
+        <div><dt>Fee</dt><dd>Pay monthly, UPI or card</dd></div>
+      </dl>
+      <div class="hero-act" id="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask a question on WhatsApp</a>
+      </div>
+    </div>
+    <figure class="hero-ph">
+      <!-- stock placeholder: replace with a real photo of a CloudCadre mentor and learner -->
+      <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1400&q=75" alt="A mentor and a learner look at code on a laptop together" fetchpriority="high">
+      <figcaption>A mentor reviews a learner's lab</figcaption>
+    </figure>
+  </section>
+
+  <!-- ===================== proof ===================== -->
+  <section class="proof" aria-label="Where our learners work">
+    <div class="wrap proof-in">
+      <p data-t="Small · 15"><b>15 learners placed at 12 companies,</b> with packages up to ₹29 LPA.</p>
+      <ul class="logos">
+        <li><img src="../../apps/academy/public/cloudcadre/logos/infosys.svg" alt="Infosys"></li>
+        <li class="tall"><img src="../../apps/academy/public/cloudcadre/logos/capgemini.svg" alt="Capgemini"></li>
+        <li class="heavy"><img src="../../apps/academy/public/cloudcadre/logos/hcltech.svg" alt="HCLTech"></li>
+        <li><img src="../../apps/academy/public/cloudcadre/logos/amdocs.svg" alt="Amdocs"></li>
+        <li><img src="../../apps/academy/public/cloudcadre/logos/persistent.svg" alt="Persistent Systems"></li>
+        <li class="heavy"><img src="../../apps/academy/public/cloudcadre/logos/zensar.svg" alt="Zensar"></li>
+        <li class="tall"><img src="../../apps/academy/public/cloudcadre/logos/zs.svg" alt="ZS Associates"></li>
+      </ul>
+    </div>
+    <div class="wrap"><div class="note" style="margin:0 0 24px"><b>Hero and proof.</b> The 5-second test: a stranger should be able to say "it's a 4-month live online cloud course, it starts 12 Jan, I can pay monthly". The H1 names the category, the lead says for whom, the four facts answer when, how long, how and how much. No eyebrow label, no slogan. Proof comes right after: real numbers and real employer logos, in grey so they don't fight the button.</div></div>
+  </section>
+
+  <!-- ===================== who joins ===================== -->
+  <section class="sec who" aria-labelledby="who-h">
+    <div class="wrap">
+      <div class="sh"><h2 class="t-h2" id="who-h" data-t="H2 · 40 / 600">Who joins</h2></div>
+      <ul class="who-grid">
+        <li>
+          <h3 class="t-h3" data-t="H3 · 21 / 600">Freshers</h3>
+          <p data-t="Body · 17 / 400">No IT job yet. Month 1 starts from cloud basics.</p>
+          <dl class="who-to"><dt class="t-label">Common next role</dt><dd>Cloud engineer</dd></dl>
+        </li>
+        <li>
+          <h3 class="t-h3">IT professionals</h3>
+          <p>Support, sysadmin or developer, moving up to cloud work.</p>
+          <dl class="who-to"><dt class="t-label">Common next role</dt><dd>Cloud or DevOps engineer</dd></dl>
+        </li>
+        <li>
+          <h3 class="t-h3">Finance and operations</h3>
+          <p>You already read budgets. FinOps puts that to work in cloud.</p>
+          <dl class="who-to"><dt class="t-label">Common next role</dt><dd>FinOps analyst</dd></dl>
+        </li>
+      </ul>
+      <div class="note"><b>Who joins.</b> Text only, on purpose: stock photos of "a fresher" are the decorative images people skip. Three short columns with a strong top rule answer "is this for me?" in one glance. "Common next role" describes, it doesn't promise.</div>
+    </div>
+  </section>
+
+  <!-- ===================== program ===================== -->
+  <section class="sec" id="program" aria-labelledby="prog-h">
+    <div class="wrap">
+      <div class="sh">
+        <div>
+          <h2 class="t-h2" id="prog-h">What you learn, month by month</h2>
+          <p class="t-lead">The CloudCadre Elite Architect Program (CEAP). Each month ends with something you build.</p>
+        </div>
+        <a class="link" href="#">Download the syllabus (PDF)</a>
+      </div>
+      <ol class="rows" id="rows"></ol>
+      <div class="note"><b>Program.</b> All four months visible at once, so people comparing courses can scan it like a brochure. Each row reads left to right in one order: when → what you can do by the end → what you build. On phones the topics and project fold behind "Topics and project" so the four months fit in about two screens.</div>
+    </div>
+  </section>
+
+  <!-- ===================== how classes work ===================== -->
+  <section class="sec how dark" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="sh"><h2 class="t-h2" id="how-h">How classes work</h2></div>
+      <ul class="how-grid">
+        <!-- stock placeholders: swap for CloudCadre's own class and lab photos -->
+        <li><div class="how-ph"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=75" alt="A small group of learners in a live class with laptops" loading="lazy"></div>
+          <h3 class="t-h3">Live classes, 30 seats</h3><p class="t-small">Small enough that your trainer knows your name.</p></li><!-- placeholder: seat count -->
+        <li><div class="how-ph"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=75" alt="Learners working through a lab on their laptops" loading="lazy"></div>
+          <h3 class="t-h3">Labs on a real cloud account</h3><p class="t-small">A mentor checks every lab you hand in.</p></li>
+        <li><div class="how-ph"><img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=900&q=75" alt="A learner explains a design on a laptop to a reviewer" loading="lazy"></div>
+          <h3 class="t-h3">A capstone you defend</h3><p class="t-small">To a panel, like a real job interview.</p></li>
+        <li><div class="how-ph cert">
+            <!-- placeholder certificate drawn in code (the image file prints a banned brand name) -->
+            <div class="cert-in" role="img" aria-label="Sample CEAP certificate with an ID employers can check online">
+              <span class="logo"><img src="assets/cloudcadre-mark.svg" alt="">CloudCadre</span>
+              <span style="margin-top:8px">Certificate of completion</span>
+              <b>Rohan Mehta</b>
+              <span>CloudCadre Elite Architect Program</span>
+              <span class="id">ID CC-CEAP-2026-0147 · cloudcadre.in/verify</span>
+            </div></div>
+          <h3 class="t-h3">A certificate with an ID</h3><p class="t-small">Employers can check it online.</p></li>
+      </ul>
+      <div class="note"><b>How classes work.</b> Four equal tiles on one grid that reflows by itself (4 → 2 → 1 columns) as space shrinks. Captions sit under the photos, never on them. Each tile is one fact, not a feature claim.</div>
+    </div>
+  </section>
+
+  <!-- ===================== placements ===================== -->
+  <section class="sec place" id="placements" aria-labelledby="pl-h">
+    <div class="wrap">
+      <div class="sh">
+        <div>
+          <h2 class="t-h2" id="pl-h">Where our learners work now</h2>
+          <p class="sum"><b>15</b> learners · <b>12</b> companies · packages up to <b>₹29 LPA</b></p>
+        </div>
+      </div>
+      <ul class="wall" id="wall"></ul>
+      <button class="btn btn-line more" id="more" type="button">Show all 15 learners</button>
+      <p class="t-small fine">Real CloudCadre learners. Packages are CTC per year, as shared by each learner.</p>
+      <div class="note"><b>Placements.</b> Real faces are the strongest content on the page, so they get the most space. The package is the largest text on each card because it's what people look for first. On phones it stays a 2-column grid of 6 with "Show all", not a swipe row people skip.</div>
+    </div>
+  </section>
+
+  <!-- ===================== batch and fees ===================== -->
+  <section class="sec" id="batch" aria-labelledby="bt-h">
+    <div class="wrap">
+      <div class="sh"><h2 class="t-h2" id="bt-h">Next batch starts 12 January</h2></div>
+      <div class="batch-grid">
+        <!-- placeholder: every value below until the owner confirms -->
+        <dl class="bt">
+          <div><dt>Start date</dt><dd>12 Jan 2027</dd></div>
+          <div><dt>Live classes</dt><dd>Mon to Thu, 8 to 10 pm IST<span>Recorded and online the same night</span></dd></div>
+          <div><dt>Weekend lab</dt><dd>Saturday, 10 am to 1 pm</dd></div>
+          <div><dt>Length</dt><dd>4 months (16 weeks)</dd></div>
+          <div><dt>Fee</dt><dd>₹60,000<span>or 4 monthly payments of ₹15,000 by UPI, card or net banking</span></dd></div>
+          <div><dt>Seats</dt><dd>30 per batch</dd></div>
+        </dl>
+        <aside class="join" aria-label="Join">
+          <a class="btn" href="#">Join the 12 Jan batch</a>
+          <p class="t-small">You'll pick a payment plan on the next screen. Nothing is charged until you confirm.</p>
+          <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Not sure yet? Ask on WhatsApp</a>
+        </aside>
+      </div>
+      <div class="note"><b>Fees and dates.</b> This replaces the generic yellow "next batch" band. It answers the two questions every buyer has, when and how much, as a plain table. Hiding the price makes people leave or message just to ask. All values here are placeholders until the owner confirms them.</div>
+    </div>
+  </section>
+
+  <!-- ===================== faq ===================== -->
+  <section class="sec faq-s" id="faq" aria-labelledby="faq-h">
+    <div class="wrap">
+      <div class="sh"><h2 class="t-h2" id="faq-h">Questions before you join</h2></div>
+      <div class="faq-grid">
+        <div class="faq">
+          <details><summary>Do I need an IT background?</summary><p>No. Month 1 starts from cloud basics. If you are completely new to IT, a counsellor will suggest a short warm-up first.</p></details>
+          <details><summary>How many hours a week?</summary><p>About 8 to 10: two or three live evening classes, plus labs in your own time.</p></details>
+          <details><summary>What if I miss a class?</summary><p>Every class is recorded and up the same night, and your mentor helps you catch up on the lab.</p></details>
+          <details><summary>Can I pay in instalments?</summary><p>Yes. Pay by UPI, card or net banking, in one go or monthly.</p></details>
+          <details><summary>Do I get a certificate?</summary><p>Yes, a CEAP certificate employers can verify online. AWS, Azure and Google Cloud exam fees are paid to the exam provider.</p></details>
+          <details><summary>Do you guarantee a job?</summary><p>No, and be wary of anyone who does. We give you the skills, a capstone, mock interviews, CV and LinkedIn help, and introductions.</p></details>
+        </div>
+        <!-- placeholder: counsellor name, photo (stock), hours -->
+        <aside class="person" aria-label="Talk to an admissions counsellor">
+          <div class="p-top">
+            <img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=160&h=160&crop=faces&q=75" alt="">
+            <div><b>Ananya Rao</b><span class="t-small">Admissions counsellor</span></div>
+          </div>
+          <p>Ask about the program, batch dates or fees. She usually replies within 15 minutes.</p>
+          <a class="btn btn-line" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Message Ananya on WhatsApp</a>
+          <p class="t-small">9 am to 9 pm, Monday to Saturday</p>
+        </aside>
+      </div>
+      <div class="note"><b>FAQ.</b> One real person next to the questions, with one outline button (the filled button lives in the section above). No quick-reply chips: one clear action is easier than three small ones.</div>
+    </div>
+  </section>
+
+  <footer class="ft dark">
+    <div class="wrap">
+      <div class="ft-top">
+        <div>
+          <a class="logo" href="#"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+          <p>Live online training in cloud, DevOps and FinOps.</p>
+        </div>
+        <div><h3>Program</h3><ul><li><a href="#program">What you learn</a></li><li><a href="#placements">Placements</a></li><li><a href="#batch">Fees and dates</a></li></ul></div>
+        <div><h3>Help</h3><ul><li><a href="#faq">FAQ</a></li><li><a href="#">Download the syllabus</a></li><li><a href="#">Log in</a></li></ul></div>
+        <!-- placeholder: phone and email -->
+        <div><h3>Contact</h3><ul><li><a href="https://wa.me/" target="_blank" rel="noopener noreferrer">+91 98765 43210</a></li><li><a href="#">hello@cloudcadre.in</a></li></ul></div>
+      </div>
+      <div class="ft-bot"><span>© 2026 CloudCadre. AWS, Azure, Google Cloud, Kubernetes and other marks belong to their owners.</span><span>Privacy · Terms · Refunds</span></div>
+    </div>
+  </footer>
+
+  <!-- phone only: appears once the hero button has scrolled away, hides at the batch section -->
+  <div class="mbar" id="mbar" aria-hidden="true">
+    <p><b>Next batch 12 Jan</b>4 months, live online</p>
+    <a class="wa-btn" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Ask on WhatsApp" tabindex="-1"><svg class="wa"><use href="#i-wa"/></svg></a>
+    <a class="btn" href="#batch" tabindex="-1">Join batch</a>
+  </div>
+</main>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'), tb=document.getElementById('tb');
+  function setTbh(){document.documentElement.style.setProperty('--tbh',tb.offsetHeight+'px')}
+  setTbh(); addEventListener('resize',setTbh);
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  /* ---------- program (INVENTED syllabus copied from aurora-content.ts: confirm with the owner) ---------- */
+  var dv='https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/';
+  var T={aws:['AWS',dv+'amazonwebservices/amazonwebservices-original-wordmark.svg'],azure:['Azure',dv+'azure/azure-original.svg'],gcp:['Google Cloud',dv+'googlecloud/googlecloud-original.svg'],
+    terraform:['Terraform',dv+'terraform/terraform-original.svg'],docker:['Docker',dv+'docker/docker-original.svg'],kubernetes:['Kubernetes',dv+'kubernetes/kubernetes-original.svg'],cicd:['GitHub Actions',dv+'githubactions/githubactions-original.svg']};
+  var M=[
+    {t:'Three clouds, one architecture',w:[1,4],o:'run the same app on AWS, Azure and Google Cloud, and explain which fits when.',tp:'Core services on AWS and Azure, Google Cloud basics, networking and identity, security foundations',b:'The same 3-tier app on all three clouds',tools:['aws','azure','gcp'],m:'12 hands-on labs'},
+    {t:'FinOps and cloud costs',w:[5,8],o:'find the waste in a cloud bill and show finance what it saves.',tp:'Reading cloud bills, cost optimisation, budgets and accountability, tagging and governance, unit economics',b:'A savings plan for a real cloud bill',tools:['aws','azure'],m:'8 hands-on labs'},
+    {t:'Automate and ship',w:[9,12],o:'ship an app to Kubernetes through one pipeline, with every server built from code.',tp:'Terraform, Docker, Kubernetes, CI/CD pipelines, automated provisioning',b:'A pipeline that ships an app to Kubernetes, built with Terraform',tools:['terraform','docker','kubernetes','cicd'],m:'14 hands-on labs'},
+    {t:'Design, defend, get hired',w:[13,16],o:'design an enterprise architecture, defend it in a review, and interview for the job.',tp:'Architecture design, migration strategies, security and governance, mock interviews, CV and LinkedIn',b:'A multi-cloud migration you design and defend to a panel',tools:[],m:'Capstone review and 2 mock interviews'}
+  ];
+  document.getElementById('rows').innerHTML=M.map(function(m,i){
+    var tools=m.tools.length?'<ul class="tools">'+m.tools.map(function(k){return '<li><img src="'+T[k][1]+'" alt="" loading="lazy">'+esc(T[k][0])+'</li>'}).join('')+'</ul>':'';
+    return '<li class="row" id="m'+(i+1)+'">'+
+      '<div class="r-when"><b'+(i===0?' data-t="Small · 15 / 600"':'')+'>Month '+(i+1)+'</b><span class="t-small">Weeks '+m.w[0]+'–'+m.w[1]+'</span></div>'+
+      '<div class="r-what"><h3 class="t-h3">'+esc(m.t)+'</h3><p>By week '+m.w[1]+' you can '+esc(m.o)+'</p>'+
+        '<p class="t-small topics">'+esc(m.tp)+'</p>'+
+        '<button class="r-toggle" type="button" aria-expanded="false" aria-controls="m'+(i+1)+'">Topics and project</button></div>'+
+      '<div class="r-build"><p class="t-label">You build</p><p>'+esc(m.b)+'</p>'+tools+'<p class="t-small">'+esc(m.m)+'</p></div></li>'}).join('');
+  document.getElementById('rows').addEventListener('click',function(e){
+    var b=e.target.closest('.r-toggle'); if(!b)return;
+    var row=b.closest('.row'), open=!row.classList.contains('open');
+    row.classList.toggle('open',open); b.setAttribute('aria-expanded',open); b.textContent=open?'Hide topics and project':'Topics and project';
+  });
+
+  /* ---------- placements (REAL, from aurora-content.ts; confirm consent before launch) ---------- */
+  var cld=function(p,t){return 'https://res.cloudinary.com/dqw5bkqgz/image/upload/f_auto,q_auto,'+t+'/'+p+'.jpg'};
+  var logo=function(f){return '../../apps/academy/public/cloudcadre/logos/'+f+'.svg'};
+  var P=[
+    ['Priyanka Dhavle','v1779775797/finops/partners/pkws9p6zmrfb1wmzdn9e','27','AWS DevOps Engineer','Capgemini','capgemini'],
+    ['Lalit Borse','v1779777581/finops/partners/pqtkm6wpsvd8zdjysg4t','29','Technical Specialist, Cloud and FinOps','Zensar','zensar'],
+    ['Monika Singh','v1779776907/finops/partners/ot1kjhdy0fjn8cym60q6','27','Senior Program Manager, AWS and Cloud','NICE'],
+    ['Atish Sonwane','v1779778117/finops/partners/ipu40he74efuwwiocpzu','20','Senior Cloud Engineer, FinOps','Persistent Systems','persistent'],
+    ['Rupali Janapure','v1779775550/finops/partners/vdycpmti6ndbv4fnnlck','12','Cloud FinOps Specialist','Amdocs','amdocs'],
+    ['Swapnil Khandare','v1779696875/finops/partners/wq8vsntaol8qea1jijb8','17','Cloud Engineer','Infosys','infosys'],
+    ['Abhilesh Jadhao','v1779777941/finops/partners/xeqthvtjcqo4pbk4tcgm','19','Project Manager, Cloud and DC','Fabutech'],
+    ['Prashant Jawalkar','v1779775977/finops/partners/rxb2j3nfydwzcsvchi6s','18','Cloud FinOps Engineer','Infosys','infosys'],
+    ['Prakash Gulbhele','v1779776432/finops/partners/blck4mtyzs7rujlbor7y','16','AWS FinOps Engineer','Truetech'],
+    ['Shubham Kulkarni','v1779774796/finops/partners/eoctu1xlij4zjufqy010','14','Cloud Engineer','Infosys','infosys'],
+    ['Ashish Kumbhojkar','v1779696513/finops/partners/bmphc8rteevycsbqc1i7','14','Cloud FinOps Engineer','Cencora'],
+    ['Ninand Bhoir','v1779776610/finops/partners/bq3rw6vjqcokhwvaz50s','13','AWS Developer','SA Technologies'],
+    ['Mayuri Fate','v1779777079/finops/partners/d9hfe13d8rrbe1j1okef','13','Cloud Engineer','HCLTech','hcltech'],
+    ['Prasad Suryawanshi','v1779776202/finops/partners/lbotu68t8kupfwqwrjyh','12.5','Cloud FinOps Admin','ZS Associates','zs'],
+    ['Shrinath Gaikwad','v1779775162/finops/partners/inih6zmlzkcrvwmq7jqy','8','DevOps Engineer','HCL Technologies','hcltech']
+  ];
+  document.getElementById('wall').innerHTML=P.map(function(r,i){
+    var co='<span class="co">'+(r[5]?'<img src="'+logo(r[5])+'" alt="'+esc(r[4])+'" loading="lazy">':esc(r[4]))+'</span>';
+    return '<li class="pc"><img class="f" src="'+cld(r[1],'w_400,h_400,c_fill,g_face')+'" alt="" loading="lazy">'+
+      '<div class="pc-b"><p class="t-h3"'+(i===0?' data-t="H3 · 21 / 600"':'')+'>₹'+r[2]+'<small>LPA</small></p><h3 class="pc-n">'+esc(r[0])+'</h3><p class="t-small">'+esc(r[3])+'</p>'+co+'</div></li>'}).join('');
+  var wall=document.getElementById('wall'), more=document.getElementById('more');
+  more.addEventListener('click',function(){var all=wall.classList.toggle('all');more.textContent=all?'Show fewer':'Show all 15 learners'});
+
+  /* ---------- phone action bar: after the hero button leaves, before the batch section ---------- */
+  var mbar=document.getElementById('mbar'), heroGone=false, batchIn=false;
+  function paint(){var on=heroGone&&!batchIn;mbar.classList.toggle('show',on);mbar.setAttribute('aria-hidden',!on);[].forEach.call(mbar.querySelectorAll('a'),function(a){a.tabIndex=on?0:-1})}
+  var heroAct=document.getElementById('hero-act'), batch=document.getElementById('batch');
+  function check(){heroGone=heroAct.getBoundingClientRect().bottom<0;batchIn=batch.getBoundingClientRect().top<innerHeight;paint()}
+  addEventListener('scroll',check,{passive:true});addEventListener('resize',check);check();
+
+  /* ---------- toolbar ---------- */
+  var W={desktop:'',tablet:'w-tablet',phone:'w-phone'};
+  function setW(v){stage.classList.remove('w-tablet','w-phone');if(W[v])stage.classList.add(W[v]);
+    [].forEach.call(document.querySelectorAll('[data-group="w"] button'),function(b){b.setAttribute('aria-pressed',b.dataset.v===v)});
+    try{localStorage.setItem('v10-w',v)}catch(e){}}
+  document.querySelector('[data-group="w"]').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setW(b.dataset.v)});
+  try{var sv=localStorage.getItem('v10-w');if(W.hasOwnProperty(sv))setW(sv)}catch(e){}
+  function toggle(id,cls){var b=document.getElementById(id);b.addEventListener('click',function(){var on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);document.body.classList.toggle(cls,on);setTbh()})}
+  toggle('t-type','type-on'); toggle('t-notes','notes-on');
+})();
+</script>
+</body>
+</html>

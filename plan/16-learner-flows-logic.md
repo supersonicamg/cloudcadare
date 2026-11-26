@@ -2,7 +2,7 @@
 
 > **Status:** built in sessions 12, 13 and 15 (see PROGRESS.md). Where §12 differs from earlier sections, §12 wins.
 > **Mockups:** [`plan/mockups-learner-flows/flows-index.html`](mockups-learner-flows/flows-index.html) (24 screens). Every screen has a yellow **Logic notes** bar (toolbar toggle) that repeats the rules for that screen. This file is the full version and wins if they ever differ.
-> **Design rules:** [15-design-and-ux-guide.md](15-design-and-ux-guide.md) and `plan/mockups/homepage-v9.html`. Visual decisions there are final.
+> **Design rules:** [15-design-and-ux-guide.md](15-design-and-ux-guide.md) (version 11) and `plan/mockups/home-v11.html`. Visual decisions there are final; the learner-flow mockups give structure only.
 > **Who reads this:** whoever builds these screens. Read §1 (what the owner asked), §3 (data), §4–§5 (the two risky flows), §10 (open questions), then the screen table in §2.
 
 ---

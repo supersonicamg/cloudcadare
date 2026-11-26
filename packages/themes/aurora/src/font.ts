@@ -1,4 +1,4 @@
-import { Schibsted_Grotesk } from 'next/font/google'
+import { Hanken_Grotesk } from 'next/font/google'
 
-// One family for headings and text. Variable font, so every weight the design uses (400 to 800) is one file.
-export const schibsted = Schibsted_Grotesk({ subsets: ['latin'], display: 'swap', variable: '--font-schibsted' })
+// One family, two weights (plan/15 §6): 400 for text and 600 for everything that carries weight. Nothing else is loaded.
+export const hanken = Hanken_Grotesk({ subsets: ['latin'], weight: ['400', '600'], display: 'swap', variable: '--font-hanken' })

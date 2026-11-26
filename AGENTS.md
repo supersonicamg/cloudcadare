@@ -10,4 +10,4 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## UI work
 
-Before building or changing any screen, read [`plan/15-design-and-ux-guide.md`](plan/15-design-and-ux-guide.md) and open its reference build, `plan/mockups/homepage-v9.html`. Visual decisions there are final; where older mockups disagree on visuals, the guide wins.
+Before building or changing any screen, read [`plan/15-design-and-ux-guide.md`](plan/15-design-and-ux-guide.md) (version 11) and open its reference build, `plan/mockups/home-v11.html`. Visual decisions there are final; where older mockups (including `homepage-v9.html`) disagree on visuals, the guide wins.

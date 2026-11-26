@@ -1,214 +1,207 @@
-import type { CSSProperties } from 'react'
 import { defaultTheme } from '@educore/theme-default'
-import { Icon, Logo, LOGO_NAMES } from '@educore/ui/marks'
-import type { BrandInfo, HomeContent, HomePageProps, NavItem } from '@educore/ui/theme'
-import { Climb } from './climb'
-import { Reveal, StoryMarquee } from './client'
-import { CeapArt } from './diagrams'
-import { A, Arrow, Stars, WhatsAppIcon, waLink } from './parts'
+import type { BrandInfo, HomeContent, HomePageProps } from '@educore/ui/theme'
+import { PhoneBar, PlacementWall } from './client'
+import { Diagram } from './diagrams'
+import { A, WhatsAppIcon, waLink } from './parts'
 
 type Content = HomeContent
-type Join = NavItem
 
-// Section structure follows plan/15 §3: page → mist panel → page → dark panel → page → stone panel.
-// Every image here is `<img>`: the photos are remote placeholders until the academy has its own (plan/15 §10).
+// CloudCadre home, design guide version 11 (plan/15; reference build plan/mockups/home-v11.html).
+//
+// Brief. One job: say what this is, who it is for, when it starts and what it costs, then let the visitor join or talk to a
+// person. One filled button per view (saffron "Join"); WhatsApp is an outline button or a text link. The visitor's
+// questions, in order: what is it -> does it work -> what will I learn -> how is it taught -> when and how much -> my doubts.
+// Every unit is a picture, one big value and one short line (plan/15 §3). No paragraphs, no arrows in buttons.
+//
+// Surfaces (plan/15 §4), touching sections never share one:
+//   header + hero dark -> placements paper -> program white -> how classes work dark -> batch paper -> FAQ white -> footer dark.
+// Images are plain <img>: the photos are remote placeholders until the academy has its own (plan/15 §12).
 
-function Hero({ c, join, wa }: { c: Content['hero']; join: Join; wa: string | null }) {
-  const { headline, trust } = c
+/** 1. Hero: the H1, one line, three facts (when, what time, how much), the one filled button, and a real learner. */
+function Hero({ c, wa }: { c: Content['hero']; wa: string | null }) {
+  const { learner: l } = c
   return (
-    <section id="hero" aria-label="Introduction">
-      <div className="wrap">
-        <div className="hero-in">
-          <div className="copy">
-            <h1 className="h1">{headline.lead}<br /><span className="c">{headline.accent}</span><br /><span className="u">{headline.mark}</span></h1>
-            <p className="lead">{c.lead}</p>
-            <ul className="ffacts">
-              {c.facts.map((f) => <li key={f.text}><Icon name={f.icon} className="ic" />{f.text}</li>)}
-            </ul>
-            <div className="actions">
-              <A className="btn btn-brand" href={join.href}>{join.label}<Arrow /></A>
-              {wa && <a className="btn btn-line" href={wa} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />Ask on WhatsApp</a>}
-            </div>
-            {trust && (
-              <p className="trust">
-                <span><Stars n={trust.stars} /><b>{trust.score}</b> · {trust.reviews}</span>
-                <span className="sep" aria-hidden="true" />
-                <span><b>{trust.placed.value}</b> {trust.placed.label}</span>
-              </p>
-            )}
-          </div>
-
-          {c.image ? (
-            <div className="ha-media">
-              <div className="ha-back shape" />
-              <div className="ha-photo shape">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="photo" src={c.image.src} alt={c.image.alt} fetchPriority="high" />
-                {c.imageTag && <div className="ha-tag"><span>{c.imageTag.text}</span><A href={c.imageTag.link.href}>{c.imageTag.link.label} <Arrow /></A></div>}
-              </div>
-            </div>
-          ) : <div className="hero-art"><CeapArt /></div>}
+    <section className="hero dark" id="hero" aria-labelledby="h1">
+      <div className="hero-copy">
+        <h1 className="t-display" id="h1">{c.headline}</h1>
+        <p className="t-lead">{c.lead}</p>
+        <ul className="hfacts">
+          {c.facts.map((f) => <li key={f.label}><span className="t-label">{f.label}</span><b className="t-h3">{f.value}</b></li>)}
+        </ul>
+        <div className="hero-act" id="hero-act">
+          <A className="btn" href={c.primaryCta.href}>{c.primaryCta.label}</A>
+          {wa && <a className="link" href={wa} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />Ask on WhatsApp</a>}
         </div>
-
-        {c.builtFor && (
-          <>
-            <h2 className="bf-t" id="au-for">{c.builtFor.title}</h2>
-            <ul className="bf" aria-labelledby="au-for" data-reveal>
-              {c.builtFor.items.map((p) => (
-                <li key={p.label}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.image.src} alt={p.image.alt} loading="lazy" />
-                  <div className="ov"><div><small>{p.intro}</small><b>{p.label}</b></div><span className="to">→ {p.outcome}</span></div>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
       </div>
+      <figure className="hero-ph">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={l.photo} alt={l.alt} fetchPriority="high" />
+        <figcaption>
+          <span className="t-num">₹{l.package}<small>LPA</small></span>
+          <p><b>{l.name}</b>, CloudCadre learner · {l.role}, {l.company}</p>
+        </figcaption>
+      </figure>
     </section>
   )
 }
 
-function Program({ c, join, syllabus }: { c: NonNullable<Content['program']>; join: Join; syllabus?: string }) {
-  return (
-    <section className="sec panel panel-mist" id="program" aria-labelledby="au-prog">
-      <div className="wrap">
-        <div className="sh" data-reveal>
-          <div><h2 className="h2" id="au-prog">{c.title}</h2><p className="lead">{c.lead}</p></div>
-          {syllabus && <a className="tlink" href={syllabus}>Download the syllabus<Arrow /></a>}
-        </div>
-        <div data-reveal><Climb months={c.months} goal={c.goal} join={join} /></div>
-      </div>
-    </section>
-  )
-}
-
-function How({ c }: { c: NonNullable<Content['how']> }) {
-  const { certificate: cert } = c
-  return (
-    <section className="sec" id="how" aria-labelledby="au-how">
-      <div className="wrap">
-        <div className="sh" data-reveal><div><h2 className="h2" id="au-how">{c.title}</h2><p className="lead">{c.lead}</p></div></div>
-        <div className="mosaic" data-reveal>
-          {c.tiles.map((t, i) => (
-            <figure key={t.title} className={`mz${i === 0 ? ' big' : i === 1 ? ' wide' : ''}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={t.image.src} alt={t.image.alt} loading="lazy" />
-              <span className="mz-num" aria-hidden="true">{i + 1}</span>
-              <figcaption className="mz-cap"><b>{t.title}</b><span>{t.line}</span></figcaption>
-            </figure>
-          ))}
-          <figure className="mz cert">
-            <span className="mz-num" aria-hidden="true">{c.tiles.length + 1}</span>
-            <a className="cert-img" href={cert.image.src} target="_blank" rel="noopener noreferrer" title="Open full size">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cert.image.src} width={1536} height={1024} alt={cert.image.alt} loading="lazy" />
-            </a>
-            <figcaption className="cert-cap"><b>{cert.title}</b><span>{cert.line}</span></figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
-  )
-}
-
+/** 2. Placements: the model unit. Real faces, real packages, real employers; counted, never averaged. */
 function Placements({ c }: { c: NonNullable<Content['placements']> }) {
-  // Two lanes, alternating people, so the same face is never on screen twice at once
   const cards = c.items.map((p) => (
     <li key={p.name} className="pc">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="pc-pic" src={p.photo} alt="" width={112} height={112} loading="lazy" decoding="async" />
-      <div className="pc-bd">
-        <p className="pc-pkg"><b>₹{p.lpa}</b> LPA{p.city ? <span> · {p.city}</span> : null}</p>
-        <h3 className="pc-name">{p.name}</h3>
-        <p className="pc-co">
+      <img className="f" src={p.photo} alt="" width={240} height={240} loading="lazy" decoding="async" />
+      <div className="pc-b">
+        <p className="t-h3">₹{p.lpa}<small>LPA</small></p>
+        <h3 className="pc-n">{p.name}</h3>
+        <p className="t-small">{p.now}</p>
+        <span className="co">
           {p.logo
             // eslint-disable-next-line @next/next/no-img-element
-            ? <img className="pc-logo" src={p.logo} alt={p.company} height={26} loading="lazy" decoding="async" />
+            ? <img src={p.logo} alt={p.company} height={17} loading="lazy" decoding="async" />
             : p.company}
-        </p>
-        <p className="pc-role">{p.was ? `${p.was} → ` : ''}{p.now}</p>
+        </span>
       </div>
     </li>
   ))
-  const lanes = [cards.filter((_, i) => i % 2 === 0), cards.filter((_, i) => i % 2 === 1)]
   return (
-    <section className="sec panel panel-dark" id="placements" aria-labelledby="au-pl">
+    <section className="sec place" id="placements" aria-labelledby="pl-h">
       <div className="wrap">
-        <div className="sh" data-reveal>
+        <div className="sh">
           <div>
-            <h2 className="h2" id="au-pl">{c.title}</h2>
-            <p className="lead pl-sum">{c.stats.map((s) => <span key={s.label}><b>{s.value}</b> {s.label.toLowerCase()}</span>)}</p>
+            <h2 className="t-h2" id="pl-h">{c.title}</h2>
+            <p className="sum">
+              {c.stats.map((s, i) => (
+                <span key={s.value}>{i > 0 && ' · '}{s.prefix && `${s.prefix} `}<b>{s.value}</b>{s.label && ` ${s.label}`}</span>
+              ))}
+            </p>
           </div>
-          {c.link && <A className="tlink" href={c.link.href}>{c.link.label}<Arrow /></A>}
+          <ul className="logos" aria-label="Employers">
+            {c.logos.map((l) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <li key={l.src} className={l.size}><img src={l.src} alt={l.alt} loading="lazy" /></li>
+            ))}
+          </ul>
         </div>
+        <PlacementWall items={cards} count={c.items.length} />
+        <p className="t-small fine">{c.footnote}</p>
       </div>
-      {/* The lanes run the full width of the panel, so cards slide in from its edges */}
-      <div data-reveal><StoryMarquee lanes={lanes} label="Placement stories" /></div>
     </section>
   )
 }
 
-function Trainers({ c }: { c: NonNullable<Content['trainers']> }) {
+/** 3. Program: four month cards, each led by a code-drawn diagram of what you build. */
+function Program({ c, syllabus }: { c: NonNullable<Content['program']>; syllabus?: string }) {
   return (
-    <section className="sec" id="trainers" aria-labelledby="au-tr">
+    <section className="sec prog" id="program" aria-labelledby="prog-h">
       <div className="wrap">
-        <div className="sh" data-reveal><h2 className="h2" id="au-tr">{c.title}</h2></div>
-        <div className="tgrid" data-reveal>
-          {c.items.map((t) => (
-            <article key={t.name} className="tr">
+        <div className="sh">
+          <h2 className="t-h2" id="prog-h">{c.title}</h2>
+          {syllabus && <a className="link" href={syllabus}>Full syllabus (PDF)</a>}
+        </div>
+        <ol className="months">
+          {c.months.map((m) => (
+            <li key={m.n} className="mc">
+              <Diagram k={m.diagram} />
+              <div className="mc-b">
+                <p className="t-label"><b>Month {m.n}</b> · {m.meta}</p>
+                <h3 className="t-h3">{m.title}</h3>
+                <p className="t-small">{m.line}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )
+}
+
+/** 4. How classes work: a photo, one big number, three or four words. */
+function How({ c }: { c: NonNullable<Content['how']> }) {
+  return (
+    <section className="sec how dark" id="how" aria-labelledby="how-h">
+      <div className="wrap">
+        <div className="sh"><h2 className="t-h2" id="how-h">{c.title}</h2></div>
+        <ul className="nums">
+          {c.tiles.map((t) => (
+            <li key={t.line}>
               <div className="ph">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={t.photo} alt="" loading="lazy" />
-                <span className="yrs">{t.years} yrs</span>
-                <div className="badges">{t.teaches.map((k) => <span key={k}><Logo name={k} label={LOGO_NAMES[k]} /></span>)}</div>
+                <img src={t.image.src} alt={t.image.alt} loading="lazy" />
               </div>
-              <h3 className="tn">
-                <b>{t.name}</b>
-                {t.linkedin && (
-                  <a className="li" href={t.linkedin} target="_blank" rel="noopener noreferrer" aria-label={`${t.name} on LinkedIn`}>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-linkedin" /></svg>
-                  </a>
-                )}
-              </h3>
-              <p className="role">{t.role}</p>
-            </article>
+              <b className="t-num">{t.value}</b>
+              <p>{t.line}</p>
+            </li>
           ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+/** 5. Next batch: one ticket with three pictures. The date as a calendar, the week as a timetable, the fee as one number. */
+function Batch({ c, wa }: { c: NonNullable<Content['batch']>; wa: string | null }) {
+  return (
+    <section className="sec batch" id="batch" aria-labelledby="bt-h">
+      <div className="wrap">
+        <div className="sh"><h2 className="t-h2" id="bt-h">{c.title}</h2></div>
+        <div className="ticket">
+          <div className="cal">
+            <span className="mo">{c.month}</span>
+            <span className="d">{c.day}</span>
+            <span className="t-label">{c.length}</span>
+          </div>
+          <div>
+            <p className="t-label tk-h">Your week</p>
+            <ul className="week" aria-label="Weekly schedule">
+              {c.week.map((d) => (
+                <li key={d.day} className={d.kind === 'class' ? 'on' : d.kind === 'lab' ? 'lab' : undefined}>
+                  <span className="dn">{d.day}</span>
+                  <span className="cell" aria-label={d.kind === 'free' ? 'free' : undefined}>
+                    {d.time ? <>{d.time[0]}<br />{d.time[1]}</> : '–'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="legend"><span><i className="k-class" />Live class</span><span><i className="k-lab" />Lab with a mentor</span><span>Every class is recorded</span></p>
+          </div>
+          <div className="fee">
+            <p className="t-label tk-h">Fee</p>
+            <span className="t-num">{c.fee.amount}<small>{c.fee.per}</small></span>
+            <p className="t-small">{c.fee.alt}</p>
+            <A className="btn" href={c.join.href}>{c.join.label}</A>
+            {wa && <a className="link" href={wa} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />Ask on WhatsApp</a>}
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-function Talk({ c, brand, join }: { c: NonNullable<Content['talk']>; brand: BrandInfo; join: Join }) {
-  const { counsellor: p } = c
+/** 6. Questions before you join: a real person first, then five closed questions. */
+function Talk({ c, brand }: { c: NonNullable<Content['talk']>; brand: BrandInfo }) {
+  const p = c.counsellor
   const wa = p ? waLink(brand, p.message) : null
-  const phone = brand.contact?.phone
-  const card = Boolean(p && wa)
   return (
-    <section className="sec panel panel-stone" id="talk" aria-labelledby="au-talk">
+    <section className="sec" id="faq" aria-labelledby="faq-h">
       <div className="wrap">
-        <div className="sh" data-reveal><div><h2 className="h2" id="au-talk">{c.title}</h2><p className="lead">{c.lead}</p></div></div>
-        <div className={`talk2${card ? '' : ' solo'}`} data-reveal>
+        <div className={`faq-grid${p && wa ? '' : ' solo'}`}>
           {p && wa && (
-            <aside className="person2" aria-label="Talk to an admissions counsellor">
-              <div className="p2-top">
+            <aside className="person" aria-label="Talk to an admissions counsellor">
+              <div className="ph">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.photo} alt="" width={56} height={56} loading="lazy" />
-                <div><b>{p.name}</b><span>{p.role}</span></div>
+                <img src={p.photo} alt="" loading="lazy" />
               </div>
-              <p className="p2-say">{p.line}</p>
-              <a className="btn btn-brand" href={wa} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />Message {p.name.split(' ')[0]} on WhatsApp</a>
-              {phone && <p className="p2-call">Or call <a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a>{p.hours ? ` · ${p.hours}` : ''}</p>}
+              <p><b>{p.name}</b><br /><span className="t-small">{p.role}</span></p>
+              <a className="btn btn-line" href={wa} target="_blank" rel="noopener noreferrer"><WhatsAppIcon />Message {p.name.split(' ')[0]}</a>
             </aside>
           )}
-          <div className="faq">
-            {c.faq.map((q) => <details key={q.question}><summary>{q.question}</summary><p>{q.answer}</p></details>)}
+          <div>
+            <div className="sh"><h2 className="t-h2" id="faq-h">{c.faqTitle}</h2></div>
+            <div className="faq">
+              {c.faq.map((q) => <details key={q.question}><summary>{q.question}</summary><p>{q.answer}</p></details>)}
+            </div>
           </div>
-        </div>
-        <div className="final" data-reveal>
-          <div><b>{c.nextBatch.title}</b><span>{c.nextBatch.meta}</span></div>
-          <A className="btn btn-accent" href={join.href}>{join.label}<Arrow /></A>
         </div>
       </div>
     </section>
@@ -219,16 +212,15 @@ export function HomePage({ brand, content }: HomePageProps) {
   // No content supplied: show the plain fallback page instead of an empty design.
   if (!content) return <defaultTheme.HomePage brand={brand} />
   const wa = waLink(brand)
-  const join = content.hero.primaryCta
   return (
-    <div className="au">
-      <Reveal />
-      <Hero c={content.hero} join={join} wa={wa} />
-      {content.program && <Program c={content.program} join={join} syllabus={content.syllabusHref} />}
-      {content.how && <How c={content.how} />}
+    <div className="cc cc-home">
+      <Hero c={content.hero} wa={wa} />
       {content.placements && <Placements c={content.placements} />}
-      {content.trainers && <Trainers c={content.trainers} />}
-      {content.talk && <Talk c={content.talk} brand={brand} join={join} />}
+      {content.program && <Program c={content.program} syllabus={content.syllabusHref} />}
+      {content.how && <How c={content.how} />}
+      {content.batch && <Batch c={content.batch} wa={wa} />}
+      {content.talk && <Talk c={content.talk} brand={brand} />}
+      {content.batch && <PhoneBar {...content.batch.bar} href="/#batch" whatsapp={wa} />}
     </div>
   )
 }

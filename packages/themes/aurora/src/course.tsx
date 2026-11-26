@@ -52,6 +52,7 @@ export function CoursePage({ brand, site, course, cta, terms, catalogHref }: Cou
   const wa = waLink(brand)
   const logo = platformFor(course.title, course.tags)
   const art = site?.authArt
+  const poster = site?.coursePosters?.[course.slug]
   const total = course.lessonCount
   const facts = [LEVEL[course.level], MODE[course.deliveryMode], total ? plural(total, 'lesson') : null, duration(course.estimatedMinutes)].filter(Boolean) as string[]
   const action = cta.href
@@ -84,7 +85,10 @@ export function CoursePage({ brand, site, course, cta, terms, catalogHref }: Cou
             {cta.note && <p className="small">{cta.note}</p>}
           </div>
         </div>
-        {art ? (
+        {poster ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="crs-poster" src={poster.src} alt={poster.alt} width={1080} height={1080} />
+        ) : art ? (
           <div className="ha-media" style={{ justifySelf: 'end' }}>
             <div className="ha-back shape" />
             <div className="ha-photo shape">

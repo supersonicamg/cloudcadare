@@ -55,6 +55,8 @@ export const auroraSite: SiteContent = {
   ],
   // stock placeholder
   authArt: { image: { src: photo('1531482615713-2afd69097998', 900), alt: 'Learners working through a cloud lab together' }, tag: 'Taught by working engineers' },
+  // The poster carries the 12 Jan date, 8-10 pm and Rs 15,000 a month: the same INVENTED placeholders as the home hero. Redo both together.
+  coursePosters: { ceap: { src: '/cloudcadre/ceap-poster.webp', alt: 'CloudCadre Elite Architect Program: become a cloud architect in 4 months. Next batch 12 Jan, classes 8 to 10 pm, Rs 15,000 a month.' } },
   disclaimer: 'AWS, Azure, Google Cloud, Kubernetes and other marks belong to their owners.',
 }
 

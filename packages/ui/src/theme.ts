@@ -34,6 +34,8 @@ export interface SiteContent {
   legal?: NavItem[]
   /** Photo beside the sign-in form (themes with a split sign-in layout). */
   authArt?: { image: HomeImage; tag?: string }
+  /** A finished square poster per course, keyed by course slug. It replaces the course page's photo, uncropped. */
+  coursePosters?: Record<string, HomeImage>
   /** Small print under the footer, for example trademark ownership. */
   disclaimer?: string
 }

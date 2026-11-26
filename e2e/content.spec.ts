@@ -146,17 +146,14 @@ test.describe.serial('files, previews, ordering and unlock rules', () => {
     await page.goto(`/learn/${slug}/${ids.Beta}`)
     await expect(page.getByText('Completed', { exact: true }).filter({ visible: true })).toBeVisible()
 
-    // the PDF lesson shows the file; the download lesson offers it
+    // the PDF lesson shows the file; the download lesson hands nothing out
     await page.goto(`/learn/${slug}/${ids.Slides}`)
     await expect(page.locator('.pdfr, .pdfr-fallback')).toBeVisible()
+    await expect(page.getByRole('link', { name: /download/i })).toHaveCount(0)
     await page.goto(`/learn/${slug}/${ids.Handout}`)
-    const dl = page.getByTestId('download-link')
-    await expect(dl).toContainText('cheatsheet.txt')
-    const res = await page.request.get(`/api/lesson-file/${ids.Handout}?download=1`, { maxRedirects: 0 })
-    expect(res.status()).toBe(302)
-    const body = await page.request.get(res.headers().location!)
-    expect(body.headers()['content-disposition'] ?? '').toContain('cheatsheet.txt')
-    expect(await body.text()).toBe('remember to tag everything')
+    await expect(page.getByTestId('download-link')).toHaveCount(0)
+    await expect(page.getByText('Course files are not offered for download.')).toBeVisible()
+    expect((await page.request.get(`/api/lesson-file/${ids.Handout}?download=1`, { maxRedirects: 0 })).status()).toBe(404)
   })
 
   test('someone who is not enrolled cannot get a lesson file', async ({ page }) => {

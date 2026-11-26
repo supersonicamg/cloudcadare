@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { z } from 'zod'
-import { describeFile, humanSize, isFileLessonType, resolvePlayback } from '@educore/core/media'
+import { describeFile, isFileLessonType, resolvePlayback } from '@educore/core/media'
 import { isEnabled } from '@educore/features'
 import { requireMember } from '@/lib/dal'
 import { getLearnCourse, getLessonContent, getLessonProgress } from '@/lib/learn'
@@ -91,7 +91,6 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   const monthName = place ? `${place.label}${place.month.title && place.month.title !== place.label ? `: ${place.month.title}` : ''}` : null
   const e = course?.enrollment
   const mins = minutes(lesson.durationSeconds)
-  const fileLabel = file?.sizeBytes ? humanSize(file.sizeBytes) : undefined
 
   const backHref = course ? (lesson.type === 'live' ? `/learn/${slug}/live` : `/learn/${slug}/material${place ? `?month=${place.month.id}` : ''}`) : `/courses/${slug}`
   const toLesson = (l?: LearnLesson) => (l ? { href: `/learn/${slug}/${l.id}`, title: l.title } : null)
@@ -125,10 +124,10 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   } else if (lesson.type === 'pdf') {
     viewer = !fileOn ? <Callout icon="info" title="PDFs are switched off">This kind of lesson is not enabled for this academy.</Callout>
       : !file ? <Callout icon="clock" title="The file is not ready yet">Check back soon.</Callout>
-      : <PdfReader src={`/api/lesson-file/${lesson.id}`} title={lesson.title} downloadHref={`/api/lesson-file/${lesson.id}?download=1`} sizeLabel={fileLabel} />
+      : <PdfReader src={`/api/lesson-file/${lesson.id}`} title={lesson.title} />
   } else if (imageOn) {
     viewer = lesson.mediaAssetId
-      ? <ImageViewer src={`/api/lesson-file/${lesson.id}`} alt={lesson.title} downloadHref={`/api/lesson-file/${lesson.id}?download=1`} />
+      ? <ImageViewer src={`/api/lesson-file/${lesson.id}`} alt={lesson.title} />
       : <Callout icon="clock" title="The picture is not ready yet">Check back soon.</Callout>
   }
 
@@ -149,9 +148,8 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
         ? <Callout icon="ext" title={host ?? 'Open the resource'} action={<a href={lesson.externalUrl} target="_blank" rel="noopener noreferrer" className="btn btn-line btn-sm">Open the resource<Ic n="ext" s /></a>}>This lesson is on another website. It opens in a new tab.</Callout>
         : <Callout icon="info" title="No link yet">This lesson has no link yet.</Callout>
     } else if (fileType && lesson.type !== 'pdf') {
-      content = !fileOn ? <Callout icon="info" title="Not switched on">This kind of lesson is not enabled for this academy.</Callout>
-        : !file ? <Callout icon="clock" title="The file is not ready yet">Check back soon.</Callout>
-        : <Callout icon="down" title={file.title} action={<a href={`/api/lesson-file/${lesson.id}?download=1`} className="btn btn-line btn-sm" data-testid="download-link"><Ic n="down" s />Download {file.title}{fileLabel ? ` (${fileLabel})` : ''}</a>}>{fileLabel ? `${fileLabel}. ` : ''}It saves to your device.</Callout>
+      // Files are not offered for download. Lessons made as "file to download" before that rule have nothing to show.
+      content = <Callout icon="info" title="This file is not available online">Course files are not offered for download. Ask your instructor if you need this one.</Callout>
     } else if (lesson.type === 'quiz') {
       content = !isEnabled(a.bundle.features, 'assess.quizzes') ? <Callout icon="info" title="Quizzes are switched off">Quizzes are not enabled for this academy.</Callout>
         : !course ? <Callout icon="info" title="Join to take this quiz">Enrol in the course to take the quiz.</Callout>

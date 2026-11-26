@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { z } from 'zod'
 import { getPublicPreview } from '@educore/core/catalog'
-import { describeFile, humanSize, isFileLessonType, resolvePlayback } from '@educore/core/media'
+import { describeFile, isFileLessonType, resolvePlayback } from '@educore/core/media'
 import { isEnabled } from '@educore/features'
 import { getShell } from '@/lib/shell'
 import { button, buttonQuiet } from '@/lib/ui'
@@ -53,7 +53,7 @@ export default async function PreviewLesson({ params }: PageProps<'/[tenant]/cou
             !fileOn || !file ? <Notice>The file for this lesson is not available.</Notice>
             : lesson.type === 'pdf'
               ? <iframe src={`/api/lesson-file/${lesson.id}`} title={lesson.title} className="h-[75vh] w-full rounded-[var(--radius)] border border-border" />
-              : <a href={`/api/lesson-file/${lesson.id}?download=1`} className={`${buttonQuiet} inline-block`}>Download {file.title}{file.sizeBytes ? ` (${humanSize(file.sizeBytes)})` : ''}</a>
+              : <Notice>This file is not available online.</Notice>
           )}
           {!['article', 'video', 'external_link', 'pdf', 'download'].includes(lesson.type) && <Notice>This kind of lesson cannot be previewed.</Notice>}
         </div>

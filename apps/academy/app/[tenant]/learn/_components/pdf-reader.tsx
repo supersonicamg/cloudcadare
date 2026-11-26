@@ -24,7 +24,7 @@ const ZOOMS = [0.6, 0.8, 1, 1.25, 1.5, 2, 2.5]
  * page box jump, zoom is one tap, and text can be selected and saved as a highlight. Each note is stamped with the page
  * the learner is on. If the file cannot be drawn here (an old browser, a blocked file), the browser's own viewer takes over.
  */
-export function PdfReader({ src, title, downloadHref, sizeLabel }: { src: string; title: string; downloadHref: string; sizeLabel?: string }) {
+export function PdfReader({ src, title }: { src: string; title: string }) {
   const stage = useStage()
   const { page, pageCount, setPage, setPageCount, goTo, jumpTick, add, enabled } = stage
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -148,10 +148,10 @@ export function PdfReader({ src, title, downloadHref, sizeLabel }: { src: string
   useEffect(() => { const t = setTimeout(() => setCanFull(document.fullscreenEnabled), 0); return () => clearTimeout(t) }, [])
 
   if (status === 'error') {
+    // No fallback to the browser's own viewer: it comes with a download button.
     return (
       <div className="pdfr-fallback">
-        <iframe src={`${src}#page=${page}`} title={title} />
-        <p className="note-l"><Ic n="info" s /><span>This file is shown in your browser&apos;s own viewer. <a href={downloadHref}>Download it</a> if it does not open.</span></p>
+        <p className="note-l"><Ic n="info" s /><span>This file could not be opened here. Refresh the page, or try another browser.</span></p>
       </div>
     )
   }
@@ -179,7 +179,6 @@ export function PdfReader({ src, title, downloadHref, sizeLabel }: { src: string
           <button type="button" onClick={() => changeZoom(zoomAt + 1)} disabled={zoomAt === ZOOMS.length - 1} aria-label="Zoom in">+</button>
         </div>
         <div className="grp more">
-          <a href={downloadHref} className="tb" download><Ic n="down" s /><span>Download{sizeLabel ? ` (${sizeLabel})` : ''}</span></a>
           {canFull && <button type="button" className="tb" onClick={() => { if (full) void document.exitFullscreen(); else void box.current?.requestFullscreen() }}><Ic n="full" s /><span>{full ? 'Exit full screen' : 'Full screen'}</span></button>}
         </div>
       </div>
@@ -193,7 +192,7 @@ export function PdfReader({ src, title, downloadHref, sizeLabel }: { src: string
         </div>
       )}
 
-      <div className="pdfr-scroll" ref={scroller} tabIndex={0} role="document" aria-label={`${title}. Use the arrow keys to scroll.`}
+      <div className="pdfr-scroll" ref={scroller} onContextMenu={(e) => e.preventDefault()} tabIndex={0} role="document" aria-label={`${title}. Use the arrow keys to scroll.`}
         onKeyDown={(e) => {
           const t = e.target as HTMLElement
           if (t.tagName === 'INPUT') return

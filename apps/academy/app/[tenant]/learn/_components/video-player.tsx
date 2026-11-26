@@ -95,8 +95,14 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
     const time = () => t.update(v.currentTime, v.duration)
     v.addEventListener('play', on); v.addEventListener('pause', off); v.addEventListener('ended', off); v.addEventListener('timeupdate', time)
     return () => {
+      // Next keeps the page you left alive but hidden (cacheComponents), so the element is not removed and would keep
+      // playing. Cleanup runs on hide as well as on unmount: report the position, stop, and let go of the stream.
+      if (!v.paused) off()
       v.removeEventListener('play', on); v.removeEventListener('pause', off); v.removeEventListener('ended', off); v.removeEventListener('timeupdate', time)
+      v.pause()
       hls?.destroy()
+      v.removeAttribute('src')
+      v.load()
       pauseRef.current = null
     }
   }, [playback, startAt, tracker])
@@ -140,14 +146,19 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
         },
       })
     })
-    return () => { cancelled = true; clearInterval(poll); pauseRef.current = null; register?.(null); player?.destroy() }
+    return () => {
+      cancelled = true; clearInterval(poll); pauseRef.current = null; register?.(null)
+      // Stop the sound before the iframe goes: a hidden page must never keep playing.
+      try { player?.pauseVideo() } catch { /* not ready yet */ }
+      player?.destroy()
+    }
   }, [playback, startAt, tracker, register, setDuration])
 
   if (playback.kind === 'youtube') {
     return <div ref={ytRef} className={framed ? undefined : 'aspect-video w-full overflow-hidden rounded-[18px] bg-deep [&_iframe]:size-full'} aria-label={title} />
   }
   return (
-    <video ref={videoRef} controls playsInline preload="metadata" aria-label={title}
+    <video ref={videoRef} controls controlsList="nodownload" playsInline preload="metadata" aria-label={title} onContextMenu={(e) => e.preventDefault()}
       className={framed ? undefined : 'aspect-video w-full rounded-[18px] bg-deep'} />
   )
 }

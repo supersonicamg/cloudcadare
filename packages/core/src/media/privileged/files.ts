@@ -2,7 +2,7 @@ import 'server-only'
 import { randomUUID } from 'node:crypto'
 import { getPlane } from '@educore/auth'
 import { createPrivilegedDb } from '@educore/auth/privileged'
-import { FILE_BUCKET, extOf, mimeForExt, safeFilename } from '../files'
+import { FILE_BUCKET, extOf, mimeForExt } from '../files'
 
 // FILE STORAGE for lesson files (PDF, downloads). Files sit in the private `course-media` bucket under
 // {tenant}/lessons/{lesson}/. Nobody reads the bucket directly: the app first proves the person may see the LESSON,
@@ -48,15 +48,13 @@ export async function describeFile(tenantId: string, mediaAssetId: string): Prom
   return { title: data.title ?? 'File', ext: extOf(data.storage_path), mime: data.mime_type, sizeBytes: data.size_bytes }
 }
 
-/** A link that works for one minute. `download` makes the browser save it under the original name. */
-export async function signedFileUrl(tenantId: string, mediaAssetId: string, opts: { download?: boolean } = {}): Promise<string | null> {
+/** A link that works for one minute. It is always inline: files are never offered as a download. */
+export async function signedFileUrl(tenantId: string, mediaAssetId: string): Promise<string | null> {
   const d = db()
   const { data } = await d.from('media_assets').select('title, storage_bucket, storage_path, status')
     .eq('tenant_id', tenantId).eq('id', mediaAssetId).is('deleted_at', null).maybeSingle()
   if (!data || data.status !== 'ready' || data.storage_bucket !== FILE_BUCKET || !data.storage_path) return null
-  const { data: signed, error } = await d.storage.from(FILE_BUCKET).createSignedUrl(
-    data.storage_path, 60, opts.download ? { download: safeFilename(data.title ?? 'file') } : undefined,
-  )
+  const { data: signed, error } = await d.storage.from(FILE_BUCKET).createSignedUrl(data.storage_path, 60)
   if (error || !signed) return null
   return signed.signedUrl
 }

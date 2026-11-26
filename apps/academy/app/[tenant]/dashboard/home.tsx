@@ -5,7 +5,7 @@ import { courseAbbr, dateShort } from '@/lib/format'
 import type { MyEnrollment } from '@/lib/learn'
 import { isOpenNow } from '@/lib/live'
 import { NextClassCard } from '../_components/live'
-import { Dg, Ic, diagramOfMonth, type IconName } from '../_components/v11'
+import { Ic, type IconName } from '../_components/v11'
 import { LESSON_ICON, MonthCards, type MonthCardData } from './parts'
 
 /** "Good morning" for a clock in India. */
@@ -55,6 +55,9 @@ export function EnrolledHome({ d, lead, first, joined, others }: { d: Enrolled; 
   const minutesLeft = resume?.durationSeconds && resume.pct > 0 ? Math.max(1, Math.round((resume.durationSeconds * (1 - resume.pct / 100)) / 60)) : null
   const resumeIcon: IconName = resume ? (resume.type === 'video' || resume.type === 'live' ? 'play' : LESSON_ICON[resume.type] ?? 'doc') : 'play'
   const resumeMonth = resume ? d.m.months.findIndex((mo) => mo.lessons.some((l) => l.id === resume.id)) : -1
+  // Where this lesson sits in the whole program. The picture says "Lesson 3 of 20" so it never repeats a month card's drawing.
+  const allLessons = d.m.months.flatMap((mo) => mo.lessons)
+  const resumeAt = resume ? allLessons.findIndex((l) => l.id === resume.id) + 1 : 0
   const upNext = nextIn(d)
 
   return (
@@ -74,7 +77,12 @@ export function EnrolledHome({ d, lead, first, joined, others }: { d: Enrolled; 
         {resume ? (
           <section className="cont dark" aria-labelledby="cont-k">
             <div className="cont-pic">
-              <Dg id={diagramOfMonth((resumeMonth >= 0 ? resumeMonth : d.currentMonth) + 1)} label={false} />
+              {resumeAt > 0 && (
+                <p className="cont-n">
+                  <span className="t-label">{resumeMonth >= 0 ? `Month ${resumeMonth + 1}` : 'Lesson'}</span>
+                  <span className="t-num">Lesson {resumeAt}<small>of {allLessons.length}</small></span>
+                </p>
+              )}
               <span className="play" aria-hidden="true"><Ic n={resumeIcon} /></span>
               {resume.pct > 0 && !resume.done && <span className="wp" aria-hidden="true"><i style={{ width: `${resume.pct}%` }} /></span>}
             </div>

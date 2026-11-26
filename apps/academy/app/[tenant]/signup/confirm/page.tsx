@@ -1,9 +1,11 @@
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { safeNext } from '@educore/core/accounts'
+import type { BrandInfo } from '@educore/ui/theme'
 import { requireMember } from '@/lib/dal'
 import { emailCodeRequired } from '@/lib/email-code'
 import { getShell } from '@/lib/shell'
+import { waHref } from '../../_components/v11-bars'
 import { AuthFrame, AuthTop } from '../../login/auth-frame'
 import { ConfirmForm } from './confirm-form'
 
@@ -17,7 +19,7 @@ export const metadata = { title: 'Confirm your email' }
  *    (dominant) -> Confirm -> resend and "use a different email" as quiet text links.
  * Identical for everyone: it never says whether the address is on the learner list.
  */
-async function Body({ searchParams }: { searchParams: PageProps<'/[tenant]/signup/confirm'>['searchParams'] }) {
+async function Body({ searchParams, brand }: { searchParams: PageProps<'/[tenant]/signup/confirm'>['searchParams']; brand: BrandInfo }) {
   const next = safeNext((await searchParams).next)
   const a = await requireMember(`/signup/confirm?next=${encodeURIComponent(next)}`)
   const { data: m } = await a.db.from('tenant_members').select('email, email_verified_at').eq('id', a.memberId).single()
@@ -29,7 +31,7 @@ async function Body({ searchParams }: { searchParams: PageProps<'/[tenant]/signu
         <h1 className="t-title">Check your email</h1>
         <p className="t-lead" style={{ marginTop: 8 }}>We sent a 6-digit code to <b>{email}</b>. It works for 10 minutes.</p>
       </div>
-      <ConfirmForm next={next} />
+      <ConfirmForm next={next} helpHref={waHref(brand, 'Hi, I did not get my email code.')} />
     </div>
   )
 }
@@ -39,7 +41,7 @@ export default async function ConfirmPage(props: PageProps<'/[tenant]/signup/con
   return (
     <AuthFrame brand={brand} photo={home?.authPhoto}>
       <AuthTop brand={brand} />
-      <Suspense fallback={<div className="auth-box" aria-busy />}><Body searchParams={props.searchParams} /></Suspense>
+      <Suspense fallback={<div className="auth-box" aria-busy />}><Body searchParams={props.searchParams} brand={brand} /></Suspense>
     </AuthFrame>
   )
 }

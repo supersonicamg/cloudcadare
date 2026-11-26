@@ -11,6 +11,7 @@ import { getShell } from '@/lib/shell'
 import type { LearnLesson } from '@/lib/learn'
 import { LearnerShell } from '../../../_components/learner-shell'
 import { Ic, type IconName } from '../../../_components/v11'
+import { waHref } from '../../../_components/v11-bars'
 import { ImageViewer } from '../../_components/image-viewer'
 import { LessonActions } from '../../_components/lesson-actions'
 import { KIND, KIND_ICON, dripDate, minutes, placeOf } from '../../_components/lesson-meta'
@@ -136,11 +137,12 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   if (!lock) {
     if (lesson.type === 'article') content = lesson.body?.text ? <Prose v11 text={lesson.body.text} /> : <Callout icon="info" title="Nothing here yet">This lesson has no text yet.</Callout>
     else if (lesson.type === 'lab') {
+      const labHelp = waHref(shell.brand, `Hi, I need help with the lab "${lesson.title}".`)
       content = <>
         {lesson.body?.text && <Prose v11 text={lesson.body.text} />}
         {lesson.externalUrl
           ? <Callout icon="lab" title="Open the lab" action={<a href={lesson.externalUrl} target="_blank" rel="noopener noreferrer" className="btn btn-line btn-sm">Open the lab<Ic n="ext" s /></a>}>This is a hands-on lab. It opens in a new tab. Come back here when you are done.</Callout>
-          : !lesson.body?.text && <Callout icon="lab" title="A hands-on lab">Do this one on your own computer, as shown in class or in the lesson text. Stuck? Ask in the next class, or message us on WhatsApp.</Callout>}
+          : !lesson.body?.text && <Callout icon="lab" title="A hands-on lab">Do this one on your own computer, as shown in class or in the lesson text. Stuck? Ask in the next class, or {labHelp ? <a href={labHelp} target="_blank" rel="noopener noreferrer">message us on WhatsApp</a> : 'message us on WhatsApp'}.</Callout>}
       </>
     } else if (lesson.type === 'external_link') {
       const host = (() => { try { return new URL(lesson.externalUrl ?? '').hostname.replace(/^www\./, '') } catch { return null } })()

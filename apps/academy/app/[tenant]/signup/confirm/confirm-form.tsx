@@ -1,7 +1,7 @@
 'use client'
 
 import { startTransition, useActionState, useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from 'react'
-import { Ic } from '../../_components/v11'
+import { Ic, Wa } from '../../_components/v11'
 import { resendCode, verifyCode, type ConfirmState } from './actions'
 
 const LENGTH = 6
@@ -11,7 +11,7 @@ const blank = () => Array<string>(LENGTH).fill('')
  * Six boxes for the code (plan/16 §4.1). A paste, the phone's one-time-code suggestion or one long fill spreads over
  * all six; the server still receives one value (the hidden `code` field), so the form works the same as a single input.
  */
-export function ConfirmForm({ next }: { next: string }) {
+export function ConfirmForm({ next, helpHref }: { next: string; helpHref: string | null }) {
   const [state, verify, verifying] = useActionState<ConfirmState, FormData>(verifyCode, {})
   const [again, resend, resending] = useActionState<ConfirmState, FormData>(resendCode, {})
   const [digits, setDigits] = useState(blank)
@@ -101,6 +101,7 @@ export function ConfirmForm({ next }: { next: string }) {
           </button>
         </p>
       </form>
+      {again.help && helpHref && <p className="t-small"><a className="link link-s" href={helpHref} target="_blank" rel="noopener noreferrer"><Wa />Message us on WhatsApp</a></p>}
       <form action="/logout" method="post">
         <input type="hidden" name="next" value="/signup" />
         <p className="t-small">Wrong email? <button type="submit" className="link link-s">Use a different email</button></p>

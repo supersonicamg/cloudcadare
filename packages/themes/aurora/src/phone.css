@@ -1,0 +1,83 @@
+/* CloudCadre on a phone (plan/15 §8). This is its own design, not the wide page squeezed: the picture opens the page,
+   money has its own row, card grids become sliding rows with the next card peeking in, and the week is two plain lines.
+   Everything here acts at phone width only. Loaded after site.css and home.css. The hiding navbar is in
+   packages/ui (auto-hide.tsx and styles.css), because the learner area uses it too.
+
+   Widths: `stage` container queries for the home page (as in home.css), 560px. The sliding rows in client.tsx use the
+   same 560px limit. */
+
+@media (max-width: 600px) {
+  /* The navbar steps aside on a jump, so a section lands at the very top of the screen. */
+  .cc [id] { scroll-margin-top: 0; }
+}
+
+/* Touch: no grey flash, no double-tap zoom delay, and every button answers the thumb. */
+.cc a, .cc button, .cc summary { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.cc .btn:active { transform: translateY(1px); }
+.cc .btn:not(.btn-line):active { background: var(--acc-h); }
+.cc .btn-line:active { background: rgba(15,23,22,.08); }
+
+.cc-home {
+  .rail-ctl { display: none; }
+
+  @container stage (max-width: 560px) {
+    .sec { padding-block: 48px; font-size: 16px; }
+    .sh { margin-bottom: 20px; }
+
+    /* ---------- Hero: the picture opens the page and melts into the headline ---------- */
+    .hero-ph { order: -1; aspect-ratio: auto; height: clamp(148px, 25svh, 250px); background: var(--dark); -webkit-mask-image: linear-gradient(180deg, #000 40%, transparent 96%); mask-image: linear-gradient(180deg, #000 40%, transparent 96%); }
+    .hero-copy { position: relative; z-index: 2; margin-top: -44px; padding: 0 var(--gutter) 24px; }
+    .hero .t-lead { margin-top: 12px; }
+    .hfacts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin-top: 20px; }
+    .hfacts li { gap: 2px; }
+    /* The money row: what you start with, large, on its own line. */
+    .hfacts .money { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; column-gap: 16px; padding-block: 12px; border-block: 1px solid var(--on-dark-rule); }
+    .hfacts .money span { grid-area: 1 / 1; color: #fff; font-size: var(--t-small); font-weight: 600; }
+    .hfacts .money small { grid-area: 2 / 1; margin: 0; }
+    .hfacts .money b { grid-area: 1 / 2 / span 2; font-size: 28px; letter-spacing: -.03em; line-height: 1; }
+    .hero-act { flex-direction: column; align-items: stretch; gap: 4px; margin-top: 18px; }
+    .hero-act .link { justify-content: center; }
+
+    /* ---------- Sliding rows: full bleed, one card and a good part of the next ---------- */
+    .rail { display: flex; gap: 0; margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
+    .rail::-webkit-scrollbar { display: none; }
+    .rail > li { flex: none; margin-right: 12px; }
+    /* Swiped rows settle on a card. A row that slides by itself must not snap. */
+    .rail:not([data-sliding]) { scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); }
+    .rail:not([data-sliding]) > li { scroll-snap-align: start; }
+    .rail:not([data-sliding]) > li:last-child { margin-right: 0; }
+    .rail[data-sliding] { padding-inline: 0; }
+    .rail-ctl { display: flex; width: fit-content; min-height: 44px; margin: 8px 0 -8px auto; padding: 0; border: 0; background: transparent; font-size: var(--t-label); font-weight: 400; color: var(--muted); cursor: pointer; }
+    .dark .rail-ctl { color: var(--on-dark-2); }
+
+    .wall > li { width: min(62cqi, 232px); }
+    .pc-b { padding: 14px 14px 16px; }
+    .place .fine { margin-top: 12px; font-size: var(--t-label); }
+
+    /* Month cards at nearly full width: the drawing's labels become readable and the line is back. */
+    .months > li { width: 82cqi; }
+
+    .nums > li { width: 68cqi; }
+
+    /* ---------- Next batch: the week as seven markers and two plain lines ---------- */
+    .ticket > div { padding: 20px 16px; }
+    .week .cell { height: 10px; overflow: hidden; font-size: 0; }
+    .slots { display: grid; gap: 10px; margin-top: 16px; }
+    .slots div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; font-size: var(--t-small); }
+    .slots dt { font-weight: 600; }
+    .slots i { display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 2px; }
+    .slots .k-class { background: var(--ink); }
+    .slots .k-lab { background: var(--acc); }
+    .slots dd { color: var(--body); }
+    .legend { margin-top: 12px; }
+    .legend span:not(:last-child) { display: none; }
+
+    /* ---------- The counsellor: a face, a name, one button ---------- */
+    .person { grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 14px; padding-top: 24px; border-top: 1px solid var(--rule); }
+    .person .ph { grid-row: auto; width: 64px; height: 64px; aspect-ratio: 1; border-radius: 50%; }
+    .person .btn { grid-column: 1 / -1; }
+    .faq details p { padding-right: 0; }
+
+    .mbar-wrap { display: block; }
+  }
+}

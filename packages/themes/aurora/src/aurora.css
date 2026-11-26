@@ -168,6 +168,7 @@
   .price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
   .price b { font-size: 44px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; }
   .price s { font-size: 20px; color: var(--mute); }
+  .price strong { font-size: 18px; font-weight: 600; }
   .price span { font-size: 15px; color: var(--mute); }
   .btn.is-off, .btn[disabled] { background: #D9D6CC; color: #6A726F; box-shadow: none; cursor: not-allowed; }
   .two { display: grid; grid-template-columns: 5fr 7fr; gap: 32px clamp(40px, 5vw, 88px); align-items: start; }

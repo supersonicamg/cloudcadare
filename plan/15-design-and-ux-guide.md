@@ -5,8 +5,8 @@
 >
 > | | |
 > |---|---|
-> | **Guide version** | **11**, 2026-11-26 |
-> | **Reference build** | [`plan/mockups/home-v11.html`](mockups/home-v11.html). Open it in a browser. Toolbar: **Desktop / Tablet 820 / Phone 390** and **Design notes** |
+> | **Guide version** | **11.1**, 2026-11-26 (11 plus the owner's phone changes: hiding navbar, sliding rows) |
+> | **Reference build** | [`plan/mockups/home-v11.html`](mockups/home-v11.html). Open it in a browser. Toolbar: **Desktop / Tablet 820 / Phone 390** and **Design notes**. **Its phone view is out of date:** for phones follow §8 and `packages/themes/aurora/src/phone.css` |
 > | **Replaces** | Version 9 (teal + Schibsted Grotesk, rounded inset panels, slanted frame). Archived at [`plan/archive/15-design-and-ux-guide-v9.md`](archive/15-design-and-ux-guide-v9.md) |
 > | **History** | §19 lists every version and the mockup file behind it |
 >
@@ -67,7 +67,7 @@
 | Stock photos of "a fresher" or "a professional" as persona cards | Drop the section, or show real people |
 | Chips and pill buttons (quick-reply chips, tool chips with borders) | One clear action; logos without boxes |
 | Grey-to-colour hover effects, hover lift on things that are not links, photo zoom on hover | No hover effect on static content |
-| Auto-scrolling marquees, carousels, swipe rows on phones | A grid with "Show all" (§8) |
+| Marquees and carousels on wide screens; on phones, a sliding row with no card peeking in, a self-sliding row that cannot be stopped, or the price or main action inside a row | A grid on wide screens; the phone rows in §8 |
 | Hamburger menu on phones | A visible row of 4 links (§8) |
 | A full-width yellow "Next batch" band | The batch ticket (§10.8) |
 | AI-generated photos of people | Real CloudCadre people; stock only as a marked placeholder |
@@ -214,21 +214,26 @@ Eight roles. Every piece of text on a page uses exactly one of them.
 
 | Component | Wide | ≤ 900px | ≤ 560px (phone) |
 |---|---|---|---|
-| Header | Logo, 4 links, Log in, "WhatsApp us" | Links move to a **visible link row** under the header | WhatsApp becomes a 44px icon button |
-| Hero | Copy left, photo right (50/50) | Copy first, photo below at 4:3 | Facts in one row of 3, buttons full width, photo 1:1 |
-| Placement wall | 5 per row | 3 per row | 2 per row, **first 6 + "Show all 15 learners"** |
-| Month cards / number tiles | 4 per row | 2 per row | 2 per row, card's last line hidden |
-| Batch ticket | Date · week · fee in 3 columns | Date + week, fee below | Stacked; date beside its label |
-| FAQ + person | Person left, FAQ right | FAQ first, person after | Same, person photo 16:10 |
+| Header | Logo, 4 links, Log in, "WhatsApp us" | Links move to a **visible link row** under the header | WhatsApp becomes a 44px icon button; header and link row **hide on scroll down, return on scroll up** |
+| Hero | Copy left, photo right (50/50) | Copy first, photo below at 4:3 | Photo first (25svh) fading into the H1; two facts side by side, the money fact on its own row; buttons full width |
+| Placement wall | 5 per row | 3 per row | **Self-sliding row** of all 15, 232px cards, "Pause sliding" |
+| Month cards | 4 per row | 2 per row | **Swipe row**, snapping, card 82cqi, all lines shown |
+| Number tiles | 4 per row | 2 per row | **Self-sliding row**, card 68cqi, "Pause sliding" |
+| Batch ticket | Date · week · fee in 3 columns | Date + week, fee below | Stacked; the week is seven colour markers and two lines ("Live class · Sat–Sun, 11 am to 2 pm") |
+| FAQ + person | Person left, FAQ right | FAQ first, person after | FAQ first; person as a 64px round face, name and one button |
 | Footer | 4 columns | 2 columns | 2 columns |
 
-**Phone patterns (researched, keep them):**
+**Phone patterns (researched, keep them).** The phone is its own design, kept in `phone.css`, not the wide page squeezed.
 - **No hamburger.** With 4 main links, keep them visible in a row of equal tabs under the header. Hidden navigation is found less often ([NN/g](https://www.nngroup.com/articles/hamburger-menus/)).
-- **No carousels or swipe rows.** People skip them ([NN/g](https://www.nngroup.com/articles/mobile-carousels/)). Show a grid with "Show all".
-- **The first screen holds the H1, the facts and the Join button.** The photo comes after them.
-- **Sticky action bar:** a slim white bar at the bottom ("Next batch 12 Jan" · WhatsApp icon · "Join batch"). It appears only after the hero button scrolls away and hides once the batch section is reached. Show it on phones only.
+- **Hiding navbar** (`@educore/ui/auto-hide`, public pages and the learner area): hides after a few pixels of scroll down, returns on a few pixels up, 0.3s ([NN/g](https://www.nngroup.com/articles/sticky-headers/)). It stays while the keyboard focus or an open menu is inside it, and steps aside when an in-page link is tapped.
+- **Sliding rows instead of squeezed grids** (owner, 26 Nov 2026). Full bleed, one card and a good part of the next, so it is plain there is more ([NN/g](https://www.nngroup.com/articles/mobile-carousels/)). Every row can be swiped.
+  - **Self-sliding** only for things that can be glanced at in any order (placements, number tiles): about 36px a second, loops, waits while touched, has a "Pause sliding" button ([WCAG 2.2.2](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html)), and does not move by itself with reduced motion or without JavaScript.
+  - **Swipe and snap** for things read in order (months).
+  - Never put the price, the date or the one filled button inside a row.
+- **The first screen holds the H1, the facts and the Join button**, checked down to 360×640. The photo above the H1 is short enough to keep that true.
+- **Sticky action bar:** a slim white bar at the bottom ("Start with ₹80,000" · WhatsApp icon · "Join batch"). It appears only after the hero button scrolls away and hides once the batch section is reached. Show it on phones only.
 - **Progressive disclosure:** when a unit has detail that doesn't fit, hide it behind a text-button toggle with `aria-expanded` ("Topics and project"), never behind a hover.
-- **Targets:** at least 44px tall. Main buttons are full width on phones.
+- **Targets:** at least 44px tall. Main buttons are full width on phones. Hover styles only where there is a pointer (`@media (hover: hover)`); touch gets a pressed state.
 
 ---
 
@@ -241,9 +246,11 @@ Almost none. The page must work and look finished with no animation.
 | Button hover | Background colour change only |
 | Phone action bar | Slide up `translateY(110%) → 0`, 0.25s |
 | Swapping content in place | Opacity fade, 0.2–0.3s |
+| Phone navbar | Slide `translateY(-100%)`, 0.3s |
+| Phone self-sliding rows | About 36px a second; "Pause sliding"; off with reduced motion |
 | Diagram connectors | May flow slowly (`stroke-dashoffset`, 1s loop); optional |
 
-No reveal-on-scroll, no hover lift, no photo zoom, no marquee. **Everything is off under `prefers-reduced-motion: reduce`.**
+No reveal-on-scroll, no hover lift, no photo zoom, no marquee on wide screens. **Everything is off under `prefers-reduced-motion: reduce`.**
 
 ---
 
@@ -292,7 +299,7 @@ A value is always H3/600 ink with a Label/400 muted above it. Use for the hero f
 One white block on paper with three parts separated by dashed rules:
 1. **Calendar:** month and year (Small, 600) → the day as a huge numeral → "4 months, live online" (Label).
 2. **Your week:** a 7-day row (Mon–Sun). Class days are ink cells ("11 am / 2 pm"), practice days are saffron cells ("10 am / 5 pm"), free days are `--tile` with "–". A legend under it, plus "Every class is recorded".
-3. **Fee:** "₹80,000" (Number) + "first instalment" (Label) → "UPI, card, net banking" → the filled Join button → WhatsApp text link.
+3. **Fee:** "Start with" → "₹80,000" (Number) + "first instalment" (Label) → "UPI, card, net banking" → the filled Join button → WhatsApp text link.
 This is where the price lives on the home page. Never hide the price behind "ask us".
 
 ### 10.9 FAQ and counsellor
@@ -300,7 +307,7 @@ This is where the price lives on the home page. Never hide the price behind "ask
 - **FAQ:** native `<details>`, all closed, 1px ink top rule, 1px hairlines, question in Body/600, "+" / "–" on the right. 5–6 questions, answers of at most 2 sentences. Must include "Do you guarantee a job?" answered honestly (no).
 
 ### 10.10 Phone action bar
-See §8. White, 1px top rule, soft shadow. Left: "Next batch 12 Jan" (Small, 600) over the fee (Label). Right: a 48px WhatsApp icon button and a filled "Join batch". Its links are `tabindex="-1"` and `aria-hidden` while it is hidden.
+See §8. White, 1px top rule, soft shadow. Left: "Start with ₹80,000" (Small, 600) over "First instalment · 12 Jan batch" (Label). Right: a 48px WhatsApp icon button and a filled "Join batch". Its links are `tabindex="-1"` and `aria-hidden` while it is hidden.
 
 ### 10.11 Footer
 Dark. Logo + one line ("Live online training in cloud, DevOps and FinOps.") · Program · Help · Contact columns · bottom rule with the trademark line and Privacy · Terms · Refunds.
@@ -399,7 +406,7 @@ Diagrams are **built in code (inline SVG), never generated images**: generated i
 
 ## 17. Open placeholders and questions (resolve before launch)
 
-- **Batch and price:** the date "12 Jan", seats (30). Class times (Sat–Sun 11 am–2 pm), practice (Mon–Fri 10 am–5 pm) and the first instalment (₹80,000) came from the owner on 26 Nov 2026; the total fee and later instalments are not given yet.
+- **Batch and price:** the date "12 Jan", seats (30). Class times (Sat–Sun 11 am–2 pm), practice (Mon–Fri 10 am–5 pm) and the first instalment (₹80,000) came from the owner on 26 Nov 2026; the total fee and later instalments are not given yet. `courseInstalments` in `aurora-content.ts` makes the course page and checkout call CEAP's database price the first instalment and hides its struck ₹95,000. Paying it opens the whole course: collecting the rest is manual.
 - **Program:** the month split, topics, lab counts (12 / 8 / 14 / "34 labs"), and a real syllabus PDF.
 - **People:** the counsellor's name, photo and hours; the WhatsApp number, phone and email.
 - **Consent:** every placement learner, and Monika Singh for the hero photo.
@@ -416,7 +423,7 @@ Diagrams are **built in code (inline SVG), never generated images**: generated i
 - [ ] Every unit is picture + number + line; no paragraphs on marketing screens.
 - [ ] One H1 (≤ 8 words); one filled button per view; button labels without arrows.
 - [ ] Touching sections never share a surface.
-- [ ] Nothing from §2: no eyebrows, chips, arrows, big radii, gradients, carousels, hamburger, AI faces.
+- [ ] Nothing from §2: no eyebrows, chips, arrows, big radii, gradients, hamburger, AI faces; sliding rows only as §8 describes.
 - [ ] Only Hanken Grotesk 400/600, only the 8 type roles in §6, only the colours in §5, radius 3px.
 - [ ] Images carry information; people are real or marked stock placeholders.
 - [ ] Checked at 1440, 820 and 390 wide: no sideways overflow, no orphan card, 44px targets, H1 + facts + Join in the phone's first screen.
@@ -434,7 +441,8 @@ Diagrams are **built in code (inline SVG), never generated images**: generated i
 | — | 2026-11-26 | [`mockups/hero-redesign.html`](mockups/hero-redesign.html) | Four hero directions from scratch: A Editorial, B Photo-led, C Syllabus-led, D Proof-led | Exploration. **B Photo-led picked** |
 | — | 2026-11-26 | [`mockups/home-photo-led.html`](mockups/home-photo-led.html) | Full photo-led page with options: 4 heroes, climb/rows, wall/featured, ink/teal | Exploration. Picked **Split hero, Rows, Wall, Ink + saffron** |
 | 10 | 2026-11-26 | [`mockups/home-v10.html`](mockups/home-v10.html) | Research-backed refinement: clarity-first hero, strict type scale, AI tropes removed, container-query layout, visible phone nav, sticky phone bar | **Superseded.** Owner loved only the placement wall; the rest was "too text heavy" |
-| **11** | **2026-11-26** | [`mockups/home-v11.html`](mockups/home-v11.html) | Every section rebuilt as picture + number + line units, modelled on the placement wall; real learner in the hero; month cards with code diagrams; number tiles; batch ticket | **Current.** This guide |
+| **11** | **2026-11-26** | [`mockups/home-v11.html`](mockups/home-v11.html) | Every section rebuilt as picture + number + line units, modelled on the placement wall; real learner in the hero; month cards with code diagrams; number tiles; batch ticket | Current for wide screens and tablet |
+| **11.1** | **2026-11-26** | No new mockup; the app (`phone.css`) | Phone redesign after owner feedback: hiding navbar, sliding rows, photo-first hero, money row, "Start with" fee wording | **Current** |
 
 **How to version from now on:** a new mockup gets the next number (`home-v12.html`). When the owner approves it, update this guide, bump its version in the header, add a row here and to §20, and archive the previous guide under `plan/archive/`.
 
@@ -462,3 +470,6 @@ Rows marked *superseded* are kept for history.
 | 2026-11-26 | **Picture + number + line** for every marketing unit; the placement wall is the model | Owner loved only the placement wall in v10; the rest was "too text heavy" |
 | 2026-11-26 | A real learner (with consent) is the hero photo; "Who joins" persona section dropped | Real faces are studied, stock personas are skipped |
 | 2026-11-26 | The price is shown on the home page in the batch ticket | When and how much are the two questions every visitor has |
+| 2026-11-26 | *Supersedes "grids instead of swipe rows" for phones:* sliding rows on phones (placements and number tiles slide by themselves, months are swiped) | Owner: "in phone sliding (marquee) sections look better instead of squeezing it all in" |
+| 2026-11-26 | The navbar hides on scroll down on phones and returns on scroll up | Owner request |
+| 2026-11-26 | ₹80,000 is always worded as the first instalment, what you start with, never as the whole fee | Owner request |

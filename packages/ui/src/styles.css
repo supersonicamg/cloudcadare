@@ -113,3 +113,11 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Phone navbar that hides on scroll down and returns on scroll up (auto-hide.tsx). Wider screens: no box at all. */
+.autohide { display: contents; }
+@media (max-width: 600px) {
+  .autohide { display: block; position: sticky; top: var(--tbh, 0px); z-index: 40; transition: transform .3s ease; }
+  .autohide > * { position: static !important; }
+  .autohide[data-hidden]:not(:has(:focus-visible, [aria-expanded="true"])) { transform: translateY(calc(-100% - var(--tbh, 0px))); }
+}

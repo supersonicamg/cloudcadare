@@ -60,10 +60,13 @@ export function CoursePage({ brand, site, course, cta, terms, catalogHref }: Cou
     : cta.action
       ? <form action={cta.action}><button className="btn btn-brand">{cta.label}<Arrow /></button></form>
       : <button className="btn is-off" disabled>{cta.label}</button>
+  const instalment = site?.courseInstalments?.includes(course.slug)
   const price = course.offer && (
     <div className="price">
       <b>{money(course.offer.amountMinor, course.offer.currency)}</b>
-      {course.offer.compareAtMinor && course.offer.compareAtMinor > course.offer.amountMinor && <s>{money(course.offer.compareAtMinor, course.offer.currency)}</s>}
+      {instalment
+        ? <strong>first instalment</strong>
+        : course.offer.compareAtMinor && course.offer.compareAtMinor > course.offer.amountMinor && <s>{money(course.offer.compareAtMinor, course.offer.currency)}</s>}
       {course.offer.taxIncluded && <span>Includes {course.offer.taxLabel ?? 'tax'}</span>}
     </div>
   )

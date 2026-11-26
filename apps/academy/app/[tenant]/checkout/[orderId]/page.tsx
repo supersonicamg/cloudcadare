@@ -4,6 +4,7 @@ import { loadGateway } from '@educore/core/commerce'
 import { readUpiSettings, upiPayLink, upiQrSvg, whatsappScreenshotLink } from '@educore/core/commerce/upi'
 import { isEnabled } from '@educore/features'
 import { FAKE_KEYS, hmacHex } from '@educore/integrations/payments'
+import { isFirstInstalment } from '@/lib/catalog'
 import { requireMember } from '@/lib/dal'
 import { emailCodeRequired } from '@/lib/email-code'
 import { money } from '@/lib/money'
@@ -41,7 +42,7 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   const [{ brand, site }, order, items, gwPay, payments, proof, settings, { data: me }, codeRequired] = await Promise.all([
     getShell(),
     a.db.from('orders').select('id, order_no, status, total_minor, subtotal_minor, tax_minor, discount_minor, coupon_id, currency').eq('id', orderId).eq('member_id', a.memberId).maybeSingle(),
-    a.db.from('order_items').select('title_snapshot').eq('order_id', orderId),
+    a.db.from('order_items').select('title_snapshot, product_id').eq('order_id', orderId),
     a.db.from('payments').select('gateway_order_id, failure_reason').eq('order_id', orderId).eq('status', 'created').neq('gateway', 'upi_manual').not('gateway_order_id', 'is', null).limit(1).maybeSingle(),
     a.db.from('payments').select('amount_minor, status').eq('order_id', orderId),
     a.db.from('payment_proofs').select('state').eq('order_id', orderId).eq('state', 'pending_review').maybeSingle(),
@@ -58,6 +59,7 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   if (codeRequired && !me?.email_verified_at) redirect(`/signup/confirm?next=${encodeURIComponent(`/checkout/${orderId}`)}`)
 
   const title = items.data?.map((i) => i.title_snapshot).join(', ') ?? 'Your order'
+  const instalment = await isFirstInstalment(a.bundle.tenant.id, site?.courseInstalments, items.data?.map((i) => i.product_id) ?? [])
   const paid = (payments.data ?? []).filter((p) => p.status === 'captured').reduce((s, p) => s + p.amount_minor, 0)
   const balance = o.total_minor - paid
   const upi = readUpiSettings((settings.data?.commerce as { upi?: unknown } | null)?.upi)
@@ -183,7 +185,7 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
             </dl>
           )}
           <p className="tot">
-            <span className="t-small"><b>{paid > 0 ? 'Balance' : 'Total'}</b></span>
+            <span className="t-small"><b>{paid > 0 ? 'Balance' : instalment && o.total_minor > 0 ? 'First instalment' : 'Total'}</b></span>
             <span className="t-num tnum" data-testid="order-total">{money(paid > 0 ? balance : o.total_minor, o.currency)}</span>
           </p>
           {couponsOn && !couponOnly && <CouponForm orderId={o.id} applied={Boolean(o.coupon_id)} />}

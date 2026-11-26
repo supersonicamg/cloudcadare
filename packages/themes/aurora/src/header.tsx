@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { AutoHide } from '@educore/ui/auto-hide'
 import type { BrandInfo, NavItem, ViewerInfo } from '@educore/ui/theme'
 import { A, Brand, WhatsAppIcon } from './parts'
 
@@ -62,9 +63,10 @@ function AccountMenu({ viewer, whatsapp }: { viewer: ViewerInfo; whatsapp: strin
  * Header (plan/15 §10.2). Dark and sticky, 64px (56px on phones). Signed out: logo, four section links, Log in, outline
  * "WhatsApp us". Signed in (plan/16 §7): logo, the learner's links, and ONE account button; WhatsApp help moves into its
  * menu and Log out is its last item. Up to 900px the links move to a visible row of equal tabs under the header (never a
- * hamburger, plan/15 §8); that row scrolls away and only the header row stays. "Log in" stays in the header row on phones:
- * a learner must be able to sign in from any width. The header is a direct child of the page shell, which is what lets
- * it stay on screen.
+ * hamburger, plan/15 §8). On a tablet that row scrolls away and only the header row stays; on a phone both rows hide on
+ * scroll down and return together on scroll up. "Log in" stays in the header row on phones:
+ * a learner must be able to sign in from any width. The wrapper is a direct child of the page shell, which is what lets
+ * the header stay on screen.
  */
 export function SiteHeader({ brand, nav, account, whatsapp }: { brand: BrandInfo; nav: NavItem[]; account: NavItem & { viewer?: ViewerInfo }; whatsapp: string | null }) {
   const pathname = usePathname()
@@ -80,7 +82,7 @@ export function SiteHeader({ brand, nav, account, whatsapp }: { brand: BrandInfo
   }
 
   return (
-    <>
+    <AutoHide>
       <div className="cc hd-bar">
         <header className="hd">
           <div className="wrap hd-in">
@@ -112,6 +114,6 @@ export function SiteHeader({ brand, nav, account, whatsapp }: { brand: BrandInfo
           </ul>
         </nav>
       </div>
-    </>
+    </AutoHide>
   )
 }

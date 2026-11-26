@@ -1,6 +1,6 @@
 import { defaultTheme } from '@educore/theme-default'
 import type { BrandInfo, HomeContent, HomePageProps } from '@educore/ui/theme'
-import { PhoneBar, PlacementWall } from './client'
+import { PhoneBar, Rail } from './client'
 import { Diagram } from './diagrams'
 import { A, WhatsAppIcon, waLink } from './parts'
 
@@ -25,7 +25,13 @@ function Hero({ c, wa }: { c: Content['hero']; wa: string | null }) {
         <h1 className="t-display" id="h1">{c.headline}</h1>
         <p className="t-lead">{c.lead}</p>
         <ul className="hfacts">
-          {c.facts.map((f) => <li key={f.label}><span className="t-label">{f.label}</span><b className="t-h3">{f.value}</b></li>)}
+          {c.facts.map((f) => (
+            <li key={f.label} className={f.note ? 'money' : undefined}>
+              <span className="t-label">{f.label}</span>
+              <b className="t-h3">{f.value}</b>
+              {f.note && <small className="t-label">{f.note}</small>}
+            </li>
+          ))}
         </ul>
         <div className="hero-act" id="hero-act">
           <A className="btn" href={c.primaryCta.href}>{c.primaryCta.label}</A>
@@ -42,23 +48,26 @@ function Hero({ c, wa }: { c: Content['hero']; wa: string | null }) {
 
 /** 2. Placements: the model unit. Real faces, real packages, real employers; counted, never averaged. */
 function Placements({ c }: { c: NonNullable<Content['placements']> }) {
-  const cards = c.items.map((p) => (
-    <li key={p.name} className="pc">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="f" src={p.photo} alt="" width={240} height={240} loading="lazy" decoding="async" />
-      <div className="pc-b">
-        <p className="t-h3">₹{p.lpa}<small>LPA</small></p>
-        <h3 className="pc-n">{p.name}</h3>
-        <p className="t-small">{p.now}</p>
-        <span className="co">
-          {p.logo
-            // eslint-disable-next-line @next/next/no-img-element
-            ? <img src={p.logo} alt={p.company} height={17} loading="lazy" decoding="async" />
-            : p.company}
-        </span>
-      </div>
-    </li>
-  ))
+  const cards = c.items.map((p) => ({
+    key: p.name,
+    node: (
+      <>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="f" src={p.photo} alt="" width={240} height={240} loading="lazy" decoding="async" />
+        <div className="pc-b">
+          <p className="t-h3">₹{p.lpa}<small>LPA</small></p>
+          <h3 className="pc-n">{p.name}</h3>
+          <p className="t-small">{p.now}</p>
+          <span className="co">
+            {p.logo
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={p.logo} alt={p.company} height={17} loading="lazy" decoding="async" />
+              : p.company}
+          </span>
+        </div>
+      </>
+    ),
+  }))
   return (
     <section className="sec place" id="placements" aria-labelledby="pl-h">
       <div className="wrap">
@@ -78,7 +87,7 @@ function Placements({ c }: { c: NonNullable<Content['placements']> }) {
             ))}
           </ul>
         </div>
-        <PlacementWall items={cards} count={c.items.length} />
+        <Rail className="wall" itemClassName="pc" items={cards} auto />
         <p className="t-small fine">{c.footnote}</p>
       </div>
     </section>
@@ -94,18 +103,19 @@ function Program({ c, syllabus }: { c: NonNullable<Content['program']>; syllabus
           <h2 className="t-h2" id="prog-h">{c.title}</h2>
           {syllabus && <a className="link" href={syllabus}>Full syllabus (PDF)</a>}
         </div>
-        <ol className="months">
-          {c.months.map((m) => (
-            <li key={m.n} className="mc">
+        <Rail className="months" itemClassName="mc" ordered items={c.months.map((m) => ({
+          key: String(m.n),
+          node: (
+            <>
               <Diagram k={m.diagram} />
               <div className="mc-b">
                 <p className="t-label"><b>Month {m.n}</b> · {m.meta}</p>
                 <h3 className="t-h3">{m.title}</h3>
                 <p className="t-small">{m.line}</p>
               </div>
-            </li>
-          ))}
-        </ol>
+            </>
+          ),
+        }))} />
       </div>
     </section>
   )
@@ -117,21 +127,37 @@ function How({ c }: { c: NonNullable<Content['how']> }) {
     <section className="sec how dark" id="how" aria-labelledby="how-h">
       <div className="wrap">
         <div className="sh"><h2 className="t-h2" id="how-h">{c.title}</h2></div>
-        <ul className="nums">
-          {c.tiles.map((t) => (
-            <li key={t.line}>
+        <Rail className="nums" auto items={c.tiles.map((t) => ({
+          key: t.line,
+          node: (
+            <>
               <div className="ph">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={t.image.src} alt={t.image.alt} loading="lazy" />
               </div>
               <b className="t-num">{t.value}</b>
               <p>{t.line}</p>
-            </li>
-          ))}
-        </ul>
+            </>
+          ),
+        }))} />
       </div>
     </section>
   )
+}
+
+/**
+ * The week as two lines ("Live class · Sat–Sun, 11 am to 2 pm"). Phones show these instead of times squeezed into seven
+ * cells. Days of one kind share one time.
+ */
+function slots(week: NonNullable<Content['batch']>['week']) {
+  return ([['class', 'Live class'], ['lab', 'Practice']] as const).flatMap(([kind, name]) => {
+    const days = week.filter((d) => d.kind === kind)
+    const first = days[0]
+    if (!first) return []
+    const run = days.every((d, i) => week.indexOf(d) === week.indexOf(first) + i)
+    const when = run && days.length > 1 ? `${first.day}–${days[days.length - 1]!.day}` : days.map((d) => d.day).join(', ')
+    return [{ kind, name, when: first.time ? `${when}, ${first.time.join(' to ')}` : when }]
+  })
 }
 
 /** 5. Next batch: one ticket with three pictures. The date as a calendar, the week as a timetable, the fee as one number. */
@@ -158,10 +184,13 @@ function Batch({ c, wa }: { c: NonNullable<Content['batch']>; wa: string | null 
                 </li>
               ))}
             </ul>
+            <dl className="slots">
+              {slots(c.week).map((s) => <div key={s.kind}><dt><i className={`k-${s.kind}`} />{s.name}</dt><dd>{s.when}</dd></div>)}
+            </dl>
             <p className="legend"><span><i className="k-class" />Live class</span><span><i className="k-lab" />Practice</span><span>Every class is recorded</span></p>
           </div>
           <div className="fee">
-            <p className="t-label tk-h">Fee</p>
+            <p className="t-label tk-h">{c.fee.title}</p>
             <span className="t-num">{c.fee.amount}<small>{c.fee.per}</small></span>
             <p className="t-small">{c.fee.alt}</p>
             <A className="btn" href={c.join.href}>{c.join.label}</A>

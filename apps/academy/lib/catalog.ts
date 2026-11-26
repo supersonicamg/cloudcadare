@@ -28,3 +28,9 @@ export async function catalogLink(tenantId: string) {
   return only ? { label: 'Program', href: `/courses/${only}`, only } : { label: 'Courses', href: '/courses', only }
 }
 
+
+/** True when one of these products sells a course whose price is only the first instalment (SiteContent.courseInstalments). */
+export async function isFirstInstalment(tenantId: string, slugs: string[] | undefined, productIds: string[]) {
+  const courses = await Promise.all((slugs ?? []).map((slug) => cachedCourse(tenantId, slug)))
+  return courses.some((c) => c?.offer && productIds.includes(c.offer.productId))
+}

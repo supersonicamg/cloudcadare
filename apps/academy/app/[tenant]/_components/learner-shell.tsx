@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { isEnabled } from '@educore/features'
+import { AutoHide } from '@educore/ui/auto-hide'
 import { getLeadCourseSlug } from '@/lib/learn'
 import type { Access } from '@/lib/dal'
 import type { getShell } from '@/lib/shell'
@@ -43,20 +44,22 @@ export async function LearnerShell({ a, shell, active, focus, children }: { a: A
       <V11Frame
         shell="focus"
         header={
-          <header className="fbar">
-            <div className="fbar-in">
-              <Link href={focus.backHref} className="fback"><Ic n="back" />{focus.backLabel}</Link>
-              <p className="fwhere">{focus.where}</p>
-              {focus.progress && (
-                <p className="fprog">
-                  <span className="bar" role="progressbar" aria-valuenow={Math.round(focus.progress.pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Course progress"><i style={{ width: `${Math.max(0, Math.min(100, focus.progress.pct))}%` }} /></span>
-                  {focus.progress.label}
-                </p>
-              )}
-              {whatsapp && <a className="fhelp" href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Stuck? Message us on WhatsApp"><Wa /><span>Need help?</span></a>}
-              {menu}
-            </div>
-          </header>
+          <AutoHide>
+            <header className="fbar">
+              <div className="fbar-in">
+                <Link href={focus.backHref} className="fback"><Ic n="back" />{focus.backLabel}</Link>
+                <p className="fwhere">{focus.where}</p>
+                {focus.progress && (
+                  <p className="fprog">
+                    <span className="bar" role="progressbar" aria-valuenow={Math.round(focus.progress.pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Course progress"><i style={{ width: `${Math.max(0, Math.min(100, focus.progress.pct))}%` }} /></span>
+                    {focus.progress.label}
+                  </p>
+                )}
+                {whatsapp && <a className="fhelp" href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Stuck? Message us on WhatsApp"><Wa /><span>Need help?</span></a>}
+                {menu}
+              </div>
+            </header>
+          </AutoHide>
         }
       >
         {children}
@@ -69,18 +72,20 @@ export async function LearnerShell({ a, shell, active, focus, children }: { a: A
       shell="app"
       header={
         <>
-          <header className="ah">
-            <div className="ah-in">
-              <Brand brand={brand} href="/dashboard" />
-              <nav className="ah-nav" aria-label="Learning">
-                {tabs.map((t) => <Link key={t.key} href={t.href} aria-current={active === t.key ? 'page' : undefined}>{t.label}</Link>)}
-              </nav>
-              <div className="ah-end">
-                {whatsapp && <a className="ah-help" href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Need help? Message us on WhatsApp"><Wa /><span>Need help?</span></a>}
-                {menu}
+          <AutoHide>
+            <header className="ah">
+              <div className="ah-in">
+                <Brand brand={brand} href="/dashboard" />
+                <nav className="ah-nav" aria-label="Learning">
+                  {tabs.map((t) => <Link key={t.key} href={t.href} aria-current={active === t.key ? 'page' : undefined}>{t.label}</Link>)}
+                </nav>
+                <div className="ah-end">
+                  {whatsapp && <a className="ah-help" href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Need help? Message us on WhatsApp"><Wa /><span>Need help?</span></a>}
+                  {menu}
+                </div>
               </div>
-            </div>
-          </header>
+            </header>
+          </AutoHide>
           {tabs.length > 1 && (
             <nav className="subnav" aria-label="Learning, short">
               <ul style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>

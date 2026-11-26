@@ -1,6 +1,6 @@
 /* CloudCadre home, design guide version 11 (plan/15; reference build plan/mockups/home-v11.html).
    Tokens, type roles, buttons, header and footer are in site.css. Every section is its own container and changes its
-   layout from its own width (plan/15 §8); type and space are fluid (clamp with cqi), so nothing jumps.
+   layout from its own width (plan/15 §8). The phone layout is its own design, in phone.css; type and space are fluid (clamp with cqi), so nothing jumps.
    Surfaces: dark #0C1312, white, paper #F5F4F0. Two touching sections never share one. */
 
 .cc-home { container: stage / inline-size; overflow: clip; background: #fff; }
@@ -15,7 +15,8 @@
   .hero-copy { display: flex; flex-direction: column; justify-content: center; padding: clamp(48px, 6cqi, 88px) clamp(24px, 4.5cqi, 72px) clamp(48px, 6cqi, 80px) max(var(--gutter), calc((100cqi - 1440px) / 2 + var(--gutter))); }
   .hero .t-lead { margin-top: 18px; }
   .hfacts { display: flex; flex-wrap: wrap; gap: 20px 40px; margin-top: 36px; }
-  .hfacts li { display: grid; gap: 6px; }
+  .hfacts li { display: grid; align-content: start; gap: 6px; }
+  .hfacts small { margin-top: -4px; }
   .hero-act { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin-top: 36px; }
   .hero-ph { position: relative; overflow: hidden; background: var(--dark-2); }
   .hero-ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
@@ -43,7 +44,6 @@
   .pc .t-small { min-height: 2.8em; font-size: var(--t-label); }
   .co { display: flex; align-items: center; height: 24px; margin-top: 10px; font-size: var(--t-label); font-weight: 600; }
   .co img { width: auto; max-width: 92px; height: 17px; }
-  .more { display: none; }
   .place .fine { margin-top: 20px; }
 
   /* ============ 3. program: four month cards, each led by a diagram ============ */
@@ -89,6 +89,8 @@
   .fee .t-small { margin-top: 6px; }
   .fee .btn { width: 100%; margin-top: 22px; }
   .fee .link { margin-top: 6px; }
+
+  .slots { display: none; }
 
   /* ============ 6. questions before you join: a real person, then the FAQ ============ */
   .faq-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: start; gap: 32px 64px; }
@@ -137,26 +139,5 @@
     .week .cell { height: 48px; font-size: 11px; }
     .person { grid-template-columns: 1fr; }
     .person .ph { grid-row: auto; aspect-ratio: 16 / 10; }
-  }
-  @container stage (max-width: 560px) {
-    .sec { font-size: 16px; }
-    .wall { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .pc-b { padding: 12px; }
-    .wall.capped li:nth-child(n+7) { display: none; }
-    .more { display: flex; width: 100%; margin-top: 16px; }
-    .months { gap: 10px; }
-    .mc-b { padding: 12px 12px 14px; }
-    .mc-b .t-small { display: none; }
-    .nums { gap: 24px 10px; }
-    .nums p { font-size: var(--t-label); }
-    .mbar-wrap { display: block; }
-  }
-  @container stage (max-width: 520px) {
-    .hero-copy { padding: 28px var(--gutter) 32px; }
-    .hfacts { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 12px; margin-top: 26px; }
-    .hfacts .t-h3 { font-size: 18px; }
-    .hero-act { flex-direction: column; align-items: stretch; gap: 6px; margin-top: 26px; }
-    .hero-act .link { justify-content: center; }
-    .hero-ph { aspect-ratio: 1; }
   }
 }

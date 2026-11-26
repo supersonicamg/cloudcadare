@@ -36,6 +36,8 @@ export interface SiteContent {
   authArt?: { image: HomeImage; tag?: string }
   /** A finished square poster per course, keyed by course slug. It replaces the course page's photo, uncropped. */
   coursePosters?: Record<string, HomeImage>
+  /** Course slugs whose price is only the first instalment: the page and the checkout say so, and no struck price is shown. */
+  courseInstalments?: string[]
   /** Small print under the footer, for example trademark ownership. */
   disclaimer?: string
 }
@@ -103,8 +105,8 @@ export interface HomeContent {
     /** The H1: at most 8 words, plain, names the outcome. */
     headline: string
     lead: string
-    /** Three facts that answer when, what time and how much. */
-    facts: Array<{ label: string; value: string }>
+    /** Three facts that answer when, what time and how much. A fact with a `note` is the money one: it gets its own row on phones. */
+    facts: Array<{ label: string; value: string; note?: string }>
     /** The one filled button of the page. Every "Join" button points here or to the batch ticket. */
     primaryCta: NavItem
     /** The hero picture: it fills the right side and fades into the dark on its left edge. No caption on it. */
@@ -148,7 +150,8 @@ export interface HomeContent {
     day: string
     length: string
     week: BatchDay[]
-    fee: { amount: string; per: string; alt: string }
+    /** `title` heads the block ("Start with"), `per` says what the amount is ("first instalment"). */
+    fee: { title: string; amount: string; per: string; alt: string }
     join: NavItem
     /** Phone action bar: "Next batch 12 Jan" over "₹80,000 first instalment", and the short button label. */
     bar: { title: string; line: string; label: string }

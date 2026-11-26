@@ -57,6 +57,8 @@ export const auroraSite: SiteContent = {
   authArt: { image: { src: photo('1531482615713-2afd69097998', 900), alt: 'Learners working through a cloud lab together' }, tag: 'Taught by working engineers' },
   // The poster carries the 12 Jan date, the weekend class time and the first instalment, the same values as the home hero. Redo both together.
   coursePosters: { ceap: { src: '/cloudcadre/ceap-poster.webp', alt: 'CloudCadre Elite Architect Program: become a cloud architect in 4 months. Next batch 12 Jan, weekend classes 11 am to 2 pm, first instalment Rs 80,000.' } },
+  // CEAP's price in the database is the first instalment, not the whole fee (owner, 26 Nov 2026).
+  courseInstalments: ['ceap'],
   disclaimer: 'AWS, Azure, Google Cloud, Kubernetes and other marks belong to their owners.',
 }
 
@@ -68,7 +70,7 @@ export const auroraHome: HomeContent = {
     facts: [
       { label: 'Next batch', value: '12 Jan' },
       { label: 'Weekend classes', value: '11 am–2 pm' },
-      { label: 'First instalment', value: '₹80,000' },
+      { label: 'Start with', value: '₹80,000', note: 'first instalment' },
     ],
     // The hero button goes to the batch ticket, so the visitor sees the date and the price before paying.
     primaryCta: { label: 'Join the 12 Jan batch', href: '/#batch' }, // INVENTED date
@@ -159,10 +161,10 @@ export const auroraHome: HomeContent = {
       { day: 'Sat', kind: 'class', time: ['11 am', '2 pm'] },
       { day: 'Sun', kind: 'class', time: ['11 am', '2 pm'] },
     ],
-    fee: { amount: '₹80,000', per: 'first instalment', alt: 'UPI, card, net banking' },
+    fee: { title: 'Start with', amount: '₹80,000', per: 'first instalment', alt: 'UPI, card, net banking' },
     // /courses until the program page exists (plan/15 §15).
     join: { label: 'Join the 12 Jan batch', href: '/courses' },
-    bar: { title: 'Next batch 12 Jan', line: '₹80,000 first instalment', label: 'Join batch' },
+    bar: { title: 'Start with ₹80,000', line: 'First instalment · 12 Jan batch', label: 'Join batch' },
   },
 
   talk: {
@@ -176,6 +178,7 @@ export const auroraHome: HomeContent = {
     // Check each answer against CloudCadre's real policies before launch (hours, recordings, exam fees).
     faq: [
       { question: 'Do I need an IT background?', answer: 'No. Month 1 starts from cloud basics. If you are completely new to IT, a counsellor will suggest a short warm-up first.' },
+      { question: 'Do I pay the whole fee at once?', answer: 'No. You start with a first instalment of ₹80,000. Ask a counsellor about the later instalments.' },
       { question: 'How many hours a week?', answer: 'Live classes are on Saturday and Sunday, 11 am to 2 pm. Practice is Monday to Friday, 10 am to 5 pm.' },
       { question: 'What if I miss a class?', answer: 'Every class is recorded and up the same night, and your mentor helps you catch up on the lab.' },
       { question: 'Do I get a certificate?', answer: 'Yes, a CEAP certificate employers can verify online. AWS, Azure and Google Cloud exam fees are paid to the exam provider.' },

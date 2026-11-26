@@ -41,9 +41,11 @@ export default async function CoursePage({ params }: PageProps<'/[tenant]/course
   let cta: CourseCta
   if (enrolled) cta = { label: 'Continue learning', href: `/learn/${slug}` }
   else if (course.offer) {
+    const instalment = site?.courseInstalments?.includes(slug)
+    const amount = money(course.offer.amountMinor, course.offer.currency)
     cta = access
-      ? { label: `Buy for ${money(course.offer.amountMinor, course.offer.currency)}`, action: startCheckout.bind(null, course.offer.productId, course.offer.priceId, slug) }
-      : { label: 'Sign in to buy', href: login }
+      ? { label: instalment ? `Pay ${amount} to start` : `Buy for ${amount}`, action: startCheckout.bind(null, course.offer.productId, course.offer.priceId, slug) }
+      : { label: instalment ? 'Sign in to join' : 'Sign in to buy', href: login }
   } else if (course.enrolmentOpen) {
     cta = access
       ? { label: 'Enrol for free', action: enrolInCourse.bind(null, course.id, slug) }

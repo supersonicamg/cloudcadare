@@ -45,9 +45,9 @@
 
   /* ---------- Buttons and links (plan/15 §10.1) ---------- */
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 24px; border: 0; border-radius: 3px; background: var(--acc); color: var(--dark); font-size: 16px; font-weight: 600; cursor: pointer; }
-  .btn:hover { background: var(--acc-h); }
+  @media (hover: hover) { .btn:hover { background: var(--acc-h); } }
   .btn-line { border: 1px solid currentColor; background: transparent; color: var(--ink); }
-  .btn-line:hover { border-color: var(--ink); background: var(--ink); color: #fff; }
+  @media (hover: hover) { .btn-line:hover { border-color: var(--ink); background: var(--ink); color: #fff; } }
   .link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 16px; font-weight: 600; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
   .wa { flex: none; width: 18px; height: 18px; fill: currentColor; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

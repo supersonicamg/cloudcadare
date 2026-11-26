@@ -8,7 +8,8 @@
     "./tokens": "./src/tokens.ts",
     "./theme": "./src/theme.ts",
     "./styles.css": "./src/styles.css",
-    "./marks": "./src/marks.tsx"
+    "./marks": "./src/marks.tsx",
+    "./auto-hide": "./src/auto-hide.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

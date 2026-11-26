@@ -70,15 +70,13 @@ export const auroraHome: HomeContent = {
     ],
     // The hero button goes to the batch ticket, so the visitor sees the date and the price before paying.
     primaryCta: { label: 'Join the 12 Jan batch', href: '/#batch' }, // INVENTED date
-    // STOCK placeholder: a laptop open on code during a lab. Replace with a real photo of a CloudCadre lab or live class
+    // STOCK placeholder: a small class working on laptops. Replace with a real photo of a CloudCadre lab or live class
     // (plan/15 §12); it fades into the dark on its left edge, so pick one whose subject sits on the right.
-    photo: { src: photo('1517694712202-14dd9538aa97', 1400), alt: 'A laptop open on code during a lab' },
+    photo: { src: photo('1522202176988-66273c2fd55f', 1400), alt: 'A small live class with laptops', position: '62% 35%' },
   },
-  // REAL learner on the sign in and sign up pages (see placements below). Confirm Monika Singh's written consent before launch.
-  authLearner: {
-    photo: cld(MONIKA, 'full'), alt: 'Monika Singh, a CloudCadre learner',
-    package: '27', name: 'Monika Singh', role: 'Senior Program Manager, AWS and Cloud', company: 'NICE',
-  },
+  // STOCK placeholder beside the sign in and sign up forms. Replace with a real photo of a CloudCadre lab or class (plan/15 §12).
+  authPhoto: { src: photo('1522071820081-009f0129c71c', 1400), alt: 'Learners working through a lab together' },
+
   // syllabusHref: set to the syllabus PDF to show the "Full syllabus (PDF)" link.
 
   // REAL placements, taken from the old CloudCadre website's "partners" list (2026-11-25). Before launch confirm with each

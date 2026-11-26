@@ -23,7 +23,7 @@ async function Content({ searchParams, tenantId, brand }: { searchParams: PagePr
 export default async function LoginPage(props: PageProps<'/[tenant]/login'>) {
   const { brand, home, bundle } = await getShell()
   return (
-    <AuthFrame brand={brand} learner={home?.authLearner}>
+    <AuthFrame brand={brand} photo={home?.authPhoto}>
       {/* searchParams is request-time data: it streams inside Suspense under Cache Components. */}
       <Suspense fallback={<><AuthTop brand={brand} /><div className="auth-box" aria-busy /></>}>
         <Content searchParams={props.searchParams} tenantId={bundle.tenant.id} brand={brand} />

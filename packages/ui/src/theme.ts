@@ -106,10 +106,10 @@ export interface HomeContent {
     /** The one filled button of the page. Every "Join" button points here or to the batch ticket. */
     primaryCta: NavItem
     /** The hero picture: it fills the right side and fades into the dark on its left edge. No caption on it. */
-    photo: { src: string; alt: string }
+    photo: { src: string; alt: string; /** CSS object-position, to keep the subject in view when cropped. */ position?: string }
   }
-  /** A real learner shown beside the sign in and sign up forms (hidden on phones). Without one, the form is the whole page. Needs the learner's written consent. */
-  authLearner?: { photo: string; alt: string; package: string; name: string; role: string; company: string }
+  /** A photo beside the sign in and sign up forms (hidden on phones). Without one, the form is the whole page. */
+  authPhoto?: { src: string; alt: string }
   /** Where the syllabus PDF can be downloaded. The "Full syllabus (PDF)" link is hidden until this is set. */
   syllabusHref?: string
   placements?: {

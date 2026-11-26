@@ -37,7 +37,7 @@ async function Body({ searchParams }: { searchParams: PageProps<'/[tenant]/signu
 export default async function ConfirmPage(props: PageProps<'/[tenant]/signup/confirm'>) {
   const { brand, home } = await getShell()
   return (
-    <AuthFrame brand={brand} learner={home?.authLearner}>
+    <AuthFrame brand={brand} photo={home?.authPhoto}>
       <AuthTop brand={brand} />
       <Suspense fallback={<div className="auth-box" aria-busy />}><Body searchParams={props.searchParams} /></Suspense>
     </AuthFrame>

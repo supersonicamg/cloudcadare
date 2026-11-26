@@ -34,7 +34,7 @@ function Hero({ c, wa }: { c: Content['hero']; wa: string | null }) {
       </div>
       <figure className="hero-ph">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={c.photo.src} alt={c.photo.alt} fetchPriority="high" />
+        <img src={c.photo.src} alt={c.photo.alt} style={c.photo.position ? { objectPosition: c.photo.position } : undefined} fetchPriority="high" />
       </figure>
     </section>
   )

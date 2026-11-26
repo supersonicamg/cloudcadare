@@ -24,7 +24,7 @@ async function Content({ searchParams, tenantId, brand, facts }: {
 export default async function SignUpPage(props: PageProps<'/[tenant]/signup'>) {
   const { brand, home, bundle } = await getShell()
   return (
-    <AuthFrame brand={brand} learner={home?.authLearner}>
+    <AuthFrame brand={brand} photo={home?.authPhoto}>
       <Suspense fallback={<><AuthTop brand={brand} /><div className="auth-box" aria-busy /></>}>
         <Content searchParams={props.searchParams} tenantId={bundle.tenant.id} brand={brand} facts={home?.hero.facts} />
       </Suspense>

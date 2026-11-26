@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudCadre home v11: hero options</title>
+<!--
+  HERO OPTIONS for v11. Same page as home-v11.html; only the hero changes (switch it in the toolbar).
+  Round 3 (layout + photo treatment): the Layout and Photo switches change HOW the photo sits in the hero
+  (split, wider photo, flipped, fade into dark, framed card, wide band) and how it is treated (natural, muted,
+  black and white). They apply to every hero that has a photo (4, 6-10, Current), on desktop width; below 900px
+  every hero stacks the same way, as before.
+  Fade into dark always shows the class photo with no caption text, whichever hero is selected.
+  Round 2 (faces): versions 6-10 use faces that are NOT a placed candidate: a class, a counsellor, a lab team,
+  a design review, a mosaic. All stock placeholders here; the real ones come from the photo session (guide §12).
+  Round 1 question: can the hero work WITHOUT a candidate's face? Six versions:
+    face     the current v11 hero (Monika Singh), kept as the baseline to compare against
+    clouds   a drawing of what you learn: one app, three clouds
+    numbers  the placement counts, typeset big, with employer logos
+    ticket   the next batch as the picture: date, week, fee
+    lab      a hands-on lab photo (stock placeholder, no faces)
+    months   the four months as picture cards under the headline
+  Everything under the hero is v11, unchanged.
+
+  CloudCadre home v11. The owner loved only the placement wall in v10 and found the rest too text heavy.
+  Rule for this version: every section is built like the placement wall, as visual units, each one
+  a picture (real face, photo or diagram), one big value, and one short line. No paragraphs.
+
+  REAL: the 15 placements (names, photos, packages, roles, companies) and employer logos, FAQ wording.
+  PLACEHOLDERS (invented, replace before launch):
+  - stock photos (marked `stock placeholder`)
+  - batch date 12 Jan, class times, seat count, lab count, fee (₹15,000 × 4), month split
+  - counsellor name, photo and hours; phone and email
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:#D6D5D0;font-family:system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+h1,h2,h3,p,ul,ol,figure,dl,dd{margin:0}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #F2B33D;outline-offset:3px}
+
+/* review toolbar (not part of the design) */
+.tb{position:sticky;top:0;z-index:60;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:9px 16px;background:#18181B;color:#A1A1AA;font:500 12.5px/1.2 system-ui,sans-serif}
+.tb-g{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.tb-g > span{margin-right:4px}
+.tb button{color:#D4D4D8;background:transparent;border:1px solid #3F3F46;border-radius:6px;padding:6px 10px;cursor:pointer;min-height:32px}
+.tb button:hover{border-color:#71717A;color:#fff}
+.tb button[aria-pressed="true"]{background:#F4F4F5;color:#18181B;border-color:#F4F4F5}
+.tb-title{color:#fff;font-weight:600}
+
+/* tokens */
+.stage{
+  --dark:#0C1312;--dark-2:#16201E;--ink:#0F1716;--body:#3A4240;--muted:#5F6764;--paper:#F5F4F0;--tile:#EEEDE8;--rule:#DCDAD3;
+  --acc:#F2B33D;--acc-h:#FFC25A;--on-dark:rgba(255,255,255,.82);--on-dark-2:rgba(255,255,255,.64);--on-dark-rule:rgba(255,255,255,.16);
+  --t-display:clamp(40px,4.8cqi,66px);--t-h2:clamp(28px,3cqi,40px);--t-num:clamp(28px,2.6cqi,36px);--t-h3:clamp(19px,1.5cqi,21px);
+  --t-lead:clamp(17px,1.4cqi,19px);--t-body:17px;--t-small:15px;--t-label:14px;
+  --gutter:clamp(16px,4cqi,56px);--sec:clamp(64px,8cqi,112px);
+  container:stage/inline-size;max-width:1440px;margin:0 auto;overflow:clip;background:#fff;color:var(--ink);
+  font-family:"Hanken Grotesk",sans-serif;font-size:var(--t-body);line-height:1.55;font-weight:400}
+.stage.w-tablet{max-width:820px;margin:28px auto 56px;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 60px rgba(0,0,0,.18);border-radius:18px}
+.stage.w-phone{max-width:390px;margin:28px auto 56px;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 60px rgba(0,0,0,.18);border-radius:28px}
+.stage section,.stage header,.stage footer{container-type:inline-size}
+
+.t-display{font-size:var(--t-display);line-height:1.02;letter-spacing:-.034em;font-weight:600;text-wrap:balance}
+.t-h2{font-size:var(--t-h2);line-height:1.1;letter-spacing:-.025em;font-weight:600;text-wrap:balance}
+.t-num{font-size:var(--t-num);line-height:1;letter-spacing:-.03em;font-weight:600}
+.t-h3{font-size:var(--t-h3);line-height:1.3;letter-spacing:-.01em;font-weight:600}
+.t-lead{font-size:var(--t-lead);line-height:1.5;color:var(--body);max-width:44ch}
+.t-small{font-size:var(--t-small);line-height:1.45;color:var(--muted)}
+.t-label{font-size:var(--t-label);line-height:1.4;color:var(--muted)}
+.dark .t-lead{color:var(--on-dark)}
+.dark .t-small,.dark .t-label{color:var(--on-dark-2)}
+
+.wrap{padding-inline:var(--gutter)}
+.sec{padding-block:var(--sec)}
+.sh{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 32px;margin-bottom:clamp(24px,3cqi,40px)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:3px;font-weight:600;font-size:16px;text-decoration:none;cursor:pointer;border:0;background:var(--acc);color:var(--dark)}
+.btn:hover{background:var(--acc-h)}
+.btn-line{background:transparent;border:1px solid currentColor;color:var(--ink)}
+.btn-line:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.link{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-weight:600;font-size:16px;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px}
+.wa{width:18px;height:18px;fill:currentColor;flex:none}
+
+/* header */
+.hd{position:sticky;top:var(--tbh,0px);z-index:40;background:var(--dark);color:#fff;border-bottom:1px solid var(--on-dark-rule)}
+.hd-in{display:flex;align-items:center;gap:32px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:19px;letter-spacing:-.02em;text-decoration:none}
+.logo img{width:32px;height:auto}
+.nav{display:flex;gap:4px;font-size:15px;white-space:nowrap}
+.nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;text-decoration:none;color:var(--on-dark)}
+.nav a:hover{color:#fff}
+.hd-end{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:15px;white-space:nowrap}
+.hd-end .login{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;text-decoration:none;color:var(--on-dark)}
+.hd-wa{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid rgba(255,255,255,.45);border-radius:3px;text-decoration:none}
+.hd-wa:hover{border-color:#fff}
+.subnav{display:none;background:var(--dark);border-bottom:1px solid var(--on-dark-rule)}
+.subnav ul{display:grid;grid-template-columns:repeat(4,1fr)}
+.subnav a{display:flex;align-items:center;justify-content:center;min-height:44px;font-size:15px;color:var(--on-dark);text-decoration:none}
+
+/* ============ hero: a real learner is the picture ============ */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:var(--dark);color:#fff;min-height:clamp(560px,46cqi,680px)}
+.hero-copy{padding:clamp(48px,6cqi,88px) clamp(24px,4.5cqi,72px) clamp(48px,6cqi,80px) var(--gutter);display:flex;flex-direction:column;justify-content:center}
+.hero .t-lead{margin-top:18px}
+.hfacts{display:flex;flex-wrap:wrap;gap:20px 40px;margin-top:36px}
+.hfacts li{display:grid;gap:6px}
+.hfacts .t-label{color:var(--on-dark-2)}
+.hero-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:36px}
+.hero-ph{position:relative;overflow:hidden;background:var(--dark-2)}
+.hero-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.hero-ph figcaption{position:absolute;inset:auto 0 0 0;padding:72px clamp(20px,3cqi,40px) 24px;background:linear-gradient(180deg,transparent,rgba(8,12,12,.88) 70%);display:grid;gap:4px}
+.hero-ph figcaption .t-num{color:#fff}
+.hero-ph figcaption .t-num small{font-size:var(--t-small);font-weight:400;letter-spacing:0;margin-left:6px;color:var(--on-dark)}
+.hero-ph figcaption p{font-size:var(--t-small);color:var(--on-dark)}
+.hero-ph figcaption b{font-weight:600;color:#fff}
+
+
+/* ============ hero options (this file only) ============ */
+.hv[hidden]{display:none}
+.hv > .note{margin:0;max-width:none;border-radius:0;border-width:1px 0}
+.hero-side{background:var(--dark-2);display:grid;align-content:center;gap:28px;padding:clamp(28px,4cqi,64px) clamp(20px,4cqi,64px)}
+.hero .fine{font-size:var(--t-label);color:var(--on-dark-2)}
+/* 1 clouds */
+.hero-side .art{display:block;width:100%;max-width:600px;height:auto;margin-inline:auto}
+.hero-side .art text{font-family:"Hanken Grotesk",sans-serif}
+/* 2 numbers */
+.stats li{display:grid;gap:6px;padding:20px 0;border-top:1px solid var(--on-dark-rule)}
+.stats li:first-child{border-top:0;padding-top:0}
+.stats b{font-size:clamp(48px,5.4cqi,80px);line-height:1;letter-spacing:-.04em;font-weight:600}
+.stats b small{font-size:var(--t-lead);font-weight:400;letter-spacing:0;margin-left:8px;color:var(--on-dark)}
+.stats span{font-size:var(--t-lead);color:var(--on-dark)}
+.hero-side .logos{gap:12px 20px}
+.hero-side .logos img{height:18px}
+.hero-side .logos .tall img{height:23px}
+.hero-side .logos .heavy img{height:14px}
+.hero-side .logos img{filter:brightness(0) invert(1);opacity:.72}
+/* 3 ticket */
+.tk{background:#fff;color:var(--ink);border-radius:3px;padding:clamp(20px,2.6cqi,36px);display:grid;gap:24px}
+.tk-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px 24px}
+.hero .tk .t-label{color:var(--muted)}
+.tk .week{margin-top:0}
+.tk-fee{display:grid;gap:4px;justify-items:end;text-align:right}
+.tk-fee .t-num{font-size:clamp(32px,3.2cqi,44px)}
+.tk .legend{margin-top:0}
+/* 5 months */
+.hv-months{grid-template-columns:1fr;min-height:0}
+.hm-top{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px clamp(32px,6cqi,96px);align-items:end;padding:clamp(48px,6cqi,88px) var(--gutter) clamp(32px,4cqi,52px)}
+.hm-top .hfacts{margin-top:0}
+.hm-top .hero-act{margin-top:28px}
+.hm-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:0 var(--gutter) clamp(48px,6cqi,80px)}
+.hm-strip .mc{color:var(--ink)}
+.hm-strip .t-small,.hm-strip .t-label{color:var(--muted)}
+@container (max-width:900px){
+  .hero-side{padding:32px var(--gutter) 40px}
+  .hm-top{grid-template-columns:1fr;padding:44px var(--gutter) 28px}
+  .hm-strip{grid-template-columns:1fr 1fr}
+  .stats b{font-size:clamp(44px,9cqi,64px)}
+}
+@container (max-width:520px){
+  .hero-side{gap:22px;padding:28px var(--gutter) 32px}
+  .hm-top{padding:28px var(--gutter) 24px;gap:22px}
+  .hm-strip{gap:10px}
+  .tk{padding:18px 16px}
+  .tk-fee{justify-items:start;text-align:left}
+  .tk .cal .d{font-size:72px}
+}
+
+
+/* ---- round 2: faces ---- */
+.hero-mos{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:1fr 1fr;gap:4px;background:var(--dark)}
+.hero-mos .hero-ph:first-child{grid-row:1/3}
+.hero-mos .hero-ph{aspect-ratio:auto;min-height:0}
+.hero-mos figcaption{padding:56px clamp(14px,2cqi,28px) 16px}
+.hero-mos figcaption .t-num{font-size:clamp(24px,2.4cqi,34px)}
+.hero-mos figcaption p{font-size:var(--t-label)}
+@container (max-width:900px){.hero-mos{aspect-ratio:4/3}}
+@container (max-width:520px){
+  .hero-mos{aspect-ratio:1;gap:3px}
+  .hero-mos figcaption{padding:36px 10px 10px}
+  .hero-mos figcaption .t-num{font-size:20px}
+  .hero-mos figcaption p{font-size:12px;line-height:1.3}
+}
+
+
+/* ---- round 3: layout + photo treatment (photo heroes only) ---- */
+.stage[data-ph="muted"] .ph-hero img{filter:saturate(.5) brightness(.96)}
+.stage[data-ph="mono"] .ph-hero img{filter:grayscale(1) contrast(1.05)}
+@container (min-width:901px){
+  /* photo wider: 40 / 60 */
+  .stage[data-lay="wide"] .ph-hero{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+  /* photo left, copy right */
+  .stage[data-lay="flip"] .ph-hero .hero-copy{order:2;padding:clamp(48px,6cqi,88px) var(--gutter) clamp(48px,6cqi,80px) clamp(24px,4.5cqi,72px)}
+  /* fade: photo fills the right two thirds and melts into the dark on its left edge */
+  .stage[data-lay="fade"] .ph-hero{position:relative;grid-template-columns:1fr}
+  .stage[data-lay="fade"] .ph-hero .hero-copy{position:relative;z-index:2;width:min(100%,58%)}
+  .stage[data-lay="fade"] .ph-hero .hero-ph,
+  .stage[data-lay="fade"] .ph-hero .hero-mos{position:absolute;inset:0 0 0 32%;background:transparent;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 38%);mask-image:linear-gradient(90deg,transparent 0,#000 38%)}
+  /* fade shows one photo only (the class photo, swapped in by JS) and no caption text */
+  .stage[data-lay="fade"] .ph-hero figcaption{display:none}
+  .stage[data-lay="fade"] .ph-hero .hero-mos{grid-template-columns:1fr;grid-template-rows:1fr}
+  .stage[data-lay="fade"] .ph-hero .hero-mos .hero-ph{position:relative;inset:auto;-webkit-mask-image:none;mask-image:none;grid-row:auto}
+  .stage[data-lay="fade"] .ph-hero .hero-mos .hero-ph:not(:first-child){display:none}
+  /* framed: the photo is a card with its own edge, margin around it */
+  .stage[data-lay="framed"] .ph-hero .hero-ph,
+  .stage[data-lay="framed"] .ph-hero .hero-mos{margin:clamp(24px,3cqi,48px) var(--gutter) clamp(24px,3cqi,48px) 0;border-radius:3px;overflow:hidden}
+  /* band: headline block on top, one wide photo under it */
+  .stage[data-lay="band"] .ph-hero{grid-template-columns:1fr;min-height:0}
+  .stage[data-lay="band"] .ph-hero .hero-copy{padding-bottom:40px}
+  .stage[data-lay="band"] .ph-hero .hero-ph{aspect-ratio:16/5}
+  .stage[data-lay="band"] .ph-hero .hero-mos{aspect-ratio:auto;height:clamp(220px,25cqi,360px);grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
+  .stage[data-lay="band"] .ph-hero .hero-mos .hero-ph{height:100%}
+  .stage[data-lay="band"] .ph-hero .hero-mos .hero-ph:first-child{grid-row:auto}
+  .stage[data-lay="band"] .ph-hero .hero-ph figcaption{padding-left:clamp(20px,3cqi,40px)}
+}
+
+/* ============ placements (the section the owner loved, unchanged) ============ */
+.place{background:var(--paper)}
+.sum{margin-top:12px;font-size:var(--t-lead);color:var(--body)}
+.sum b{font-weight:600;color:var(--ink)}
+.logos{display:flex;flex-wrap:wrap;align-items:center;gap:14px 32px}
+.logos img{height:20px;width:auto;filter:grayscale(1);opacity:.7}
+.logos .tall img{height:26px}
+.logos .heavy img{height:15px}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.pc{background:#fff;border-radius:3px;overflow:hidden}
+.pc img.f{width:100%;aspect-ratio:1;object-fit:cover;background:#E7E6E1}
+.pc-b{padding:14px 16px 16px}
+.pc .t-h3 small{font-size:var(--t-label);font-weight:400;color:var(--muted);margin-left:4px;letter-spacing:0}
+.pc-n{margin-top:6px;font-size:var(--t-small);font-weight:600;line-height:1.4}
+.pc .t-small{font-size:var(--t-label);min-height:2.8em}
+.co{display:flex;align-items:center;height:24px;margin-top:10px;font-size:var(--t-label);font-weight:600}
+.co img{height:17px;width:auto;max-width:92px}
+.more{display:none}
+.place .fine{margin-top:20px}
+
+/* ============ program: four month cards, each led by a diagram ============ */
+.months{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.mc{background:var(--paper);border-radius:3px;overflow:hidden;display:flex;flex-direction:column}
+.dg{display:block;width:100%;aspect-ratio:8/5;background:var(--tile)}
+.dg text{font-family:"Hanken Grotesk",sans-serif}
+.mc-b{padding:16px 18px 20px;display:grid;gap:6px}
+.mc-b .t-label b{color:var(--ink);font-weight:600}
+.mc-b .t-small{font-size:var(--t-label)}
+.prog .sh .link{margin-bottom:-6px}
+
+/* ============ how classes work: photo + one big number ============ */
+.how{background:var(--dark);color:#fff}
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px 16px}
+.nums .ph{aspect-ratio:4/3;border-radius:3px;overflow:hidden;background:var(--dark-2)}
+.nums img{width:100%;height:100%;object-fit:cover}
+.nums .t-num{margin-top:16px;display:block;font-size:clamp(36px,3.4cqi,48px)}
+.nums p{margin-top:6px;font-size:var(--t-small);color:var(--on-dark)}
+
+/* ============ batch: one ticket, three blocks ============ */
+.batch{background:var(--paper)}
+.ticket{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1fr);background:#fff;border-radius:3px}
+.ticket > div{padding:clamp(20px,2.6cqi,36px)}
+.ticket > div + div{border-left:1px dashed var(--rule)}
+.cal{display:grid;justify-items:start;align-content:start;gap:2px;min-width:170px}
+.cal .mo{font-size:var(--t-small);font-weight:600;color:var(--ink)}
+.cal .d{font-size:clamp(72px,7cqi,104px);line-height:.9;letter-spacing:-.05em;font-weight:600}
+.cal .t-label{margin-top:8px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:14px}
+.week li{display:grid;gap:6px;justify-items:center;text-align:center}
+.week .dn{font-size:var(--t-label);color:var(--muted)}
+.week .cell{width:100%;height:56px;border-radius:3px;background:var(--tile);display:grid;place-items:center;font-size:12px;line-height:1.2;color:var(--muted)}
+.week .on .cell{background:var(--ink);color:#fff;font-weight:600}
+.week .lab .cell{background:var(--acc);color:var(--dark);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:14px;font-size:var(--t-label);color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.fee .t-num{display:block;margin-top:10px;font-size:clamp(36px,3.4cqi,48px)}
+.fee .t-num small{font-size:var(--t-small);font-weight:400;letter-spacing:0;color:var(--muted);margin-left:4px}
+.fee .t-small{margin-top:6px}
+.fee .btn{width:100%;margin-top:22px}
+.fee .link{margin-top:6px}
+
+/* ============ faq + a real person ============ */
+.faq-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:32px 64px;align-items:start}
+.person{display:grid;gap:14px}
+.person .ph{aspect-ratio:4/3;border-radius:3px;overflow:hidden}
+.person .ph img{width:100%;height:100%;object-fit:cover;object-position:50% 25%}
+.person .btn{width:100%}
+.faq{border-top:1px solid var(--ink)}
+.faq details{border-bottom:1px solid var(--rule)}
+.faq summary{display:flex;justify-content:space-between;gap:16px;align-items:center;min-height:60px;padding:12px 0;font-weight:600;cursor:pointer;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:22px;font-weight:400;color:var(--muted);flex:none;width:24px;text-align:center}
+.faq details[open] summary::after{content:"–"}
+.faq details p{padding:0 40px 20px 0;color:var(--body)}
+
+/* footer */
+.ft{background:var(--dark);color:#fff;font-size:var(--t-small)}
+.ft-top{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:32px;padding-block:56px 40px}
+.ft-top > div:first-child p{margin-top:12px;color:var(--on-dark-2);max-width:34ch}
+.ft h3{font-size:var(--t-label);font-weight:600;margin-bottom:10px}
+.ft ul{display:grid;gap:4px}
+.ft ul a{display:inline-flex;align-items:center;min-height:32px;text-decoration:none;color:var(--on-dark)}
+.ft ul a:hover{color:#fff}
+.ft-bot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;padding-block:20px 28px;border-top:1px solid var(--on-dark-rule);font-size:13px;color:var(--on-dark-2)}
+
+/* phone action bar */
+.mbar{position:sticky;bottom:0;z-index:45;display:none;align-items:center;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--rule);box-shadow:0 -6px 20px rgba(0,0,0,.06);transform:translateY(110%);transition:transform .25s}
+.mbar.show{transform:none}
+.mbar p{flex:1;font-size:var(--t-label);line-height:1.35;color:var(--muted)}
+.mbar p b{display:block;color:var(--ink);font-weight:600;font-size:var(--t-small)}
+.mbar .btn{min-height:48px;padding:0 18px}
+.mbar .wa-btn{display:grid;place-items:center;width:48px;height:48px;border:1px solid var(--rule);border-radius:3px;color:#128C4A}
+.mbar .wa-btn .wa{width:22px;height:22px}
+
+/* notes */
+.note{display:none;margin-top:28px;padding:12px 16px;background:#FFFBEA;border:1px solid #EAD9A0;border-radius:4px;color:#3F3A26;font:400 14px/1.55 system-ui,sans-serif;max-width:110ch}
+.note b{color:#1F1B0E}
+.notes-on .note{display:block}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* ===================== responsive (components respond to their own width) ===================== */
+@container (max-width:900px){ .hd .nav,.hd-end .login{display:none} }
+@container stage (max-width:900px){ .subnav{display:block} }
+@container (max-width:520px){
+  .hd-in{height:56px}
+  .hd-wa span{display:none}
+  .hd-wa{width:44px;height:44px;padding:0;justify-content:center}
+}
+@container (max-width:900px){
+  .hero{grid-template-columns:1fr;min-height:0}
+  .hero-copy{padding:44px var(--gutter) 40px}
+  .hero-ph{aspect-ratio:4/3}
+}
+@container (max-width:520px){
+  .hero-copy{padding:28px var(--gutter) 32px}
+  .hfacts{display:grid;grid-template-columns:repeat(3,auto);justify-content:space-between;gap:12px;margin-top:26px}
+  .hfacts .t-h3{font-size:18px}
+  .hero-act{flex-direction:column;align-items:stretch;gap:6px;margin-top:26px}
+  .hero-act .link{justify-content:center}
+  .hero-ph{aspect-ratio:1}
+}
+@container (max-width:560px){
+  .wall{grid-template-columns:1fr 1fr;gap:10px}
+  .pc-b{padding:12px}
+  .wall:not(.all) li:nth-child(n+7){display:none}
+  .more{display:flex;width:100%;margin-top:16px}
+  .months{grid-template-columns:1fr 1fr;gap:10px}
+  .mc-b{padding:12px 12px 14px}
+  .mc-b .t-small{display:none}
+  .nums{grid-template-columns:1fr 1fr;gap:24px 10px}
+  .nums p{font-size:var(--t-label)}
+}
+@container (max-width:900px){
+  .ticket{grid-template-columns:auto minmax(0,1fr)}
+  .ticket .fee{grid-column:1/-1;border-left:0;border-top:1px dashed var(--rule)}
+  .faq-grid{grid-template-columns:1fr}
+  .person{order:2}
+  .months,.nums{grid-template-columns:1fr 1fr}
+  .person{grid-template-columns:200px 1fr;align-items:center;gap:16px 24px}
+  .person .ph{grid-row:span 3}
+}
+@container (max-width:600px){
+  .ticket{grid-template-columns:1fr}
+  .ticket > div + div{border-left:0;border-top:1px dashed var(--rule)}
+  .cal{grid-template-columns:auto 1fr;align-items:end;column-gap:16px;min-width:0}
+  .cal .d{grid-column:1;grid-row:1/span 2}
+  .cal .mo,.cal .t-label{grid-column:2}
+  .week{gap:4px}
+  .week .cell{height:48px;font-size:11px}
+  .person{grid-template-columns:1fr}
+  .person .ph{grid-row:auto;aspect-ratio:16/10}
+}
+@container (max-width:760px){
+  .ft-top{grid-template-columns:1fr 1fr}
+  .ft-top > div:first-child{grid-column:1/-1}
+}
+@container stage (max-width:560px){
+  .stage{--t-body:16px}
+  .mbar{display:flex}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0F1716"/></marker></defs>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
+</svg>
+
+<div class="tb" id="tb" role="toolbar" aria-label="Review controls">
+  <span class="tb-title">Home v11 · hero options</span>
+  <div class="tb-g" data-group="w"><span>Width</span>
+    <button data-v="desktop" aria-pressed="true">Desktop</button><button data-v="tablet" aria-pressed="false">Tablet 820</button><button data-v="phone" aria-pressed="false">Phone 390</button>
+  </div>
+  <div class="tb-g" data-group="h"><span>No face</span>
+    <button data-v="clouds" aria-pressed="false">1 Clouds</button><button data-v="numbers" aria-pressed="false">2 Numbers</button><button data-v="ticket" aria-pressed="false">3 Ticket</button><button data-v="lab" aria-pressed="false">4 Lab photo</button><button data-v="months" aria-pressed="false">5 Months</button>
+  </div>
+  <div class="tb-g" data-group="h"><span>Faces</span>
+    <button data-v="class" aria-pressed="true">6 Class</button><button data-v="mentor" aria-pressed="false">7 Counsellor</button><button data-v="team" aria-pressed="false">8 Lab team</button><button data-v="review" aria-pressed="false">9 Interview</button><button data-v="mosaic" aria-pressed="false">10 Mosaic</button>
+  </div>
+  <div class="tb-g" data-group="h"><span>Baseline</span><button data-v="face" aria-pressed="false">Current (placed learner)</button>
+  </div>
+  <div class="tb-g" data-group="l"><span>Layout (photo heroes)</span>
+    <button data-v="split" aria-pressed="true">Split 50/50</button><button data-v="wide" aria-pressed="false">Photo wider</button><button data-v="flip" aria-pressed="false">Photo left</button><button data-v="fade" aria-pressed="false">Fade into dark</button><button data-v="framed" aria-pressed="false">Framed card</button><button data-v="band" aria-pressed="false">Wide band</button>
+  </div>
+  <div class="tb-g" data-group="p"><span>Photo</span>
+    <button data-v="natural" aria-pressed="true">Natural</button><button data-v="muted" aria-pressed="false">Muted</button><button data-v="mono" aria-pressed="false">Black and white</button>
+  </div>
+  <div class="tb-g"><button id="t-notes" aria-pressed="false">Design notes</button></div>
+</div>
+
+<main class="stage" id="stage">
+
+  <header class="hd">
+    <div class="wrap hd-in">
+      <a class="logo" href="#"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+      <nav class="nav" aria-label="Main"><a href="#placements">Placements</a><a href="#program">Program</a><a href="#batch">Fees and dates</a><a href="#faq">FAQ</a></nav>
+      <div class="hd-end">
+        <a class="login" href="#">Log in</a>
+        <a class="hd-wa" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"><svg class="wa"><use href="#i-wa"/></svg><span>WhatsApp us</span></a>
+      </div>
+    </div>
+  </header>
+  <nav class="subnav" aria-label="Main">
+    <ul><li><a href="#placements">Placements</a></li><li><a href="#program">Program</a></li><li><a href="#batch">Fees</a></li><li><a href="#faq">FAQ</a></li></ul>
+  </nav>
+
+  <!-- ===================== hero options ===================== -->
+  <div class="hv" data-hv="clouds" hidden>
+  <section class="hero dark" aria-labelledby="h1-clouds">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-clouds">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <div class="hero-side">
+      <svg class="art" viewBox="0 0 520 430" role="img" aria-label="One app running on AWS, Azure and Google Cloud">
+        <rect x="165" y="24" width="190" height="66" rx="3" fill="#F2B33D"/>
+        <text x="260" y="66" text-anchor="middle" fill="#0C1312" font-size="22" font-weight="600">Your app</text>
+        <path d="M260 90V160M90 160H430M90 160V204M260 160V204M430 160V204" stroke="rgba(255,255,255,.6)" stroke-width="2" fill="none"/>
+        <g fill="#fff">
+          <rect x="20" y="204" width="140" height="150" rx="3"/><rect x="190" y="204" width="140" height="150" rx="3"/><rect x="360" y="204" width="140" height="150" rx="3"/>
+        </g>
+        <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" x="40" y="228" width="100" height="72"/>
+        <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/azure/azure-original.svg" x="220" y="228" width="80" height="72"/>
+        <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/googlecloud/googlecloud-original.svg" x="390" y="228" width="80" height="72"/>
+        <g fill="#0F1716" font-size="17" font-weight="600" text-anchor="middle">
+          <text x="90" y="334">AWS</text><text x="260" y="334">Azure</text><text x="430" y="334">Google Cloud</text>
+        </g>
+        <text x="260" y="404" text-anchor="middle" fill="rgba(255,255,255,.82)" font-size="17">Build it once. Run it on all three.</text>
+      </svg>
+    </div>
+  </section>
+    <div class="note"><b>1 Clouds.</b> Shows what you learn, not who learned it. Built in code (guide §11), one saffron element, real tool logos, no photo needed. Risk: a drawing is calmer than a face, so the H1 and the button have to do more work. Needs: nothing new.</div>
+  </div>
+  <div class="hv" data-hv="numbers" hidden>
+  <section class="hero dark" aria-labelledby="h1-numbers">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-numbers">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <div class="hero-side">
+      <ul class="stats" aria-label="Placement results">
+        <li><b>15</b><span>learners placed in cloud jobs</span></li>
+        <li><b>₹29<small>LPA</small></b><span>highest package</span></li>
+        <li><b>12</b><span>companies hired them</span></li>
+      </ul>
+      <ul class="logos" aria-label="Employers">
+          <li><img src="../../apps/academy/public/cloudcadre/logos/infosys.svg" alt="Infosys"></li>
+          <li class="tall"><img src="../../apps/academy/public/cloudcadre/logos/capgemini.svg" alt="Capgemini"></li>
+          <li class="heavy"><img src="../../apps/academy/public/cloudcadre/logos/hcltech.svg" alt="HCLTech"></li>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/amdocs.svg" alt="Amdocs"></li>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/persistent.svg" alt="Persistent Systems"></li>
+          <li class="heavy"><img src="../../apps/academy/public/cloudcadre/logos/zensar.svg" alt="Zensar"></li>
+        </ul>
+      <p class="fine">Packages are CTC per year, as shared by each learner.</p>
+    </div>
+  </section>
+    <div class="note"><b>2 Numbers.</b> Proof first: the three placement counts typeset huge, plus the employer logos from the placement section. All real, counted from the list. Risk: it repeats the placement section right below it, so that section could move lower or lose its logo row. Needs: nothing new.</div>
+  </div>
+  <div class="hv" data-hv="ticket" hidden>
+  <section class="hero dark" aria-labelledby="h1-ticket">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-ticket">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <div class="hero-side">
+      <!-- placeholder: every value -->
+      <div class="tk">
+        <div class="tk-top">
+          <div class="cal"><span class="mo">January 2027</span><span class="d">12</span><span class="t-label">Next batch · 4 months, live online</span></div>
+          <div class="tk-fee"><span class="t-label">Fee</span><span class="t-num">₹15,000</span><span class="t-label">a month × 4</span></div>
+        </div>
+        <ul class="week" aria-label="Weekly schedule">
+          <li class="on"><span class="dn">Mon</span><span class="cell">8–10<br>pm</span></li>
+          <li class="on"><span class="dn">Tue</span><span class="cell">8–10<br>pm</span></li>
+          <li class="on"><span class="dn">Wed</span><span class="cell">8–10<br>pm</span></li>
+          <li class="on"><span class="dn">Thu</span><span class="cell">8–10<br>pm</span></li>
+          <li><span class="dn">Fri</span><span class="cell" aria-label="free">–</span></li>
+          <li class="lab"><span class="dn">Sat</span><span class="cell">Lab<br>10–1</span></li>
+          <li><span class="dn">Sun</span><span class="cell" aria-label="free">–</span></li>
+        </ul>
+        <p class="legend"><span><i style="background:var(--ink)"></i>Live class</span><span><i style="background:var(--acc)"></i>Lab with a mentor</span><span>Every class is recorded</span></p>
+      </div>
+    </div>
+  </section>
+    <div class="note"><b>3 Ticket.</b> Answers "when, what time, how much" as a picture, and the facts row on the left goes away because the ticket carries them. Risk: the Next batch section further down becomes a repeat. Every value is a placeholder. Needs: real date, times, fee.</div>
+  </div>
+  <div class="hv" data-hv="lab" hidden>
+  <section class="hero dark" aria-labelledby="h1-lab">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-lab">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <!-- stock placeholder: replace with a real photo of a CloudCadre lab or live class (guide §12) -->
+    <figure class="hero-ph">
+      <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1400&q=75" alt="A laptop open on code during a lab" style="object-position:50% 50%">
+      <figcaption>
+        <span class="t-num">34 labs</span>
+        <p>Every lab is checked by a mentor, not auto-graded.</p>
+      </figcaption>
+    </figure>
+  </section>
+    <div class="note"><b>4 Lab photo.</b> The classic photo-led hero, but with hands and a screen, no face. Stock placeholder (marked). Best long-term form: a real photo from a CloudCadre lab or live class, from the planned photo session. Risk: stock reads as generic; "34 labs" is a placeholder.</div>
+  </div>
+  <div class="hv" data-hv="months" hidden>
+  <section class="hero dark hv-months" aria-labelledby="h1-months">
+    <div class="hm-top">
+      <div>
+        <h1 class="t-display" id="h1-months">Become a cloud engineer in 4 months.</h1>
+        <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      </div>
+      <div>
+        <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+        <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+      </div>
+    </div>
+    <ol class="hm-strip" id="hm-strip" aria-label="What you build, month by month"></ol>
+  </section>
+    <div class="note"><b>5 Months.</b> The headline sits on top and the four month cards (cloned from the Program section) form the picture. Tells a cold visitor exactly what the 4 months contain. Risk: the Program section further down repeats the same cards, so one of them would go. Month split is invented.</div>
+  </div>
+  <div class="hv" data-hv="class" hidden>
+  <section class="hero dark" aria-labelledby="h1-class">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-class">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <!-- stock placeholder: replace with a real CloudCadre live class -->
+    <figure class="hero-ph">
+      <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=75" alt="A small live class with laptops" style="object-position:50% 40%">
+      <figcaption>
+        <span class="t-num">30 seats</span>
+        <p>A small live class, not a webinar. Every class is recorded.</p>
+      </figcaption>
+    </figure>
+  </section>
+    <div class="note"><b>6 Class.</b> A group of faces, nobody singled out: says "real people, a real class" without promising anyone's salary. Closest in feel to the current hero. Stock placeholder; "30 seats" is a placeholder number. Best real version: a photo of an actual CloudCadre class from the photo session.</div>
+  </div>
+  <div class="hv" data-hv="mentor" hidden>
+  <section class="hero dark" aria-labelledby="h1-mentor">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-mentor">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Message Ananya on WhatsApp</a>
+      </div>
+    </div>
+    <!-- stock placeholder: counsellor Ananya Rao is invented (same as the FAQ section) -->
+    <figure class="hero-ph">
+      <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=75" alt="" style="object-position:50% 22%">
+      <figcaption>
+        <span class="t-num">Talk to a person first</span>
+        <p><b>Ananya Rao</b>, admissions counsellor · replies in about 15 min</p>
+      </figcaption>
+    </figure>
+  </section>
+    <div class="note"><b>7 Counsellor.</b> One friendly face and a promise that a person answers. Trust comes from access, not results, and the WhatsApp button now has someone to talk to. Risk: it does not show the course. Name, photo and reply time are placeholders (the FAQ section uses the same person).</div>
+  </div>
+  <div class="hv" data-hv="team" hidden>
+  <section class="hero dark" aria-labelledby="h1-team">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-team">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <!-- stock placeholder: replace with a real CloudCadre lab -->
+    <figure class="hero-ph">
+      <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=75" alt="Learners working through a lab together" style="object-position:50% 35%">
+      <figcaption>
+        <span class="t-num">34 labs</span>
+        <p>You build in pairs and a mentor checks every lab.</p>
+      </figcaption>
+    </figure>
+  </section>
+    <div class="note"><b>8 Lab team.</b> Faces doing the work: learners over a laptop, which is the actual product (labs). Warmer than the laptop-only photo (4). Stock placeholder; "34 labs" and "in pairs" are placeholders.</div>
+  </div>
+  <div class="hv" data-hv="review" hidden>
+  <section class="hero dark" aria-labelledby="h1-review">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-review">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <!-- stock placeholder: replace with a real capstone review -->
+    <figure class="hero-ph">
+      <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1400&q=75" alt="A mock interview across a table" style="object-position:50% 30%">
+      <figcaption>
+        <span class="t-num">2 mock interviews</span>
+        <p>Practised with a panel before you apply.</p>
+      </figcaption>
+    </figure>
+  </section>
+    <div class="note"><b>9 Interview.</b> The moment that makes someone hireable: a mock interview across a table. Faces plus a promise of practice you get, not a salary figure. Stock placeholder; "2 mock interviews" is a placeholder from the program section.</div>
+  </div>
+  <div class="hv" data-hv="mosaic" hidden>
+  <section class="hero dark" aria-labelledby="h1-mosaic">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-mosaic">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <div class="hero-mos">
+      <!-- stock placeholders: class, lab, review -->
+      <figure class="hero-ph"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=75" alt="A small live class with laptops" style="object-position:50% 40%"><figcaption><span class="t-num">30 seats</span><p>live online class</p></figcaption></figure>
+      <figure class="hero-ph"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=75" alt="Learners working through a lab" style="object-position:50% 35%"><figcaption><span class="t-num">34 labs</span><p>a mentor checks each</p></figcaption></figure>
+      <figure class="hero-ph"><img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1400&q=75" alt="A learner explaining a design to a reviewer" style="object-position:12% 20%"><figcaption><span class="t-num">1 capstone</span><p>you defend, then 2 mock interviews</p></figcaption></figure>
+    </div>
+  </section>
+    <div class="note"><b>10 Mosaic.</b> Three pictures, each with its own big number, built the same way as the placement wall: face + number + line. Shows the whole experience (class, lab, review) in one glance instead of one person. Busier than 6 to 9 on a phone. All stock placeholders.</div>
+  </div>
+  <div class="hv" data-hv="face" hidden>
+  <section class="hero dark" aria-labelledby="h1-face">
+    <div class="hero-copy">
+      <h1 class="t-display" id="h1-face">Become a cloud engineer in 4 months.</h1>
+      <p class="t-lead">Live online classes in AWS, Azure, DevOps and FinOps.</p>
+      <!-- placeholder: date, times, fee -->
+      <ul class="hfacts">
+        <li><span class="t-label">Next batch</span><b class="t-h3">12 Jan</b></li>
+        <li><span class="t-label">Classes</span><b class="t-h3">8–10 pm</b></li>
+        <li><span class="t-label">Fee</span><b class="t-h3">₹15k/month</b></li>
+      </ul>
+      <div class="hero-act">
+        <a class="btn" href="#batch">Join the 12 Jan batch</a>
+        <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+      </div>
+    </div>
+    <!-- REAL learner (aurora-content.ts). Confirm consent before launch. -->
+    <figure class="hero-ph">
+      <img src="https://res.cloudinary.com/dqw5bkqgz/image/upload/f_auto,q_auto,w_1024/v1779776907/finops/partners/ot1kjhdy0fjn8cym60q6.jpg" alt="Monika Singh, a CloudCadre learner" fetchpriority="high">
+      <figcaption>
+        <span class="t-num">₹27 LPA</span>
+        <p><b>Monika Singh</b>, CloudCadre learner · Senior Program Manager, AWS and Cloud, NICE</p>
+      </figcaption>
+    </figure>
+  </section>
+    <div class="note"><b>Current v11.</b> Real learner (Monika Singh, ₹27 LPA) with a scrim caption. Kept here only to compare. Needs her written consent before launch.</div>
+  </div>
+
+  <!-- ===================== placements (loved, kept as is, now second) ===================== -->
+  <section class="sec place" id="placements" aria-labelledby="pl-h">
+    <div class="wrap">
+      <div class="sh">
+        <div>
+          <h2 class="t-h2" id="pl-h">Where our learners work now</h2>
+          <p class="sum"><b>15</b> learners · <b>12</b> companies · up to <b>₹29 LPA</b></p>
+        </div>
+        <ul class="logos" aria-label="Employers">
+          <li><img src="../../apps/academy/public/cloudcadre/logos/infosys.svg" alt="Infosys"></li>
+          <li class="tall"><img src="../../apps/academy/public/cloudcadre/logos/capgemini.svg" alt="Capgemini"></li>
+          <li class="heavy"><img src="../../apps/academy/public/cloudcadre/logos/hcltech.svg" alt="HCLTech"></li>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/amdocs.svg" alt="Amdocs"></li>
+          <li><img src="../../apps/academy/public/cloudcadre/logos/persistent.svg" alt="Persistent Systems"></li>
+          <li class="heavy"><img src="../../apps/academy/public/cloudcadre/logos/zensar.svg" alt="Zensar"></li>
+        </ul>
+      </div>
+      <ul class="wall" id="wall"></ul>
+      <button class="btn btn-line more" id="more" type="button">Show all 15 learners</button>
+      <p class="t-small fine">Packages are CTC per year, as shared by each learner.</p>
+      <div class="note"><b>Placements</b> move up to second place: they are the page's best proof, and the section you liked. The employer logos join the header of this section, so the page no longer has a separate logo strip saying the same thing.</div>
+    </div>
+  </section>
+
+  <!-- ===================== program ===================== -->
+  <section class="sec prog" id="program" aria-labelledby="prog-h">
+    <div class="wrap">
+      <div class="sh">
+        <h2 class="t-h2" id="prog-h">What you build in 4 months</h2>
+        <a class="link" href="#">Full syllabus (PDF)</a>
+      </div>
+      <!-- INVENTED syllabus split (aurora-content.ts): confirm with the owner -->
+      <ol class="months">
+        <li class="mc">
+          <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="One app running on AWS, Azure and Google Cloud">
+            <rect x="105" y="26" width="110" height="38" rx="3" fill="#0F1716"/>
+            <text x="160" y="50" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Your app</text>
+            <path d="M160 64V94M60 94H260M60 94V122M160 94V122M260 94V122" stroke="#0F1716" stroke-width="1.5" fill="none"/>
+            <rect x="28" y="122" width="64" height="54" rx="3" fill="#fff" stroke="#DCDAD3"/><image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" x="40" y="131" width="40" height="36"/>
+            <rect x="128" y="122" width="64" height="54" rx="3" fill="#fff" stroke="#DCDAD3"/><image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/azure/azure-original.svg" x="144" y="133" width="32" height="32"/>
+            <rect x="228" y="122" width="64" height="54" rx="3" fill="#fff" stroke="#DCDAD3"/><image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/googlecloud/googlecloud-original.svg" x="244" y="133" width="32" height="32"/>
+          </svg>
+          <div class="mc-b">
+            <p class="t-label"><b>Month 1</b> · 12 labs</p>
+            <h3 class="t-h3">One app on three clouds</h3>
+            <p class="t-small">AWS, Azure and Google Cloud basics</p>
+          </div>
+        </li>
+        <li class="mc">
+          <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="A monthly cloud bill, cut down after optimisation">
+            <text x="40" y="30" fill="#5F6764" font-size="13">Monthly cloud bill</text>
+            <rect x="84" y="46" width="64" height="122" fill="#C9C6BD"/>
+            <rect x="176" y="92" width="64" height="76" fill="#F2B33D"/>
+            <path d="M152 46L172 88" stroke="#0F1716" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ah)"/>
+            <path d="M40 168H280" stroke="#0F1716" stroke-width="1.5"/>
+            <text x="116" y="188" text-anchor="middle" fill="#0F1716" font-size="13">Before</text>
+            <text x="208" y="188" text-anchor="middle" fill="#0F1716" font-size="13" font-weight="600">After</text>
+          </svg>
+          <div class="mc-b">
+            <p class="t-label"><b>Month 2</b> · 8 labs</p>
+            <h3 class="t-h3">A smaller cloud bill</h3>
+            <p class="t-small">FinOps: find the waste, show the saving</p>
+          </div>
+        </li>
+        <li class="mc">
+          <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="A pipeline from code through Terraform and Docker to Kubernetes">
+            <g fill="#fff" stroke="#DCDAD3">
+              <rect x="14" y="66" width="56" height="56" rx="3"/><rect x="94" y="66" width="56" height="56" rx="3"/><rect x="174" y="66" width="56" height="56" rx="3"/><rect x="254" y="66" width="56" height="56" rx="3"/>
+            </g>
+            <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/githubactions/githubactions-original.svg" x="26" y="78" width="32" height="32"/>
+            <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/terraform/terraform-original.svg" x="106" y="78" width="32" height="32"/>
+            <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/docker/docker-original.svg" x="186" y="78" width="32" height="32"/>
+            <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/kubernetes/kubernetes-original.svg" x="266" y="78" width="32" height="32"/>
+            <g stroke="#0F1716" stroke-width="1.5" marker-end="url(#ah)"><path d="M71 94H92"/><path d="M151 94H172"/><path d="M231 94H252"/></g>
+            <g fill="#0F1716" font-size="12" text-anchor="middle"><text x="42" y="146">Code</text><text x="122" y="146">Terraform</text><text x="202" y="146">Docker</text><text x="282" y="146">Kubernetes</text></g>
+          </svg>
+          <div class="mc-b">
+            <p class="t-label"><b>Month 3</b> · 14 labs</p>
+            <h3 class="t-h3">Code to Kubernetes</h3>
+            <p class="t-small">Terraform, Docker, CI/CD pipelines</p>
+          </div>
+        </li>
+        <li class="mc">
+          <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="Your architecture, reviewed by a panel, then two mock interviews">
+            <rect x="16" y="44" width="136" height="112" rx="3" fill="#fff" stroke="#DCDAD3"/>
+            <text x="30" y="66" fill="#5F6764" font-size="12">Your architecture</text>
+            <rect x="30" y="80" width="48" height="28" rx="2" fill="none" stroke="#0F1716" stroke-width="1.5"/>
+            <rect x="92" y="80" width="48" height="28" rx="2" fill="none" stroke="#0F1716" stroke-width="1.5"/>
+            <rect x="30" y="116" width="110" height="26" rx="2" fill="#F2B33D"/>
+            <path d="M78 94H92" stroke="#0F1716" stroke-width="1.5"/>
+            <path d="M160 100H180" stroke="#0F1716" stroke-width="1.5" marker-end="url(#ah)"/>
+            <circle cx="204" cy="78" r="15" fill="#0F1716"/><circle cx="204" cy="122" r="15" fill="#0F1716"/>
+            <path d="M197 78l5 5 9-10M197 122l5 5 9-10" stroke="#F2B33D" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <g fill="#0F1716" font-size="13"><text x="228" y="74">Panel</text><text x="228" y="89">review</text><text x="228" y="118">2 mock</text><text x="228" y="133">interviews</text></g>
+          </svg>
+          <div class="mc-b">
+            <p class="t-label"><b>Month 4</b> · capstone</p>
+            <h3 class="t-h3">Design it, defend it</h3>
+            <p class="t-small">Then mock interviews and a CV review</p>
+          </div>
+        </li>
+      </ol>
+      <div class="note"><b>Program</b> as four cards built like the placement cards: a picture on top, then a label, a title and one short line. Each picture is a small diagram of what you actually build that month, drawn with the real tool logos. You can read the whole syllabus in about 5 seconds; the PDF has the detail.</div>
+    </div>
+  </section>
+
+  <!-- ===================== how classes work ===================== -->
+  <section class="sec how dark" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="sh"><h2 class="t-h2" id="how-h">How classes work</h2></div>
+      <!-- stock placeholders; numbers are placeholders too -->
+      <ul class="nums">
+        <li><div class="ph"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=75" alt="A small live class with laptops" loading="lazy"></div><b class="t-num">30</b><p>seats in a batch</p></li>
+        <li><div class="ph"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=75" alt="Learners working through a lab" loading="lazy"></div><b class="t-num">34</b><p>labs a mentor checks</p></li>
+        <li><div class="ph"><img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=75" alt="A learner explaining a design to a reviewer" loading="lazy"></div><b class="t-num">1</b><p>capstone you defend</p></li>
+        <li><div class="ph"><img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=75" alt="A mock interview across a table" loading="lazy"></div><b class="t-num">2</b><p>mock interviews</p></li>
+      </ul>
+      <div class="note"><b>How classes work</b> uses the placement-card formula: photo, one big number, three words. Four numbers you can remember instead of four sentences.</div>
+    </div>
+  </section>
+
+  <!-- ===================== batch ===================== -->
+  <section class="sec batch" id="batch" aria-labelledby="bt-h">
+    <div class="wrap">
+      <div class="sh"><h2 class="t-h2" id="bt-h">Next batch</h2></div>
+      <!-- placeholder: every value here -->
+      <div class="ticket">
+        <div class="cal">
+          <span class="mo">January 2027</span>
+          <span class="d">12</span>
+          <span class="t-label">4 months, live online</span>
+        </div>
+        <div>
+          <p class="t-label"><b style="color:var(--ink);font-weight:600">Your week</b></p>
+          <ul class="week" aria-label="Weekly schedule">
+            <li class="on"><span class="dn">Mon</span><span class="cell">8–10<br>pm</span></li>
+            <li class="on"><span class="dn">Tue</span><span class="cell">8–10<br>pm</span></li>
+            <li class="on"><span class="dn">Wed</span><span class="cell">8–10<br>pm</span></li>
+            <li class="on"><span class="dn">Thu</span><span class="cell">8–10<br>pm</span></li>
+            <li><span class="dn">Fri</span><span class="cell" aria-label="free">–</span></li>
+            <li class="lab"><span class="dn">Sat</span><span class="cell">Lab<br>10–1</span></li>
+            <li><span class="dn">Sun</span><span class="cell" aria-label="free">–</span></li>
+          </ul>
+          <p class="legend"><span><i style="background:var(--ink)"></i>Live class</span><span><i style="background:var(--acc)"></i>Lab with a mentor</span><span>Every class is recorded</span></p>
+        </div>
+        <div class="fee">
+          <p class="t-label"><b style="color:var(--ink);font-weight:600">Fee</b></p>
+          <span class="t-num">₹15,000<small>/ month × 4</small></span>
+          <p class="t-small">or ₹60,000 once · UPI, card, net banking</p>
+          <a class="btn" href="#">Join the 12 Jan batch</a>
+          <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+        </div>
+      </div>
+      <div class="note"><b>Next batch</b> is one ticket with three pictures: the date as a calendar, the week as a timetable, the fee as one big number. The table of text from v10 is gone.</div>
+    </div>
+  </section>
+
+  <!-- ===================== faq ===================== -->
+  <section class="sec" id="faq" aria-labelledby="faq-h">
+    <div class="wrap">
+      <div class="faq-grid">
+        <!-- placeholder: counsellor name and stock photo -->
+        <aside class="person" aria-label="Talk to an admissions counsellor">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=75" alt="" loading="lazy"></div>
+          <p><b style="font-weight:600">Ananya Rao</b><br><span class="t-small">Admissions counsellor · replies in about 15 min</span></p>
+          <a class="btn btn-line" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Message Ananya</a>
+        </aside>
+        <div>
+          <div class="sh"><h2 class="t-h2" id="faq-h">Questions before you join</h2></div>
+          <div class="faq">
+            <details><summary>Do I need an IT background?</summary><p>No. Month 1 starts from cloud basics. If you are completely new to IT, a counsellor will suggest a short warm-up first.</p></details>
+            <details><summary>How many hours a week?</summary><p>About 8 to 10: two or three live evening classes, plus labs in your own time.</p></details>
+            <details><summary>What if I miss a class?</summary><p>Every class is recorded and up the same night, and your mentor helps you catch up on the lab.</p></details>
+            <details><summary>Do I get a certificate?</summary><p>Yes, a CEAP certificate employers can verify online. AWS, Azure and Google Cloud exam fees are paid to the exam provider.</p></details>
+            <details><summary>Do you guarantee a job?</summary><p>No, and be wary of anyone who does. We give you the skills, a capstone, mock interviews, CV and LinkedIn help, and introductions.</p></details>
+          </div>
+        </div>
+      </div>
+      <div class="note"><b>FAQ</b> leads with a person's face, not text. Questions stay closed, so the section is five short lines until someone taps.</div>
+    </div>
+  </section>
+
+  <footer class="ft dark">
+    <div class="wrap">
+      <div class="ft-top">
+        <div>
+          <a class="logo" href="#"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+          <p>Live online training in cloud, DevOps and FinOps.</p>
+        </div>
+        <div><h3>Program</h3><ul><li><a href="#placements">Placements</a></li><li><a href="#program">What you build</a></li><li><a href="#batch">Fees and dates</a></li></ul></div>
+        <div><h3>Help</h3><ul><li><a href="#faq">FAQ</a></li><li><a href="#">Full syllabus</a></li><li><a href="#">Log in</a></li></ul></div>
+        <!-- placeholder: phone and email -->
+        <div><h3>Contact</h3><ul><li><a href="https://wa.me/" target="_blank" rel="noopener noreferrer">+91 98765 43210</a></li><li><a href="#">hello@cloudcadre.in</a></li></ul></div>
+      </div>
+      <div class="ft-bot"><span>© 2026 CloudCadre. AWS, Azure, Google Cloud, Kubernetes and other marks belong to their owners.</span><span>Privacy · Terms · Refunds</span></div>
+    </div>
+  </footer>
+
+  <div class="mbar" id="mbar" aria-hidden="true">
+    <p><b>Next batch 12 Jan</b>₹15,000 a month</p>
+    <a class="wa-btn" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Ask on WhatsApp" tabindex="-1"><svg class="wa"><use href="#i-wa"/></svg></a>
+    <a class="btn" href="#batch" tabindex="-1">Join batch</a>
+  </div>
+</main>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'), tb=document.getElementById('tb');
+  function setTbh(){document.documentElement.style.setProperty('--tbh',tb.offsetHeight+'px')}
+  setTbh(); addEventListener('resize',setTbh);
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  /* REAL placements (aurora-content.ts). Confirm consent with each learner before launch. */
+  var cld=function(p,t){return 'https://res.cloudinary.com/dqw5bkqgz/image/upload/f_auto,q_auto,'+t+'/'+p+'.jpg'};
+  var logo=function(f){return '../../apps/academy/public/cloudcadre/logos/'+f+'.svg'};
+  var P=[
+    ['Priyanka Dhavle','v1779775797/finops/partners/pkws9p6zmrfb1wmzdn9e','27','AWS DevOps Engineer','Capgemini','capgemini'],
+    ['Lalit Borse','v1779777581/finops/partners/pqtkm6wpsvd8zdjysg4t','29','Technical Specialist, Cloud and FinOps','Zensar','zensar'],
+    ['Atish Sonwane','v1779778117/finops/partners/ipu40he74efuwwiocpzu','20','Senior Cloud Engineer, FinOps','Persistent Systems','persistent'],
+    ['Rupali Janapure','v1779775550/finops/partners/vdycpmti6ndbv4fnnlck','12','Cloud FinOps Specialist','Amdocs','amdocs'],
+    ['Swapnil Khandare','v1779696875/finops/partners/wq8vsntaol8qea1jijb8','17','Cloud Engineer','Infosys','infosys'],
+    ['Abhilesh Jadhao','v1779777941/finops/partners/xeqthvtjcqo4pbk4tcgm','19','Project Manager, Cloud and DC','Fabutech'],
+    ['Prashant Jawalkar','v1779775977/finops/partners/rxb2j3nfydwzcsvchi6s','18','Cloud FinOps Engineer','Infosys','infosys'],
+    ['Prakash Gulbhele','v1779776432/finops/partners/blck4mtyzs7rujlbor7y','16','AWS FinOps Engineer','Truetech'],
+    ['Shubham Kulkarni','v1779774796/finops/partners/eoctu1xlij4zjufqy010','14','Cloud Engineer','Infosys','infosys'],
+    ['Ashish Kumbhojkar','v1779696513/finops/partners/bmphc8rteevycsbqc1i7','14','Cloud FinOps Engineer','Cencora'],
+    ['Ninand Bhoir','v1779776610/finops/partners/bq3rw6vjqcokhwvaz50s','13','AWS Developer','SA Technologies'],
+    ['Mayuri Fate','v1779777079/finops/partners/d9hfe13d8rrbe1j1okef','13','Cloud Engineer','HCLTech','hcltech'],
+    ['Prasad Suryawanshi','v1779776202/finops/partners/lbotu68t8kupfwqwrjyh','12.5','Cloud FinOps Admin','ZS Associates','zs'],
+    ['Shrinath Gaikwad','v1779775162/finops/partners/inih6zmlzkcrvwmq7jqy','8','DevOps Engineer','HCL Technologies','hcltech'],
+    ['Monika Singh','v1779776907/finops/partners/ot1kjhdy0fjn8cym60q6','27','Senior Program Manager, AWS and Cloud','NICE']
+  ];
+  var wall=document.getElementById('wall'), more=document.getElementById('more');
+  wall.innerHTML=P.map(function(r){
+    var co='<span class="co">'+(r[5]?'<img src="'+logo(r[5])+'" alt="'+esc(r[4])+'" loading="lazy">':esc(r[4]))+'</span>';
+    return '<li class="pc"><img class="f" src="'+cld(r[1],'w_400,h_400,c_fill,g_face')+'" alt="" loading="lazy">'+
+      '<div class="pc-b"><p class="t-h3">₹'+r[2]+'<small>LPA</small></p><h3 class="pc-n">'+esc(r[0])+'</h3><p class="t-small">'+esc(r[3])+'</p>'+co+'</div></li>'}).join('');
+  more.addEventListener('click',function(){var all=wall.classList.toggle('all');more.textContent=all?'Show fewer':'Show all 15 learners'});
+
+  /* phone action bar: after the hero button scrolls away, until the batch section */
+  var mbar=document.getElementById('mbar'), batch=document.getElementById('batch');
+  function check(){var heroAct=document.querySelector('.hv:not([hidden]) .hero-act');if(!heroAct)return;var on=heroAct.getBoundingClientRect().bottom<0&&batch.getBoundingClientRect().top>innerHeight;
+    mbar.classList.toggle('show',on);mbar.setAttribute('aria-hidden',!on);[].forEach.call(mbar.querySelectorAll('a'),function(a){a.tabIndex=on?0:-1})}
+  addEventListener('scroll',check,{passive:true});addEventListener('resize',check);check();
+
+  /* toolbar */
+  var W={desktop:'',tablet:'w-tablet',phone:'w-phone'};
+  function setW(v){stage.classList.remove('w-tablet','w-phone');if(W[v])stage.classList.add(W[v]);
+    [].forEach.call(document.querySelectorAll('[data-group="w"] button'),function(b){b.setAttribute('aria-pressed',b.dataset.v===v)});
+    try{localStorage.setItem('v11h-w',v)}catch(e){};check()}
+  document.querySelector('[data-group="w"]').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setW(b.dataset.v)});
+  try{var sv=localStorage.getItem('v11h-w');if(W.hasOwnProperty(sv))setW(sv)}catch(e){}
+  /* hero options */
+  var strip=document.getElementById('hm-strip');
+  [].forEach.call(document.querySelectorAll('#program .months > li'),function(li){strip.appendChild(li.cloneNode(true))});
+  var HV=['clouds','numbers','ticket','lab','months','class','mentor','team','review','mosaic','face'];
+  function setH(v){[].forEach.call(document.querySelectorAll('.hv'),function(h){h.hidden=h.dataset.hv!==v});
+    [].forEach.call(document.querySelectorAll('[data-group="h"] button'),function(b){b.setAttribute('aria-pressed',b.dataset.v===v)});
+    try{localStorage.setItem('v11h-h',v)}catch(e){};check()}
+  [].forEach.call(document.querySelectorAll('[data-group="h"]'),function(g){g.addEventListener('click',function(e){var b=e.target.closest('button');if(b)setH(b.dataset.v)})});
+  var q=new URLSearchParams(location.search).get('hero'), hv=null;
+  try{hv=localStorage.getItem('v11h-h')}catch(e){}
+  setH(HV.indexOf(q)>-1?q:(HV.indexOf(hv)>-1?hv:'class'));
+  /* layout + photo treatment */
+  [].forEach.call(document.querySelectorAll('.hero'),function(h){if(h.querySelector('.hero-ph,.hero-mos'))h.classList.add('ph-hero')});
+  function setOpt(key,attr,group,list,def,cb){
+    function set(v){stage.dataset[attr]=v;[].forEach.call(document.querySelectorAll('[data-group="'+group+'"] button'),function(b){b.setAttribute('aria-pressed',b.dataset.v===v)});try{localStorage.setItem('v11h-'+key,v)}catch(e){} if(cb)cb(v)}
+    document.querySelector('[data-group="'+group+'"]').addEventListener('click',function(e){var b=e.target.closest('button');if(b)set(b.dataset.v)});
+    var q=new URLSearchParams(location.search).get(key),sv=null;try{sv=localStorage.getItem('v11h-'+key)}catch(e){}
+    set(list.indexOf(q)>-1?q:(list.indexOf(sv)>-1?sv:def));
+  }
+  var FADE_SRC='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=75';
+  function fadePhoto(v){[].forEach.call(document.querySelectorAll('.ph-hero .hero-ph img'),function(im){
+    if(v==='fade'){if(im.dataset.o===undefined){im.dataset.o=im.getAttribute('src');im.dataset.a=im.getAttribute('alt')||'';im.dataset.p=im.style.objectPosition}
+      im.src=FADE_SRC;im.alt='A small live class with laptops';im.style.objectPosition='62% 35%'}
+    else if(im.dataset.o!==undefined){im.src=im.dataset.o;im.alt=im.dataset.a;im.style.objectPosition=im.dataset.p;delete im.dataset.o}})}
+  setOpt('lay','lay','l',['split','wide','flip','fade','framed','band'],'split',fadePhoto);
+  setOpt('ph','ph','p',['natural','muted','mono'],'natural');
+  var nb=document.getElementById('t-notes');
+  nb.addEventListener('click',function(){var on=nb.getAttribute('aria-pressed')!=='true';nb.setAttribute('aria-pressed',on);document.body.classList.toggle('notes-on',on);setTbh()});
+})();
+</script>
+</body>
+</html>

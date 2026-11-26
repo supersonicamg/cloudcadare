@@ -1,0 +1,2366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudCadre app v11</title>
+<!--
+  CloudCadre learner app, redesigned on design guide v11 (plan/15-design-and-ux-guide.md, reference build home-v11.html).
+  Covers every learner-facing route that is live in apps/academy today:
+    Learn:    /dashboard (4 states), /learn/[slug]/material, /learn/[slug]/live, /learn/[slug]/[lessonId], quiz attempt + result, /learn/notes
+    Account:  /account, /account/subscription, /account/payments, /account/security, /progress, /certificates
+    Get in:   /login, /signup (+ /signup/confirm), /checkout/[orderId] (UPI and coupon-only), /checkout/[orderId]/pending + /done
+    Public:   /certificates/[id], /verify/[code]
+  Not here: /admin/* (staff), /courses and /courses/[slug] (marketing; guide §15 recipes), /orders/[id] print receipt.
+
+  Structure comes from the live code (app/[tenant]/**). Visuals come only from guide v11.
+  REAL: program name, the 4 month diagrams and titles from home-v11 (themselves a placeholder split), Monika Singh's photo (consent pending).
+  PLACEHOLDERS (invented): the learner "Rahul Verma", every lesson title, date, count, order number, price split,
+  UPI ID, WhatsApp number, badge and level names. The QR code is drawn and cannot be scanned.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{background:#D6D5D0;font-family:system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+h1,h2,h3,h4,p,ul,ol,figure,dl,dd,fieldset,blockquote{margin:0}
+fieldset{border:0;padding:0;min-width:0}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #F2B33D;outline-offset:3px}
+[hidden]{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- review toolbar (not part of the design) ---------- */
+.tb{position:sticky;top:0;z-index:60;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:9px 16px;background:#18181B;color:#A1A1AA;font:500 12.5px/1.2 system-ui,sans-serif}
+.tb-g{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.tb-g > span{margin-right:4px}
+.tb button,.tb select{color:#D4D4D8;background:transparent;border:1px solid #3F3F46;border-radius:6px;padding:6px 10px;cursor:pointer;min-height:32px;font:inherit}
+.tb select{background:#27272A;color:#F4F4F5;max-width:280px}
+.tb button:hover{border-color:#71717A;color:#fff}
+.tb button[aria-pressed="true"]{background:#F4F4F5;color:#18181B;border-color:#F4F4F5}
+.tb-title{color:#fff;font-weight:600}
+.tb-states:empty{display:none}
+
+/* ---------- tokens (guide §5–§7) ---------- */
+.stage{
+  --dark:#0C1312;--dark-2:#16201E;--ink:#0F1716;--body:#3A4240;--muted:#5F6764;--paper:#F5F4F0;--tile:#EEEDE8;--rule:#DCDAD3;
+  --acc:#F2B33D;--acc-h:#FFC25A;--on-dark:rgba(255,255,255,.82);--on-dark-2:rgba(255,255,255,.64);--on-dark-rule:rgba(255,255,255,.16);
+  --t-display:clamp(40px,4.8cqi,66px);--t-h2:clamp(28px,3cqi,40px);--t-num:clamp(28px,2.6cqi,36px);--t-h3:clamp(19px,1.5cqi,21px);
+  --t-lead:clamp(17px,1.4cqi,19px);--t-body:17px;--t-small:15px;--t-label:14px;
+  --gutter:clamp(16px,4cqi,56px);
+  container:stage/inline-size;max-width:1440px;margin:0 auto;min-height:calc(100vh - var(--tbh,0px));background:#fff;color:var(--ink);
+  font-family:"Hanken Grotesk",sans-serif;font-size:var(--t-body);line-height:1.55;font-weight:400}
+.stage.w-tablet{max-width:820px;margin:28px auto 56px;min-height:0;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 60px rgba(0,0,0,.18);border-radius:18px;overflow:clip}
+.stage.w-phone{max-width:390px;margin:28px auto 56px;min-height:0;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 24px 60px rgba(0,0,0,.18);border-radius:28px;overflow:clip}
+.scr{container-type:inline-size}
+
+/* ---------- the 8 type roles (guide §6), and nothing else ---------- */
+.t-display{font-size:var(--t-display);line-height:1.02;letter-spacing:-.034em;font-weight:600;text-wrap:balance}
+.t-h2,.t-title{font-size:var(--t-h2);line-height:1.1;letter-spacing:-.025em;font-weight:600;text-wrap:balance}
+.t-num{font-size:var(--t-num);line-height:1;letter-spacing:-.03em;font-weight:600}
+.t-num small{font-size:var(--t-label);font-weight:400;letter-spacing:0;color:var(--muted);margin-left:4px}
+.t-h3{font-size:var(--t-h3);line-height:1.3;letter-spacing:-.01em;font-weight:600}
+.t-lead{font-size:var(--t-lead);line-height:1.5;color:var(--body);max-width:52ch}
+.t-body{font-size:var(--t-body);line-height:1.55;color:var(--body)}
+.t-card{font-size:var(--t-body);line-height:1.35;font-weight:600;color:var(--ink)}
+.t-small{font-size:var(--t-small);line-height:1.45;color:var(--muted)}
+.t-label{font-size:var(--t-label);line-height:1.4;color:var(--muted)}
+.t-small b,.t-label b,.t-lead b,.t-body b{font-weight:600;color:var(--ink)}
+.dark .t-lead,.dark .t-body{color:var(--on-dark)}
+.dark .t-small,.dark .t-label{color:var(--on-dark-2)}
+.dark .t-small b,.dark .t-label b{color:#fff}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ---------- buttons and links (guide §10.1) ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:3px;font-weight:600;font-size:16px;text-decoration:none;cursor:pointer;border:0;background:var(--acc);color:var(--dark);white-space:nowrap}
+.btn:hover{background:var(--acc-h)}
+.btn-line{background:transparent;border:1px solid var(--ink);color:var(--ink)}
+.btn-line:hover{background:var(--ink);color:#fff}
+.dark .btn-line{border-color:rgba(255,255,255,.55);color:#fff}
+.dark .btn-line:hover{background:#fff;color:var(--ink);border-color:#fff}
+.btn-sm{min-height:44px;padding:0 16px;font-size:15px}
+.btn-full{width:100%}
+.link{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-weight:600;font-size:16px;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px;background:none;border:0;padding:0;cursor:pointer;color:inherit}
+.link-s{font-size:var(--t-small)}
+.wa{width:18px;height:18px;fill:currentColor;flex:none}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.ic-s{width:16px;height:16px}
+
+/* ---------- app frame: header, link row (tablet), tab bar (phone) ---------- */
+.ah,.subnav,.tabbar,.site-hd{display:none}
+.stage[data-shell="app"] .ah{display:block}
+.stage[data-shell="site"] .site-hd{display:block}
+.ah{position:sticky;top:var(--tbh,0px);z-index:40;background:var(--dark);color:#fff;border-bottom:1px solid var(--on-dark-rule)}
+.ah-in{display:flex;align-items:center;gap:28px;height:64px;max-width:1200px;margin:0 auto;padding-inline:var(--gutter)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:19px;letter-spacing:-.02em;text-decoration:none;white-space:nowrap}
+.logo img{width:32px;height:auto}
+.ah-nav{display:flex;gap:4px;align-self:stretch}
+.ah-nav a{display:inline-flex;align-items:center;padding:0 12px;font-size:15px;color:var(--on-dark);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap}
+.ah-nav a:hover{color:#fff}
+.ah-nav a[aria-current="page"]{color:#fff;font-weight:600;border-bottom-color:#fff}
+.ah-end{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ah-help{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid rgba(255,255,255,.45);border-radius:3px;text-decoration:none;font-size:15px;white-space:nowrap}
+.ah-help:hover{border-color:#fff}
+.acct{position:relative}
+.acct-btn{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 8px 0 4px;background:transparent;border:0;border-radius:3px;cursor:pointer;color:inherit;font-size:15px}
+.acct-btn:hover{background:rgba(255,255,255,.08)}
+.av{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:var(--t-label);font-weight:600;flex:none}
+.acct-pan{position:absolute;right:0;top:calc(100% + 8px);width:280px;background:#fff;color:var(--ink);border:1px solid var(--rule);border-radius:3px;box-shadow:0 12px 32px rgba(12,19,18,.14);padding:6px 0;z-index:55}
+.acct-who{display:grid;gap:2px;padding:12px 16px 14px;border-bottom:1px solid var(--rule);margin-bottom:6px}
+.acct-pan a,.acct-pan button.mi{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 16px;width:100%;text-align:left;background:none;border:0;font-size:var(--t-small);text-decoration:none;cursor:pointer;color:var(--ink)}
+.acct-pan a:hover,.acct-pan button.mi:hover{background:var(--paper)}
+.acct-pan .ic{color:var(--muted)}
+.acct-pan .sep{border-top:1px solid var(--rule);margin-top:6px;padding-top:6px}
+.subnav{background:var(--dark);border-bottom:1px solid var(--on-dark-rule)}
+.subnav ul{display:grid;grid-template-columns:repeat(4,1fr)}
+.subnav a{display:flex;align-items:center;justify-content:center;min-height:44px;font-size:15px;color:var(--on-dark);text-decoration:none}
+.subnav a[aria-current="page"]{color:#fff;font-weight:600;box-shadow:inset 0 -2px 0 #fff}
+.tabbar{position:sticky;bottom:0;z-index:45;background:#fff;border-top:1px solid var(--rule);grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.tabbar a{display:grid;justify-items:center;align-content:center;gap:4px;min-height:62px;padding:6px 2px;font-size:var(--t-label);line-height:1.2;color:var(--muted);text-decoration:none;text-align:center}
+.tabbar .ic{width:22px;height:22px}
+.tabbar a[aria-current="page"]{color:var(--ink);font-weight:600;box-shadow:inset 0 2px 0 var(--ink)}
+/* marketing header, used by the public verify page (same as home-v11) */
+.site-hd{position:sticky;top:var(--tbh,0px);z-index:40;background:var(--dark);color:#fff;border-bottom:1px solid var(--on-dark-rule)}
+.site-hd .ah-in{max-width:1440px}
+.site-hd .login{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;text-decoration:none;color:var(--on-dark);font-size:15px}
+
+/* ---------- page skeleton ---------- */
+.pg{max-width:1200px;margin:0 auto;padding:clamp(28px,4cqi,48px) var(--gutter) clamp(64px,7cqi,96px)}
+.pg-h{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px;margin-bottom:clamp(24px,3cqi,36px)}
+.pg-h .t-lead{margin-top:8px}
+.blk{margin-top:clamp(40px,5cqi,64px)}
+.blk-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px;margin-bottom:16px}
+.blk-h .link{min-height:0}
+.card{background:#fff;border:1px solid var(--rule);border-radius:3px}
+.paper{background:var(--paper);border-radius:3px}
+.stack{display:grid;gap:16px}
+
+/* ---------- small parts ---------- */
+.st{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-label);font-weight:600;color:var(--ink);white-space:nowrap}
+.st .ic{width:16px;height:16px}
+.st.quiet{font-weight:400;color:var(--muted)}
+.bar{display:block;height:4px;border-radius:2px;background:var(--tile);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink)}
+.dark .bar{background:rgba(255,255,255,.18)}
+.dark .bar i{background:#fff}
+.ti{display:grid;place-items:center;width:40px;height:40px;border-radius:3px;background:var(--tile);color:var(--ink);flex:none}
+.ti.done{background:var(--ink);color:#fff}
+.ti.half{background:#fff;box-shadow:inset 0 0 0 2px var(--ink)}
+.ti.lock{background:transparent;border:1px dashed var(--muted);color:var(--muted)}
+.ti.lg{width:48px;height:48px}
+.rows{border-top:1px solid var(--ink)}
+.rows > li{border-bottom:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:14px;min-height:68px;padding:12px 8px;text-decoration:none;color:inherit}
+a.row:hover{background:var(--paper)}
+.row .tx{display:grid;gap:2px;min-width:0}
+.row .tx b{font-weight:600;line-height:1.35;color:var(--ink)}
+.row .tx > span{font-size:var(--t-label);color:var(--muted)}
+.row .rt{display:flex;align-items:center;gap:14px;font-size:var(--t-label);color:var(--muted);white-space:nowrap}
+.row .rt b{color:var(--ink);font-weight:600}
+.row .rt .go{color:var(--ink)}
+.nt{display:inline-flex;align-items:center;gap:4px}
+.row.locked .tx b{color:var(--muted);font-weight:400}
+.facts{border-top:1px solid var(--ink)}
+.facts > div{display:grid;grid-template-columns:200px minmax(0,1fr) auto;gap:4px 24px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--rule)}
+.facts dt{font-size:var(--t-label);color:var(--muted)}
+.facts dd{font-weight:600;color:var(--ink)}
+.facts dd span{font-weight:400;color:var(--body)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--rule)}
+.tabs a,.tabs button{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 14px;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;font-size:var(--t-small);color:var(--muted);text-decoration:none;cursor:pointer;white-space:nowrap}
+.tabs a:hover,.tabs button:hover{color:var(--ink)}
+.tabs [aria-current="true"],.tabs [aria-selected="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.tabs em{font-style:normal;font-size:var(--t-label);font-weight:400;color:var(--muted)}
+.tabs .ic{width:18px;height:18px}
+.select{display:none;height:48px;width:100%;border:1px solid var(--muted);border-radius:3px;padding:0 40px 0 14px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='%230F1716' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;font-size:16px;color:var(--ink)}
+.search{display:flex;gap:8px}
+.search label{position:relative;flex:1;min-width:0}
+.search label .ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{width:100%;height:48px;border:1px solid var(--muted);border-radius:3px;padding:0 14px 0 44px;font-size:16px;background:#fff}
+.search input::placeholder{color:var(--muted)}
+.find{display:grid;gap:12px;margin-bottom:28px}
+.note-l{display:flex;gap:12px;align-items:flex-start;padding:14px 18px;background:var(--paper);border-radius:3px;box-shadow:inset 3px 0 0 var(--ink);font-size:var(--t-small);color:var(--body)}
+.note-l .ic{margin-top:1px}
+.note-l b{color:var(--ink);font-weight:600}
+
+/* ---------- forms ---------- */
+.fld{display:grid;gap:8px;align-content:start;min-width:0}
+.fld > label,.fld > .lb{font-size:var(--t-small);font-weight:600;color:var(--ink)}
+.fld > label small{font-size:var(--t-small);font-weight:400;color:var(--muted)}
+.in{height:52px;width:100%;border:1px solid var(--muted);border-radius:3px;padding:0 14px;background:#fff;font-size:16px;color:var(--ink)}
+.in::placeholder{color:var(--muted)}
+.in[readonly]{background:var(--paper);border-color:var(--rule);color:var(--body)}
+textarea.in{height:auto;min-height:88px;padding:12px 14px;resize:vertical;line-height:1.5}
+.hint{font-size:var(--t-label);color:var(--muted)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}
+.fgrid .full{grid-column:1/-1}
+.pre{display:flex}
+.pre span{display:grid;place-items:center;padding:0 14px;border:1px solid var(--muted);border-right:0;border-radius:3px 0 0 3px;background:var(--paper);font-size:16px;color:var(--ink)}
+.pre .in{border-radius:0 3px 3px 0}
+.form-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-top:8px}
+.ok-line{display:inline-flex;align-items:center;gap:8px;font-size:var(--t-label);font-weight:600;color:var(--ink)}
+.chk{display:flex;gap:12px;align-items:flex-start;font-size:var(--t-small);color:var(--body);cursor:pointer}
+.chk input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--ink);flex:none}
+.sw{position:relative;width:52px;height:44px;flex:none;background:none;border:0;cursor:pointer;padding:0}
+.sw::before{content:"";position:absolute;left:0;top:8px;width:52px;height:28px;border-radius:3px;background:#fff;border:1px solid var(--muted);box-sizing:border-box;transition:background .2s}
+.sw::after{content:"";position:absolute;left:4px;top:12px;width:20px;height:20px;border-radius:2px;background:var(--muted);transition:transform .2s,background .2s}
+.sw[aria-checked="true"]::before{background:var(--ink);border-color:var(--ink)}
+.sw[aria-checked="true"]::after{transform:translateX(24px);background:#fff}
+
+/* ---------- Home ---------- */
+.home-top{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:16px}
+.cont{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:var(--dark);color:#fff;border-radius:3px;overflow:hidden}
+.cont-pic{position:relative;background:var(--tile);min-height:240px}
+.cont-pic .dg{position:absolute;inset:0;width:100%;height:100%}
+.play{display:grid;place-items:center;width:56px;height:56px;border-radius:3px;background:var(--dark);color:#fff}
+.play .ic{width:24px;height:24px}
+.cont-pic .play{position:absolute;right:12px;top:12px;width:44px;height:44px}
+.cont-pic .wp{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(15,23,22,.14)}
+.cont-pic .wp i{display:block;height:100%;background:var(--ink)}
+.cont-pic .mo{position:absolute;left:12px;top:12px;padding:4px 8px;background:#fff;border-radius:3px;font-size:var(--t-label);font-weight:600;color:var(--ink)}
+.cont-b{padding:clamp(20px,2.6cqi,32px);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.cont-b .t-h3{color:#fff;margin-top:4px}
+.cont-b .pace{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:var(--t-small);color:var(--on-dark)}
+.cont-b .acts-c{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;margin-top:18px}
+.ncls{padding:20px;display:flex;flex-direction:column;gap:16px}
+.ncls-row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:16px;align-items:center}
+.dblk{display:grid;justify-items:center;align-content:center;gap:6px;width:72px;height:80px;background:var(--paper);border-radius:3px;text-align:center}
+.dblk b{font-size:36px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.dblk span{font-size:var(--t-label);line-height:1;color:var(--muted)}
+.dblk.on{background:var(--ink);color:#fff}
+.dblk.on span{color:var(--on-dark)}
+.ncls .foot{margin-top:auto;display:grid;gap:6px}
+.mcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.mcard{position:relative;display:flex;flex-direction:column;background:var(--paper);border-radius:3px;overflow:hidden;text-decoration:none;color:inherit}
+a.mcard:hover .t-card{text-decoration:underline;text-underline-offset:4px}
+.mcard.now::after{content:"";position:absolute;inset:0;border:2px solid var(--ink);border-radius:3px;pointer-events:none}
+.mcard .dg{display:block;width:100%;aspect-ratio:8/5;background:var(--tile)}
+.mcard.locked .dg{opacity:.45}
+.mc-b{padding:14px 16px 16px;display:grid;gap:6px}
+.mc-b .bar{margin-top:6px}
+.nextin{margin-top:24px}
+.nextin .blk-h{margin-bottom:8px}
+.dg text{font-family:"Hanken Grotesk",sans-serif}
+.todo li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:14px;align-items:center;min-height:64px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.todo .ck{display:grid;place-items:center;width:28px;height:28px;border-radius:3px;border:1px solid var(--muted)}
+.todo .ck.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.todo .ck.lnk{border:0;background:var(--tile)}
+.todo .tx{display:grid;gap:2px}
+.todo .tx span{font-size:var(--t-label);color:var(--muted)}
+/* batch ticket (guide §10.8) */
+.ticket{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1fr);background:#fff;border-radius:3px}
+.ticket > div{padding:clamp(20px,2.6cqi,32px)}
+.ticket > div + div{border-left:1px dashed var(--rule)}
+.ticket.two{grid-template-columns:auto minmax(0,1fr)}
+.cal{display:grid;justify-items:start;align-content:start;gap:2px;min-width:170px}
+.cal .mo{font-size:var(--t-small);font-weight:600;color:var(--ink)}
+.cal .d{font-size:clamp(72px,7cqi,104px);line-height:.9;letter-spacing:-.05em;font-weight:600}
+.cal .t-label{margin-top:8px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:14px}
+.week li{display:grid;gap:6px;justify-items:center;text-align:center}
+.week .dn{font-size:var(--t-label);color:var(--muted)}
+.week .cell{width:100%;height:56px;border-radius:3px;background:var(--tile);display:grid;place-items:center;font-size:12px;line-height:1.2;color:var(--muted)}
+.week .on .cell{background:var(--ink);color:#fff;font-weight:600}
+.week .lab .cell{background:var(--acc);color:var(--dark);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:14px;font-size:var(--t-label);color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.fee .t-num{display:block;margin-top:10px;font-size:clamp(36px,3.4cqi,48px)}
+.fee .t-small{margin-top:6px}
+.fee .btn{width:100%;margin-top:22px}
+.band{background:var(--paper);border-radius:3px;padding:clamp(12px,1.6cqi,20px)}
+.previews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pv{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:center;padding:12px;text-decoration:none}
+.pv:hover .t-card{text-decoration:underline;text-underline-offset:4px}
+.pv .dg{width:120px;aspect-ratio:8/5;background:var(--tile);border-radius:3px;display:block}
+
+/* ---------- My course ---------- */
+.mon{border-top:1px solid var(--ink)}
+.mon + .mon{margin-top:0}
+.mon summary{display:grid;grid-template-columns:112px minmax(0,1fr) auto 24px;gap:20px;align-items:center;padding:16px 0;cursor:pointer;list-style:none}
+.mon summary::-webkit-details-marker{display:none}
+.mon summary .dg{width:112px;aspect-ratio:8/5;background:var(--tile);border-radius:3px;display:block}
+.mon.locked summary .dg{opacity:.45}
+.mon summary .tt{display:grid;gap:4px;min-width:0}
+.mon summary .bar{max-width:320px;margin-top:6px}
+.mon summary .c{font-size:var(--t-label);color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.mon summary .chv{transition:transform .2s;color:var(--ink)}
+.mon[open] summary .chv{transform:rotate(90deg)}
+.mon .rows{border-top:1px solid var(--rule);margin-bottom:24px}
+.here{display:inline-block;margin-left:10px;font-size:var(--t-label);font-weight:600;color:var(--ink);padding:1px 8px;border:1px solid var(--ink);border-radius:3px;vertical-align:2px;letter-spacing:0}
+.mlist > .mon:last-child{border-bottom:1px solid var(--ink)}
+
+/* ---------- Live classes ---------- */
+.nxt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;background:#fff;border:1px solid var(--ink);border-radius:3px}
+.nxt > div{padding:clamp(20px,2.6cqi,32px)}
+.nxt > div + div{border-left:1px dashed var(--rule)}
+.nxt .mid{display:grid;align-content:center;gap:6px}
+.nxt .act{display:grid;gap:8px;align-content:center;justify-items:start;min-width:260px}
+.on-now{display:inline-flex;align-items:center;gap:8px;font-size:var(--t-label);font-weight:600;color:var(--ink)}
+.on-now i{width:10px;height:10px;border-radius:2px;background:var(--ink)}
+.sched{margin-top:16px}
+.sched li{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:16px;align-items:center;min-height:64px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.sched .dy{display:grid;font-weight:600;line-height:1.3}
+.sched .dy span{font-size:var(--t-label);font-weight:400;color:var(--muted)}
+.recs{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:28px 16px}
+.rec{display:grid;gap:10px;align-content:start;text-decoration:none;color:inherit}
+a.rec:hover .t-card{text-decoration:underline;text-underline-offset:4px}
+.rth{position:relative;aspect-ratio:16/10;background:var(--dark-2);border-radius:3px;overflow:hidden;color:#fff}
+.rth .d{position:absolute;left:14px;top:12px;display:grid;line-height:1}
+.rth .d b{font-size:36px;font-weight:600;letter-spacing:-.03em}
+.rth .d span{font-size:var(--t-label);color:var(--on-dark);margin-top:6px}
+.rth .du{position:absolute;right:12px;bottom:12px;font-size:var(--t-label);color:var(--on-dark)}
+.rth .pl{position:absolute;left:14px;bottom:12px;width:36px;height:36px;border-radius:3px;background:rgba(255,255,255,.14);display:grid;place-items:center}
+.rth .pl .ic{width:18px;height:18px}
+.rth .wp{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.16)}
+.rth .wp i{display:block;height:100%;background:#fff}
+.rth.soft{background:var(--tile);color:var(--ink)}
+.rth.soft .d span,.rth.soft .du{color:var(--muted)}
+.rth .src{position:absolute;left:14px;bottom:12px;display:inline-flex;align-items:center;gap:6px;font-size:var(--t-label);font-weight:600}
+.rec .tx{display:grid;gap:3px}
+.more-b{display:none;width:100%;margin-top:20px}
+.show-more .more-b{display:inline-flex}
+
+/* ---------- Lesson (focus) ---------- */
+.fbar{position:sticky;top:var(--tbh,0px);z-index:40;background:#fff;border-bottom:1px solid var(--rule)}
+.fbar-in{display:flex;align-items:center;gap:20px;height:64px;padding-inline:var(--gutter);max-width:1440px;margin:0 auto}
+.fback{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;font-size:var(--t-small);text-decoration:none;white-space:nowrap}
+.fback:hover{text-decoration:underline;text-underline-offset:4px}
+.fwhere{flex:1;min-width:0;font-size:var(--t-small);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fprog{display:flex;align-items:center;gap:10px;font-size:var(--t-label);color:var(--muted);white-space:nowrap}
+.fprog .bar{width:120px}
+.fhelp{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:var(--t-small);font-weight:600;text-decoration:none;white-space:nowrap}
+.fhelp:hover{text-decoration:underline;text-underline-offset:4px}
+.fbar .acct-btn:hover{background:var(--paper)}
+.fbar .av{background:var(--ink);color:#fff}
+.study{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:32px;max-width:1440px;margin:0 auto;padding:24px var(--gutter) 80px;align-items:start}
+.player{position:relative;background:#000;aspect-ratio:16/9;border-radius:3px;overflow:hidden}
+.player .slide{position:absolute;inset:0;width:100%;height:100%}
+.pctl{position:absolute;left:0;right:0;bottom:0;padding:36px 16px 10px;background:linear-gradient(180deg,transparent,rgba(8,12,12,.88) 60%);color:#fff;display:grid;gap:6px}
+.scrub{position:relative;height:4px;background:rgba(255,255,255,.28);border-radius:2px;margin:6px 0}
+.scrub > i{position:absolute;left:0;top:0;bottom:0;background:#fff;border-radius:2px}
+.scrub .mk{position:absolute;top:-5px;width:3px;height:14px;background:var(--acc);border-radius:1px}
+.scrub .kn{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;transform:translate(-50%,-50%)}
+.pctl-r{display:flex;align-items:center;gap:6px;font-size:var(--t-label)}
+.pctl-r button{display:grid;place-items:center;width:40px;height:40px;background:none;border:0;color:#fff;cursor:pointer;border-radius:3px}
+.pctl-r button:hover{background:rgba(255,255,255,.12)}
+.pctl-r .ic{width:22px;height:22px}
+.pctl-r .sp{margin-left:auto}
+.vtools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.vtools select{height:44px;border:1px solid var(--ink);border-radius:3px;padding:0 12px;background:#fff;font-size:15px}
+.resumed{display:inline-flex;align-items:center;gap:8px;margin-left:auto;font-size:var(--t-label);color:var(--muted)}
+.resumed button{font-size:var(--t-label);min-height:44px}
+.qn{margin-top:16px;padding:16px;background:var(--paper);border-radius:3px;display:grid;gap:10px}
+.qn-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;align-items:center}
+.qn-h label{display:inline-flex;gap:8px;align-items:center;font-size:var(--t-small);font-weight:600;color:var(--ink)}
+kbd{font:inherit;font-size:var(--t-label);font-weight:600;padding:1px 7px;border:1px solid var(--rule);border-bottom-width:2px;border-radius:3px;background:#fff;color:var(--ink)}
+.qn-act{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.stitle{margin-top:28px;display:grid;gap:10px}
+.kick{display:inline-flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:var(--t-label);color:var(--muted)}
+.acts{margin-top:28px;padding-top:20px;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+.acts .lft{display:grid;gap:2px}
+.side{background:var(--paper);border-radius:3px;position:sticky;top:calc(var(--tbh,0px) + 88px);overflow:hidden}
+.side .tabs{padding:0 8px;border-color:var(--rule)}
+.side-h{display:flex;justify-content:space-between;gap:12px;padding:14px 16px 6px}
+.side-l{padding:4px 8px 12px;max-height:620px;overflow:auto}
+.lrow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:56px;padding:8px 10px;border-radius:3px;text-decoration:none;color:inherit}
+a.lrow:hover{background:#fff}
+.lrow.cur{background:#fff;box-shadow:inset 3px 0 0 var(--ink)}
+.lrow .n{display:grid;place-items:center;width:28px;height:28px;border-radius:3px;background:#fff;font-size:var(--t-label);font-weight:600;color:var(--ink)}
+.lrow .n.done{background:var(--ink);color:#fff}
+.lrow .n.lock{background:transparent;border:1px dashed var(--muted);color:var(--muted)}
+.lrow .tx{display:grid;gap:1px;min-width:0}
+.lrow .tx b{font-size:var(--t-small);font-weight:600;line-height:1.35}
+.lrow.locked .tx b{font-weight:400;color:var(--muted)}
+.lrow .tx span{font-size:var(--t-label);color:var(--muted)}
+.lrow .r{font-size:var(--t-label);color:var(--muted);white-space:nowrap}
+.snotes li{display:grid;grid-template-columns:72px minmax(0,1fr) 32px;gap:10px;align-items:start;padding:12px 10px;border-bottom:1px solid var(--rule)}
+.snotes .at{display:inline-flex;align-items:center;gap:6px;min-height:28px;font-size:var(--t-label);font-weight:600;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.snotes p{font-size:var(--t-small);color:var(--body)}
+.snotes .x{display:grid;place-items:center;width:32px;height:32px;background:none;border:0;border-radius:3px;color:var(--muted);cursor:pointer}
+.snotes .x:hover{background:#fff;color:var(--ink)}
+.side .foot{padding:12px 16px 16px}
+.sheet-btns{display:none;gap:8px;margin-top:16px}
+
+/* ---------- Quiz ---------- */
+.qz{max-width:760px;margin:0 auto;padding:clamp(28px,4cqi,48px) var(--gutter) 80px}
+.qsteps{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;margin:12px 0 28px}
+.qsteps i{height:6px;border-radius:1px;background:var(--tile)}
+.qsteps i.d{background:var(--ink)}
+.qsteps i.c{background:#fff;box-shadow:inset 0 0 0 2px var(--ink)}
+.opts{display:grid;gap:10px;margin-top:24px}
+.opt{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);gap:14px;align-items:center;min-height:64px;padding:12px 16px;border:1px solid var(--muted);border-radius:3px;cursor:pointer;background:#fff}
+.opt:hover{background:var(--paper)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt .lt{display:grid;place-items:center;width:36px;height:36px;border-radius:3px;background:var(--tile);font-weight:600}
+.opt:has(input:checked){border:2px solid var(--ink);padding:11px 15px}
+.opt:has(input:checked) .lt{background:var(--ink);color:#fff}
+.opt:has(input:focus-visible){outline:3px solid var(--acc);outline-offset:3px}
+.score{display:flex;align-items:baseline;gap:10px}
+.score b{font-size:clamp(56px,6cqi,72px);line-height:1;letter-spacing:-.04em;font-weight:600}
+.rv li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:14px;align-items:start;padding:14px 0;border-bottom:1px solid var(--rule)}
+.rv .mk{display:grid;place-items:center;width:28px;height:28px;border-radius:3px;background:var(--ink);color:#fff}
+.rv .mk.x{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+
+/* ---------- Notes ---------- */
+.ngroup{border:1px solid var(--rule);border-radius:3px;background:#fff}
+.ngroup + .ngroup{margin-top:16px}
+.ngroup-h{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--rule)}
+.ngroup-h a{text-decoration:none}
+.ngroup-h a:hover{text-decoration:underline;text-underline-offset:4px}
+.ngroup-h .ti{width:48px;height:48px}
+.nrow{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:16px;align-items:baseline;padding:14px 20px;border-bottom:1px solid var(--rule);text-decoration:none;color:inherit}
+.ngroup li:last-child .nrow{border-bottom:0}
+a.nrow:hover{background:var(--paper)}
+.nrow .at{display:inline-flex;gap:6px;align-items:center;font-weight:600;font-size:var(--t-small);color:var(--ink)}
+.nrow .at .ic{width:16px;height:16px;align-self:center}
+.nrow p{color:var(--body)}
+.nrow p.q{color:var(--muted)}
+.hl{border-left:3px solid var(--ink);padding-left:12px;color:var(--ink)}
+
+/* ---------- Account ---------- */
+.acc{display:grid;grid-template-columns:220px minmax(0,1fr);gap:clamp(32px,5cqi,64px);align-items:start}
+.accnav{position:sticky;top:calc(var(--tbh,0px) + 88px);display:grid;gap:2px}
+.accnav p{padding:0 12px 8px}
+.accnav a{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:3px;text-decoration:none;font-size:var(--t-small);color:var(--body)}
+.accnav a:hover{background:var(--paper);color:var(--ink)}
+.accnav a[aria-current="page"]{background:var(--paper);color:var(--ink);font-weight:600;box-shadow:inset 3px 0 0 var(--ink)}
+.accnav .ic{width:18px;height:18px}
+.acc-main{min-width:0;max-width:780px}
+.mehead{display:flex;gap:16px;align-items:center;padding-bottom:24px;border-bottom:1px solid var(--rule);margin-bottom:28px}
+.av-l{width:64px;height:64px;font-size:var(--t-h3);background:var(--ink);color:#fff}
+.certrow{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;align-items:center}
+.certmini{background:var(--paper);border-radius:3px;padding:14px}
+.certmini > div{background:#fff;border:1px solid var(--ink);outline:1px solid var(--ink);outline-offset:-6px;border-radius:2px;padding:18px 14px;display:grid;justify-items:center;gap:4px;text-align:center}
+.certmini img{width:22px}
+.swrow{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--rule)}
+.swrow .tx{display:grid;gap:2px}
+.pass{border:1px solid var(--ink);border-radius:3px;background:#fff}
+.pass-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;padding:24px 28px 20px;align-items:start}
+.pass-top .who{display:grid;gap:6px}
+.pass-days{text-align:right;display:grid;gap:6px;justify-items:end}
+.pass-days .t-num{font-size:clamp(36px,3.4cqi,48px)}
+.tl{padding:0 28px 22px}
+.tl-bar{position:relative;height:4px;background:var(--tile);border-radius:2px;margin:10px 0 8px}
+.tl-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);border-radius:2px}
+.tl-bar b{position:absolute;top:-6px;width:2px;height:16px;background:var(--ink)}
+.tl-lb{display:flex;justify-content:space-between;gap:12px;font-size:var(--t-label);color:var(--muted)}
+.pass-src{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:16px 28px;border-top:1px dashed var(--rule);font-size:var(--t-small);color:var(--body)}
+.pass-src .link{min-height:0;font-size:var(--t-small)}
+.banner{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:16px 20px;background:var(--paper);border-radius:3px;box-shadow:inset 3px 0 0 var(--ink);margin-bottom:16px}
+.banner .link{min-height:0;margin-left:auto}
+.order{border-top:1px solid var(--ink);padding-top:18px}
+.order + .order{margin-top:40px}
+.order-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;align-items:flex-start;margin-bottom:6px}
+.order-h .l{display:grid;gap:4px}
+.order-h .r{display:grid;gap:6px;justify-items:end;text-align:right}
+.pay{display:grid;grid-template-columns:130px minmax(0,1fr) 110px 150px 72px;gap:6px 20px;align-items:center;min-height:60px;padding:10px 0;border-bottom:1px solid var(--rule);font-size:var(--t-small);color:var(--body)}
+.pay .amt{font-weight:600;color:var(--ink);text-align:right;font-size:var(--t-body)}
+.pay .link{min-height:0;font-size:var(--t-small);justify-self:end}
+.dev{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:14px;align-items:center;min-height:72px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.dev .tx{display:grid;gap:2px}
+.ntiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.ntile{background:var(--paper);border-radius:3px;padding:20px 20px 22px;display:grid;gap:8px;align-content:start}
+.ntile .t-num{font-size:clamp(36px,3.4cqi,48px)}
+.level{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;padding:clamp(20px,2.6cqi,32px);background:var(--dark);color:#fff;border-radius:3px;margin-top:16px}
+.level .bar{max-width:420px;margin:14px 0 8px}
+.level .xp{display:grid;justify-items:end;gap:6px;text-align:right}
+.level .xp .t-num{font-size:clamp(36px,3.4cqi,48px);color:#fff}
+.badges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.bdg{display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:center;padding:16px;border:1px solid var(--rule);border-radius:3px}
+.bdg.no{border-style:dashed}
+.bdg.no svg{opacity:.4}
+.bdg .tx{display:grid;gap:2px}
+.lb li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:56px;padding:8px 12px;border-bottom:1px solid var(--rule)}
+.lb li .rk{font-weight:600;color:var(--muted)}
+.lb li.me{background:var(--paper);font-weight:600;border-radius:3px;border-bottom-color:transparent;box-shadow:inset 3px 0 0 var(--ink)}
+.lb li.me .rk{color:var(--ink)}
+.certl{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:20px;align-items:center;padding:16px 0;border-bottom:1px solid var(--rule)}
+.certl .tx{display:grid;gap:4px}
+.certl .acts2{display:flex;gap:8px 16px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.req{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(24px,4cqi,48px);align-items:start}
+.req .rows .row{grid-template-columns:40px minmax(0,1fr) 140px}
+.req .row .rt{display:grid;gap:6px;justify-items:end}
+.req .row .rt .bar{width:140px}
+
+/* ---------- Certificate document ---------- */
+.cert-pg{background:var(--paper);min-height:100%;padding-bottom:64px}
+.cert-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;max-width:1040px;margin:0 auto;padding:20px var(--gutter)}
+.cert{max-width:1040px;margin:0 auto;padding:0 var(--gutter)}
+.cert article{container-type:inline-size;background:#fff;border-radius:3px;padding:14px}
+.cert-in{border:1px solid var(--ink);outline:1px solid var(--ink);outline-offset:-10px;padding:clamp(36px,7cqi,88px) clamp(20px,6cqi,80px);display:grid;justify-items:center;text-align:center}
+.cert-in .logo{color:var(--ink)}
+.cert-in .t-h2{margin-top:clamp(24px,4cqi,40px)}
+.cert-in .nm{margin-top:10px;font-size:clamp(36px,5.4cqi,64px);line-height:1.05;letter-spacing:-.034em;font-weight:600}
+.cert-in .rl{width:56px;height:3px;background:var(--acc);margin-top:14px}
+.cert-in .facts2{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 48px;margin-top:clamp(24px,4cqi,40px)}
+.cert-in .facts2 div{display:grid;gap:4px}
+.cert-in .vr{margin-top:28px;padding-top:16px;border-top:1px solid var(--rule);word-break:break-all}
+.cert-dim{opacity:.5}
+
+/* ---------- Verify ---------- */
+.vpg{max-width:760px;margin:0 auto;padding:clamp(32px,5cqi,64px) var(--gutter) 96px}
+.vres{display:flex;gap:16px;align-items:center;padding:20px 24px;border:1px solid var(--ink);border-radius:3px;margin:24px 0 28px}
+.vres.no{border-color:var(--rule);background:var(--paper)}
+.vform{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-top:32px}
+.vform .fld{flex:1;min-width:220px}
+
+/* ---------- Log in / Sign up ---------- */
+.auth{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:calc(100vh - var(--tbh,0px))}
+.w-tablet .auth,.w-phone .auth{min-height:820px}
+.auth-ph{position:relative;overflow:hidden;background:var(--dark-2)}
+.auth-ph > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.auth-ph .logo{position:absolute;left:clamp(20px,3cqi,40px);top:24px;color:#fff;z-index:1}
+.auth-ph figcaption{position:absolute;inset:auto 0 0 0;padding:96px clamp(20px,3cqi,40px) 28px;background:linear-gradient(180deg,transparent,rgba(8,12,12,.88) 70%);display:grid;gap:4px;color:#fff}
+.auth-ph figcaption .t-num{color:#fff}
+.auth-ph figcaption .t-num small{color:var(--on-dark)}
+.auth-ph figcaption p{font-size:var(--t-small);color:var(--on-dark)}
+.auth-ph figcaption b{font-weight:600;color:#fff}
+.auth-f{display:flex;flex-direction:column;padding:20px var(--gutter) 32px}
+.auth-top{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px}
+.auth-top .logo{display:none}
+.auth-top .t-small{margin-left:auto}
+.auth-box{width:100%;max-width:440px;margin:auto;display:grid;gap:20px;padding:32px 0}
+.auth-box .hfacts{display:flex;flex-wrap:wrap;gap:12px 32px;padding:16px 0;border-block:1px solid var(--rule)}
+.auth-box .hfacts li{display:grid;gap:4px}
+.code{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.code input{height:64px;width:100%;text-align:center;font-size:28px;font-weight:600;border:1px solid var(--muted);border-radius:3px;background:#fff;color:var(--ink)}
+.or{display:flex;align-items:center;gap:12px;font-size:var(--t-label);color:var(--muted)}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--rule)}
+
+/* ---------- Checkout and payment status ---------- */
+.cbar .fbar-in{max-width:1200px}
+.cbar .mid{flex:1;display:flex;justify-content:center;align-items:center;gap:8px;font-size:var(--t-small);color:var(--muted)}
+.cbar .logo{color:var(--ink)}
+.co{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:clamp(32px,5cqi,64px);max-width:1200px;margin:0 auto;padding:clamp(28px,4cqi,48px) var(--gutter) 96px;align-items:start}
+.co-main{display:grid;gap:24px;min-width:0}
+.methods{display:grid;gap:10px}
+.method{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:14px;align-items:center;min-height:68px;padding:14px 18px;border:1px solid var(--muted);border-radius:3px;background:#fff;cursor:pointer}
+.method .rd{width:20px;height:20px;border-radius:50%;border:2px solid var(--muted)}
+.method.on{border:2px solid var(--ink);padding:13px 17px}
+.method.on .rd{border:6px solid var(--ink)}
+.method .tx{display:grid;gap:2px}
+.method.off{border-style:dashed;border-color:var(--muted);cursor:not-allowed;background:var(--paper)}
+.method.off .t-card{color:var(--muted);font-weight:400}
+.method.off .rd{border-color:var(--rule)}
+.upi{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;padding:24px;background:var(--paper);border-radius:3px;align-items:center}
+.qr{display:grid;gap:8px;justify-items:center}
+.qr > div{background:#fff;padding:12px;border-radius:3px;width:220px}
+.qr svg{display:block;width:100%;height:auto}
+.steps{display:grid;gap:14px}
+.steps li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:start}
+.steps .n{display:grid;place-items:center;width:28px;height:28px;border-radius:3px;background:var(--ink);color:#fff;font-size:var(--t-label);font-weight:600}
+.copies{display:grid;gap:8px}
+.copy{display:grid;grid-template-columns:100px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:56px;padding:6px 6px 6px 16px;border:1px solid var(--rule);border-radius:3px;background:#fff}
+.copy dt{font-size:var(--t-label);color:var(--muted)}
+.copy dd{font-weight:600;color:var(--ink);overflow-wrap:anywhere}
+.osum{background:var(--paper);border-radius:3px;padding:24px;display:grid;gap:18px;position:sticky;top:calc(var(--tbh,0px) + 88px)}
+.osum .prod{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center}
+.osum .prod .dg{width:96px;aspect-ratio:8/5;background:var(--tile);border-radius:3px;display:block}
+.osum dl div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:var(--t-small);color:var(--body)}
+.osum dl div dd{color:var(--ink)}
+.osum .tot{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:14px;border-top:1px solid var(--ink)}
+.osum .help{display:grid;gap:2px;padding-top:14px;border-top:1px solid var(--rule)}
+.coup{display:flex;gap:8px}
+.coup .in{flex:1;min-width:0}
+.coup .in:not(:placeholder-shown){text-transform:uppercase}
+.coup-big .in{height:56px;font-size:20px;font-weight:600;letter-spacing:.04em}
+.coup-big .btn{min-height:56px}
+.lockd{display:grid;gap:8px;opacity:1}
+.pst{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:clamp(32px,5cqi,64px);max-width:1120px;margin:0 auto;padding:clamp(28px,4cqi,48px) var(--gutter) 96px;align-items:start}
+.pst-main{display:grid;gap:24px;min-width:0}
+.track{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.track li{padding:14px 16px;display:grid;gap:6px;align-content:start}
+.track li + li{border-left:1px solid var(--rule)}
+.track .n{font-size:var(--t-label);color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.track b{font-weight:600;font-size:var(--t-small);line-height:1.35}
+.track .now{background:var(--ink);color:#fff}
+.track .now .n{color:var(--on-dark)}
+.track .later b{color:var(--muted);font-weight:400}
+.send{border:1px solid var(--ink);border-radius:3px;padding:24px;display:grid;gap:14px}
+.send summary{list-style:none;cursor:pointer}
+.send summary::-webkit-details-marker{display:none}
+.drop{border:1px dashed var(--muted);border-radius:3px;padding:24px;display:grid;gap:8px;justify-items:center;text-align:center;margin-top:12px}
+.quote{padding:16px 20px;background:var(--paper);box-shadow:inset 3px 0 0 var(--ink);border-radius:3px;font-size:var(--t-small);color:var(--body)}
+.bigok{display:grid;place-items:center;width:64px;height:64px;border-radius:3px;background:var(--ink);color:#fff}
+.bigok .ic{width:32px;height:32px;stroke-width:2.2}
+.chkl{border-top:1px solid var(--ink)}
+.chkl div{display:grid;gap:2px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.chkl dt{font-size:var(--t-label);color:var(--muted)}
+.chkl dd{font-weight:600}
+
+/* ---------- reference sheet ---------- */
+.ramp > div{display:grid;grid-template-columns:200px minmax(0,1fr) 260px;gap:8px 24px;align-items:baseline;padding:18px 0;border-bottom:1px solid var(--rule)}
+.ramp .spec{font-size:var(--t-label);color:var(--muted)}
+.parts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.parts > div{border:1px solid var(--rule);border-radius:3px;padding:20px;display:grid;gap:14px;align-content:start}
+.parts .row{padding-inline:0}
+.order-ex{display:grid;gap:4px;counter-reset:o}
+.order-ex li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--rule)}
+.order-ex li::before{counter-increment:o;content:counter(o);font-weight:600;color:var(--ink);font-size:var(--t-small)}
+
+/* ---------- extras ---------- */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4cqi,48px)}
+.pw{position:relative}
+.pw .in{padding-right:76px}
+.pw button{position:absolute;right:4px;top:4px;height:44px;padding:0 12px;background:none;border:0;border-radius:3px;font-weight:600;font-size:var(--t-small);color:var(--ink);cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.upi-app{display:none}
+.hint a{color:var(--ink);font-weight:600}
+
+/* ---------- design notes ---------- */
+.note{display:none;margin-top:40px;padding:14px 18px;background:#FFFBEA;border:1px solid #EAD9A0;border-radius:4px;color:#3F3A26;font:400 14px/1.6 system-ui,sans-serif;max-width:120ch}
+.note b{color:#1F1B0E}
+.note ul{list-style:disc;padding-left:18px;margin-top:6px}
+.notes-on .note{display:block}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* ===================== responsive: the stage is the container (guide §8) ===================== */
+@container stage (max-width:1000px){
+  .study{grid-template-columns:1fr}
+  .side{position:static}
+  .side-l{max-height:none}
+  .co,.pst{grid-template-columns:1fr}
+  .osum{position:static}
+  .req{grid-template-columns:1fr}
+}
+@container stage (max-width:900px){
+  .two{grid-template-columns:1fr}
+  .ah-nav{display:none}
+  .subnav{display:block}
+  .stage:not([data-shell="app"]) .subnav{display:none}
+  .home-top{grid-template-columns:1fr}
+  .mcards,.ntiles,.badges{grid-template-columns:1fr 1fr}
+  .ticket{grid-template-columns:auto minmax(0,1fr)}
+  .ticket .fee{grid-column:1/-1;border-left:0;border-top:1px dashed var(--rule)}
+  .acc{grid-template-columns:1fr}
+  .accnav{position:static;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .accnav p{display:none}
+  .accnav a{justify-content:center;text-align:center;border:1px solid var(--rule);line-height:1.25;padding:6px 8px;min-height:52px}
+  .accnav a .ic{display:none}
+  .accnav a[aria-current="page"]{box-shadow:none;border:2px solid var(--ink)}
+  .nxt{grid-template-columns:auto minmax(0,1fr)}
+  .nxt .act{grid-column:1/-1;border-left:0;border-top:1px dashed var(--rule);min-width:0}
+  .auth{grid-template-columns:minmax(0,.8fr) minmax(0,1fr)}
+  .pay{grid-template-columns:110px minmax(0,1fr) 100px 140px 64px;gap:6px 14px}
+}
+@container stage (max-width:760px){
+  .cont{grid-template-columns:1fr}
+  .cont-pic{min-height:0;aspect-ratio:16/9}
+  .auth{grid-template-columns:1fr}
+  .auth-ph{display:none}
+  .auth-top .logo{display:flex;color:var(--ink)}
+  .accnav{grid-template-columns:1fr 1fr}
+  .certrow{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .previews{grid-template-columns:1fr}
+  .upi{grid-template-columns:1fr;justify-items:center}
+  .upi .steps{justify-self:stretch}
+  .ramp > div{grid-template-columns:1fr}
+  .parts{grid-template-columns:1fr}
+  .pay{grid-template-columns:minmax(0,1fr) auto;gap:2px 12px}
+  .pay .dt{grid-column:1;grid-row:1;font-weight:600;color:var(--ink)}
+  .pay .mt{grid-column:1;grid-row:2;font-size:var(--t-label)}
+  .pay .amt{grid-column:2;grid-row:1}
+  .pay .stc{grid-column:1;grid-row:3}
+  .pay .link{grid-column:2;grid-row:2/4}
+  .certl{grid-template-columns:110px minmax(0,1fr)}
+  .certl .acts2{grid-column:1/-1;justify-content:flex-start}
+}
+@container stage (max-width:600px){
+  .ticket,.ticket.two{grid-template-columns:1fr}
+  .ticket > div + div{border-left:0;border-top:1px dashed var(--rule)}
+  .cal{grid-template-columns:auto 1fr;align-items:end;column-gap:16px;min-width:0}
+  .cal .d{grid-column:1;grid-row:1/span 2}
+  .cal .mo,.cal .t-label{grid-column:2}
+  .week{gap:4px}
+  .week .cell{height:48px;font-size:11px}
+  .nxt{grid-template-columns:1fr}
+  .nxt > div + div{border-left:0;border-top:1px dashed var(--rule)}
+  .track{grid-template-columns:1fr 1fr}
+  .track li:nth-child(3){border-left:0}
+  .track li:nth-child(n+3){border-top:1px solid var(--rule)}
+}
+@container stage (max-width:560px){
+  .scr{--t-body:16px}
+  .subnav{display:none !important}
+  .stage[data-shell="app"] .tabbar{display:grid}
+  .ah-in{height:56px;gap:12px}
+  .ah-help span,.acct-name,.acct-chev{display:none}
+  .ah-help{width:44px;height:44px;padding:0;justify-content:center}
+  .acct-btn{padding:0 4px}
+  .tabs.swap{display:none}
+  .select{display:block}
+  .mcards{gap:10px}
+  .mc-b{padding:12px}
+  .mc-b .ln{display:none}
+  .ntiles{gap:10px}
+  .ntile{padding:16px}
+  .home-top .ncls .btn,.cont-b .btn{width:100%}
+  .cont-b .acts-c{display:grid}
+  .upi-app{display:inline-flex}
+  .side.open{display:block;margin-top:8px}
+  .mon summary{grid-template-columns:minmax(0,1fr) 24px;gap:12px}
+  .mon summary .dg{display:none}
+  .mon summary .c{grid-column:1;grid-row:2}
+  .mon summary .chv{grid-column:2;grid-row:1/3}
+  .row{grid-template-columns:40px minmax(0,1fr);gap:4px 12px}
+  .row .rt{grid-column:2;gap:10px}
+  .row .rt .go{display:none}
+  .recs{grid-template-columns:1fr 1fr;gap:20px 10px}
+  .rth .d b{font-size:28px}
+  .rth .du{display:none}
+  .recs.lim:not(.all) > *:nth-child(n+5){display:none}
+  .more-b.ph{display:inline-flex}
+  .sched li{grid-template-columns:72px minmax(0,1fr)}
+  .sched li > :last-child{grid-column:2}
+  .fbar-in{height:56px;gap:10px}
+  .fwhere,.fprog .bar,.fhelp span,.cbar .mid span,.kbd-hint{display:none}
+  .fprog{margin-left:auto}
+  .pctl{padding:20px 8px 2px;gap:0}
+  .pctl-r button{width:36px;height:36px}
+  .study{padding-top:0}
+  .player{margin-inline:calc(-1 * var(--gutter));border-radius:0}
+  .resumed{margin-left:0}
+  .side{display:none}
+  .sheet-btns{display:flex}
+  .acts .btn{width:100%}
+  .acts{flex-direction:column-reverse;align-items:stretch}
+  .nrow{grid-template-columns:1fr;gap:4px}
+  .nrow > span:last-child{display:none}
+  .ngroup-h{grid-template-columns:40px minmax(0,1fr);padding:14px 16px}
+  .ngroup-h .ti{width:40px;height:40px}
+  .ngroup-h .c{grid-column:2}
+  .nrow{padding:12px 16px}
+  .facts > div{grid-template-columns:minmax(0,1fr) auto}
+  .facts dt{grid-column:1/-1}
+  .pass-top{grid-template-columns:1fr;padding:20px}
+  .pass-days{justify-items:start;text-align:left;grid-auto-flow:column;align-items:baseline;justify-content:start;gap:10px}
+  .tl,.pass-src{padding-inline:20px}
+  .order-h .r{justify-items:start;text-align:left}
+  .level{grid-template-columns:1fr}
+  .level .xp{justify-items:start;text-align:left}
+  .copy{grid-template-columns:minmax(0,1fr) auto}
+  .copy dt{grid-column:1}
+  .copy dd{grid-column:1}
+  .copy button{grid-column:2;grid-row:1/3}
+  .co-main .btn,.pst-main .btn,.auth-box .btn,.vform .btn{width:100%}
+  .coup-big{flex-direction:column}
+  .coup-big .in{flex:none}
+  .track{grid-template-columns:1fr}
+  .track li + li{border-left:0;border-top:1px solid var(--rule)}
+  .certl{grid-template-columns:88px minmax(0,1fr);gap:14px}
+  .req .rows .row{grid-template-columns:40px minmax(0,1fr)}
+  .req .row .rt{justify-items:start}
+  .code input{height:56px;font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0F1716"/></marker></defs>
+  <!-- icons: 24px grid, 1.75 stroke, drawn for this mockup -->
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></symbol>
+  <symbol id="i-live" viewBox="0 0 24 24"><rect x="2.5" y="6" width="13.5" height="12" rx="2"/><path d="m16 10.5 5.5-3.5v10L16 13.5"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8.5 12h7M8.5 16h4.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-10 9"/></symbol>
+  <symbol id="i-quiz" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.6M12 17v.01"/></symbol>
+  <symbol id="i-lab" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5.2 9.2A2 2 0 0 0 6.5 21h11a2 2 0 0 0 1.7-2.8L14 9V3"/><path d="M7.5 15h9"/></symbol>
+  <symbol id="i-read" viewBox="0 0 24 24"><path d="M3 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H3zM21 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-down-c" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></symbol>
+  <symbol id="i-hl" viewBox="0 0 24 24"><path d="m14.5 4 5.5 5.5-8.5 8.5H6v-5.5z"/><path d="M4 21h16"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-pass" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="14" r="4"/><path d="m11 11 9-9M17 5l2 2M15 7l2 2"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 16V5M7 10l5-5 5 5M5 20h14"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-6M3 20h18"/></symbol>
+  <symbol id="i-medal" viewBox="0 0 24 24"><circle cx="12" cy="15" r="6"/><path d="M8.5 3h7L14 9.5h-4z"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9a4 4 0 0 1 0 6"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
+
+  <!-- the four month diagrams, exactly as in home-v11 (guide §11) -->
+  <symbol id="dg1" viewBox="0 0 320 200">
+    <rect x="105" y="26" width="110" height="38" rx="3" fill="#0F1716"/>
+    <text x="160" y="50" text-anchor="middle" fill="#fff" font-size="14" font-weight="600" font-family="Hanken Grotesk, sans-serif">Your app</text>
+    <path d="M160 64V94M60 94H260M60 94V122M160 94V122M260 94V122" stroke="#0F1716" stroke-width="1.5" fill="none"/>
+    <rect x="28" y="122" width="64" height="54" rx="3" fill="#fff" stroke="#DCDAD3"/><image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" x="40" y="131" width="40" height="36"/>
+    <rect x="128" y="122" width="64" height="54" rx="3" fill="#fff" stroke="#DCDAD3"/><image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/azure/azure-original.svg" x="144" y="133" width="32" height="32"/>
+    <rect x="228" y="122" width="64" height="54" rx="3" fill="#fff" stroke="#DCDAD3"/><image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/googlecloud/googlecloud-original.svg" x="244" y="133" width="32" height="32"/>
+  </symbol>
+  <symbol id="dg2" viewBox="0 0 320 200">
+    <text x="40" y="30" fill="#5F6764" font-size="13" font-family="Hanken Grotesk, sans-serif">Monthly cloud bill</text>
+    <rect x="84" y="46" width="64" height="122" fill="#C9C6BD"/>
+    <rect x="176" y="92" width="64" height="76" fill="#F2B33D"/>
+    <path d="M152 46L172 88" stroke="#0F1716" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ah)"/>
+    <path d="M40 168H280" stroke="#0F1716" stroke-width="1.5"/>
+    <text x="116" y="188" text-anchor="middle" fill="#0F1716" font-size="13" font-family="Hanken Grotesk, sans-serif">Before</text>
+    <text x="208" y="188" text-anchor="middle" fill="#0F1716" font-size="13" font-weight="600" font-family="Hanken Grotesk, sans-serif">After</text>
+  </symbol>
+  <symbol id="dg3" viewBox="0 0 320 200">
+    <g fill="#fff" stroke="#DCDAD3"><rect x="14" y="66" width="56" height="56" rx="3"/><rect x="94" y="66" width="56" height="56" rx="3"/><rect x="174" y="66" width="56" height="56" rx="3"/><rect x="254" y="66" width="56" height="56" rx="3"/></g>
+    <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/githubactions/githubactions-original.svg" x="26" y="78" width="32" height="32"/>
+    <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/terraform/terraform-original.svg" x="106" y="78" width="32" height="32"/>
+    <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/docker/docker-original.svg" x="186" y="78" width="32" height="32"/>
+    <image href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/icons/kubernetes/kubernetes-original.svg" x="266" y="78" width="32" height="32"/>
+    <g stroke="#0F1716" stroke-width="1.5" marker-end="url(#ah)"><path d="M71 94H92"/><path d="M151 94H172"/><path d="M231 94H252"/></g>
+    <g fill="#0F1716" font-size="12" text-anchor="middle" font-family="Hanken Grotesk, sans-serif"><text x="42" y="146">Code</text><text x="122" y="146">Terraform</text><text x="202" y="146">Docker</text><text x="282" y="146">Kubernetes</text></g>
+  </symbol>
+  <symbol id="dg4" viewBox="0 0 320 200">
+    <rect x="16" y="44" width="136" height="112" rx="3" fill="#fff" stroke="#DCDAD3"/>
+    <text x="30" y="66" fill="#5F6764" font-size="12" font-family="Hanken Grotesk, sans-serif">Your architecture</text>
+    <rect x="30" y="80" width="48" height="28" rx="2" fill="none" stroke="#0F1716" stroke-width="1.5"/>
+    <rect x="92" y="80" width="48" height="28" rx="2" fill="none" stroke="#0F1716" stroke-width="1.5"/>
+    <rect x="30" y="116" width="110" height="26" rx="2" fill="#F2B33D"/>
+    <path d="M78 94H92" stroke="#0F1716" stroke-width="1.5"/>
+    <path d="M160 100H180" stroke="#0F1716" stroke-width="1.5" marker-end="url(#ah)"/>
+    <circle cx="204" cy="78" r="15" fill="#0F1716"/><circle cx="204" cy="122" r="15" fill="#0F1716"/>
+    <path d="M197 78l5 5 9-10M197 122l5 5 9-10" stroke="#F2B33D" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#0F1716" font-size="13" font-family="Hanken Grotesk, sans-serif"><text x="228" y="74">Panel</text><text x="228" y="89">review</text><text x="228" y="118">2 mock</text><text x="228" y="133">interviews</text></g>
+  </symbol>
+  <!-- new for the app: the lesson "Tag every resource by team". One saffron element: the resource nobody owns -->
+  <symbol id="dg-tag" viewBox="0 0 320 200">
+    <text x="24" y="30" fill="#5F6764" font-size="13" font-family="Hanken Grotesk, sans-serif">Who pays for what</text>
+    <g fill="#fff" stroke="#DCDAD3"><rect x="24" y="46" width="124" height="36" rx="3"/><rect x="24" y="94" width="124" height="36" rx="3"/><rect x="24" y="142" width="124" height="36" rx="3"/></g>
+    <g fill="#0F1716" font-size="13" font-family="Hanken Grotesk, sans-serif"><text x="38" y="69">ec2-api-prod</text><text x="38" y="117">rds-orders</text><text x="38" y="165">s3-old-logs</text></g>
+    <g stroke="#0F1716" stroke-width="1.5" marker-end="url(#ah)"><path d="M150 64H188"/><path d="M150 112H188"/></g>
+    <path d="M150 160H188" stroke="#0F1716" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ah)"/>
+    <rect x="190" y="48" width="118" height="32" rx="3" fill="#0F1716"/><rect x="190" y="96" width="118" height="32" rx="3" fill="#0F1716"/>
+    <rect x="190" y="144" width="118" height="32" rx="3" fill="#F2B33D"/>
+    <g font-size="13" font-family="Hanken Grotesk, sans-serif" text-anchor="middle"><text x="249" y="69" fill="#fff">team: payments</text><text x="249" y="117" fill="#fff">team: orders</text><text x="249" y="165" fill="#0C1312" font-weight="600">no owner</text></g>
+  </symbol>
+</svg>
+
+<div class="tb" id="tb" role="toolbar" aria-label="Review controls">
+  <span class="tb-title">CloudCadre app v11</span>
+  <div class="tb-g"><span>Screen</span>
+    <button type="button" id="t-prev" aria-label="Previous screen">‹</button>
+    <select id="t-screen" aria-label="Screen"></select>
+    <button type="button" id="t-next" aria-label="Next screen">›</button>
+  </div>
+  <div class="tb-g tb-states" id="t-states" aria-label="State"></div>
+  <div class="tb-g" data-group="w"><span>Width</span>
+    <button data-v="desktop" aria-pressed="true">Desktop</button><button data-v="tablet" aria-pressed="false">Tablet 820</button><button data-v="phone" aria-pressed="false">Phone 390</button>
+  </div>
+  <div class="tb-g"><button id="t-notes" aria-pressed="false">Design notes</button></div>
+</div>
+
+<div class="stage" id="stage" data-shell="app">
+
+  <!-- ===================== app frame (signed in) ===================== -->
+  <a href="#main" class="sr">Skip to content</a>
+  <header class="ah">
+    <div class="ah-in">
+      <a class="logo" href="#/home"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+      <nav class="ah-nav" aria-label="Learning">
+        <a href="#/home" data-tab="home">Home</a><a href="#/course" data-tab="course">My course</a><a href="#/live" data-tab="live">Live classes</a><a href="#/notes" data-tab="notes">My notes</a>
+      </nav>
+      <div class="ah-end">
+        <a class="ah-help" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Need help? Message us on WhatsApp"><svg class="wa"><use href="#i-wa"/></svg><span>Need help?</span></a>
+        <div class="acct" data-acct></div>
+      </div>
+    </div>
+  </header>
+  <nav class="subnav" aria-label="Learning">
+    <ul><li><a href="#/home" data-tab="home">Home</a></li><li><a href="#/course" data-tab="course">My course</a></li><li><a href="#/live" data-tab="live">Live classes</a></li><li><a href="#/notes" data-tab="notes">My notes</a></li></ul>
+  </nav>
+
+  <!-- marketing header (public pages), same as home-v11 -->
+  <header class="site-hd">
+    <div class="ah-in">
+      <a class="logo" href="#/home"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+      <div class="ah-end">
+        <a class="login" href="#/login">Log in</a>
+        <a class="ah-help" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"><svg class="wa"><use href="#i-wa"/></svg><span>WhatsApp us</span></a>
+      </div>
+    </div>
+  </header>
+
+  <div id="main">
+
+  <!-- =====================================================================
+       0 · Reference: type roles and parts used across the app
+       ===================================================================== -->
+  <section class="scr" id="s-ref" data-title="Type and parts" data-group="Reference" data-shell="app" data-tab="" data-route="(reference sheet)" hidden>
+    <div class="pg">
+      <div class="pg-h"><div><h1 class="t-title">Type and parts</h1><p class="t-lead">Every screen in this file uses only these eight sizes, two weights and these parts.</p></div></div>
+
+      <section aria-labelledby="ramp-h">
+        <div class="blk-h"><h2 class="t-h3" id="ramp-h">Type roles in the app</h2><p class="t-small">Hanken Grotesk, 400 and 600 only</p></div>
+        <div class="ramp">
+          <div><p class="spec">Display · 40–66 · 600</p><p class="t-display">Rahul Verma</p><p class="spec">Only the name on the certificate. App pages have no Display.</p></div>
+          <div><p class="spec">H2 · 28–40 · 600</p><p class="t-title">Good evening, Rahul</p><p class="spec">The page title (the h1 of every app page). One per page.</p></div>
+          <div><p class="spec">Number · 28–48 · 600</p><p class="t-num">33% <small>done</small></p><p class="spec">Big values: progress, days left, ₹, the date in a calendar block.</p></div>
+          <div><p class="spec">H3 · 19–21 · 600</p><p class="t-h3">Your 4 months</p><p class="spec">Section titles. The lesson in the Continue card.</p></div>
+          <div><p class="spec">Lead · 17–19 · 400</p><p class="t-lead">Oct 2026 batch · Month 2 of 4</p><p class="spec">The one line under the page title.</p></div>
+          <div><p class="spec">Body · 17 (16 phone) · 400 / 600</p><p><span class="t-card">Find idle resources</span> <span class="t-body">and body text</span></p><p class="spec">600 for card and row titles; 400 for sentences.</p></div>
+          <div><p class="spec">Small · 15 · 400 / 600</p><p class="t-small">Video · 12 min left · Month 2</p><p class="spec">Meta under a title, field labels (600), menu items.</p></div>
+          <div><p class="spec">Label · 14 · 400</p><p class="t-label">Month 2 · 6 of 18 done</p><p class="spec">Labels over values, counts, status words, hints.</p></div>
+        </div>
+      </section>
+
+      <section class="blk" aria-labelledby="parts-h">
+        <div class="blk-h"><h2 class="t-h3" id="parts-h">Parts</h2></div>
+        <div class="parts">
+          <div>
+            <p class="t-label">Buttons: one filled per view</p>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><a class="btn" href="#/lesson">Resume lesson</a><a class="btn btn-line btn-sm" href="#">Add to calendar</a><a class="link" href="#">See all 18 lessons</a></div>
+          </div>
+          <div>
+            <p class="t-label">Status: shape + word, never colour alone</p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px 24px">
+              <span class="st"><svg class="ic"><use href="#i-check"/></svg>Verified</span>
+              <span class="st"><svg class="ic"><use href="#i-clock"/></svg>Waiting for check</span>
+              <span class="st"><svg class="ic"><use href="#i-lock"/></svg>Opens 4 Dec</span>
+              <span class="st quiet">Ended</span>
+            </div>
+          </div>
+          <div>
+            <p class="t-label">Row: what it is · its name · one fact</p>
+            <ul class="rows"><li><a class="row" href="#/lesson"><span class="ti half"><svg class="ic"><use href="#i-video"/></svg></span><span class="tx"><b>Tag every resource by team</b><span>Video · 22 min</span></span><span class="rt"><b>45% watched</b><svg class="ic go"><use href="#i-chev"/></svg></span></a></li></ul>
+          </div>
+          <div>
+            <p class="t-label">Facts: label over value, ruled</p>
+            <dl class="facts"><div><dt>Access until</dt><dd>31 Aug 2027</dd><span></span></div></dl>
+          </div>
+          <div>
+            <p class="t-label">Progress bar: real progress only, ink on tile</p>
+            <span class="bar"><i style="width:33%"></i></span>
+          </div>
+          <div>
+            <p class="t-label">Tabs (filters) on wide screens, a native select on phones. No chips.</p>
+            <nav class="tabs" aria-label="Example"><a href="#" aria-current="true" onclick="return false">Everything <em>60</em></a><a href="#" onclick="return false">Videos <em>24</em></a><a href="#" onclick="return false">PDFs <em>9</em></a></nav>
+          </div>
+        </div>
+      </section>
+
+      <section class="blk" aria-labelledby="read-h">
+        <div class="blk-h"><h2 class="t-h3" id="read-h">How every app page reads</h2></div>
+        <ol class="order-ex">
+          <li><span><b class="t-card">Page title + one line.</b> <span class="t-small">Where am I and what is my situation, in one sentence ("Your access is active until 31 Aug 2027").</span></span></li>
+          <li><span><b class="t-card">The one dominant block.</b> <span class="t-small">Dark (Continue, level) or ink-outlined (next class, subscription). It holds the page's only filled button.</span></span></li>
+          <li><span><b class="t-card">Supporting sections.</b> <span class="t-small">H3 title on the left, a count or text link on the right, then cards or ruled rows.</span></span></li>
+          <li><span><b class="t-card">Quiet help.</b> <span class="t-small">A WhatsApp text link or an outline button. Never a second filled button.</span></span></li>
+        </ol>
+      </section>
+
+      <div class="note"><b>Why this sheet exists.</b> The current app pages mix 13+ sizes, weights 500–800, 12–36px radii and teal chips. Here the hierarchy is fixed: page title (H2 role, 28–40px) → section title (H3, 21px) → card title (Body 600, 17px) → meta (Small 15px) → labels (14px). Each step is smaller <i>and</i> lighter or greyer, so the eye always knows what to read first.</div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       1 · Home  /dashboard
+       ===================================================================== -->
+  <section class="scr" id="s-home" data-title="Home" data-group="Learn" data-shell="app" data-tab="home" data-route="/dashboard"
+    data-states="running:Batch running|open:Class on now|before:Before the batch starts|none:Not joined yet" hidden>
+    <div class="pg">
+
+      <!-- running + open -->
+      <div data-when="running open">
+        <div class="pg-h">
+          <div><h1 class="t-title">Good evening, Rahul</h1><p class="t-lead">Oct 2026 batch · Month 2 of 4</p></div>
+        </div>
+
+        <div class="home-top">
+          <section class="cont dark" aria-labelledby="cont-k">
+            <div class="cont-pic">
+              <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="Three resources: two tagged with a team, one with no owner"><use href="#dg-tag"/></svg>
+                            <span class="play" aria-hidden="true"><svg class="ic"><use href="#i-play"/></svg></span>
+              <span class="wp" aria-hidden="true"><i style="width:45%"></i></span>
+            </div>
+            <div class="cont-b">
+              <p class="t-label" id="cont-k">Continue where you left off</p>
+              <h2 class="t-h3">Tag every resource by team</h2>
+              <p class="t-small">Video · 12 min left · Month 2</p>
+              <p class="pace"><svg class="ic ic-s"><use href="#i-check"/></svg>You are on track with your batch.</p>
+              <div class="acts-c">
+                <a class="btn" href="#/lesson" data-when="running">Resume lesson</a>
+                <a class="btn btn-line" href="#/lesson" data-when="open">Resume lesson</a>
+              </div>
+            </div>
+          </section>
+
+          <section class="card ncls" aria-labelledby="ncls-k">
+            <p class="t-label" id="ncls-k" data-when="running">Next live class</p>
+            <p class="on-now" data-when="open"><i></i>Class on now</p>
+            <div class="ncls-row">
+              <span class="dblk" aria-hidden="true"><b>26</b><span>Thu · Nov</span></span>
+              <div><h2 class="t-card">Rightsizing EC2 and RDS</h2><p class="t-small">Today, 8–10 pm · Microsoft Teams</p></div>
+            </div>
+            <div class="foot" data-when="running">
+              <a class="btn btn-line btn-sm btn-full" href="#"><svg class="ic"><use href="#i-cal"/></svg>Add to calendar</a>
+              <p class="t-label">The Join button appears here at 7:50 pm.</p>
+            </div>
+            <div class="foot" data-when="open">
+              <a class="btn btn-full" href="#" target="_blank" rel="noopener noreferrer">Join on Teams</a>
+              <p class="t-label">Opens Microsoft Teams in a new tab.</p>
+            </div>
+          </section>
+        </div>
+
+        <section class="blk" aria-labelledby="mo-h">
+          <div class="blk-h"><h2 class="t-h3" id="mo-h">Your 4 months</h2><p class="t-small"><b>33%</b> of CEAP done · 20 of 60 lessons</p></div>
+          <ol class="mcards">
+            <li><a class="mcard" href="#/course">
+              <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="One app running on AWS, Azure and Google Cloud"><use href="#dg1"/></svg>
+              <div class="mc-b"><p class="t-label"><b>Month 1</b> · finished</p><h3 class="t-card">One app on three clouds</h3><span class="bar" aria-hidden="true"><i style="width:100%"></i></span><p class="t-label ln">All 14 lessons done</p></div>
+            </a></li>
+            <li><a class="mcard now" href="#/course" aria-current="step">
+              <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="A monthly cloud bill, cut down after optimisation"><use href="#dg2"/></svg>
+              <div class="mc-b"><p class="t-label"><b>Month 2</b> · you are here</p><h3 class="t-card">A smaller cloud bill</h3><span class="bar" aria-hidden="true"><i style="width:33%"></i></span><p class="t-label ln">6 of 18 done</p></div>
+            </a></li>
+            <li><div class="mcard locked">
+              <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="A pipeline from code through Terraform and Docker to Kubernetes"><use href="#dg3"/></svg>
+              <div class="mc-b"><p class="t-label"><b>Month 3</b> · opens 4 Dec</p><h3 class="t-card">Code to Kubernetes</h3><span class="bar" aria-hidden="true"><i style="width:0"></i></span><p class="t-label ln">16 lessons</p></div>
+            </div></li>
+            <li><div class="mcard locked">
+              <svg class="dg" viewBox="0 0 320 200" role="img" aria-label="Your architecture, reviewed by a panel, then two mock interviews"><use href="#dg4"/></svg>
+              <div class="mc-b"><p class="t-label"><b>Month 4</b> · opens 3 Jan</p><h3 class="t-card">Design it, defend it</h3><span class="bar" aria-hidden="true"><i style="width:0"></i></span><p class="t-label ln">12 lessons</p></div>
+            </div></li>
+          </ol>
+
+          <div class="nextin">
+            <div class="blk-h"><h3 class="t-card">Next in Month 2</h3><a class="link link-s" href="#/course">See all 18 lessons</a></div>
+            <ul class="rows">
+              <li><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-video"/></svg></span><span class="tx"><b>Find idle resources</b><span>Video · 19 min</span></span><span class="rt"><b>New</b><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+              <li><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-doc"/></svg></span><span class="tx"><b>Rightsizing EC2 and RDS</b><span>PDF · 14 pages</span></span><span class="rt"><b>New</b><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+              <li><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-lab"/></svg></span><span class="tx"><b>Lab: Clean up an idle account</b><span>Lab · about 1 hour</span></span><span class="rt"><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <!-- before the batch starts -->
+      <div data-when="before">
+        <div class="pg-h">
+          <div><h1 class="t-title">You’re in, Rahul. See you on 12 Jan.</h1><p class="t-lead">CEAP · Jan 2027 batch</p></div>
+          <a class="btn" href="#/lesson">Watch the orientation</a>
+        </div>
+        <div class="band">
+          <div class="ticket two">
+            <div class="cal"><span class="mo">January 2027</span><span class="d">12</span><span class="t-label"><b>47 days</b> to go</span></div>
+            <div>
+              <p class="t-label"><b>Your week</b></p>
+              <ul class="week" aria-label="Weekly schedule">
+                <li class="on"><span class="dn">Mon</span><span class="cell">8–10<br>pm</span></li>
+                <li class="on"><span class="dn">Tue</span><span class="cell">8–10<br>pm</span></li>
+                <li class="on"><span class="dn">Wed</span><span class="cell">8–10<br>pm</span></li>
+                <li class="on"><span class="dn">Thu</span><span class="cell">8–10<br>pm</span></li>
+                <li><span class="dn">Fri</span><span class="cell" aria-label="free">–</span></li>
+                <li class="lab"><span class="dn">Sat</span><span class="cell">Lab<br>10–1</span></li>
+                <li><span class="dn">Sun</span><span class="cell" aria-label="free">–</span></li>
+              </ul>
+              <p class="legend"><span><i style="background:var(--ink)"></i>Live class on Teams</span><span><i style="background:var(--acc)"></i>Lab with a mentor</span><span>Every class is recorded</span></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="two blk">
+          <section aria-labelledby="ready-h">
+            <div class="blk-h"><h2 class="t-h3" id="ready-h">Before 12 Jan</h2><p class="t-small"><b>1 of 2</b> done</p></div>
+            <ul class="todo rows">
+              <li><span class="ck on"><svg class="ic ic-s"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b class="t-card">Confirm the name on your certificate</b><span>Rahul Verma</span></span><a class="link link-s" href="#/profile">Change</a></li>
+              <li><span class="ck"><span class="sr">To do</span></span><span class="tx"><b class="t-card">Watch “How CEAP works”</b><span>Free lesson · 9 min</span></span><a class="link link-s" href="#/lesson">Open</a></li>
+              <li><span class="ck lnk"><svg class="ic ic-s"><use href="#i-wa"/></svg></span><span class="tx"><b class="t-card">Join your batch WhatsApp group</b><span>Class links and reminders go here</span></span><a class="link link-s" href="#">Join</a></li>
+              <li><span class="ck lnk"><svg class="ic ic-s"><use href="#i-live"/></svg></span><span class="tx"><b class="t-card">Install Microsoft Teams</b><span>Phone or laptop. Classes run on Teams</span></span><a class="link link-s" href="#">Get it</a></li>
+            </ul>
+          </section>
+          <section aria-labelledby="first-h">
+            <div class="blk-h"><h2 class="t-h3" id="first-h">First classes</h2><p class="t-small">On Microsoft Teams</p></div>
+            <ol class="sched rows" style="margin-top:0">
+              <li><span class="dy">Tue<span>12 Jan</span></span><span><b class="t-card">Welcome and your first cloud account</b><br><span class="t-label">8:00 to 10:00 pm</span></span><span></span></li>
+              <li><span class="dy">Wed<span>13 Jan</span></span><span><b class="t-card">How the cloud bills you</b><br><span class="t-label">8:00 to 10:00 pm</span></span><span></span></li>
+              <li><span class="dy">Sat<span>16 Jan</span></span><span><b class="t-card">Lab: Launch one app on AWS</b><br><span class="t-label">10:00 am to 1:00 pm</span></span><span></span></li>
+            </ol>
+          </section>
+        </div>
+
+        <section class="blk" aria-labelledby="mo2-h">
+          <div class="blk-h"><h2 class="t-h3" id="mo2-h">Your 4 months</h2><p class="t-small">Month 1 opens on 12 Jan</p></div>
+          <ol class="mcards">
+            <li><div class="mcard"><svg class="dg" viewBox="0 0 320 200" role="img" aria-label="One app running on AWS, Azure and Google Cloud"><use href="#dg1"/></svg><div class="mc-b"><p class="t-label"><b>Month 1</b> · opens 12 Jan</p><h3 class="t-card">One app on three clouds</h3><p class="t-label ln">14 lessons · 12 labs</p></div></div></li>
+            <li><div class="mcard"><svg class="dg" viewBox="0 0 320 200" role="img" aria-label="A monthly cloud bill, cut down after optimisation"><use href="#dg2"/></svg><div class="mc-b"><p class="t-label"><b>Month 2</b> · opens 9 Feb</p><h3 class="t-card">A smaller cloud bill</h3><p class="t-label ln">18 lessons · 8 labs</p></div></div></li>
+            <li><div class="mcard"><svg class="dg" viewBox="0 0 320 200" role="img" aria-label="A pipeline from code through Terraform and Docker to Kubernetes"><use href="#dg3"/></svg><div class="mc-b"><p class="t-label"><b>Month 3</b> · opens 9 Mar</p><h3 class="t-card">Code to Kubernetes</h3><p class="t-label ln">16 lessons · 14 labs</p></div></div></li>
+            <li><div class="mcard"><svg class="dg" viewBox="0 0 320 200" role="img" aria-label="Your architecture, reviewed by a panel, then two mock interviews"><use href="#dg4"/></svg><div class="mc-b"><p class="t-label"><b>Month 4</b> · opens 6 Apr</p><h3 class="t-card">Design it, defend it</h3><p class="t-label ln">12 lessons · capstone</p></div></div></li>
+          </ol>
+        </section>
+      </div>
+
+      <!-- not joined yet -->
+      <div data-when="none">
+        <div class="pg-h">
+          <div><h1 class="t-title">Welcome, Rahul</h1><p class="t-lead">Your account is ready. Join a batch to open the lessons and live classes.</p></div>
+        </div>
+        <div class="band">
+          <div class="ticket">
+            <div class="cal"><span class="mo">January 2027</span><span class="d">12</span><span class="t-label">4 months, live online</span></div>
+            <div>
+              <p class="t-label"><b>Your week</b></p>
+              <ul class="week" aria-label="Weekly schedule">
+                <li class="on"><span class="dn">Mon</span><span class="cell">8–10<br>pm</span></li>
+                <li class="on"><span class="dn">Tue</span><span class="cell">8–10<br>pm</span></li>
+                <li class="on"><span class="dn">Wed</span><span class="cell">8–10<br>pm</span></li>
+                <li class="on"><span class="dn">Thu</span><span class="cell">8–10<br>pm</span></li>
+                <li><span class="dn">Fri</span><span class="cell" aria-label="free">–</span></li>
+                <li class="lab"><span class="dn">Sat</span><span class="cell">Lab<br>10–1</span></li>
+                <li><span class="dn">Sun</span><span class="cell" aria-label="free">–</span></li>
+              </ul>
+              <p class="legend"><span><i style="background:var(--ink)"></i>Live class</span><span><i style="background:var(--acc)"></i>Lab with a mentor</span><span>Every class is recorded</span></p>
+            </div>
+            <div class="fee">
+              <p class="t-label"><b>Fee</b></p>
+              <span class="t-num">₹15,000<small>/ month × 4</small></span>
+              <p class="t-small">or ₹60,000 once · UPI</p>
+              <a class="btn" href="#/checkout">Join the 12 Jan batch</a>
+              <a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+            </div>
+          </div>
+        </div>
+        <section class="blk" aria-labelledby="free-h">
+          <div class="blk-h"><h2 class="t-h3" id="free-h">Try 2 free lessons first</h2><p class="t-small">No payment needed</p></div>
+          <ul class="previews">
+            <li><a class="pv card" href="#/lesson"><svg class="dg" viewBox="0 0 320 200" role="img" aria-label="One app running on AWS, Azure and Google Cloud"><use href="#dg1"/></svg><span><b class="t-card">How one app runs on three clouds</b><br><span class="t-label">Video · 9 min · Month 1</span></span></a></li>
+            <li><a class="pv card" href="#/lesson"><svg class="dg" viewBox="0 0 320 200" role="img" aria-label="A monthly cloud bill, cut down after optimisation"><use href="#dg2"/></svg><span><b class="t-card">Read your first cloud bill</b><br><span class="t-label">Video · 12 min · Month 2</span></span></a></li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="note">
+        <b>Home</b> · job: “what do I do now?” · one filled button.
+        <ul>
+          <li><b>Running:</b> reading order is Continue (the dark block, the page’s only filled button) → next class → your 4 months. The month cards are the same picture + label + title units as the home page, now showing your own progress, so the program looks the same before and after you pay.</li>
+          <li><b>Class on now:</b> “Join on Teams” takes the filled button; Resume drops to outline. Never two filled buttons.</li>
+          <li><b>Before the batch starts:</b> the batch ticket from the home page becomes your countdown and timetable. The checklist ticks only what is recorded (certificate name, orientation); Teams and WhatsApp are links without ticks, as built.</li>
+          <li><b>Not joined yet:</b> the same ticket with the price and “Join the 12 Jan batch” → checkout, plus the free preview lessons. My course, Live classes and My notes leave the menu in this state (as built today). The “on the learner list” variant puts “Join my batch now” in this same spot.</li>
+          <li><b>Removed from today’s build:</b> the climb steps, pace chip styling, 12–36px rounded cards, teal; the greeting shrinks to the H2 role so the Continue block leads.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       2 · My course  /learn/[slug]/material
+       ===================================================================== -->
+  <section class="scr" id="s-course" data-title="My course" data-group="Learn" data-shell="app" data-tab="course" data-route="/learn/ceap/material" hidden>
+    <div class="pg">
+      <div class="pg-h">
+        <div><h1 class="t-title">My course</h1><p class="t-lead">CEAP · <b>20 of 60</b> lessons done (33%)</p></div>
+        <a class="link" href="#/lesson">Continue: Tag every resource by team</a>
+      </div>
+
+      <div class="find">
+        <form class="search" role="search" onsubmit="return false">
+          <label><span class="sr">Search lessons and your notes</span><svg class="ic"><use href="#i-search"/></svg><input type="search" placeholder="Search lessons and your notes" enterkeyhint="search"></label>
+          <button class="btn btn-line btn-sm" type="submit">Search</button>
+        </form>
+        <nav class="tabs swap" aria-label="Show only" data-filter="course">
+          <button type="button" data-k="all" aria-current="true"><svg class="ic"><use href="#i-list"/></svg>Everything <em>60</em></button>
+          <button type="button" data-k="video"><svg class="ic"><use href="#i-video"/></svg>Videos <em>24</em></button>
+          <button type="button" data-k="live"><svg class="ic"><use href="#i-live"/></svg>Class recordings <em>19</em></button>
+          <button type="button" data-k="pdf"><svg class="ic"><use href="#i-doc"/></svg>PDFs <em>9</em></button>
+          <button type="button" data-k="image"><svg class="ic"><use href="#i-image"/></svg>Pictures <em>3</em></button>
+        </nav>
+        <label class="sr" for="kind-m">Show only</label>
+        <select class="select" id="kind-m" data-filter-sel="course">
+          <option value="all">Everything (60)</option><option value="video">Videos (24)</option><option value="live">Class recordings (19)</option><option value="pdf">PDFs (9)</option><option value="image">Pictures (3)</option>
+        </select>
+      </div>
+
+      <div class="mlist" data-mlist="course">
+        <details class="mon done">
+          <summary>
+            <svg class="dg" viewBox="0 0 320 200" aria-hidden="true"><use href="#dg1"/></svg>
+            <span class="tt"><span class="t-label"><b>Month 1</b></span><span class="t-card">One app on three clouds</span><span class="bar" aria-hidden="true"><i style="width:100%"></i></span></span>
+            <span class="c"><svg class="ic ic-s"><use href="#i-check"/></svg>All 14 done</span>
+            <svg class="ic chv"><use href="#i-chev"/></svg>
+          </summary>
+          <ul class="rows">
+            <li data-k="video"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>How one app runs on three clouds</b><span>Video · 9 min</span></span><span class="rt">Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="live"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>Your first AWS account</b><span>Class recording · 1 h 50 min · 6 Oct</span></span><span class="rt">Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="image"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>Map: AWS, Azure and Google Cloud names</b><span>Picture</span></span><span class="rt">Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="pdf"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>IAM cheat sheet</b><span>PDF · 6 pages</span></span><span class="rt"><span class="nt"><svg class="ic ic-s"><use href="#i-note"/></svg>2<span class="sr"> notes</span></span>Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+          </ul>
+        </details>
+
+        <details class="mon now" open>
+          <summary>
+            <svg class="dg" viewBox="0 0 320 200" aria-hidden="true"><use href="#dg2"/></svg>
+            <span class="tt"><span class="t-label"><b>Month 2</b></span><span class="t-card">A smaller cloud bill <span class="here">You are here</span></span><span class="bar" aria-hidden="true"><i style="width:33%"></i></span></span>
+            <span class="c">6 of 18 done</span>
+            <svg class="ic chv"><use href="#i-chev"/></svg>
+          </summary>
+          <ul class="rows">
+            <li data-k="video"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>Read a cloud bill</b><span>Video · 18 min</span></span><span class="rt">Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="live"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>What FinOps teams do</b><span>Class recording · 1 h 48 min · 19 Nov</span></span><span class="rt"><span class="nt"><svg class="ic ic-s"><use href="#i-note"/></svg>2<span class="sr"> notes</span></span>Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="video"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>Cost Explorer basics</b><span>Video · 16 min</span></span><span class="rt">Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="lab"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>Lab: Build a cost report</b><span>Lab · about 1 hour</span></span><span class="rt">Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="image"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>The FinOps lifecycle</b><span>Picture</span></span><span class="rt">Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="live"><a class="row" href="#/lesson"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg><span class="sr">Done</span></span><span class="tx"><b>Tagging in practice</b><span>Class recording · 1 h 52 min · 25 Nov</span></span><span class="rt"><span class="nt"><svg class="ic ic-s"><use href="#i-note"/></svg>3<span class="sr"> notes</span></span>Done<svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="video"><a class="row" href="#/lesson"><span class="ti half"><svg class="ic"><use href="#i-video"/></svg><span class="sr">Started</span></span><span class="tx"><b>Tag every resource by team</b><span>Video · 22 min</span></span><span class="rt"><span class="nt"><svg class="ic ic-s"><use href="#i-note"/></svg>2<span class="sr"> notes</span></span><b>45% watched</b><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="video"><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-video"/></svg></span><span class="tx"><b>Find idle resources</b><span>Video · 19 min</span></span><span class="rt"><b>New</b><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="pdf"><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-doc"/></svg></span><span class="tx"><b>Rightsizing EC2 and RDS</b><span>PDF · 14 pages</span></span><span class="rt"><b>New</b><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="live"><div class="row"><span class="ti"><svg class="ic"><use href="#i-live"/></svg></span><span class="tx"><b>Rightsizing EC2 and RDS</b><span>Class recording · class tonight, 8 pm</span></span><span class="rt">Up the same night</span></div></li>
+            <li data-k="lab"><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-lab"/></svg></span><span class="tx"><b>Lab: Clean up an idle account</b><span>Lab · about 1 hour</span></span><span class="rt"><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="video"><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-video"/></svg></span><span class="tx"><b>Savings Plans and Reserved Instances</b><span>Video · 24 min</span></span><span class="rt"><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="video"><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-video"/></svg></span><span class="tx"><b>Storage tiers and lifecycle rules</b><span>Video · 17 min</span></span><span class="rt"><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="read"><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-read"/></svg></span><span class="tx"><b>Spot instances: when they are safe</b><span>Reading · 8 min</span></span><span class="rt"><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="video"><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-video"/></svg></span><span class="tx"><b>Budgets and alerts</b><span>Video · 12 min</span></span><span class="rt"><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="pdf"><a class="row" href="#/lesson"><span class="ti"><svg class="ic"><use href="#i-doc"/></svg></span><span class="tx"><b>Unit cost: cost per customer</b><span>PDF · 9 pages</span></span><span class="rt"><svg class="ic go"><use href="#i-chev"/></svg></span></a></li>
+            <li data-k="lab"><div class="row locked"><span class="ti lock"><svg class="ic"><use href="#i-lock"/></svg><span class="sr">Locked</span></span><span class="tx"><b>Lab: Cut a bill by 20%</b><span>Lab · about 2 hours</span></span><span class="rt">Opens 30 Nov</span></div></li>
+            <li data-k="quiz"><div class="row locked"><span class="ti lock"><svg class="ic"><use href="#i-lock"/></svg><span class="sr">Locked</span></span><span class="tx"><b>Month 2 test</b><span>Quiz · 20 questions</span></span><span class="rt">Opens 3 Dec</span></div></li>
+          </ul>
+        </details>
+
+        <details class="mon locked">
+          <summary>
+            <svg class="dg" viewBox="0 0 320 200" aria-hidden="true"><use href="#dg3"/></svg>
+            <span class="tt"><span class="t-label"><b>Month 3</b></span><span class="t-card">Code to Kubernetes</span><span class="bar" aria-hidden="true"><i style="width:0"></i></span></span>
+            <span class="c"><svg class="ic ic-s"><use href="#i-lock"/></svg>Opens 4 Dec</span>
+            <svg class="ic chv"><use href="#i-chev"/></svg>
+          </summary>
+          <ul class="rows">
+            <li data-k="video"><div class="row locked"><span class="ti lock"><svg class="ic"><use href="#i-lock"/></svg></span><span class="tx"><b>Terraform from zero</b><span>Video · 26 min</span></span><span class="rt">Opens 4 Dec</span></div></li>
+            <li data-k="live"><div class="row locked"><span class="ti lock"><svg class="ic"><use href="#i-lock"/></svg></span><span class="tx"><b>Your first Docker image</b><span>Class recording</span></span><span class="rt">Opens 7 Dec</span></div></li>
+          </ul>
+        </details>
+
+        <details class="mon locked">
+          <summary>
+            <svg class="dg" viewBox="0 0 320 200" aria-hidden="true"><use href="#dg4"/></svg>
+            <span class="tt"><span class="t-label"><b>Month 4</b></span><span class="t-card">Design it, defend it</span><span class="bar" aria-hidden="true"><i style="width:0"></i></span></span>
+            <span class="c"><svg class="ic ic-s"><use href="#i-lock"/></svg>Opens 3 Jan</span>
+            <svg class="ic chv"><use href="#i-chev"/></svg>
+          </summary>
+          <ul class="rows">
+            <li data-k="pdf"><div class="row locked"><span class="ti lock"><svg class="ic"><use href="#i-lock"/></svg></span><span class="tx"><b>Capstone brief</b><span>PDF · 4 pages</span></span><span class="rt">Opens 3 Jan</span></div></li>
+          </ul>
+        </details>
+      </div>
+
+      <div class="note">
+        <b>My course</b> · job: “open the lesson I want” · no filled button (every row is a link).
+        <ul>
+          <li>Reading order: title + how far along → search and “show only” → the 4 months, the one you are in open. Each month header is the same diagram as on Home and the home page, so “Month 2” always looks like the same thing.</li>
+          <li>A row says three things: what it is (tile: type icon, ink tick when done, dashed lock when not open), its name (Body 600), and one fact on the right (New, 45% watched, Opens 30 Nov, note count).</li>
+          <li>Filters were teal chips; now underline tabs on wide screens and a native select on phones (no chips, no sideways scroll). Try “PDFs”: every month opens and shows only matches.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       3 · Live classes  /learn/[slug]/live
+       ===================================================================== -->
+  <section class="scr" id="s-live" data-title="Live classes" data-group="Learn" data-shell="app" data-tab="live" data-route="/learn/ceap/live"
+    data-states="before:Before class|open:Class on now" hidden>
+    <div class="pg">
+      <div class="pg-h">
+        <div><h1 class="t-title">Live classes</h1><p class="t-lead">Oct 2026 batch · classes run on Microsoft Teams</p></div>
+        <button type="button" class="link" data-jump="recs-live"><svg class="ic"><use href="#i-down-c"/></svg>Jump to 31 recordings</button>
+      </div>
+
+      <section aria-labelledby="up-h">
+        <div class="blk-h"><h2 class="t-h3" id="up-h">Coming up</h2><p class="t-small">6 classes scheduled</p></div>
+        <article class="nxt" aria-labelledby="nxt-h">
+          <div class="cal"><span class="mo">November 2026</span><span class="d">26</span><span class="t-label">Thursday</span></div>
+          <div class="mid">
+            <p class="t-label" data-when="before">Next class · today</p>
+            <p class="on-now" data-when="open"><i></i>On now</p>
+            <h3 class="t-h3" id="nxt-h">Rightsizing EC2 and RDS</h3>
+            <p class="t-small">8:00 to 10:00 pm · Microsoft Teams · recorded</p>
+          </div>
+          <div class="act">
+            <a class="btn btn-line btn-sm" href="#" data-when="before"><svg class="ic"><use href="#i-cal"/></svg>Add to calendar</a>
+            <p class="t-label" data-when="before">The “Join on Teams” button appears here at 7:50 pm.</p>
+            <a class="btn" href="#" target="_blank" rel="noopener noreferrer" data-when="open">Join on Teams</a>
+            <p class="t-label" data-when="open">Opens Teams in a new tab. Your attendance is noted.</p>
+          </div>
+        </article>
+        <div class="card" style="margin-top:16px;padding:16px 20px 4px">
+          <h3 class="t-card">After that</h3>
+          <ol class="sched">
+            <li><span class="dy">Sat<span>28 Nov</span></span><span><b class="t-card">Lab with a mentor: Clean up an idle account</b><br><span class="t-label">10:00 am to 1:00 pm</span></span><span></span></li>
+            <li><span class="dy">Mon<span>30 Nov</span></span><span><b class="t-card">Savings Plans in practice</b><br><span class="t-label">8:00 to 10:00 pm</span></span><span></span></li>
+            <li><span class="dy">Tue<span>1 Dec</span></span><span><b class="t-card">Storage costs that grow quietly</b><br><span class="t-label">8:00 to 10:00 pm</span></span><span></span></li>
+            <li><span class="dy">Wed<span>2 Dec</span></span><span><b class="t-card">Budgets and alerts</b><br><span class="t-label">8:00 to 10:00 pm</span></span><span></span></li>
+            <li style="border-bottom:0"><span class="dy">Thu<span>3 Dec</span></span><span><b class="t-card">Month 2 review and test</b><br><span class="t-label">8:00 to 10:00 pm</span></span><span></span></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="blk" id="recs-live" aria-labelledby="rec-h">
+        <div class="blk-h"><h2 class="t-h3" id="rec-h">Class recordings</h2><p class="t-small">Newest first · usually up the same night</p></div>
+        <nav class="tabs" aria-label="Show recordings from" style="margin-bottom:24px">
+          <a href="#" aria-current="true" onclick="return false">All months <em>31</em></a><a href="#" onclick="return false">Month 2 <em>12</em></a><a href="#" onclick="return false">Month 1 <em>19</em></a>
+        </nav>
+        <ul class="recs lim" id="recs">
+          <li><a class="rec" href="#/lesson"><span class="rth"><span class="d"><b>25</b><span>Nov</span></span><span class="pl"><svg class="ic"><use href="#i-play"/></svg></span><span class="du">1 h 52 min</span></span><span class="tx"><span class="t-label">Wednesday</span><b class="t-card">Tagging in practice</b><span class="st"><svg class="ic"><use href="#i-check"/></svg>Watched · 3 notes</span></span></a></li>
+          <li><a class="rec" href="#/lesson"><span class="rth"><span class="d"><b>24</b><span>Nov</span></span><span class="pl"><svg class="ic"><use href="#i-play"/></svg></span><span class="du">1 h 47 min</span></span><span class="tx"><span class="t-label">Tuesday</span><b class="t-card">Who owns this cost?</b><span class="st"><svg class="ic"><use href="#i-check"/></svg>Watched</span></span></a></li>
+          <li><a class="rec" href="#/lesson"><span class="rth"><span class="d"><b>23</b><span>Nov</span></span><span class="pl"><svg class="ic"><use href="#i-play"/></svg></span><span class="du">1 h 55 min</span><span class="wp"><i style="width:40%"></i></span></span><span class="tx"><span class="t-label">Monday</span><b class="t-card">Cost Explorer deep dive</b><span class="t-label"><b>40% watched</b></span></span></a></li>
+          <li><a class="rec" href="#/lesson"><span class="rth"><span class="d"><b>21</b><span>Nov</span></span><span class="pl"><svg class="ic"><use href="#i-play"/></svg></span><span class="du">2 h 58 min</span></span><span class="tx"><span class="t-label">Saturday · lab</span><b class="t-card">Build a cost report</b><span class="t-label"><b>New</b></span></span></a></li>
+          <li><a class="rec" href="#/lesson"><span class="rth"><span class="d"><b>19</b><span>Nov</span></span><span class="pl"><svg class="ic"><use href="#i-play"/></svg></span><span class="du">1 h 48 min</span></span><span class="tx"><span class="t-label">Thursday</span><b class="t-card">What FinOps teams do</b><span class="st"><svg class="ic"><use href="#i-check"/></svg>Watched · 2 notes</span></span></a></li>
+          <li><a class="rec" href="#/lesson"><span class="rth"><span class="d"><b>18</b><span>Nov</span></span><span class="pl"><svg class="ic"><use href="#i-play"/></svg></span><span class="du">1 h 50 min</span></span><span class="tx"><span class="t-label">Wednesday</span><b class="t-card">Reading a cloud bill</b><span class="st"><svg class="ic"><use href="#i-check"/></svg>Watched</span></span></a></li>
+          <li><a class="rec" href="#" target="_blank" rel="noopener noreferrer"><span class="rth soft"><span class="d"><b>17</b><span>Nov</span></span><span class="src"><svg class="ic ic-s"><use href="#i-ext"/></svg>Teams link</span></span><span class="tx"><span class="t-label">Tuesday</span><b class="t-card">Q&amp;A: Month 1 recap</b><span class="t-label">Opens in Microsoft Teams</span></span></a></li>
+          <li><a class="rec" href="#/lesson"><span class="rth"><span class="d"><b>16</b><span>Nov</span></span><span class="pl"><svg class="ic"><use href="#i-play"/></svg></span><span class="du">1 h 44 min</span></span><span class="tx"><span class="t-label">Monday</span><b class="t-card">Budgets 101</b><span class="t-label">Not watched yet</span></span></a></li>
+        </ul>
+        <button type="button" class="btn btn-line more-b ph" data-more="recs">Show all 31 recordings</button>
+      </section>
+
+      <div class="note">
+        <b>Live classes</b> · job: “when is my next class, and how do I get in?” then “I missed one” · the filled button exists only while a class is open.
+        <ul>
+          <li>The next class is the batch ticket’s calendar: the day as a huge numeral, then the title, then what to do. Before 7:50 pm the only action is “Add to calendar” (outline) with a line that says exactly when Join appears.</li>
+          <li>Recordings are picture + number + line: the picture is the date (you remember a class by its day), the line is your own state (watched, 40%, new, notes). A Teams-link recording is a light tile with “Teams link”, so you know it leaves the site.</li>
+          <li>Phone: 2 per row, first 4 + “Show all 31 recordings” (guide §8: grid with show all, no swipe row).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       4 · Lesson (study room)  /learn/[slug]/[lessonId]
+       ===================================================================== -->
+  <section class="scr" id="s-lesson" data-title="Lesson (video)" data-group="Learn" data-shell="focus" data-route="/learn/ceap/[lessonId]" hidden>
+    <header class="fbar">
+      <div class="fbar-in">
+        <a class="fback" href="#/course"><svg class="ic"><use href="#i-back"/></svg>My course</a>
+        <p class="fwhere">Month 2 · Lesson 7 of 18</p>
+        <p class="fprog"><span class="bar" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="Course progress"><i style="width:33%"></i></span>20 of 60 done</p>
+        <a class="fhelp" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Stuck? Message us on WhatsApp"><svg class="wa"><use href="#i-wa"/></svg><span>Need help?</span></a>
+        <div class="acct" data-acct></div>
+      </div>
+    </header>
+
+    <div class="study">
+      <article aria-labelledby="ls-h" style="min-width:0">
+        <div class="player">
+          <!-- drawn stand-in for a video frame -->
+          <svg class="slide" viewBox="0 0 640 360" role="img" aria-label="Lesson slide: three resources with their team tag; one has no owner">
+            <rect width="640" height="360" fill="#fff"/>
+            <g font-family="Hanken Grotesk, sans-serif">
+              <text x="40" y="60" font-size="26" font-weight="600" fill="#0F1716">Every resource needs an owner</text>
+              <text x="40" y="88" font-size="15" fill="#5F6764">Tag key “team”, added when the resource is created</text>
+              <rect x="40" y="112" width="560" height="36" fill="#EEEDE8"/>
+              <g font-size="14" fill="#5F6764"><text x="56" y="135">Resource</text><text x="320" y="135">Monthly cost</text><text x="470" y="135">team</text></g>
+              <g font-size="15" fill="#0F1716">
+                <text x="56" y="175">ec2-api-prod</text><text x="320" y="175">₹18,400</text><text x="470" y="175">payments</text>
+                <text x="56" y="215">rds-orders</text><text x="320" y="215">₹12,900</text><text x="470" y="215">orders</text>
+                <text x="56" y="255">s3-old-logs</text><text x="320" y="255">₹6,300</text><text x="470" y="255" font-weight="600">no owner</text>
+              </g>
+              <path d="M40 188H600M40 228H600M40 268H600" stroke="#DCDAD3"/>
+            </g>
+          </svg>
+          <div class="pctl">
+            <div class="scrub" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="1330" aria-valuenow="724" aria-valuetext="12 minutes 4 seconds" tabindex="0">
+              <i style="width:54.4%"></i>
+              <span class="mk" style="left:18.9%" title="Note at 04:12"></span>
+              <span class="mk" style="left:43.6%" title="Bookmark at 09:40"></span>
+              <span class="kn" style="left:54.4%"></span>
+            </div>
+            <div class="pctl-r">
+              <button type="button" aria-label="Play"><svg class="ic"><use href="#i-play"/></svg></button>
+              <span class="tnum">12:04 / 22:10</span>
+              <button type="button" class="sp" aria-label="Volume"><svg class="ic"><use href="#i-vol"/></svg></button>
+              <button type="button" aria-label="Full screen"><svg class="ic"><use href="#i-full"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="vtools" role="group" aria-label="Video controls">
+          <button class="btn btn-line btn-sm" type="button">Back 10 s</button>
+          <button class="btn btn-line btn-sm" type="button">Forward 10 s</button>
+          <label><span class="sr">Playback speed</span><select><option>Speed 1×</option><option>1.25×</option><option>1.5×</option><option>0.75×</option></select></label>
+          <button class="btn btn-line btn-sm" type="button"><svg class="ic"><use href="#i-bookmark"/></svg>Mark this moment</button>
+          <p class="resumed"><svg class="ic ic-s"><use href="#i-clock"/></svg>Picked up at 12:04. <button class="link" type="button">Start over</button></p>
+        </div>
+
+        <section class="qn" aria-label="Write a note">
+          <div class="qn-h">
+            <label for="note-box"><svg class="ic ic-s"><use href="#i-pen"/></svg>Write a note at 12:04</label>
+            <span class="t-label kbd-hint">Press <kbd>N</kbd> while watching</span>
+          </div>
+          <textarea id="note-box" class="in" placeholder="What do you want to remember from this minute?"></textarea>
+          <div class="qn-act">
+            <button class="btn btn-line btn-sm" type="button">Save note</button>
+            <span class="t-label"><span class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> saves too. </span>Only you can see your notes.</span>
+          </div>
+        </section>
+
+        <header class="stitle">
+          <p class="kick"><svg class="ic ic-s"><use href="#i-video"/></svg>Video · 22 min · Month 2: A smaller cloud bill</p>
+          <h1 class="t-title" id="ls-h">Tag every resource by team</h1>
+          <p class="t-lead">If nobody owns a resource, nobody turns it off. Tag first, then cut.</p>
+        </header>
+
+        <div class="acts">
+          <div class="lft">
+            <a class="link link-s" href="#/lesson">Previous: Tagging in practice</a>
+            <span class="t-label">This lesson is marked done when you have watched 90%.</span>
+          </div>
+          <a class="btn" href="#/lesson">Next lesson: Find idle resources</a>
+        </div>
+
+        <div class="sheet-btns">
+          <button class="btn btn-line btn-sm" type="button" data-sheet="l" style="flex:1"><svg class="ic"><use href="#i-list"/></svg>Lessons</button>
+          <button class="btn btn-line btn-sm" type="button" data-sheet="n" style="flex:1"><svg class="ic"><use href="#i-note"/></svg>My notes (2)</button>
+        </div>
+      </article>
+
+      <aside class="side" aria-label="Lessons and notes">
+        <div class="tabs" role="tablist" aria-label="Side panel">
+          <button type="button" role="tab" aria-selected="true" data-ptab="l">Lessons</button>
+          <button type="button" role="tab" aria-selected="false" data-ptab="n">My notes <em>2</em></button>
+        </div>
+        <div role="tabpanel" data-ppanel="l">
+          <div class="side-h"><p class="t-label"><b>Month 2</b> · A smaller cloud bill</p><p class="t-label">6 of 18 done</p></div>
+          <ol class="side-l">
+            <li><a class="lrow" href="#/lesson"><span class="n done"><svg class="ic ic-s"><use href="#i-check"/></svg></span><span class="tx"><b>Read a cloud bill</b><span>Video · 18 min</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n done"><svg class="ic ic-s"><use href="#i-check"/></svg></span><span class="tx"><b>What FinOps teams do</b><span>Class recording</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n done"><svg class="ic ic-s"><use href="#i-check"/></svg></span><span class="tx"><b>Cost Explorer basics</b><span>Video · 16 min</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n done"><svg class="ic ic-s"><use href="#i-check"/></svg></span><span class="tx"><b>Lab: Build a cost report</b><span>Lab</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n done"><svg class="ic ic-s"><use href="#i-check"/></svg></span><span class="tx"><b>The FinOps lifecycle</b><span>Picture</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n done"><svg class="ic ic-s"><use href="#i-check"/></svg></span><span class="tx"><b>Tagging in practice</b><span>Class recording</span></span></a></li>
+            <li><a class="lrow cur" href="#/lesson" aria-current="page"><span class="n">7</span><span class="tx"><b>Tag every resource by team</b><span>Video · 22 min · now</span></span><span class="r">45%</span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n">8</span><span class="tx"><b>Find idle resources</b><span>Video · 19 min</span></span><span class="r">New</span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n">9</span><span class="tx"><b>Rightsizing EC2 and RDS</b><span>PDF · 14 pages</span></span><span class="r">New</span></a></li>
+            <li><div class="lrow"><span class="n">10</span><span class="tx"><b>Rightsizing EC2 and RDS</b><span>Class recording · tonight</span></span></div></li>
+            <li><a class="lrow" href="#/lesson"><span class="n">11</span><span class="tx"><b>Lab: Clean up an idle account</b><span>Lab</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n">12</span><span class="tx"><b>Savings Plans and Reserved Instances</b><span>Video · 24 min</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n">13</span><span class="tx"><b>Storage tiers and lifecycle rules</b><span>Video · 17 min</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n">14</span><span class="tx"><b>Spot instances: when they are safe</b><span>Reading · 8 min</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n">15</span><span class="tx"><b>Budgets and alerts</b><span>Video · 12 min</span></span></a></li>
+            <li><a class="lrow" href="#/lesson"><span class="n">16</span><span class="tx"><b>Unit cost: cost per customer</b><span>PDF · 9 pages</span></span></a></li>
+            <li><div class="lrow locked"><span class="n lock"><svg class="ic ic-s"><use href="#i-lock"/></svg></span><span class="tx"><b>Lab: Cut a bill by 20%</b><span>Opens 30 Nov</span></span></div></li>
+            <li><div class="lrow locked"><span class="n lock"><svg class="ic ic-s"><use href="#i-lock"/></svg></span><span class="tx"><b>Month 2 test</b><span>Opens 3 Dec</span></span></div></li>
+          </ol>
+        </div>
+        <div role="tabpanel" data-ppanel="n" hidden>
+          <ul class="snotes" aria-label="Your notes on this lesson">
+            <li><button type="button" class="at"><svg class="ic ic-s"><use href="#i-note"/></svg>04:12</button><p>Tag keys: team, env, cost-centre. Lowercase only.</p><button type="button" class="x" aria-label="Delete this note"><svg class="ic ic-s"><use href="#i-x"/></svg></button></li>
+            <li><button type="button" class="at"><svg class="ic ic-s"><use href="#i-bookmark"/></svg>09:40</button><p class="t-label">Bookmark</p><button type="button" class="x" aria-label="Delete this bookmark"><svg class="ic ic-s"><use href="#i-x"/></svg></button></li>
+          </ul>
+          <div class="foot"><a class="link link-s" href="#/notes">See all my notes</a></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="pg" style="padding-top:0">
+      <div class="note" style="margin-top:0">
+        <b>Lesson</b> · job: “learn this, then move on” · one filled button: the next lesson.
+        <ul>
+          <li>Focus layout: no menu, a slim white bar with the way back, where you are, your course progress and help. Reading order: the video → video tools → a one-line note box → the title → the forward button.</li>
+          <li>The yellow ticks on the scrubber are your notes and bookmarks (the view’s one extra saffron spot, as in plan/16 §9). “Back 10 s”, “Forward 10 s” and “Mark this moment” are written out, not icons.</li>
+          <li>Beside the video: “Lessons” and “My notes” as two tabs. On a phone they become two outline buttons under the lesson (tap one in this mockup to open it); the video runs edge to edge.</li>
+          <li>Same frame for PDF, picture, reading and lab lessons; only the block at the top changes.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       5 · Quiz  /learn/[slug]/[lessonId]/attempt/[id] and /result/[id]
+       ===================================================================== -->
+  <section class="scr" id="s-quiz" data-title="Quiz" data-group="Learn" data-shell="focus" data-route="/learn/ceap/[lessonId]/attempt/[id]"
+    data-states="q:Question|r:Result" hidden>
+    <header class="fbar">
+      <div class="fbar-in">
+        <a class="fback" href="#/course"><svg class="ic"><use href="#i-back"/></svg>My course</a>
+        <p class="fwhere">Month 1 · Month 1 test</p>
+        <p class="fprog" data-when="q"><span class="bar"><i style="width:20%"></i></span>Question 3 of 10</p>
+        <a class="fhelp" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Stuck? Message us on WhatsApp"><svg class="wa"><use href="#i-wa"/></svg><span>Need help?</span></a>
+        <div class="acct" data-acct></div>
+      </div>
+    </header>
+
+    <div class="qz" data-when="q">
+      <h1 class="t-label"><b>Month 1 test</b> · Question 3 of 10 · no time limit</h1>
+      <div class="qsteps" aria-hidden="true"><i class="d"></i><i class="d"></i><i class="c"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <fieldset>
+        <legend class="t-h3">A team runs the same app on AWS and Azure. Which Azure service matches Amazon EC2?</legend>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="q3"><span class="lt">A</span><span>Azure Functions</span></label>
+          <label class="opt"><input type="radio" name="q3" checked><span class="lt">B</span><span>Azure Virtual Machines</span></label>
+          <label class="opt"><input type="radio" name="q3"><span class="lt">C</span><span>Azure Blob Storage</span></label>
+          <label class="opt"><input type="radio" name="q3"><span class="lt">D</span><span>Azure Kubernetes Service</span></label>
+        </div>
+      </fieldset>
+      <div class="acts">
+        <div class="lft"><button class="link link-s" type="button">Previous question</button><span class="t-label">Answers save as you go. You can leave and come back.</span></div>
+        <a class="btn" href="#/quiz/r">Next question</a>
+      </div>
+    </div>
+
+    <div class="qz" data-when="r">
+      <div class="score"><b>8</b><span class="t-h3">out of 10</span></div>
+      <h1 class="t-title" style="margin-top:12px">You passed the Month 1 test</h1>
+      <p class="t-lead" style="margin-top:8px">You needed 6 to pass. Attempt 1 of 3 · 9 minutes.</p>
+      <div class="acts">
+        <a class="btn btn-line btn-sm" href="#/quiz/q">Try again (2 tries left)</a>
+        <a class="btn" href="#/lesson">Next lesson: Read a cloud bill</a>
+      </div>
+      <section class="blk" aria-labelledby="rv-h">
+        <div class="blk-h"><h2 class="t-h3" id="rv-h">Your answers</h2><p class="t-small"><b>8</b> right · <b>2</b> to review</p></div>
+        <ol class="rv rows">
+          <li><span class="mk" aria-label="Right"><svg class="ic ic-s"><use href="#i-check"/></svg></span><span><b class="t-card">Which AWS service stores objects?</b><br><span class="t-label">Your answer: Amazon S3</span></span><span class="t-label">Q1</span></li>
+          <li><span class="mk" aria-label="Right"><svg class="ic ic-s"><use href="#i-check"/></svg></span><span><b class="t-card">Which Azure service matches Amazon EC2?</b><br><span class="t-label">Your answer: Azure Virtual Machines</span></span><span class="t-label">Q3</span></li>
+          <li><span class="mk x" aria-label="Wrong"><svg class="ic ic-s"><use href="#i-x"/></svg></span><span><b class="t-card">What does an IAM role give a server?</b><br><span class="t-label">Your answer: A password. <b>Right answer: short-lived keys it can use.</b></span></span><span class="t-label">Q6</span></li>
+          <li><span class="mk x" aria-label="Wrong"><svg class="ic ic-s"><use href="#i-x"/></svg></span><span><b class="t-card">Which region is closest to Mumbai users?</b><br><span class="t-label">Your answer: ap-southeast-1. <b>Right answer: ap-south-1.</b></span></span><span class="t-label">Q9</span></li>
+        </ol>
+        <p style="margin-top:12px"><button class="link link-s" type="button">Show all 10 answers</button></p>
+      </section>
+    </div>
+
+    <div class="qz" style="padding-top:0">
+      <div class="note" style="margin-top:0">
+        <b>Quiz</b> · question: one question per screen, the four answers as 64px rows you can tap anywhere; the chosen one gets a 2px ink border and an ink letter, never colour alone. One filled button: “Next question”.
+        <b>Result</b>: the score is the picture (a big numeral, like the calendar day), then one sentence. Wrong answers show the right one in the same row, in plain words; no red. Next lesson is filled; trying again is outline.
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       6 · My notes  /learn/notes
+       ===================================================================== -->
+  <section class="scr" id="s-notes" data-title="My notes" data-group="Learn" data-shell="app" data-tab="notes" data-route="/learn/notes" hidden>
+    <div class="pg">
+      <div class="pg-h">
+        <div><h1 class="t-title">My notes</h1><p class="t-lead"><b>23 notes</b> from 9 lessons. Only you can see them.</p></div>
+        <a class="btn btn-line btn-sm" href="#"><svg class="ic"><use href="#i-down"/></svg>Download as PDF</a>
+      </div>
+
+      <div class="find">
+        <form class="search" role="search" onsubmit="return false">
+          <label><span class="sr">Search your notes</span><svg class="ic"><use href="#i-search"/></svg><input type="search" placeholder="Search your notes" enterkeyhint="search"></label>
+          <button class="btn btn-line btn-sm" type="submit">Search</button>
+        </form>
+        <nav class="tabs swap" aria-label="Show only" data-filter="notes">
+          <button type="button" data-k="all" aria-current="true">All <em>23</em></button>
+          <button type="button" data-k="note"><svg class="ic"><use href="#i-note"/></svg>Notes <em>15</em></button>
+          <button type="button" data-k="bookmark"><svg class="ic"><use href="#i-bookmark"/></svg>Bookmarks <em>5</em></button>
+          <button type="button" data-k="highlight"><svg class="ic"><use href="#i-hl"/></svg>Highlights <em>3</em></button>
+        </nav>
+        <label class="sr" for="nkind-m">Show only</label>
+        <select class="select" id="nkind-m" data-filter-sel="notes"><option value="all">All (23)</option><option value="note">Notes (15)</option><option value="bookmark">Bookmarks (5)</option><option value="highlight">Highlights (3)</option></select>
+      </div>
+
+      <div data-mlist="notes">
+        <section class="ngroup" aria-labelledby="ng1">
+          <div class="ngroup-h"><span class="ti"><svg class="ic"><use href="#i-video"/></svg></span><span class="tx" style="display:grid;gap:2px"><a class="t-card" id="ng1" href="#/lesson">Tag every resource by team</a><span class="t-label">Video · Month 2</span></span><span class="t-label c">2 items</span></div>
+          <ul>
+            <li data-k="note"><a class="nrow" href="#/lesson"><span class="at"><svg class="ic"><use href="#i-note"/></svg>04:12</span><p>Tag keys: team, env, cost-centre. Lowercase only.</p><span class="t-label">Today</span></a></li>
+            <li data-k="bookmark"><a class="nrow" href="#/lesson"><span class="at"><svg class="ic"><use href="#i-bookmark"/></svg>09:40</span><p class="q">Bookmark</p><span class="t-label">Today</span></a></li>
+          </ul>
+        </section>
+        <section class="ngroup" aria-labelledby="ng2">
+          <div class="ngroup-h"><span class="ti"><svg class="ic"><use href="#i-live"/></svg></span><span class="tx" style="display:grid;gap:2px"><a class="t-card" id="ng2" href="#/lesson">Tagging in practice</a><span class="t-label">Class recording · 25 Nov</span></span><span class="t-label c">3 items</span></div>
+          <ul>
+            <li data-k="note"><a class="nrow" href="#/lesson"><span class="at"><svg class="ic"><use href="#i-note"/></svg>18:22</span><p>The trainer’s tag policy file is pinned in the Teams chat.</p><span class="t-label">25 Nov</span></a></li>
+            <li data-k="bookmark"><a class="nrow" href="#/lesson"><span class="at"><svg class="ic"><use href="#i-bookmark"/></svg>47:05</span><p>Q&amp;A about forcing tags on new resources</p><span class="t-label">25 Nov</span></a></li>
+            <li data-k="note"><a class="nrow" href="#/lesson"><span class="at"><svg class="ic"><use href="#i-note"/></svg>1:21:40</span><p>Untagged spend goes to a “shared” bucket until a team claims it.</p><span class="t-label">25 Nov</span></a></li>
+          </ul>
+        </section>
+        <section class="ngroup" aria-labelledby="ng3">
+          <div class="ngroup-h"><span class="ti"><svg class="ic"><use href="#i-doc"/></svg></span><span class="tx" style="display:grid;gap:2px"><a class="t-card" id="ng3" href="#/lesson">Rightsizing EC2 and RDS</a><span class="t-label">PDF · Month 2</span></span><span class="t-label c">2 items</span></div>
+          <ul>
+            <li data-k="highlight"><a class="nrow" href="#/lesson"><span class="at"><svg class="ic"><use href="#i-hl"/></svg>Page 3</span><p class="hl">Rightsize before you buy Savings Plans, or you lock in the waste.</p><span class="t-label">24 Nov</span></a></li>
+            <li data-k="note"><a class="nrow" href="#/lesson"><span class="at"><svg class="ic"><use href="#i-note"/></svg>Page 7</span><p>Look at CPU and memory over 14 days, not one day.</p><span class="t-label">24 Nov</span></a></li>
+          </ul>
+        </section>
+        <section class="ngroup" aria-labelledby="ng4">
+          <div class="ngroup-h"><span class="ti"><svg class="ic"><use href="#i-doc"/></svg></span><span class="tx" style="display:grid;gap:2px"><a class="t-card" id="ng4" href="#/lesson">IAM cheat sheet</a><span class="t-label">PDF · Month 1</span></span><span class="t-label c">1 item</span></div>
+          <ul>
+            <li data-k="highlight"><a class="nrow" href="#/lesson"><span class="at"><svg class="ic"><use href="#i-hl"/></svg>Page 2</span><p class="hl">Give roles to people and servers, not long-lived keys.</p><span class="t-label">14 Oct</span></a></li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="note">
+        <b>My notes</b> · job: “find a note again” · no filled button (“Download as PDF” is outline).
+        <ul>
+          <li>Grouped by lesson, newest first. Each row leads with <i>where</i> (04:12, Page 3) in 600 ink, because that is what you click for: it reopens the lesson at that minute or page.</li>
+          <li>Highlights are quoted with an ink bar, not a yellow marker (guide §2 bans highlighter bars).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       7 · Profile  /account
+       ===================================================================== -->
+  <section class="scr" id="s-profile" data-title="Profile" data-group="Account" data-shell="app" data-tab="" data-route="/account" hidden>
+    <div class="pg">
+      <div class="acc">
+        <nav class="accnav" aria-label="Account" data-accnav="profile"></nav>
+        <div class="acc-main">
+          <div class="pg-h"><div><h1 class="t-title">Profile</h1><p class="t-lead">How CloudCadre and your trainers see you.</p></div></div>
+          <div class="mehead"><span class="av av-l" aria-hidden="true">RV</span><div><p class="t-h3">Rahul Verma</p><p class="t-small">rahul.verma@example.com · learner since Oct 2026</p></div></div>
+
+          <form class="fgrid" onsubmit="return false" data-saveform>
+            <div class="fld"><label for="pf-name">Full name</label><input class="in" id="pf-name" value="Rahul Verma" autocomplete="name"></div>
+            <div class="fld"><label for="pf-wa">WhatsApp number</label><div class="pre"><span>+91</span><input class="in" id="pf-wa" value="98765 43210" inputmode="tel" autocomplete="tel-national"></div><p class="hint">We message you here about classes and payments.</p></div>
+            <div class="fld"><label for="pf-mail">Email</label><input class="in" id="pf-mail" value="rahul.verma@example.com" readonly><p class="hint">To change it, see <a href="#/sec">Password and devices</a>.</p></div>
+            <div class="fld"><label for="pf-city">City <small>(optional)</small></label><input class="in" id="pf-city" value="Pune" autocomplete="address-level2"></div>
+            <div class="full certrow">
+              <div class="fld"><label for="pf-cert">Name on your certificate</label><input class="in" id="pf-cert" value="Rahul Verma" data-certname><p class="hint">Check the spelling. It cannot change after your certificate is issued.</p></div>
+              <div class="certmini" aria-hidden="true"><div><img src="assets/cloudcadre-mark.svg" alt=""><span class="t-label">Certificate of completion</span><span class="t-h3" data-certprev>Rahul Verma</span><span class="t-label">CloudCadre Elite Architect Program</span></div></div>
+            </div>
+            <div class="full form-act"><button class="btn" type="submit">Save changes</button><span class="ok-line" data-saved hidden><svg class="ic ic-s"><use href="#i-check"/></svg>Saved</span></div>
+          </form>
+
+          <section class="blk" aria-labelledby="rm-h">
+            <div class="blk-h"><h2 class="t-h3" id="rm-h">Reminders</h2><p class="t-small">Payment and security messages always come through.</p></div>
+            <ul class="rows">
+              <li class="swrow"><span class="ti"><svg class="wa"><use href="#i-wa"/></svg></span><span class="tx"><b class="t-card" id="sw1">Class reminders on WhatsApp</b><span class="t-label">30 minutes before each class</span></span><button class="sw" type="button" role="switch" aria-checked="true" aria-labelledby="sw1"></button></li>
+              <li class="swrow"><span class="ti"><svg class="ic"><use href="#i-mail"/></svg></span><span class="tx"><b class="t-card" id="sw2">Class reminders by email</b><span class="t-label">The evening before, and 30 minutes before</span></span><button class="sw" type="button" role="switch" aria-checked="true" aria-labelledby="sw2"></button></li>
+              <li class="swrow"><span class="ti"><svg class="ic"><use href="#i-mail"/></svg></span><span class="tx"><b class="t-card" id="sw3">New material by email</b><span class="t-label">When a trainer adds a recording, PDF or lab</span></span><button class="sw" type="button" role="switch" aria-checked="false" aria-labelledby="sw3"></button></li>
+            </ul>
+          </section>
+
+          <div class="note">
+            <b>Profile</b> · job: “keep my details right” · one filled button: Save changes. Switches save on their own.
+            <ul>
+              <li>Account pages share one side list (Profile, Subscription, Payments and receipts, Password and devices); on tablet and phone it becomes a 4-up or 2-up grid of 52px targets above the page, never a sideways scroll.</li>
+              <li>The certificate name has a live preview beside it: you see exactly how your name will be printed before it locks. Type in the field to try it.</li>
+              <li>Switches are square-cornered (3px) to match everything else; on = ink, off = outline. Each has a visible label.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       8 · Subscription  /account/subscription
+       ===================================================================== -->
+  <section class="scr" id="s-sub" data-title="Subscription" data-group="Account" data-shell="app" data-tab="" data-route="/account/subscription"
+    data-states="active:Active|soon:Ends soon|none:No access yet" hidden>
+    <div class="pg">
+      <div class="acc">
+        <nav class="accnav" aria-label="Account" data-accnav="sub"></nav>
+        <div class="acc-main">
+          <div class="pg-h"><div>
+            <h1 class="t-title">Subscription</h1>
+            <p class="t-lead" data-when="active">Your access is active until <b>31 Aug 2027</b>.</p>
+            <p class="t-lead" data-when="soon">Your access ends on <b>8 Dec 2026</b>.</p>
+            <p class="t-lead" data-when="none">You do not have access to a course yet.</p>
+          </div></div>
+
+          <div data-when="active soon">
+            <p class="banner" data-when="soon"><svg class="ic"><use href="#i-clock"/></svg><span class="t-card">Ends in 12 days.</span><span class="t-small">After that, lessons lock. Notes stay for 30 days.</span><a class="link link-s" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Message us to extend</a></p>
+            <article class="pass" aria-labelledby="pass-h">
+              <div class="pass-top">
+                <div class="who">
+                  <p class="t-label">Your program</p>
+                  <h2 class="t-h3" id="pass-h">CloudCadre Elite Architect Program</h2>
+                  <p class="t-small" data-when="active">Oct 2026 batch · started 5 Oct 2026</p>
+                  <p class="t-small" data-when="soon">Apr 2026 batch · started 6 Apr 2026</p>
+                  <p class="st" style="margin-top:4px"><svg class="ic"><use href="#i-check"/></svg>Active</p>
+                </div>
+                <p class="pass-days"><span class="t-num" data-when="active">278</span><span class="t-num" data-when="soon">12</span><span class="t-label">days of access left</span></p>
+              </div>
+              <div class="tl" aria-hidden="true">
+                <div class="tl-bar" data-when="active"><i style="width:15%"></i><b style="left:15%"></b></div>
+                <div class="tl-bar" data-when="soon"><i style="width:95%"></i><b style="left:95%"></b></div>
+                <div class="tl-lb" data-when="active"><span>5 Oct 2026</span><span>Today</span><span>31 Aug 2027</span></div>
+                <div class="tl-lb" data-when="soon"><span>6 Apr 2026</span><span>Today · 8 Dec 2026</span></div>
+              </div>
+              <p class="pass-src"><svg class="ic ic-s"><use href="#i-check"/></svg><span>Paid by UPI · order CC-2026-000118 · ₹60,000 on 2 Oct 2026.</span><a class="link" href="#/pay">See payments</a></p>
+            </article>
+
+            <dl class="facts blk">
+              <div><dt>Started</dt><dd data-when="active">5 Oct 2026</dd><dd data-when="soon">6 Apr 2026</dd><span></span></div>
+              <div><dt>Access until</dt><dd data-when="active">31 Aug 2027</dd><dd data-when="soon">8 Dec 2026</dd><span></span></div>
+              <div><dt>Progress</dt><dd>20 of 60 lessons <span>· 33%</span></dd><a class="link link-s" href="#/course" style="min-height:0">Open my course</a></div>
+              <div><dt>After it ends</dt><dd><span>Lessons lock. You keep your notes for 30 days and your certificate for good.</span></dd><span></span></div>
+            </dl>
+            <div class="form-act" style="margin-top:20px">
+              <a class="btn btn-line btn-sm" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask about my access</a>
+              <a class="link link-s" href="#">Refund policy</a>
+            </div>
+          </div>
+
+          <div data-when="none">
+            <div class="band">
+              <div class="ticket two">
+                <div class="cal"><span class="mo">January 2027</span><span class="d">12</span><span class="t-label">Next batch · 4 months</span></div>
+                <div class="fee">
+                  <p class="t-label"><b>Fee</b></p>
+                  <span class="t-num">₹15,000<small>/ month × 4</small></span>
+                  <p class="t-small">or ₹60,000 once · lessons, live classes, labs and notes</p>
+                  <a class="btn" href="#/checkout">Join the 12 Jan batch</a>
+                </div>
+              </div>
+            </div>
+            <p class="t-small" style="margin-top:16px">Paid already, or on our learner list? <a class="link link-s" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a></p>
+          </div>
+
+          <div class="note">
+            <b>Subscription</b> · job: “do I have access, until when, and why?” · the answer is the first line, in one sentence.
+            <ul>
+              <li>The pass is the one dominant block (1px ink border): the program, the days left as a big number, a line from start to end with today on it, and how you got access.</li>
+              <li><b>Ends soon</b> (30 days or fewer) adds one quiet banner with an ink bar and a WhatsApp link; no red, no warning colour.</li>
+              <li><b>No access</b>: the batch ticket with the only filled button. Self-service cancel and refund stay out (plan/16 §7).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       9 · Payments and receipts  /account/payments
+       ===================================================================== -->
+  <section class="scr" id="s-pay" data-title="Payments and receipts" data-group="Account" data-shell="app" data-tab="" data-route="/account/payments" hidden>
+    <div class="pg">
+      <div class="acc">
+        <nav class="accnav" aria-label="Account" data-accnav="pay"></nav>
+        <div class="acc-main">
+          <div class="pg-h"><div><h1 class="t-title">Payments and receipts</h1><p class="t-lead">You have paid <b>₹60,000</b> so far.</p></div></div>
+
+          <article class="order" aria-labelledby="o1">
+            <header class="order-h">
+              <div class="l"><h2 class="t-h3 tnum" id="o1">Order CC-2026-000118</h2><p class="t-small">CEAP · Oct 2026 batch · placed 2 Oct 2026</p></div>
+              <div class="r"><span class="t-num tnum">₹60,000</span><span class="st"><svg class="ic"><use href="#i-check"/></svg>Paid in full</span></div>
+            </header>
+            <ul>
+              <li class="pay"><span class="dt tnum">2 Oct 2026</span><span class="mt">UPI QR</span><span class="amt tnum">₹50,000</span><span class="stc st"><svg class="ic"><use href="#i-check"/></svg>Verified</span><a class="link" href="#">Receipt</a></li>
+              <li class="pay"><span class="dt tnum">4 Oct 2026</span><span class="mt">UPI QR · rest of the fee</span><span class="amt tnum">₹10,000</span><span class="stc st"><svg class="ic"><use href="#i-check"/></svg>Verified</span><a class="link" href="#">Receipt</a></li>
+            </ul>
+            <p class="note-l" style="margin-top:14px"><svg class="ic ic-s"><use href="#i-info"/></svg><span>The first payment was ₹10,000 short, so we asked for the rest. Both payments are on this one order.</span></p>
+          </article>
+
+          <article class="order" aria-labelledby="o2">
+            <header class="order-h">
+              <div class="l"><h2 class="t-h3 tnum" id="o2">Order CC-2026-000097</h2><p class="t-small">CEAP · Oct 2026 batch · placed 28 Sep 2026</p></div>
+              <div class="r"><span class="t-num tnum" style="color:var(--muted)">₹60,000</span><span class="st quiet">Cancelled · not paid</span></div>
+            </header>
+            <p class="t-small" style="padding:12px 0;border-bottom:1px solid var(--rule)">No payment was made on this order.</p>
+          </article>
+
+          <p class="t-small" style="margin-top:28px">A question about a payment? <a class="link link-s" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a></p>
+
+          <div class="note">
+            <b>Payments and receipts</b> · job: “prove what I paid” · no filled button.
+            <ul>
+              <li>One block per order: order number (H3) and the total as the big number, status beside it in words. Its payments are ruled rows: date, method, amount (600, the heaviest text in the row), status, Receipt.</li>
+              <li>A short note explains a top-up in plain words, so two payments on one order do not look like a double charge. On a phone each payment becomes a two-line row.</li>
+              <li>An unpaid order shows one outline “Pay now” in its header (not drawn). GST tax invoices come later (tracker I5).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       10 · Password and devices  /account/security
+       ===================================================================== -->
+  <section class="scr" id="s-sec" data-title="Password and devices" data-group="Account" data-shell="app" data-tab="" data-route="/account/security" hidden>
+    <div class="pg">
+      <div class="acc">
+        <nav class="accnav" aria-label="Account" data-accnav="sec"></nav>
+        <div class="acc-main">
+          <div class="pg-h"><div><h1 class="t-title">Password and devices</h1><p class="t-lead">Change your password. Other devices are logged out when you do.</p></div></div>
+
+          <form class="fgrid" onsubmit="return false" data-saveform>
+            <div class="fld full" style="max-width:360px"><label for="pw-c">Current password</label><div class="pw"><input class="in" id="pw-c" type="password" autocomplete="current-password" value="cloudpass1"><button type="button" data-showpw>Show</button></div></div>
+            <div class="fld"><label for="pw-n">New password</label><div class="pw"><input class="in" id="pw-n" type="password" autocomplete="new-password"><button type="button" data-showpw>Show</button></div><p class="hint">At least 8 characters.</p></div>
+            <div class="fld"><label for="pw-r">Type it again</label><div class="pw"><input class="in" id="pw-r" type="password" autocomplete="new-password"><button type="button" data-showpw>Show</button></div></div>
+            <div class="full form-act"><button class="btn" type="submit">Update password</button><span class="ok-line" data-saved hidden><svg class="ic ic-s"><use href="#i-check"/></svg>Password updated</span></div>
+          </form>
+
+          <section class="blk" aria-labelledby="dv-h">
+            <div class="blk-h"><h2 class="t-h3" id="dv-h">Where you are logged in</h2><p class="t-small">Don’t know one? Log it out and change your password.</p></div>
+            <ul class="rows">
+              <li class="dev"><span class="ti"><svg class="ic"><use href="#i-laptop"/></svg></span><span class="tx"><b class="t-card">Chrome on Windows</b><span class="t-label">Pune · active now</span></span><span class="st"><svg class="ic"><use href="#i-check"/></svg>This device</span></li>
+              <li class="dev"><span class="ti"><svg class="ic"><use href="#i-phone"/></svg></span><span class="tx"><b class="t-card">Safari on iPhone</b><span class="t-label">Last used 24 Nov, 9:12 pm</span></span><button class="btn btn-line btn-sm" type="button">Log out</button></li>
+              <li class="dev"><span class="ti"><svg class="ic"><use href="#i-laptop"/></svg></span><span class="tx"><b class="t-card">Edge on Windows</b><span class="t-label">Last used 2 Nov, 7:40 pm</span></span><button class="btn btn-line btn-sm" type="button">Log out</button></li>
+            </ul>
+            <p style="margin-top:16px"><button class="link link-s" type="button">Log out of all other devices</button></p>
+          </section>
+
+          <section class="blk" aria-labelledby="em-h">
+            <div class="blk-h"><h2 class="t-h3" id="em-h">Sign-in email</h2></div>
+            <dl class="facts"><div><dt>Email</dt><dd>rahul.verma@example.com</dd><a class="link link-s" href="https://wa.me/" target="_blank" rel="noopener noreferrer" style="min-height:0">Ask us to change it</a></div></dl>
+          </section>
+
+          <div class="note">
+            <b>Password and devices</b> · job: “keep my account safe” · one filled button: Update password. Every password field has a “Show” button, because typos in hidden fields are the most common reason people get locked out.
+            Devices are ruled rows with a device picture; “This device” is marked with a tick and a word; the others get an outline “Log out”.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       11 · My progress  /progress
+       ===================================================================== -->
+  <section class="scr" id="s-progress" data-title="My progress" data-group="Account" data-shell="app" data-tab="" data-route="/progress" hidden>
+    <div class="pg">
+      <div class="pg-h"><div><h1 class="t-title">My progress</h1><p class="t-lead">CEAP · Oct 2026 batch · Month 2 of 4</p></div><a class="link" href="#/certs">What you need for the certificate</a></div>
+
+      <ul class="ntiles">
+        <li class="ntile"><span class="t-num">33%</span><span class="t-small">of CEAP done</span><span class="bar"><i style="width:33%"></i></span></li>
+        <li class="ntile"><span class="t-num">20</span><span class="t-small">lessons done, of 60</span></li>
+        <li class="ntile"><span class="t-num">6</span><span class="t-small">days in a row · best 11</span></li>
+        <li class="ntile"><span class="t-num">4</span><span class="t-small">quizzes passed</span></li>
+      </ul>
+
+      <section class="level dark" aria-labelledby="lv-h">
+        <div>
+          <p class="t-label">Level 3 of 6</p>
+          <h2 class="t-h3" id="lv-h" style="color:#fff">Cloud builder</h2>
+          <span class="bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" aria-label="Progress to level 4"><i style="width:70%"></i></span>
+          <p class="t-label"><b>260 XP</b> to Level 4: Cost cutter</p>
+        </div>
+        <p class="xp"><span class="t-num">1,240</span><span class="t-label">XP earned</span></p>
+      </section>
+
+      <section class="blk" aria-labelledby="bd-h">
+        <div class="blk-h"><h2 class="t-h3" id="bd-h">Badges</h2><p class="t-small"><b>4</b> of 8 earned</p></div>
+        <ul class="badges">
+          <li class="bdg"><span class="ti lg done"><svg class="ic"><use href="#i-play"/></svg></span><span class="tx"><b class="t-card">First lesson</b><span class="t-label">Earned 6 Oct</span></span></li>
+          <li class="bdg"><span class="ti lg done"><svg class="ic"><use href="#i-note"/></svg></span><span class="tx"><b class="t-card">First note</b><span class="t-label">Earned 8 Oct</span></span></li>
+          <li class="bdg"><span class="ti lg done"><svg class="ic"><use href="#i-cal"/></svg></span><span class="tx"><b class="t-card">One week in a row</b><span class="t-label">Earned 13 Oct</span></span></li>
+          <li class="bdg"><span class="ti lg done"><svg class="ic"><use href="#i-check"/></svg></span><span class="tx"><b class="t-card">Month 1 done</b><span class="t-label">Earned 3 Nov</span></span></li>
+          <li class="bdg no"><span class="ti lg"><svg class="ic"><use href="#i-quiz"/></svg></span><span class="tx"><b class="t-card">Perfect test</b><span class="t-label">Score 10 of 10 on a test</span></span></li>
+          <li class="bdg no"><span class="ti lg"><svg class="ic"><use href="#i-lab"/></svg></span><span class="tx"><b class="t-card">10 labs</b><span class="t-label">4 of 10 labs done</span></span></li>
+          <li class="bdg no"><span class="ti lg"><svg class="ic"><use href="#i-check"/></svg></span><span class="tx"><b class="t-card">Month 2 done</b><span class="t-label">6 of 18 lessons</span></span></li>
+          <li class="bdg no"><span class="ti lg"><svg class="ic"><use href="#i-medal"/></svg></span><span class="tx"><b class="t-card">CEAP finished</b><span class="t-label">Finish all 4 months</span></span></li>
+        </ul>
+      </section>
+
+      <section class="blk" aria-labelledby="lb-h">
+        <div class="blk-h"><h2 class="t-h3" id="lb-h">Leaderboard</h2><p class="t-small">Your batch · XP this week</p></div>
+        <nav class="tabs" aria-label="Leaderboard period" style="margin-bottom:8px"><a href="#" aria-current="true" onclick="return false">This week</a><a href="#" onclick="return false">All time</a></nav>
+        <ol class="lb">
+          <li><span class="rk">1</span><span>Sneha P.</span><span class="t-small"><b>420 XP</b></span></li>
+          <li><span class="rk">2</span><span>Arjun K.</span><span class="t-small"><b>385 XP</b></span></li>
+          <li><span class="rk">3</span><span>Fatima S.</span><span class="t-small"><b>350 XP</b></span></li>
+          <li class="me"><span class="rk">4</span><span>Rahul Verma (you)</span><span class="t-small"><b>310 XP</b></span></li>
+          <li><span class="rk">5</span><span>Vikram R.</span><span class="t-small"><b>290 XP</b></span></li>
+        </ol>
+      </section>
+
+      <div class="note">
+        <b>My progress</b> · job: “am I moving?” · no filled button. Four number tiles first (picture + number + line, as on the home page), then the level as the one dark block, then badges as tiles you either have (ink) or can see the way to (dashed, with what is left).
+        The leaderboard shows first names and an initial only. <b>Question for the owner:</b> plan/16 says pace is never measured against other learners; consider switching <code>engage.leaderboards</code> off for CloudCadre.
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       12 · My certificates  /certificates
+       ===================================================================== -->
+  <section class="scr" id="s-certs" data-title="My certificates" data-group="Account" data-shell="app" data-tab="" data-route="/certificates"
+    data-states="no:Not earned yet|yes:Earned" hidden>
+    <div class="pg">
+      <div class="pg-h"><div>
+        <h1 class="t-title">My certificates</h1>
+        <p class="t-lead" data-when="no">You get your certificate when you finish CEAP.</p>
+        <p class="t-lead" data-when="yes">Anyone can check your certificate with its code.</p>
+      </div></div>
+
+      <div class="req" data-when="no">
+        <section aria-labelledby="rq-h">
+          <div class="blk-h"><h2 class="t-h3" id="rq-h">What is left</h2><p class="t-small"><b>1 of 3</b> done</p></div>
+          <ul class="rows">
+            <li><div class="row"><span class="ti"><svg class="ic"><use href="#i-book"/></svg></span><span class="tx"><b>Finish every lesson</b><span>Videos, readings, PDFs, labs and recordings</span></span><span class="rt"><b>20 of 60</b><span class="bar"><i style="width:33%"></i></span></span></div></li>
+            <li><div class="row"><span class="ti"><svg class="ic"><use href="#i-quiz"/></svg></span><span class="tx"><b>Pass the 4 month tests</b><span>6 of 10 to pass each one</span></span><span class="rt"><b>1 of 4</b><span class="bar"><i style="width:25%"></i></span></span></div></li>
+            <li><a class="row" href="#/profile"><span class="ti done"><svg class="ic"><use href="#i-check"/></svg></span><span class="tx"><b>Confirm the name to print</b><span>Rahul Verma</span></span><span class="rt"><span class="link link-s" style="min-height:0">Change</span></span></a></li>
+          </ul>
+        </section>
+        <figure>
+          <div class="certmini cert-dim" aria-hidden="true"><div><img src="assets/cloudcadre-mark.svg" alt=""><span class="t-label">Certificate of completion</span><span class="t-h3">Rahul Verma</span><span class="t-label">CloudCadre Elite Architect Program</span></div></div>
+          <figcaption class="t-label" style="margin-top:10px">This is how yours will look.</figcaption>
+        </figure>
+      </div>
+
+      <ul class="rows" data-when="yes">
+        <li class="certl">
+          <div class="certmini" aria-hidden="true" style="padding:8px"><div style="padding:14px 6px;gap:6px"><img src="assets/cloudcadre-mark.svg" alt="" style="width:18px"><span class="t-label" style="font-weight:600;color:var(--ink)">Rahul Verma</span><span class="bar" style="width:40px;height:2px"><i style="width:100%;background:var(--rule)"></i></span></div></div>
+          <div class="tx"><b class="t-card">CloudCadre Elite Architect Program</b><span class="t-small">No. CC-CEAP-000042 · issued 12 Feb 2027</span><span class="t-label">Check code 7KQ2M9XPA4TB</span></div>
+          <div class="acts2"><a class="btn btn-line btn-sm" href="#/cert">View and download</a><button class="link link-s" type="button">Copy check link</button></div>
+        </li>
+      </ul>
+
+      <div class="note">
+        <b>My certificates</b> · today the page is a bare “You will get a certificate here…” line. Now, before you earn it, it shows what is left as rows with real counts and a preview of your certificate; after, one row with a small picture of it, “View and download” (outline) and the check link. Requirements are lessons and tests only, as built (there is no capstone record yet).
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       13 · Certificate  /certificates/[id]
+       ===================================================================== -->
+  <section class="scr" id="s-cert" data-title="Certificate" data-group="Account" data-shell="none" data-route="/certificates/[id]" hidden>
+    <div class="cert-pg">
+      <div class="cert-bar">
+        <a class="fback" href="#/certs"><svg class="ic"><use href="#i-back"/></svg>My certificates</a>
+        <a class="btn btn-sm" href="#"><svg class="ic"><use href="#i-down"/></svg>Download PDF</a>
+      </div>
+      <div class="cert">
+        <article aria-label="Certificate">
+          <div class="cert-in">
+            <span class="logo"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</span>
+            <h1 class="t-h2">Certificate of completion</h1>
+            <p class="t-small" style="margin-top:28px">This certifies that</p>
+            <p class="nm">Rahul Verma</p>
+            <span class="rl" aria-hidden="true"></span>
+            <p class="t-small" style="margin-top:24px">has completed</p>
+            <p class="t-h3" style="margin-top:6px">CloudCadre Elite Architect Program</p>
+            <p class="t-label" style="margin-top:4px">4 months, live online · AWS, Azure, Google Cloud, FinOps and DevOps</p>
+            <div class="facts2">
+              <div><span class="t-label">Issued</span><b>12 February 2027</b></div>
+              <div><span class="t-label">Certificate no.</span><b class="tnum">CC-CEAP-000042</b></div>
+              <div><span class="t-label">Batch</span><b>Oct 2026</b></div>
+            </div>
+            <p class="t-label vr">Check it at cloudcadre.in/verify/7KQ2M9XPA4TB</p>
+          </div>
+        </article>
+      </div>
+      <div class="pg" style="padding-top:0;padding-bottom:0">
+        <div class="note">
+          <b>Certificate</b> · drawn in code (guide §17: the old image says “CloudEdufy” and must be redrawn). The name is the one Display-size text in the app; one short saffron rule under it is the only colour. No site chrome, so Print or Download gives just the page.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       14 · Certificate check (public)  /verify/[code]
+       ===================================================================== -->
+  <section class="scr" id="s-verify" data-title="Certificate check" data-group="Public" data-shell="site" data-route="/verify/[code]"
+    data-states="ok:Genuine|bad:Not found" hidden>
+    <div class="vpg">
+      <h1 class="t-title">Certificate check</h1>
+      <p class="t-lead" style="margin-top:8px">Code <b class="tnum">7KQ2M9XPA4TB</b></p>
+
+      <div data-when="ok">
+        <div class="vres"><span class="ti lg done"><svg class="ic"><use href="#i-shield"/></svg></span><p class="t-h3">This certificate is genuine.</p></div>
+        <dl class="facts">
+          <div><dt>Awarded to</dt><dd>Rahul Verma</dd><span></span></div>
+          <div><dt>For</dt><dd>CloudCadre Elite Architect Program</dd><span></span></div>
+          <div><dt>Issued by</dt><dd>CloudCadre</dd><span></span></div>
+          <div><dt>Issued on</dt><dd>12 February 2027</dd><span></span></div>
+          <div><dt>Number</dt><dd class="tnum">CC-CEAP-000042</dd><span></span></div>
+        </dl>
+      </div>
+      <div data-when="bad">
+        <div class="vres no"><span class="ti lg"><svg class="ic"><use href="#i-info"/></svg></span><div><p class="t-h3">No certificate has this code.</p><p class="t-small">Check each letter and number, then try again.</p></div></div>
+      </div>
+
+      <form class="vform" onsubmit="return false">
+        <div class="fld"><label for="vf">Check another code</label><input class="in" id="vf" placeholder="12 letters and numbers" autocomplete="off"></div>
+        <button class="btn btn-line" type="submit">Check</button>
+      </form>
+
+      <div class="note">
+        <b>Certificate check</b> · for an employer, not the learner. A plain facts page (guide §15): one sentence answer first, then the facts. Marketing header, because the visitor is not signed in. Revoked shows the same block with “This certificate was withdrawn” and no ink tick.
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       15 · Log in  /login
+       ===================================================================== -->
+  <section class="scr" id="s-login" data-title="Log in" data-group="Get in" data-shell="none" data-route="/login" hidden>
+    <div class="auth">
+      <!-- REAL learner (aurora-content.ts). Confirm consent before launch. -->
+      <figure class="auth-ph">
+        <a class="logo" href="#/home"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+        <img src="https://res.cloudinary.com/dqw5bkqgz/image/upload/f_auto,q_auto,w_1024/v1779776907/finops/partners/ot1kjhdy0fjn8cym60q6.jpg" alt="Monika Singh, a CloudCadre learner">
+        <figcaption><span class="t-num">₹27 LPA</span><p><b>Monika Singh</b>, CloudCadre learner · Senior Program Manager, AWS and Cloud, NICE</p></figcaption>
+      </figure>
+      <div class="auth-f">
+        <div class="auth-top"><a class="logo" href="#/home"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a><p class="t-small">New here? <a class="link link-s" href="#/signup">Create an account</a></p></div>
+        <form class="auth-box" onsubmit="location.hash='#/home/running';return false">
+          <div><h1 class="t-title">Log in</h1><p class="t-lead" style="margin-top:8px">Your lessons are where you left them.</p></div>
+          <div class="fld"><label for="li-e">Email</label><input class="in" id="li-e" type="email" autocomplete="email" placeholder="you@example.com"></div>
+          <div class="fld"><label for="li-p">Password</label><div class="pw"><input class="in" id="li-p" type="password" autocomplete="current-password"><button type="button" data-showpw>Show</button></div></div>
+          <button class="btn btn-full" type="submit">Log in</button>
+          <p class="t-small">Forgot your password? <a class="link link-s" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a></p>
+        </form>
+        <div class="note" style="margin-top:0">
+          <b>Log in</b> · split screen (guide §15): a real learner with the ₹ LPA line on one side, the form on the other; the photo hides on phones so the form is the first thing you see. One filled button. There is no self-service reset yet, so “Forgot your password?” goes to a person.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       16 · Sign up + email code  /signup and /signup/confirm
+       ===================================================================== -->
+  <section class="scr" id="s-signup" data-title="Sign up" data-group="Get in" data-shell="none" data-route="/signup, /signup/confirm"
+    data-states="form:Form|code:Email code" hidden>
+    <div class="auth">
+      <figure class="auth-ph">
+        <a class="logo" href="#/home"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+        <img src="https://res.cloudinary.com/dqw5bkqgz/image/upload/f_auto,q_auto,w_1024/v1779776907/finops/partners/ot1kjhdy0fjn8cym60q6.jpg" alt="Monika Singh, a CloudCadre learner">
+        <figcaption><span class="t-num">₹27 LPA</span><p><b>Monika Singh</b>, CloudCadre learner · Senior Program Manager, AWS and Cloud, NICE</p></figcaption>
+      </figure>
+      <div class="auth-f">
+        <div class="auth-top"><a class="logo" href="#/home"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a><p class="t-small" data-when="form">Have an account? <a class="link link-s" href="#/login">Log in</a></p></div>
+
+        <form class="auth-box" data-when="form" onsubmit="location.hash='#/signup/code';return false">
+          <div><h1 class="t-title">Create your account</h1><p class="t-lead" style="margin-top:8px">Next you pick the batch and pay.</p></div>
+          <!-- placeholder: date, times, fee -->
+          <ul class="hfacts" aria-label="Next batch">
+            <li><span class="t-label">Next batch</span><b class="t-card">12 Jan</b></li>
+            <li><span class="t-label">Classes</span><b class="t-card">8–10 pm</b></li>
+            <li><span class="t-label">Fee</span><b class="t-card">₹15k / month</b></li>
+          </ul>
+          <div class="fld"><label for="su-n">Full name</label><input class="in" id="su-n" autocomplete="name"></div>
+          <div class="fld"><label for="su-e">Email</label><input class="in" id="su-e" type="email" autocomplete="email" placeholder="you@example.com"></div>
+          <div class="fld"><label for="su-w">WhatsApp number</label><div class="pre"><span>+91</span><input class="in" id="su-w" inputmode="tel" autocomplete="tel-national" placeholder="10 digits"></div><p class="hint">For class links and payment updates. No spam.</p></div>
+          <div class="fld"><label for="su-p">Password</label><div class="pw"><input class="in" id="su-p" type="password" autocomplete="new-password"><button type="button" data-showpw>Show</button></div><p class="hint">At least 8 characters.</p></div>
+          <label class="chk"><input type="checkbox"><span>I agree to the <a href="#">terms</a> and <a href="#">refund policy</a>.</span></label>
+          <button class="btn btn-full" type="submit">Create account</button>
+        </form>
+
+        <form class="auth-box" data-when="code" onsubmit="location.hash='#/checkout/upi';return false">
+          <div><h1 class="t-title">Check your email</h1><p class="t-lead" style="margin-top:8px">We sent a 6-digit code to <b>rahul.verma@example.com</b>.</p></div>
+          <fieldset><legend class="sr">6-digit code</legend>
+            <div class="code">
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 1" value="4"><input inputmode="numeric" maxlength="1" aria-label="Digit 2" value="8"><input inputmode="numeric" maxlength="1" aria-label="Digit 3" value="1"><input inputmode="numeric" maxlength="1" aria-label="Digit 4"><input inputmode="numeric" maxlength="1" aria-label="Digit 5"><input inputmode="numeric" maxlength="1" aria-label="Digit 6">
+            </div>
+          </fieldset>
+          <button class="btn btn-full" type="submit">Confirm email</button>
+          <p class="t-small">No email after 2 minutes? Check spam, or <button class="link link-s" type="button">send a new code</button>.</p>
+          <p class="t-small">Wrong email? <a class="link link-s" href="#/signup/form">Go back and change it</a></p>
+        </form>
+
+        <div class="note" style="margin-top:0">
+          <b>Sign up</b> · the three batch facts sit above the form, so you know what you are signing up for. WhatsApp has the +91 already in place. <b>Email code</b>: six big boxes (paste fills all six), one filled button, a resend line. The form and this screen look the same for everyone, so they never reveal who is on the learner list (plan/16 §4.1). The switch that skips the code for an academy with no mail server stays as built.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       17 · Checkout  /checkout/[orderId]
+       ===================================================================== -->
+  <section class="scr" id="s-checkout" data-title="Checkout" data-group="Get in" data-shell="none" data-route="/checkout/[orderId]"
+    data-states="upi:UPI QR|coupon:Coupon only (live today)" hidden>
+    <header class="fbar cbar">
+      <div class="fbar-in">
+        <a class="logo" href="#/home"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+        <p class="mid"><svg class="ic ic-s"><use href="#i-lock"/></svg><span>Secure checkout</span></p>
+        <a class="fback" href="#/home">Leave checkout</a>
+      </div>
+    </header>
+    <div class="co">
+      <div class="co-main">
+        <!-- UPI -->
+        <div data-when="upi" class="stack" style="gap:24px">
+          <div><p class="t-label tnum">Order CC-2026-000123</p><h1 class="t-title" style="margin-top:4px">Pay ₹60,000</h1><p class="t-lead" style="margin-top:8px">Pay by UPI, then tell us it is done. We open your course as soon as we see the payment.</p></div>
+          <fieldset class="methods">
+            <legend class="t-card" style="margin-bottom:10px">How do you want to pay?</legend>
+            <div class="method on" role="radio" aria-checked="true" tabindex="0"><span class="rd"></span><span class="tx"><b class="t-card">UPI QR code</b><span class="t-label">GPay, PhonePe, Paytm or any UPI app</span></span><span></span></div>
+            <div class="method off" role="radio" aria-checked="false" aria-disabled="true"><span class="rd"></span><span class="tx"><b class="t-card">Card, net banking, wallets</b><span class="t-label">Pay online with Razorpay</span></span><span class="t-label"><b>Coming soon</b></span></div>
+          </fieldset>
+          <div class="upi">
+            <div class="qr">
+              <div data-qr role="img" aria-label="QR code to pay ₹60,000 to cloudcadre@okaxis"></div>
+              <p class="t-label">₹60,000 is filled in for you</p>
+              <a class="btn btn-line btn-sm upi-app" href="#">Open UPI app</a>
+            </div>
+            <ol class="steps">
+              <li><span class="n">1</span><span class="t-body"><b>Scan the code</b> with any UPI app.</span></li>
+              <li><span class="n">2</span><span class="t-body"><b>Pay ₹60,000.</b> Do not change the amount or the note.</span></li>
+              <li><span class="n">3</span><span class="t-body"><b>Take a screenshot</b> of the success screen. You send it next.</span></li>
+            </ol>
+          </div>
+          <dl class="copies">
+            <div class="copy"><dt>UPI ID</dt><dd>cloudcadre@okaxis</dd><button class="btn btn-line btn-sm" type="button" data-copy><svg class="ic"><use href="#i-copy"/></svg>Copy</button></div>
+            <div class="copy"><dt>Note</dt><dd class="tnum">CC-2026-000123</dd><button class="btn btn-line btn-sm" type="button" data-copy><svg class="ic"><use href="#i-copy"/></svg>Copy</button></div>
+          </dl>
+          <div class="form-act" style="margin-top:0"><a class="btn" href="#/paystatus/wait">I have paid</a><span class="t-label">Next, you send us the screenshot.</span></div>
+        </div>
+
+        <!-- coupon only (tenant_settings.commerce.online_payments = "off") -->
+        <div data-when="coupon" class="stack" style="gap:24px">
+          <div><p class="t-label tnum">Order CC-2026-000123</p><h1 class="t-title" style="margin-top:4px">Join with a coupon code</h1><p class="t-lead" style="margin-top:8px">Online payment is switched off for now. Enter the code we gave you.</p></div>
+          <div class="fld"><label for="cp-big">Coupon code</label>
+            <div class="coup coup-big"><input class="in" id="cp-big" placeholder="For example CEAPJAN" autocomplete="off"><button class="btn" type="button">Apply code</button></div>
+            <p class="hint">A code that covers the full price gives you “Enrol for free”.</p>
+          </div>
+          <div class="lockd">
+            <p class="t-label">Other ways to pay</p>
+            <div class="method off" aria-disabled="true"><svg class="ic"><use href="#i-lock"/></svg><span class="tx"><b class="t-card">UPI QR code</b><span class="t-label">Not available yet</span></span><span></span></div>
+            <div class="method off" aria-disabled="true"><svg class="ic"><use href="#i-lock"/></svg><span class="tx"><b class="t-card">Card, net banking, wallets</b><span class="t-label">Coming soon</span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="osum" aria-label="Order summary">
+        <div class="prod"><svg class="dg" viewBox="0 0 320 200" aria-hidden="true"><use href="#dg1"/></svg><span><b class="t-card">CloudCadre Elite Architect Program</b><br><span class="t-label">12 Jan batch · 4 months, live online</span></span></div>
+        <dl>
+          <div><dt>Program fee</dt><dd class="tnum">₹50,847.46</dd></div>
+          <div><dt>GST 18%</dt><dd class="tnum">₹9,152.54</dd></div>
+        </dl>
+        <p class="tot"><span class="t-small"><b>Total</b></span><span class="t-num tnum">₹60,000</span></p>
+        <div data-when="upi">
+          <button class="link link-s" type="button" aria-expanded="false" data-toggle="cp-sm">Have a coupon code?</button>
+          <div class="coup" id="cp-sm" hidden style="margin-top:6px"><label class="sr" for="cp-s">Coupon code</label><input class="in" id="cp-s" placeholder="Code"><button class="btn btn-line btn-sm" type="button" style="min-height:52px">Apply</button></div>
+        </div>
+        <div class="help">
+          <span class="t-label">Stuck, or need a code?</span>
+          <a class="link link-s" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a>
+          <a class="t-label" href="#">Refund policy</a>
+        </div>
+      </aside>
+    </div>
+    <div class="pg" style="padding-top:0">
+      <div class="note" style="margin-top:0">
+        <b>Checkout</b> · focus layout (logo only). The H1 is the amount. Reading order: pay what → how → the QR and 3 numbered steps → copy rows for the UPI ID and note → the one filled button “I have paid”. The order summary sits beside it as facts with the total as the big number.
+        <ul>
+          <li>“Open UPI app” appears only on phones, because you cannot scan your own screen.</li>
+          <li><b>Coupon only</b> is what CloudCadre runs today (online_payments off). The coupon field becomes the main block; the payment methods are listed as locked rows instead of a blurred pattern, so nothing looks broken.</li>
+          <li>The QR here is drawn and cannot be scanned (placeholder). UPI ID and price are placeholders.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       18 · Payment status  /checkout/[orderId]/pending and /done
+       ===================================================================== -->
+  <section class="scr" id="s-paystatus" data-title="Payment status" data-group="Get in" data-shell="none" data-route="/checkout/[orderId]/pending, /done"
+    data-states="wait:Checking|ok:Verified|bad:Could not match" hidden>
+    <header class="fbar cbar">
+      <div class="fbar-in">
+        <a class="logo" href="#/home"><img src="assets/cloudcadre-mark.svg" alt="" width="32" height="25">CloudCadre</a>
+        <p class="mid"><span>Your payment</span></p>
+        <a class="fback" href="#/pay">Close</a>
+      </div>
+    </header>
+    <div class="pst">
+      <!-- checking -->
+      <div class="pst-main" data-when="wait">
+        <div><p class="t-label tnum">Order CC-2026-000123 · ₹60,000</p><h1 class="t-title" style="margin-top:4px">Thank you. We are checking your payment.</h1><p class="t-lead" style="margin-top:8px">We check from 9 am to 9 pm, Monday to Saturday, usually within 2 hours.</p></div>
+        <ol class="track" aria-label="Where your payment is">
+          <li><span class="n"><svg class="ic ic-s"><use href="#i-check"/></svg>Done</span><b>You paid by UPI</b></li>
+          <li class="now" aria-current="step"><span class="n">Now</span><b>Send us the screenshot</b></li>
+          <li class="later"><span class="n">Next</span><b>We check it</b></li>
+          <li class="later"><span class="n">Then</span><b>Your course opens</b></li>
+        </ol>
+        <section class="send" aria-labelledby="send-h">
+          <h2 class="t-h3" id="send-h">Send us the payment screenshot</h2>
+          <p class="t-small">WhatsApp opens with your order number already typed. Attach the screenshot and press send.</p>
+          <div class="form-act" style="margin-top:0"><a class="btn" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Send screenshot on WhatsApp</a><span class="t-label">Our number: <b class="tnum">+91 98765 43210</b></span></div>
+          <details>
+            <summary class="link link-s">Or upload it here instead</summary>
+            <div class="drop"><svg class="ic"><use href="#i-up"/></svg><p class="t-card">Choose the screenshot</p><p class="t-label">JPG, PNG or PDF, up to 5 MB</p><button class="btn btn-line btn-sm" type="button">Choose file</button></div>
+            <div class="fld" style="margin-top:16px"><label for="utr">UPI reference number <small>(optional, 12 digits)</small></label><input class="in" id="utr" inputmode="numeric" placeholder="e.g. 432198765012"></div>
+            <button class="btn btn-line btn-sm" type="button" style="margin-top:12px">Upload</button>
+          </details>
+        </section>
+        <p class="t-small">While you wait, the free lessons stay open. <a class="link link-s" href="#/lesson">Watch one</a></p>
+      </div>
+      <aside data-when="wait">
+        <h2 class="t-card" style="margin-bottom:10px">What we check</h2>
+        <dl class="chkl">
+          <div><dt>Order</dt><dd class="tnum">CC-2026-000123</dd></div>
+          <div><dt>Amount</dt><dd class="tnum">₹60,000</dd></div>
+          <div><dt>Paid to</dt><dd>cloudcadre@okaxis</dd></div>
+          <div><dt>Note on the payment</dt><dd class="tnum">CC-2026-000123</dd></div>
+        </dl>
+        <p class="t-label" style="margin-top:12px">This page updates by itself when we are done.</p>
+      </aside>
+
+      <!-- verified -->
+      <div class="pst-main" data-when="ok">
+        <span class="bigok" aria-hidden="true"><svg class="ic"><use href="#i-check"/></svg></span>
+        <div><h1 class="t-title">Payment received. CEAP is open.</h1><p class="t-lead" style="margin-top:8px">Your lessons, live classes and notes are ready.</p></div>
+        <dl class="facts">
+          <div><dt>Order</dt><dd class="tnum">CC-2026-000123</dd><span></span></div>
+          <div><dt>Amount paid</dt><dd class="tnum">₹60,000</dd><span></span></div>
+          <div><dt>Verified</dt><dd>26 Nov 2026, 6:42 pm</dd><span></span></div>
+        </dl>
+        <div class="form-act"><a class="btn" href="#/home/before">Start learning</a><a class="link" href="#/pay">See your receipt</a></div>
+      </div>
+      <aside data-when="ok" class="card" style="padding:20px;display:grid;gap:14px">
+        <p class="t-label">Your batch starts</p>
+        <div class="ncls-row"><span class="dblk"><b>12</b><span>Tue · Jan</span></span><div><p class="t-card">First class at 8 pm</p><p class="t-small">On Microsoft Teams</p></div></div>
+      </aside>
+
+      <!-- could not match -->
+      <div class="pst-main" data-when="bad">
+        <div><p class="t-label tnum">Order CC-2026-000123</p><h1 class="t-title" style="margin-top:4px">We could not match your payment</h1><p class="t-lead" style="margin-top:8px">We received ₹50,000. The order is ₹60,000, so <b>₹10,000 is still due</b>.</p></div>
+        <blockquote class="quote"><b style="color:var(--ink)">From our team:</b> The screenshot shows ₹50,000. Please pay the rest with the same note.</blockquote>
+        <div class="form-act"><a class="btn" href="#/checkout/upi">Pay the remaining ₹10,000</a><a class="link" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa"><use href="#i-wa"/></svg>Ask on WhatsApp</a></div>
+        <p class="t-small">The ₹50,000 is saved on this order. You do not pay it again.</p>
+      </div>
+      <aside data-when="bad">
+        <h2 class="t-card" style="margin-bottom:10px">This order</h2>
+        <dl class="chkl">
+          <div><dt>Total</dt><dd class="tnum">₹60,000</dd></div>
+          <div><dt>Paid and verified</dt><dd class="tnum">₹50,000</dd></div>
+          <div><dt>Still due</dt><dd class="tnum">₹10,000</dd></div>
+        </dl>
+      </aside>
+    </div>
+    <div class="pg" style="padding-top:0">
+      <div class="note" style="margin-top:0">
+        <b>Payment status</b> · one URL, three states, each with one filled button that matches the next step: send the screenshot, start learning, or pay the rest. A 4-step tracker shows where you are (the current step is the ink cell). The “could not match” copy states what we saw and what is due, in money, with the team’s note quoted.
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /#main -->
+
+  <!-- phone tab bar (app frame) -->
+  <nav class="tabbar" aria-label="Learning">
+    <a href="#/home" data-tab="home"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+    <a href="#/course" data-tab="course"><svg class="ic"><use href="#i-book"/></svg>My course</a>
+    <a href="#/live" data-tab="live"><svg class="ic"><use href="#i-live"/></svg>Live classes</a>
+    <a href="#/notes" data-tab="notes"><svg class="ic"><use href="#i-note"/></svg>My notes</a>
+  </nav>
+</div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'), tb=document.getElementById('tb');
+  function setTbh(){document.documentElement.style.setProperty('--tbh',tb.offsetHeight+'px')}
+  setTbh(); addEventListener('resize',setTbh);
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $$(s,r){return [].slice.call((r||document).querySelectorAll(s))}
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+  /* account menu (same in every frame) */
+  var MENU=[['profile','Profile','i-user'],['sub','Subscription','i-pass'],['progress','My progress','i-chart'],['certs','Certificates','i-medal'],['pay','Payments and receipts','i-receipt'],['sec','Password and devices','i-key']];
+  var acct='<button type="button" class="acct-btn" aria-expanded="false" aria-haspopup="true"><span class="av" aria-hidden="true">RV</span><span class="acct-name">Rahul</span><svg class="ic ic-s acct-chev"><use href="#i-down-c"/></svg><span class="sr">Account menu</span></button>'+
+    '<div class="acct-pan" hidden><p class="acct-who"><b class="t-small" style="font-weight:600;color:var(--ink)">Rahul Verma</b><span class="t-label">rahul.verma@example.com</span></p>'+
+    MENU.map(function(m){return '<a href="#/'+m[0]+'"><svg class="ic"><use href="#'+m[2]+'"/></svg>'+m[1]+'</a>'}).join('')+
+    '<a class="sep" href="https://wa.me/" target="_blank" rel="noopener noreferrer"><svg class="wa" style="color:var(--muted)"><use href="#i-wa"/></svg>Help on WhatsApp</a>'+
+    '<button type="button" class="mi" data-logout><svg class="ic"><use href="#i-out"/></svg>Log out</button></div>';
+  $$('[data-acct]').forEach(function(n){n.innerHTML=acct});
+  function closeMenus(except){$$('.acct-pan').forEach(function(p){if(p!==except){p.hidden=true;p.previousElementSibling.setAttribute('aria-expanded','false')}})}
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('.acct-btn');
+    if(b){var p=b.nextElementSibling,open=p.hidden;closeMenus(p);p.hidden=!open;b.setAttribute('aria-expanded',open);return}
+    if(e.target.closest('[data-logout]')){location.hash='#/login';return}
+    if(!e.target.closest('.acct-pan'))closeMenus();
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){var open=$$('.acct-pan').filter(function(p){return !p.hidden})[0];closeMenus();if(open)open.previousElementSibling.focus()}});
+
+  /* account side list */
+  var ACC=[['profile','Profile','i-user'],['sub','Subscription','i-pass'],['pay','Payments and receipts','i-receipt'],['sec','Password and devices','i-key']];
+  $$('[data-accnav]').forEach(function(n){n.innerHTML='<p class="t-label">Account</p>'+ACC.map(function(a){return '<a href="#/'+a[0]+'"'+(a[0]===n.dataset.accnav?' aria-current="page"':'')+'><svg class="ic"><use href="#'+a[2]+'"/></svg>'+a[1]+'</a>'}).join('')});
+
+  /* screens, states and the toolbar */
+  var screens=$$('.scr'), sel=document.getElementById('t-screen'), box=document.getElementById('t-states');
+  var groups={};
+  screens.forEach(function(s){var g=s.dataset.group;if(!groups[g]){groups[g]=document.createElement('optgroup');groups[g].label=g;sel.appendChild(groups[g])}
+    var o=document.createElement('option');o.value=s.id.slice(2);o.textContent=s.dataset.title+'   '+s.dataset.route;groups[g].appendChild(o)});
+  var stateOf={};try{stateOf=JSON.parse(store('app11-st')||'{}')}catch(e){}
+  var current=null;
+  function parse(){var h=location.hash.replace(/^#\/?/,'').split('/');return {id:h[0]||'home',st:h[1]}}
+  function show(){
+    var p=parse(),scr=document.getElementById('s-'+p.id);
+    if(!scr){scr=document.getElementById('s-home');p.id='home'}
+    var changed=current!==p.id; current=p.id;
+    screens.forEach(function(s){s.hidden=s!==scr});
+    stage.dataset.shell=scr.dataset.shell;
+    var tab=scr.dataset.tab||'';
+    $$('.ah [data-tab], .subnav [data-tab], .tabbar [data-tab]').forEach(function(a){if(tab&&a.dataset.tab===tab)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+    var states=(scr.dataset.states||'').split('|').filter(Boolean).map(function(x){return x.split(':')});
+    var has=function(k){return states.some(function(x){return x[0]===k})};
+    var st=p.st&&has(p.st)?p.st:(has(stateOf[p.id])?stateOf[p.id]:(states[0]||[])[0]);
+    if(st){stateOf[p.id]=st;store('app11-st',JSON.stringify(stateOf))}
+    box.innerHTML=states.length?'<span>State</span>'+states.map(function(x){return '<button type="button" data-st="'+x[0]+'" aria-pressed="'+(x[0]===st)+'">'+x[1]+'</button>'}).join(''):'';
+    $$('[data-when]',scr).forEach(function(el){el.hidden=el.dataset.when.split(' ').indexOf(st)<0});
+    sel.value=p.id; document.title=scr.dataset.title+' · CloudCadre app v11';
+    closeMenus(); setTbh();
+    if(changed)scrollTo(0,0);
+  }
+  box.addEventListener('click',function(e){var b=e.target.closest('[data-st]');if(b)location.hash='#/'+current+'/'+b.dataset.st});
+  sel.addEventListener('change',function(){location.hash='#/'+sel.value});
+  function step(d){var i=screens.findIndex(function(s){return s.id==='s-'+current});var n=screens[(i+d+screens.length)%screens.length];location.hash='#/'+n.id.slice(2)}
+  document.getElementById('t-prev').addEventListener('click',function(){step(-1)});
+  document.getElementById('t-next').addEventListener('click',function(){step(1)});
+  addEventListener('hashchange',show);
+
+  /* filters on My course and My notes */
+  $$('[data-filter]').forEach(function(nav){
+    var key=nav.dataset.filter, list=document.querySelector('[data-mlist="'+key+'"]'), m=document.querySelector('[data-filter-sel="'+key+'"]');
+    function apply(k){
+      $$('button',nav).forEach(function(b){b.setAttribute('aria-current',b.dataset.k===k?'true':'false')}); if(m)m.value=k;
+      $$('[data-k]',list).forEach(function(li){li.hidden=k!=='all'&&li.dataset.k!==k});
+      $$('details',list).forEach(function(d){d.hidden=!$$('[data-k]',d).some(function(li){return !li.hidden});d.open=k==='all'?d.classList.contains('now'):true});
+      $$('.ngroup',list).forEach(function(g){g.hidden=!$$('[data-k]',g).some(function(li){return !li.hidden})});
+    }
+    nav.addEventListener('click',function(e){var b=e.target.closest('button');if(b)apply(b.dataset.k)});
+    if(m)m.addEventListener('change',function(){apply(m.value)});
+  });
+
+  /* lesson side panel: tabs, and the phone sheet buttons */
+  var side=document.querySelector('.side');
+  function ptab(k){$$('[data-ptab]').forEach(function(b){b.setAttribute('aria-selected',b.dataset.ptab===k)});$$('[data-ppanel]').forEach(function(p){p.hidden=p.dataset.ppanel!==k})}
+  $$('[data-ptab]').forEach(function(b){b.addEventListener('click',function(){ptab(b.dataset.ptab)})});
+  $$('[data-sheet]').forEach(function(b){b.addEventListener('click',function(){var k=b.dataset.sheet,open=side.classList.contains('open')&&side.dataset.k===k;side.classList.toggle('open',!open);side.dataset.k=k;ptab(k);if(!open)side.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})})});
+
+  /* small behaviours */
+  $$('[data-jump]').forEach(function(b){b.addEventListener('click',function(){document.getElementById(b.dataset.jump).scrollIntoView({behavior:reduce?'auto':'smooth'})})});
+  $$('[data-more]').forEach(function(b){var l=document.getElementById(b.dataset.more),t=b.textContent;b.addEventListener('click',function(){var all=l.classList.toggle('all');b.textContent=all?'Show fewer':t})});
+  $$('[data-toggle]').forEach(function(b){b.addEventListener('click',function(){var t=document.getElementById(b.dataset.toggle),o=t.hidden;t.hidden=!o;b.setAttribute('aria-expanded',o)})});
+  $$('[role="switch"]').forEach(function(s){s.addEventListener('click',function(){s.setAttribute('aria-checked',s.getAttribute('aria-checked')!=='true')})});
+  $$('[data-showpw]').forEach(function(b){b.addEventListener('click',function(){var i=b.previousElementSibling,show=i.type==='password';i.type=show?'text':'password';b.textContent=show?'Hide':'Show'})});
+  $$('[data-saveform]').forEach(function(f){f.addEventListener('submit',function(){var s=f.querySelector('[data-saved]');if(s){s.hidden=false;setTimeout(function(){s.hidden=true},2500)}})});
+  $$('[data-copy]').forEach(function(b){b.addEventListener('click',function(){var t=b.lastChild.textContent;b.lastChild.textContent='Copied';setTimeout(function(){b.lastChild.textContent=t},1800)})});
+  var cn=document.querySelector('[data-certname]'),cp=document.querySelector('[data-certprev]');
+  if(cn&&cp)cn.addEventListener('input',function(){cp.textContent=cn.value||' '});
+
+  /* drawn stand-in QR (not scannable) */
+  (function(){var N=29,seed=7,r=function(){seed=(seed*9301+49297)%233280;return seed/233280},q='';
+    function finder(x,y){return '<rect x="'+x+'" y="'+y+'" width="7" height="7"/><rect x="'+(x+1)+'" y="'+(y+1)+'" width="5" height="5" fill="#fff"/><rect x="'+(x+2)+'" y="'+(y+2)+'" width="3" height="3"/>'}
+    function inF(x,y){return (x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9)}
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++)if(!inF(x,y)&&r()>.52)q+='<rect x="'+x+'" y="'+y+'" width="1" height="1"/>';
+    $$('[data-qr]').forEach(function(n){n.innerHTML='<svg viewBox="0 0 '+N+' '+N+'" shape-rendering="crispEdges" fill="#0F1716" aria-hidden="true">'+finder(0,0)+finder(N-7,0)+finder(0,N-7)+q+'</svg>'})})();
+
+  /* toolbar: width and notes */
+  var W={desktop:'',tablet:'w-tablet',phone:'w-phone'};
+  function setW(v){stage.classList.remove('w-tablet','w-phone');if(W[v])stage.classList.add(W[v]);
+    $$('[data-group="w"] button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.v===v)});store('app11-w',v)}
+  document.querySelector('[data-group="w"]').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setW(b.dataset.v)});
+  var sv=store('app11-w');if(W.hasOwnProperty(sv))setW(sv);
+  var nb=document.getElementById('t-notes');
+  nb.addEventListener('click',function(){var on=nb.getAttribute('aria-pressed')!=='true';nb.setAttribute('aria-pressed',on);document.body.classList.toggle('notes-on',on);setTbh()});
+
+  show();
+})();
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist/legacy/build/pdf.mjs'
-import { Icon } from '@educore/ui/marks'
+import { Ic } from '../../_components/v11'
 import { useStage } from './stage'
 
 type PdfJs = typeof import('pdfjs-dist/legacy/build/pdf.mjs')
@@ -149,60 +149,60 @@ export function PdfReader({ src, title, downloadHref, sizeLabel }: { src: string
 
   if (status === 'error') {
     return (
-      <div className="lx-pdf-fallback">
+      <div className="pdfr-fallback">
         <iframe src={`${src}#page=${page}`} title={title} />
-        <p><Icon name="info" className="lx-i" />This file is shown in your browser&apos;s own viewer. <a href={downloadHref}>Download it</a> if it does not open.</p>
+        <p className="note-l"><Ic n="info" s /><span>This file is shown in your browser&apos;s own viewer. <a href={downloadHref}>Download it</a> if it does not open.</span></p>
       </div>
     )
   }
 
   const go = (n: number) => goTo(Math.min(Math.max(Math.round(n) || 1, 1), pageCount || 1))
   return (
-    <div className="lx-pdf" ref={box}>
-      <div className="lx-pdf-bar" role="toolbar" aria-label="PDF controls">
-        <div className="pg">
-          <button type="button" onClick={() => go(page - 1)} disabled={status !== 'ready' || page <= 1} aria-label="Previous page"><Icon name="back" /></button>
+    <div className="pdfr" ref={box}>
+      <div className="tbar" role="toolbar" aria-label="PDF controls">
+        <div className="grp">
+          <button type="button" onClick={() => go(page - 1)} disabled={status !== 'ready' || page <= 1} aria-label="Previous page"><Ic n="back" /></button>
           <label>
-            <span className="sr-only">Page number</span>
+            <span className="sr">Page number</span>
             <input inputMode="numeric" value={typed ?? String(page)} aria-label={`Page, of ${pageCount}`}
               onFocus={(e) => e.currentTarget.select()}
               onChange={(e) => setTyped(e.target.value.replace(/\D/g, '').slice(0, 4))}
               onBlur={() => { if (typed) go(Number(typed)); setTyped(null) }}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.currentTarget.blur() } }} />
           </label>
-          <span className="of">of {pageCount || '…'}</span>
-          <button type="button" onClick={() => go(page + 1)} disabled={status !== 'ready' || page >= pageCount} aria-label="Next page"><Icon name="chev" /></button>
+          <span className="of t-small tnum">of {pageCount || '…'}</span>
+          <button type="button" onClick={() => go(page + 1)} disabled={status !== 'ready' || page >= pageCount} aria-label="Next page"><Ic n="chev" /></button>
         </div>
-        <div className="zm">
-          <button type="button" onClick={() => changeZoom(zoomAt - 1)} disabled={zoomAt === 0} aria-label="Zoom out"><Icon name="minus" /></button>
-          <span aria-live="polite">{Math.round(zoom * 100)}%</span>
-          <button type="button" onClick={() => changeZoom(zoomAt + 1)} disabled={zoomAt === ZOOMS.length - 1} aria-label="Zoom in"><Icon name="plus" /></button>
+        <div className="grp">
+          <button type="button" onClick={() => changeZoom(zoomAt - 1)} disabled={zoomAt === 0} aria-label="Zoom out">−</button>
+          <span className="zv t-small tnum" aria-live="polite">{Math.round(zoom * 100)}%</span>
+          <button type="button" onClick={() => changeZoom(zoomAt + 1)} disabled={zoomAt === ZOOMS.length - 1} aria-label="Zoom in">+</button>
         </div>
-        <div className="more">
-          <a href={downloadHref} className="tb" download><Icon name="down" /><span>Download{sizeLabel ? ` (${sizeLabel})` : ''}</span></a>
-          {canFull && <button type="button" className="tb" onClick={() => { if (full) void document.exitFullscreen(); else void box.current?.requestFullscreen() }}><Icon name="expand" /><span>{full ? 'Exit full screen' : 'Full screen'}</span></button>}
+        <div className="grp more">
+          <a href={downloadHref} className="tb" download><Ic n="down" s /><span>Download{sizeLabel ? ` (${sizeLabel})` : ''}</span></a>
+          {canFull && <button type="button" className="tb" onClick={() => { if (full) void document.exitFullscreen(); else void box.current?.requestFullscreen() }}><Ic n="full" s /><span>{full ? 'Exit full screen' : 'Full screen'}</span></button>}
         </div>
       </div>
 
       {(picked || savedMsg) && (
-        <div className="lx-pdf-pick" role="status">
+        <div className="pdfr-pick" role="status">
           {picked ? <>
-            <span className="q">“{picked.text.length > 90 ? `${picked.text.slice(0, 90)}…` : picked.text}”</span>
-            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => void saveHighlight()}><Icon name="highlight" />Save as highlight</button>
-          </> : <span><Icon name="check" className="lx-i" />{savedMsg}</span>}
+            <span className="q t-small">“{picked.text.length > 90 ? `${picked.text.slice(0, 90)}…` : picked.text}”</span>
+            <button type="button" className="btn btn-line btn-sm" onMouseDown={(e) => e.preventDefault()} onClick={() => void saveHighlight()}><Ic n="hl" s />Save as highlight</button>
+          </> : <span className="ok-line"><Ic n="check" s />{savedMsg}</span>}
         </div>
       )}
 
-      <div className="lx-pdf-scroll" ref={scroller} tabIndex={0} role="document" aria-label={`${title}. Use the arrow keys to scroll.`}
+      <div className="pdfr-scroll" ref={scroller} tabIndex={0} role="document" aria-label={`${title}. Use the arrow keys to scroll.`}
         onKeyDown={(e) => {
           const t = e.target as HTMLElement
           if (t.tagName === 'INPUT') return
           if (e.key === 'ArrowRight' && zoom <= 1) { e.preventDefault(); go(page + 1) }
           if (e.key === 'ArrowLeft' && zoom <= 1) { e.preventDefault(); go(page - 1) }
         }}>
-        {status === 'loading' && <p className="lx-pdf-load" role="status"><span className="spin" aria-hidden="true" />Opening the PDF…</p>}
+        {status === 'loading' && <p className="pdfr-load t-small" role="status">Opening the PDF…</p>}
         {status === 'ready' && doc && width > 0 && (
-          <div className="lx-pdf-pages" style={{ width: pageWidth, gap: GAP }}>
+          <div className="pdfr-pages" style={{ width: pageWidth, gap: GAP }}>
             {Array.from({ length: doc.numPages }, (_, i) => <PdfPage key={i} doc={doc} n={i + 1} width={pageWidth} height={pageHeight} root={scroller} />)}
           </div>
         )}
@@ -256,7 +256,7 @@ function PdfPage({ doc, n, width, height, root }: { doc: PDFDocumentProxy; n: nu
   }, [doc, n, width, near])
 
   return (
-    <div className="lx-pdf-page" ref={wrap} data-n={n} style={{ width, height, '--scale-round-x': '1px', '--scale-round-y': '1px' } as React.CSSProperties}
+    <div className="pdfr-page" ref={wrap} data-n={n} style={{ width, height, '--scale-round-x': '1px', '--scale-round-y': '1px' } as React.CSSProperties}
       role="group" aria-label={`Page ${n}`}>
       <canvas ref={canvas} aria-hidden="true" style={{ width, height }} />
       <div className="textLayer" ref={text} />

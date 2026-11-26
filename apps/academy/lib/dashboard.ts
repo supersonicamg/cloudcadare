@@ -15,22 +15,34 @@ const IST = 5.5 * 3_600_000
 /** A date-only column ("2027-01-08") as the start of that day in India. */
 export const istDate = (d: string) => new Date(`${d}T00:00:00+05:30`)
 
-export interface BatchInfo { id: string; name: string; startDate: string | null; endDate: string | null; schedule: string | null; whatsappGroup: string | null }
+export interface BatchInfo {
+  id: string; name: string; startDate: string | null; endDate: string | null; schedule: string | null; whatsappGroup: string | null
+  /** The weekdays classes run on ("Mon", "Tue"...), and the time they start ("8 pm"). Empty/null when the batch does not say. */
+  days: string[]
+  at: string | null
+}
 
 const DAYS: Record<string, string> = { MO: 'Mon', TU: 'Tue', WE: 'Wed', TH: 'Thu', FR: 'Fri', SA: 'Sat', SU: 'Sun' }
+/** {"rrule":"FREQ=WEEKLY;BYDAY=TU,TH,SA","time":"19:00"} -> the weekdays and the start time. */
+function parseSchedule(schedule: unknown): { days: string[]; at: string | null } {
+  const s = (schedule ?? {}) as { rrule?: string; time?: string }
+  const days = /BYDAY=([A-Z,]+)/.exec(s.rrule ?? '')?.[1]?.split(',').map((d) => DAYS[d]).filter((d): d is string => Boolean(d)) ?? []
+  const at = /^\d{1,2}:\d{2}$/.test(s.time ?? '') ? timeShort(new Date(`2027-01-01T${s.time!.padStart(5, '0')}:00+05:30`)) : null
+  return { days, at }
+}
+
 /** {"rrule":"FREQ=WEEKLY;BYDAY=TU,TH,SA","time":"19:00"} -> "Tue, Thu and Sat at 7 pm". Null when it says nothing. */
 export function scheduleLine(schedule: unknown): string | null {
-  const s = (schedule ?? {}) as { rrule?: string; time?: string }
-  const by = /BYDAY=([A-Z,]+)/.exec(s.rrule ?? '')?.[1]?.split(',').map((d) => DAYS[d]).filter(Boolean) ?? []
+  const { days: by, at } = parseSchedule(schedule)
   if (!by.length) return null
   const days = by.length === 1 ? by[0] : `${by.slice(0, -1).join(', ')} and ${by.at(-1)}`
-  return /^\d{1,2}:\d{2}$/.test(s.time ?? '') ? `${days} at ${timeShort(new Date(`2027-01-01T${s.time!.padStart(5, '0')}:00+05:30`))}` : days!
+  return at ? `${days} at ${at}` : days!
 }
 
 const toBatch = (b: { id: string; name: string; start_date: string | null; end_date: string | null; schedule: unknown; settings: unknown }): BatchInfo => {
   const link = ((b.settings ?? {}) as { whatsapp_group_url?: unknown }).whatsapp_group_url
   return {
-    id: b.id, name: b.name, startDate: b.start_date, endDate: b.end_date, schedule: scheduleLine(b.schedule),
+    id: b.id, name: b.name, startDate: b.start_date, endDate: b.end_date, schedule: scheduleLine(b.schedule), ...parseSchedule(b.schedule),
     whatsappGroup: typeof link === 'string' && /^https:\/\/(chat\.whatsapp\.com|wa\.me)\//.test(link) ? link : null,
   }
 }

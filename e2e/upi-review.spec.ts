@@ -61,12 +61,12 @@ test.describe.serial('UPI review and notes', () => {
 
     // ---- notes: write one with Ctrl+Enter, it is listed, it survives a reload, My notes links back
     await l.waitForLoadState('networkidle')
-    await l.getByRole('tab', { name: /^Notes/ }).click()
-    await l.getByLabel(/^Note/).fill('Tags drive cost allocation')
-    await l.getByLabel(/^Note/).press('Control+Enter')
+    await l.getByRole('tab', { name: /^My notes/ }).click()
+    await l.getByLabel(/^Write a note/).fill('Tags drive cost allocation')
+    await l.getByLabel(/^Write a note/).press('Control+Enter')
     await expect(l.getByRole('list', { name: 'Your notes on this lesson' }).getByText('Tags drive cost allocation')).toBeVisible()
     await l.reload()
-    await l.getByRole('tab', { name: /^Notes/ }).click()
+    await l.getByRole('tab', { name: /^My notes/ }).click()
     await expect(l.getByText('Tags drive cost allocation')).toBeVisible()
     await l.goto('/learn/notes')
     await expect(l.getByRole('heading', { level: 1, name: 'My notes' })).toBeVisible()
@@ -75,7 +75,7 @@ test.describe.serial('UPI review and notes', () => {
     // ---- delete shows Undo, and undoing brings it back
     await l.getByRole('link', { name: /Tags drive cost allocation/ }).click()
     await l.waitForLoadState('networkidle')
-    await l.getByRole('tab', { name: /^Notes/ }).click()
+    await l.getByRole('tab', { name: /^My notes/ }).click()
     await l.getByRole('button', { name: 'Delete this note' }).click()
     await expect(l.getByRole('status').filter({ hasText: 'Note deleted' })).toBeVisible()
     await l.getByRole('button', { name: 'Undo' }).click()

@@ -4,23 +4,21 @@ import { notFound } from 'next/navigation'
 import { z } from 'zod'
 import { describeFile, humanSize, isFileLessonType, resolvePlayback } from '@educore/core/media'
 import { isEnabled } from '@educore/features'
-import { Icon, type IconName } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { getLearnCourse, getLessonContent, getLessonProgress } from '@/lib/learn'
 import { getLessonNotes } from '@/lib/notes'
 import { getShell } from '@/lib/shell'
-import type { LearnLesson, LearnSection } from '@/lib/learn'
-import { buttonLg, buttonLine } from '@/lib/ui'
+import type { LearnLesson } from '@/lib/learn'
 import { LearnerShell } from '../../../_components/learner-shell'
-import { dripDate, minutes } from '../../_components/curriculum'
+import { Ic, type IconName } from '../../../_components/v11'
 import { ImageViewer } from '../../_components/image-viewer'
 import { LessonActions } from '../../_components/lesson-actions'
-import { LessonList, sectionHas } from '../../_components/lesson-list'
+import { KIND, KIND_ICON, dripDate, minutes, placeOf } from '../../_components/lesson-meta'
 import { PdfReader } from '../../_components/pdf-reader'
 import { Prose } from '../../_components/prose'
 import { QuickNote } from '../../_components/quick-note'
 import { QuizOverview, type QuizOverviewData } from '../../_components/quiz-overview'
-import { SidePanel } from '../../_components/side-panel'
+import { SheetButtons, SidePanel } from '../../_components/side-panel'
 import { StageProvider, type NoteMode } from '../../_components/stage'
 import { ScrubMarks } from '../../_components/stage-parts'
 import { VideoPlayer } from '../../_components/video-player'
@@ -31,13 +29,11 @@ export const metadata: Metadata = { title: 'Lesson' }
 
 /*
  * The study room. One job: learn this lesson, then move on.
- * Reading order: the lesson itself (video, PDF, picture, text) -> a note box under it -> the title -> the one big button
- * that goes forward. Beside it (a sheet on a phone): the course's lesson list and the learner's notes on this lesson.
- * Everything that is not studying (the sidebar, other pages) is out of the way: this screen has its own slim bar.
+ * Reading order: the lesson itself (video, PDF, picture, text) -> a note box under it -> the title -> the one filled
+ * button that goes forward. Beside it (two outline buttons on a phone): the lessons of this month and the learner's notes.
+ * Everything that is not studying (the menu, other pages) is out of the way: this screen has its own slim bar.
+ * Every kind of lesson sits in the same frame; only the block at the top changes (design guide v11, mockup s-lesson).
  */
-const KIND: Record<string, string> = { video: 'Video', article: 'Reading', external_link: 'Link', pdf: 'PDF', document: 'Document', download: 'Download', quiz: 'Quiz', test: 'Test', live: 'Class recording', image: 'Picture', lab: 'Lab' }
-const ICON: Record<string, IconName> = { video: 'video', live: 'live', pdf: 'doc', document: 'doc', image: 'image', article: 'book', quiz: 'quiz', test: 'quiz', download: 'down', external_link: 'link', lab: 'lab' }
-const flatten = (s: LearnSection): LearnLesson[] => [...s.lessons, ...s.children.flatMap(flatten)]
 
 export default async function LessonPage({ params, searchParams }: PageProps<'/[tenant]/learn/[slug]/[lessonId]'>) {
   const { slug, lessonId } = await params
@@ -90,15 +86,14 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
     ? await resolvePlayback(a.bundle.tenant.id, lesson.mediaAssetId)
     : null
 
-  const monthOf = course?.sections.findIndex((sec) => sectionHas(sec, lesson.id)) ?? -1
-  const month = course && monthOf >= 0 ? course.sections[monthOf] : null
-  const inMonth = month ? flatten(month) : []
-  const place = month ? `Month ${monthOf + 1} · Lesson ${inMonth.findIndex((l) => l.id === lesson.id) + 1} of ${inMonth.length}` : undefined
+  const place = placeOf(course?.sections, lesson.id)
+  const where = place ? `${place.label} · Lesson ${place.no} of ${place.lessons.length}` : undefined
+  const monthName = place ? `${place.label}${place.month.title && place.month.title !== place.label ? `: ${place.month.title}` : ''}` : null
   const e = course?.enrollment
   const mins = minutes(lesson.durationSeconds)
   const fileLabel = file?.sizeBytes ? humanSize(file.sizeBytes) : undefined
 
-  const backHref = course ? (lesson.type === 'live' ? `/learn/${slug}/live` : `/learn/${slug}/material${month ? `?month=${month.id}` : ''}`) : `/courses/${slug}`
+  const backHref = course ? (lesson.type === 'live' ? `/learn/${slug}/live` : `/learn/${slug}/material${place ? `?month=${place.month.id}` : ''}`) : `/courses/${slug}`
   const toLesson = (l?: LearnLesson) => (l ? { href: `/learn/${slug}/${l.id}`, title: l.title } : null)
   // Reading, links, files and quizzes are the lesson; the title comes first and the content under it.
   const titleFirst = Boolean(lock) || ['article', 'external_link', 'download', 'quiz', 'test'].includes(lesson.type) || !['video', 'live', 'pdf', 'image'].includes(lesson.type)
@@ -106,80 +101,73 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
   let viewer: React.ReactNode = null
   if (lock) {
     viewer = (
-      <div className="lx-callout">
-        <span className="lx-ico"><Icon name="lock" /></span>
-        <div>
-          <b>{lock.reason === 'drip' && lock.unlocksAt ? `This lesson opens on ${dripDate(lock.unlocksAt)}` : 'Finish the earlier lessons first'}</b>
-          <p>{lock.reason === 'drip' ? 'Come back on that day. Everything before it is open now.' : <>This course is taken in order. {blocker ? <>Start with <Link href={`/learn/${slug}/${blocker.id}`}>{blocker.title}</Link>.</> : null}</>}</p>
-        </div>
-      </div>
+      <Callout icon="lock" title={lock.reason === 'drip' && lock.unlocksAt ? `This lesson opens on ${dripDate(lock.unlocksAt)}` : 'Finish the earlier lessons first'}>
+        {lock.reason === 'drip' ? 'Come back on that day. Everything before it is open now.' : <>This course is taken in order. {blocker ? <>Start with <Link href={`/learn/${slug}/${blocker.id}`}>{blocker.title}</Link>.</> : null}</>}
+      </Callout>
     )
   } else if (isVideo) {
     viewer = teamsLink ? (
-      <div className="lx-callout">
-        <span className="lx-ico"><Icon name="live" /></span>
-        <div>
-          <b>This recording is in Microsoft Teams</b>
-          <p>It opens in a new tab. Come back here when you have watched it.</p>
-          <a href={`/api/recording/${lesson.id}`} target="_blank" rel="noopener noreferrer" className={`${buttonLine} mt-3`}>Open in Microsoft Teams<Icon name="arrow" /></a>
-        </div>
-      </div>
+      <Callout icon="live" title="This recording is in Microsoft Teams" action={<a href={`/api/recording/${lesson.id}`} target="_blank" rel="noopener noreferrer" className="btn btn-line btn-sm">Open in Microsoft Teams<Ic n="ext" s /></a>}>
+        It opens in a new tab. Come back here when you have watched it.
+      </Callout>
     )
-      : lesson.type === 'live' && !lesson.mediaAssetId ? <Notice icon="clock" title="The recording is on its way">It is usually up the same night. Check back tomorrow morning.</Notice>
-      : !videoOn ? <Notice icon="info" title="Videos are switched off">Video lessons are not enabled for this academy.</Notice>
+      : lesson.type === 'live' && !lesson.mediaAssetId ? <Callout icon="clock" title="The recording is on its way">It is usually up the same night. Check back tomorrow morning.</Callout>
+      : !videoOn ? <Callout icon="info" title="Videos are switched off">Video lessons are not enabled for this academy.</Callout>
       : playback && playback.kind !== 'unavailable'
         ? <>
-            <VideoPlayer playback={playback} lessonId={lesson.id} startAt={deepT ?? (progress.completed ? 0 : progress.positionSeconds)} completed={progress.completed} title={lesson.title} tracked={tracked} />
-            <VideoTools resumeAt={deepT ?? (progress.completed ? 0 : progress.positionSeconds)} />
+            <div className="player">
+              <VideoPlayer framed playback={playback} lessonId={lesson.id} startAt={deepT ?? (progress.completed ? 0 : progress.positionSeconds)} completed={progress.completed} title={lesson.title} tracked={tracked} />
+            </div>
             <ScrubMarks fallbackSeconds={lesson.durationSeconds} />
+            <VideoTools resumeAt={deepT ?? (progress.completed ? 0 : progress.positionSeconds)} />
           </>
-        : <Notice icon="info" title="The video is not ready yet">{playback?.kind === 'unavailable' && playback.reason === 'not_configured' ? 'Video playback is not set up yet. Tell your instructor.' : 'Check back soon.'}</Notice>
+        : <Callout icon="info" title="The video is not ready yet">{playback?.kind === 'unavailable' && playback.reason === 'not_configured' ? 'Video playback is not set up yet. Tell your instructor.' : 'Check back soon.'}</Callout>
   } else if (lesson.type === 'pdf') {
-    viewer = !fileOn ? <Notice icon="info" title="PDFs are switched off">This kind of lesson is not enabled for this academy.</Notice>
-      : !file ? <Notice icon="clock" title="The file is not ready yet">Check back soon.</Notice>
+    viewer = !fileOn ? <Callout icon="info" title="PDFs are switched off">This kind of lesson is not enabled for this academy.</Callout>
+      : !file ? <Callout icon="clock" title="The file is not ready yet">Check back soon.</Callout>
       : <PdfReader src={`/api/lesson-file/${lesson.id}`} title={lesson.title} downloadHref={`/api/lesson-file/${lesson.id}?download=1`} sizeLabel={fileLabel} />
   } else if (imageOn) {
     viewer = lesson.mediaAssetId
       ? <ImageViewer src={`/api/lesson-file/${lesson.id}`} alt={lesson.title} downloadHref={`/api/lesson-file/${lesson.id}?download=1`} />
-      : <Notice icon="clock" title="The picture is not ready yet">Check back soon.</Notice>
+      : <Callout icon="clock" title="The picture is not ready yet">Check back soon.</Callout>
   }
 
   // What sits under the title for reading, links, files and quizzes.
   let content: React.ReactNode = lock ? viewer : null
   if (!lock) {
-    if (lesson.type === 'article') content = lesson.body?.text ? <Prose text={lesson.body.text} /> : <Notice icon="info" title="Nothing here yet">This lesson has no text yet.</Notice>
+    if (lesson.type === 'article') content = lesson.body?.text ? <Prose v11 text={lesson.body.text} /> : <Callout icon="info" title="Nothing here yet">This lesson has no text yet.</Callout>
     else if (lesson.type === 'lab') {
       content = <>
-        {lesson.body?.text && <Prose text={lesson.body.text} />}
+        {lesson.body?.text && <Prose v11 text={lesson.body.text} />}
         {lesson.externalUrl
-          ? <div className="lx-callout"><span className="lx-ico"><Icon name="lab" /></span><div><b>Open the lab</b><p>This is a hands-on lab. It opens in a new tab. Come back here when you are done.</p><a href={lesson.externalUrl} target="_blank" rel="noopener noreferrer" className={`${buttonLine} mt-3`}>Open the lab<Icon name="arrow" /></a></div></div>
-          : !lesson.body?.text && <Notice icon="lab" title="A hands-on lab">Do this one on your own computer, as shown in class or in the lesson text. Stuck? Ask in the next class, or message us on WhatsApp.</Notice>}
+          ? <Callout icon="lab" title="Open the lab" action={<a href={lesson.externalUrl} target="_blank" rel="noopener noreferrer" className="btn btn-line btn-sm">Open the lab<Ic n="ext" s /></a>}>This is a hands-on lab. It opens in a new tab. Come back here when you are done.</Callout>
+          : !lesson.body?.text && <Callout icon="lab" title="A hands-on lab">Do this one on your own computer, as shown in class or in the lesson text. Stuck? Ask in the next class, or message us on WhatsApp.</Callout>}
       </>
     } else if (lesson.type === 'external_link') {
       const host = (() => { try { return new URL(lesson.externalUrl ?? '').hostname.replace(/^www\./, '') } catch { return null } })()
       content = lesson.externalUrl
-        ? <div className="lx-callout"><span className="lx-ico"><Icon name="link" /></span><div><b>{host ?? 'Open the resource'}</b><p>This lesson is on another website. It opens in a new tab.</p><a href={lesson.externalUrl} target="_blank" rel="noopener noreferrer" className={`${buttonLine} mt-3`}>Open the resource<Icon name="arrow" /></a></div></div>
-        : <Notice icon="info" title="No link yet">This lesson has no link yet.</Notice>
+        ? <Callout icon="ext" title={host ?? 'Open the resource'} action={<a href={lesson.externalUrl} target="_blank" rel="noopener noreferrer" className="btn btn-line btn-sm">Open the resource<Ic n="ext" s /></a>}>This lesson is on another website. It opens in a new tab.</Callout>
+        : <Callout icon="info" title="No link yet">This lesson has no link yet.</Callout>
     } else if (fileType && lesson.type !== 'pdf') {
-      content = !fileOn ? <Notice icon="info" title="Not switched on">This kind of lesson is not enabled for this academy.</Notice>
-        : !file ? <Notice icon="clock" title="The file is not ready yet">Check back soon.</Notice>
-        : <div className="lx-callout"><span className="lx-ico"><Icon name="down" /></span><div><b>{file.title}</b><p>{fileLabel ? `${fileLabel}. ` : ''}It saves to your device.</p><a href={`/api/lesson-file/${lesson.id}?download=1`} className={`${buttonLine} mt-3`} data-testid="download-link"><Icon name="down" />Download {file.title}{fileLabel ? ` (${fileLabel})` : ''}</a></div></div>
+      content = !fileOn ? <Callout icon="info" title="Not switched on">This kind of lesson is not enabled for this academy.</Callout>
+        : !file ? <Callout icon="clock" title="The file is not ready yet">Check back soon.</Callout>
+        : <Callout icon="down" title={file.title} action={<a href={`/api/lesson-file/${lesson.id}?download=1`} className="btn btn-line btn-sm" data-testid="download-link"><Ic n="down" s />Download {file.title}{fileLabel ? ` (${fileLabel})` : ''}</a>}>{fileLabel ? `${fileLabel}. ` : ''}It saves to your device.</Callout>
     } else if (lesson.type === 'quiz') {
-      content = !isEnabled(a.bundle.features, 'assess.quizzes') ? <Notice icon="info" title="Quizzes are switched off">Quizzes are not enabled for this academy.</Notice>
-        : !course ? <Notice icon="info" title="Join to take this quiz">Enrol in the course to take the quiz.</Notice>
+      content = !isEnabled(a.bundle.features, 'assess.quizzes') ? <Callout icon="info" title="Quizzes are switched off">Quizzes are not enabled for this academy.</Callout>
+        : !course ? <Callout icon="info" title="Join to take this quiz">Enrol in the course to take the quiz.</Callout>
         : overview?.data ? <QuizOverview slug={slug} lessonId={lesson.id} o={overview.data as unknown as QuizOverviewData} notice={typeof quizNotice === 'string' ? quizNotice : undefined} />
-        : <Notice icon="info" title="Not available">This quiz is not available right now.</Notice>
+        : <Callout icon="info" title="Not available">This quiz is not available right now.</Callout>
     } else if (!['video', 'live', 'image', 'article', 'lab', 'external_link', 'pdf', 'download', 'quiz'].includes(lesson.type)) {
-      content = <Notice icon="info" title="Not available yet">This kind of lesson is not available yet.</Notice>
+      content = <Callout icon="info" title="Not available yet">This kind of lesson is not available yet.</Callout>
     }
   }
 
   const head = (
-    <header className="lx-stitle">
-      <p className="lx-kick"><Icon name={ICON[lesson.type] ?? 'doc'} className="lx-i" />{[KIND[lesson.type] ?? lesson.type, mins && lesson.type !== 'quiz' ? mins : null].filter(Boolean).join(' · ')}{month ? ` · ${month.title}` : ''}</p>
-      <h1 id="lesson-h" className="lx-sh1">{lesson.title}</h1>
-      {progress.completed && <p className="lx-done"><Icon name="check" className="lx-i" />You have completed this lesson</p>}
-      {lesson.summary && <p className="lx-ssum">{lesson.summary}</p>}
+    <header className={`stitle${titleFirst ? ' first' : ''}`}>
+      <p className="kick"><Ic n={KIND_ICON[lesson.type] ?? 'doc'} s />{[KIND[lesson.type] ?? lesson.type, mins && lesson.type !== 'quiz' ? mins : null, monthName].filter(Boolean).join(' · ')}</p>
+      <h1 className="t-title" id="ls-h">{lesson.title}</h1>
+      {progress.completed && <p className="ok-line"><Ic n="check" s />Completed</p>}
+      {lesson.summary && <p className="t-lead">{lesson.summary}</p>}
     </header>
   )
 
@@ -188,42 +176,48 @@ export default async function LessonPage({ params, searchParams }: PageProps<'/[
       autoOnOpen={lesson.type === 'article' || lesson.type === 'lab' || lesson.type === 'external_link' || fileType || imageOn}
       plays={isVideo && !teamsLink && (lesson.completionRule === 'watch_pct' || (lesson.completionRule === 'auto' && lesson.type === 'video'))}
       next={toLesson(next)} prev={toLesson(prev)} backHref={`/learn/${slug}/material`}
-      quiet={(lesson.type === 'quiz' || lesson.type === 'test') && !progress.completed} notes={notesOn} />
+      quiet={(lesson.type === 'quiz' || lesson.type === 'test') && !progress.completed} />
   ) : course && lock ? (
-    <div className="lx-acts"><div className="lx-acts-main"><Link href={blocker ? `/learn/${slug}/${blocker.id}` : `/learn/${slug}/material`} className={`${buttonLg} max-sm:flex-1`}>{blocker ? `Go to ${blocker.title}` : 'Back to my course'}<Icon name="arrow" /></Link></div></div>
+    <div className="acts"><Link href={blocker ? `/learn/${slug}/${blocker.id}` : `/learn/${slug}/material`} className="btn">{blocker ? `Go to ${blocker.title}` : 'Back to my course'}</Link></div>
   ) : null
 
   return (
     <LearnerShell a={a} shell={shell} active="lessons" focus={{
       backHref, backLabel: course ? (lesson.type === 'live' ? 'Live classes' : 'My course') : 'The course',
-      where: place, progress: e ? { pct: e.progressPct, label: `${e.lessonsCompleted} of ${e.lessonsTotal} done` } : undefined,
+      where, progress: e ? { pct: e.progressPct, label: `${e.lessonsCompleted} of ${e.lessonsTotal} done` } : undefined,
     }}>
       <StageProvider lessonId={lesson.id} mode={mode} enabled={notesOn} initialNotes={notes} startPage={deepPage ?? 1}>
-        <div className={`lx-study${course ? ' has-side' : ''}`}>
-          <article className="lx-smain" aria-labelledby="lesson-h">
+        <div className={`study${course ? '' : ' solo'}`}>
+          <article aria-labelledby="ls-h" style={{ minWidth: 0 }}>
             {!tracked && (
-              <p className="lx-note">
-                <Icon name="info" /><span>This is a free preview. <Link href={`/courses/${slug}`}>See the full course</Link> to join.</span>
+              <p className="note-l lead-note">
+                <Ic n="info" s /><span>This is a free preview. <Link href={`/courses/${slug}`}>See the full course</Link> to join.</span>
               </p>
             )}
-            {titleFirst ? <>{head}{content && <div className="lx-scontent">{content}</div>}</> : <>{viewer && <div className="lx-viewer">{viewer}</div>}</>}
+            {titleFirst ? <>{head}{content && <div className="lcontent">{content}</div>}</> : <>{viewer}</>}
             {notesOn && !lock && <QuickNote />}
             {!titleFirst && head}
             {actions}
+            {course && <SheetButtons notesOn={notesOn} />}
           </article>
 
-          {course && <SidePanel notesOn={notesOn} lessons={<LessonList slug={slug} sections={course.sections} currentId={lesson.id} />} />}
+          {course && <SidePanel slug={slug} sections={course.sections} currentId={lesson.id} notesOn={notesOn} />}
         </div>
       </StageProvider>
     </LearnerShell>
   )
 }
 
-function Notice({ icon = 'info', title, children }: { icon?: IconName; title: string; children: React.ReactNode }) {
+/** A short message in the lesson's place (locked, not ready, a link that leaves the site): an icon tile, what it is, what to do. */
+function Callout({ icon, title, action, children }: { icon: IconName; title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="lx-callout">
-      <span className="lx-ico"><Icon name={icon} /></span>
-      <div><b>{title}</b><p>{children}</p></div>
+    <div className="callout">
+      <span className="ti lg"><Ic n={icon} /></span>
+      <div>
+        <p className="t-card">{title}</p>
+        <p className="t-body">{children}</p>
+        {action && <p className="act">{action}</p>}
+      </div>
     </div>
   )
 }

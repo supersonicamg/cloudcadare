@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { buttonLg, buttonQuiet, inputLg } from '@/lib/ui'
+import { Ic } from '../_components/v11'
 import { applyCoupon, removeCoupon, type CouponState } from './actions'
 
 /** `main`: the coupon is the only way to join, so the field is always open and its button is the filled one. */
@@ -9,30 +9,37 @@ export function CouponForm({ orderId, applied, main }: { orderId: string; applie
   const [s, action, pending] = useActionState<CouponState, FormData>(applyCoupon.bind(null, orderId), {})
   if (applied) {
     return (
-      <form action={removeCoupon.bind(null, orderId)} className="grid gap-2">
-        <span className="text-[15px] font-semibold">Coupon</span>
-        <div className="flex gap-2.5">
-          <p className={`${inputLg} flex items-center`}>Coupon applied</p>
-          <button className={`${buttonQuiet} h-14 px-5`}>Remove</button>
-        </div>
+      <form action={removeCoupon.bind(null, orderId)} className="coup-on">
+        <span className="ok-line"><Ic n="check" s />Coupon applied</span>
+        <button className="link link-s">Remove</button>
       </form>
     )
   }
-  const form = (
-    <form action={action} className="grid gap-2">
-      <label htmlFor="code" className="text-[15px] font-semibold">{main ? 'Coupon code' : 'Have a coupon code?'}</label>
-      <div className="flex flex-wrap gap-2.5">
-        <input id="code" name="code" autoComplete="off" required={main} className={`${inputLg} min-w-0 flex-1 basis-56 uppercase`} />
-        <button className={main ? `${buttonLg} w-full sm:w-auto` : `${buttonQuiet} h-14 px-5`} disabled={pending}>{pending ? 'Checking…' : main ? 'Apply code' : 'Apply'}</button>
-      </div>
-      {s.error && <p role="alert" className="text-[15px] font-semibold text-danger">{s.error}</p>}
-    </form>
-  )
-  if (main) return form
+  const error = s.error && <p role="alert" className="ferr"><Ic n="info" s />{s.error}</p>
+  if (main) {
+    return (
+      <form action={action} className="fld">
+        <label htmlFor="code">Coupon code</label>
+        <div className="coup coup-big">
+          <input id="code" name="code" className="in" autoComplete="off" required placeholder="Type your code" />
+          <button className="btn" disabled={pending}>{pending ? 'Checking…' : 'Apply code'}</button>
+        </div>
+        <p className="hint">A code that covers the full price gives you “Enrol for free”.</p>
+        {error}
+      </form>
+    )
+  }
   return (
-    <details className="group" open={Boolean(s.error) || undefined}>
-      <summary className="cursor-pointer list-none text-base font-semibold text-primary [&::-webkit-details-marker]:hidden">Have a coupon?</summary>
-      <div className="mt-3">{form}</div>
+    <details className="cpn" open={Boolean(s.error) || undefined}>
+      <summary className="link link-s">Have a coupon code?</summary>
+      <form action={action} className="fld">
+        <div className="coup">
+          <label className="sr" htmlFor="code">Coupon code</label>
+          <input id="code" name="code" className="in" autoComplete="off" placeholder="Code" />
+          <button className="btn btn-line btn-sm" disabled={pending}>{pending ? 'Checking…' : 'Apply'}</button>
+        </div>
+        {error}
+      </form>
     </details>
   )
 }

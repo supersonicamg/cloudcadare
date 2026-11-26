@@ -1,0 +1,20 @@
+/* The printable notes page. Stands alone: black on white, the system font, no learner frame. */
+.np{max-width:760px;margin:0 auto;padding:40px 24px;color:#0f1716;background:#fff;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.np h1{margin:0;font-size:32px;line-height:1.1;font-weight:600;letter-spacing:-.02em}
+.np-head{margin-bottom:32px;padding-bottom:16px;border-bottom:2px solid #0f1716}
+.np-head p{margin:8px 0 0;font-size:14px;color:#3b4644;font-variant-numeric:tabular-nums}
+.np-grp{margin:0 0 28px;break-inside:avoid}
+.np-grp h2{margin:0 0 8px;font-size:17px;line-height:1.35;font-weight:600}
+.np-grp ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.np-grp li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px}
+.np-grp b{font-weight:600;font-variant-numeric:tabular-nums}
+.np-grp span{white-space:pre-line;overflow-wrap:anywhere}
+.np-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 24px}
+.np-bar button{min-height:44px;padding:0 18px;border:1px solid #0f1716;border-radius:3px;background:#fff;color:#0f1716;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.np-bar button:hover{background:#0f1716;color:#fff}
+.np-bar button:focus-visible{outline:3px solid #0f1716;outline-offset:3px}
+.np-bar span{font-size:14px;color:#3b4644}
+@media print{
+  .np{padding:0}
+  .np-bar{display:none}
+}

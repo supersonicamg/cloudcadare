@@ -1,16 +1,15 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Icon } from '@educore/ui/marks'
 import { isEnabled } from '@educore/features'
 import { requireMember } from '@/lib/dal'
 import { getEnrolled, getJoinState } from '@/lib/dashboard'
 import { getMyEnrollments } from '@/lib/learn'
 import { getShell } from '@/lib/shell'
 import { LearnerShell } from '../_components/learner-shell'
+import { Ic } from '../_components/v11'
 import { EnrolledHome } from './home'
 import { NoCourseDashboard } from './join'
 import { UpcomingHome } from './upcoming'
-import '../_components/learner.css'
 
 export const metadata: Metadata = { title: 'Home' }
 
@@ -41,18 +40,18 @@ export default async function Dashboard({ searchParams }: PageProps<'/[tenant]/d
 
   return (
     <LearnerShell a={a} shell={shell} active="home">
-      {message && (
-        <p role="status" className={`lx-note${sp.paid ? ' good' : ''}`}><Icon name={sp.paid ? 'check' : 'info'} /><span>{message}</span></p>
-      )}
-      {lead && d ? (
-        d.startsIn > 0 && d.batch?.startDate
-          ? <UpcomingHome d={d} lead={lead} first={first} />
-          : <EnrolledHome d={d} lead={lead} first={first} joined={sp.joined === '1'} others={enrollments.filter((e) => e !== lead)} goal={home?.program?.goal} />
-      ) : (
-        <div className="ld">
-          <NoCourseDashboard s={await getJoinState(a)} first={first} whatsapp={whatsapp} checkout={isEnabled(bundle.features, 'commerce.checkout')} syllabusHref={home?.syllabusHref} goal={home?.program?.goal} />
-        </div>
-      )}
+      <div className="pg">
+        {message && (
+          <p role="status" className="note-l top"><Ic n={sp.paid ? 'check' : 'info'} /><span>{message}</span></p>
+        )}
+        {lead && d ? (
+          d.startsIn > 0 && d.batch?.startDate
+            ? <UpcomingHome d={d} lead={lead} first={first} />
+            : <EnrolledHome d={d} lead={lead} first={first} joined={sp.joined === '1'} others={enrollments.filter((e) => e !== lead)} />
+        ) : (
+          <NoCourseDashboard s={await getJoinState(a)} first={first} whatsapp={whatsapp} checkout={isEnabled(bundle.features, 'commerce.checkout')} syllabusHref={home?.syllabusHref} />
+        )}
+      </div>
     </LearnerShell>
   )
 }

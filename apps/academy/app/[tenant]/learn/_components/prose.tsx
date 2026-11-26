@@ -4,7 +4,24 @@ import remarkGfm from 'remark-gfm'
 // Lesson articles are Markdown written by staff. react-markdown renders to React elements (no raw HTML,
 // javascript: links are dropped); images are off so a lesson cannot call third-party servers per learner.
 // Tables, task lists and strike-through (GitHub-style Markdown) are on: course notes are full of tables.
-export function Prose({ text }: { text: string }) {
+//
+// Two looks: the lesson page (inside the v11 frame, `v11`) takes the `.prose` rules of study.css; the public free-preview page,
+// which sits outside the v11 frame, keeps the Tailwind classes below (the default).
+export function Prose({ text, v11 = false }: { text: string; v11?: boolean }) {
+  if (v11) {
+    return (
+      <div className="prose">
+        <Markdown remarkPlugins={[remarkGfm]} disallowedElements={['img']}
+          components={{
+            h1: (p) => <h2 {...p} />,
+            a: (p) => <a target="_blank" rel="noopener noreferrer" {...p} />,
+            table: (p) => <div className="tbl"><table {...p} /></div>,
+          }}>
+          {text}
+        </Markdown>
+      </div>
+    )
+  }
   return (
     <div className="max-w-[44em] text-[18.5px] leading-[1.7] text-[#2C3736]">
       <Markdown

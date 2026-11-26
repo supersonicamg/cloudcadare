@@ -36,7 +36,7 @@ export async function latestEmailCode(email: string): Promise<string> {
 
 /** Types the emailed code on the confirm page. */
 export async function confirmEmail(page: Page, email: string) {
-  await page.getByLabel('6-digit code').fill(await latestEmailCode(email))
+  await page.getByLabel('Digit 1').fill(await latestEmailCode(email))
   await page.getByRole('button', { name: 'Confirm email' }).click()
 }
 

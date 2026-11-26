@@ -19,10 +19,10 @@ test('a new learner confirms the email with the emailed code, then logs in again
   // A wrong code is refused and counted; the right one lets the learner through.
   const real = await latestEmailCode(email)
   const wrong = real === '000000' ? '111111' : '000000'
-  await page.getByLabel('6-digit code').fill(wrong)
+  await page.getByLabel('Digit 1').fill(wrong)
   await page.getByRole('button', { name: 'Confirm email' }).click()
   await expect(page.getByText('That code is not right. You have 4 tries left.')).toBeVisible()
-  await page.getByLabel('6-digit code').fill(real)
+  await page.getByLabel('Digit 1').fill(real)
   await page.getByRole('button', { name: 'Confirm email' }).click()
   await page.waitForURL((u) => u.pathname === '/')
 
@@ -48,12 +48,12 @@ test('after five wrong codes the code is locked, and sending again is closed for
   const real = await latestEmailCode(email)
   const wrong = real === '000000' ? '111111' : '000000'
   for (let i = 0; i < 5; i++) {
-    await page.getByLabel('6-digit code').fill(wrong)
+    await page.getByLabel('Digit 1').fill(wrong)
     await page.getByRole('button', { name: 'Confirm email' }).click()
     await expect(page.getByRole('alert').first()).toBeVisible()
   }
   // Even the right code is refused now.
-  await page.getByLabel('6-digit code').fill(real)
+  await page.getByLabel('Digit 1').fill(real)
   await page.getByRole('button', { name: 'Confirm email' }).click()
   await expect(page.getByText('Too many wrong tries. Ask for a new code.')).toBeVisible()
   await expect(page.getByRole('button', { name: /Send again in/ })).toBeDisabled()

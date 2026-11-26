@@ -1,0 +1,36 @@
+/*
+ * Extra rules for the account area, progress, certificates, the public check and the receipt (design guide v11).
+ * Only what v11.css does not already have. Every selector is scoped under .v11; same tokens, 3px radius, weights 400/600.
+ */
+.v11 .in[aria-invalid="true"]{border:2px solid var(--ink)}
+.v11 .fld .err{display:flex;gap:8px;align-items:flex-start;font-size:var(--t-label);font-weight:600;color:var(--ink)}
+.v11 .fld .err .ic{margin-top:1px}
+.v11 .btn[disabled],.v11 .btn-line[disabled],.v11 .link[disabled],.v11 .sw[disabled]{opacity:.55;cursor:default}
+.v11 .ok-line{align-items:flex-start}
+.v11 .ok-line .ic{margin-top:2px}
+.v11 .swrow .tx [role="status"]{font-weight:600;color:var(--ink)}
+.v11 .certmini .nm-pv{overflow-wrap:anywhere}
+.v11 .level .t-h3{color:#fff}
+.v11 .lb{border-top:1px solid var(--ink)}
+.v11 .acts2 [role="status"]{font-size:var(--t-label);color:var(--ink);font-weight:600}
+.v11 .rcp{max-width:720px}
+.v11 .rcp-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;padding-bottom:16px;border-bottom:1px solid var(--ink)}
+.v11 .rcp-parties{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 24px;margin-top:24px}
+.v11 .rcp-parties div{display:grid;gap:2px}
+.v11 .rcp-parties dd{font-weight:600;color:var(--ink)}
+.v11 .rcp-lines{margin-top:28px;border-top:1px solid var(--ink)}
+.v11 .rcp-lines li,.v11 .rcp-sum > div{display:flex;justify-content:space-between;gap:16px;padding:12px 0}
+.v11 .rcp-lines li{border-bottom:1px solid var(--rule)}
+.v11 .rcp-sum{margin-top:8px}
+.v11 .rcp-sum dd{font-weight:600;color:var(--ink)}
+.v11 .rcp-sum .tot{border-top:1px solid var(--ink);margin-top:8px;padding-top:14px}
+.v11 .rcp-sum .tot dd{font-size:var(--t-h3)}
+@media (max-width:520px){.v11 .rcp-parties{grid-template-columns:1fr}}
+@media print{
+  .v11 .ah,.v11 .subnav,.v11 .tabbar,.v11 .site-hd,.v11 .noprint{display:none !important}
+  .v11{min-height:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .v11 .pg{padding:0}
+  .v11 .cert-pg{background:#fff;padding:0;min-height:0}
+  .v11 .cert{padding:0;max-width:none}
+  .v11 .cert article{padding:0}
+}

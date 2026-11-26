@@ -38,8 +38,17 @@ const fmt = (o: Intl.DateTimeFormatOptions) => {
   return (iso: string | Date) => f.format(new Date(iso))
 }
 export const weekday = fmt({ weekday: 'short' })
-export const dayOfMonth = fmt({ day: '2-digit' })
+export const dayNum = fmt({ day: 'numeric' })
 export const monthName = fmt({ month: 'short' })
+export const weekdayLong = fmt({ weekday: 'long' })
+export const monthYear = fmt({ month: 'long', year: 'numeric' })
+
+const istDay = (t: number | string | Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(t))
+/** "today" or "tomorrow" when the class falls on those days in India, otherwise null. */
+export function dayWord(iso: string, now: number): 'today' | 'tomorrow' | null {
+  const d = istDay(iso)
+  return d === istDay(now) ? 'today' : d === istDay(now + 86_400_000) ? 'tomorrow' : null
+}
 
 export const calendarLink = (s: ClassSession) => {
   const f = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')

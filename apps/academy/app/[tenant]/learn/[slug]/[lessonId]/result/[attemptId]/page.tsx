@@ -2,12 +2,14 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { z } from 'zod'
-import { Icon } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
-import { getLearnCourse } from '@/lib/learn'
+import { getLearnCourse, getLessonContent } from '@/lib/learn'
 import { getShell } from '@/lib/shell'
 import { LearnerShell } from '../../../../../_components/learner-shell'
-import { backLink, buttonLg, buttonLine, chipClass, h1s } from '@/lib/ui'
+import { placeOf } from '../../../../_components/lesson-meta'
+import type { QuizOverviewData } from '../../../../_components/quiz-overview'
+import '../../../../_components/study.css'
+import { ReviewList, type ReviewItem } from './review-list'
 
 export const metadata: Metadata = { title: 'Quiz result' }
 
@@ -18,95 +20,91 @@ interface Result {
   review: { id: string; text: string; options: { id: string; content?: { text?: string } }[]; selected: string | string[] | null; correct: string[]; is_correct: boolean | null; marks: number | null; max_marks: number; explanation: string | null }[] | null
 }
 
+/*
+ * The result: the score is the picture (a big numeral, like a calendar day), then one sentence, then the way on.
+ * Wrong answers show the right one in the same row, in plain words; no red. Next lesson is the one filled button.
+ */
 export default async function QuizResult({ params }: PageProps<'/[tenant]/learn/[slug]/[lessonId]/result/[attemptId]'>) {
   const { slug, lessonId, attemptId } = await params
   if (!z.uuid().safeParse(lessonId).success || !z.uuid().safeParse(attemptId).success) notFound()
   const a = await requireMember(`/learn/${slug}/${lessonId}/result/${attemptId}`)
   const shell = await getShell()
   const courseHome = getLearnCourse(a, slug)
+  const lessonHome = getLessonContent(a, lessonId)
   const { data, error } = await a.db.rpc('get_attempt_result', { p_attempt_id: attemptId })
   if (error) {
     if (error.message.includes('attempt_open')) redirect(`/learn/${slug}/${lessonId}/attempt/${attemptId}`)
     notFound()
   }
   const r = data as unknown as Result
-  const chosen = (sel: Result['review'] extends (infer R)[] | null ? R : never, id: string) => (Array.isArray(sel.selected) ? sel.selected.includes(id) : sel.selected === id)
 
   const course = await courseHome
   const at = course ? course.order.findIndex((l) => l.id === lessonId) : -1
   const next = course && at >= 0 ? course.order[at + 1] : undefined
+  const place = placeOf(course?.sections, lessonId)
+
+  // The quiz's own rules (pass mark, tries) live on its overview; the result itself does not carry them.
+  const lesson = await lessonHome
+  const ov = lesson?.testId ? await a.db.rpc('get_test_overview', { p_test_id: lesson.testId }) : null
+  const o = ov && !ov.error ? (ov.data as unknown as QuizOverviewData | null) : null
+  const left = o && o.max_attempts !== null ? Math.max(o.max_attempts - o.attempts.length - (o.open_attempt_id ? 1 : 0), 0) : null
+  const canRetry = Boolean(o && o.question_count > 0 && (left === null || left > 0))
+
   const passed = r.results_shown && r.is_passed === true
   const failed = r.results_shown && r.is_passed === false
   const pct = Math.round(Number(r.percentage ?? 0))
+  const minutes = r.time_taken_seconds ? `${Math.max(1, Math.round(r.time_taken_seconds / 60))} ${Math.round(r.time_taken_seconds / 60) <= 1 ? 'minute' : 'minutes'}` : null
+  const sentence = [
+    o && o.pass_pct !== null ? `You needed ${o.pass_pct}% to pass.` : null,
+    `Attempt ${r.attempt_no}${o && o.max_attempts !== null ? ` of ${o.max_attempts}` : ''}${minutes ? ` · ${minutes}` : ''}`,
+  ].filter(Boolean).join(' ') + '.'
+
+  const textOf = (q: NonNullable<Result['review']>[number], ids: string[]) => q.options.filter((x) => ids.includes(x.id)).map((x) => x.content?.text ?? '').filter(Boolean).join(', ')
+  const items: ReviewItem[] = (r.review ?? []).map((q, n) => {
+    const mine = q.selected == null ? [] : Array.isArray(q.selected) ? q.selected : [q.selected]
+    const right = q.is_correct === true ? true : mine.length === 0 ? null : false
+    return {
+      id: q.id, n: n + 1, text: q.text, right, yours: mine.length ? textOf(q, mine) : null, answer: textOf(q, q.correct),
+      marks: `${Number(q.marks ?? 0)} of ${Number(q.max_marks)} ${Number(q.max_marks) === 1 ? 'mark' : 'marks'}`, explanation: q.explanation,
+    }
+  })
+
+  const retry = canRetry && (failed || passed) ? `${failed ? 'Try again' : 'Take it again'}${left !== null ? ` (${left} ${left === 1 ? 'try' : 'tries'} left)` : ''}` : null
+  const forward = next
+    ? { href: `/learn/${slug}/${next.id}`, label: `Next lesson: ${next.title}` }
+    : { href: `/learn/${slug}/material`, label: 'Back to my course' }
 
   return (
-    <LearnerShell a={a} shell={shell} active="lessons">
-      <article className="max-w-[880px]">
-        <Link href={`/learn/${slug}/${lessonId}`} className={backLink}><Icon name="back" />{r.title}</Link>
-        <div className="mt-7 flex flex-col items-start gap-3.5">
-          <span className={chipClass(passed ? 'ok' : failed ? 'bad' : 'quiet')}>{passed ? 'Passed' : failed ? 'Not passed yet' : 'Submitted'}</span>
-          <h1 className={h1s}>{r.results_shown ? (r.is_passed === null ? 'Quiz submitted' : r.is_passed ? 'You passed. Nicely done.' : 'Not quite there yet') : 'Quiz submitted'}</h1>
-          {r.results_shown && r.score !== null && (
-            <p className="font-heading text-[clamp(64px,8vw,104px)] font-extrabold leading-[.95] tracking-[-0.06em]" data-testid="result-score">
-              {Number(r.score)} <small className="text-[.36em] font-semibold tracking-[-0.02em] text-mute">of {Number(r.max_score)}</small>
-            </p>
-          )}
-        </div>
+    <LearnerShell a={a} shell={shell} active="lessons" focus={{ backHref: `/learn/${slug}/material`, backLabel: 'My course', where: place ? `${place.label} · ${r.title}` : r.title }}>
+      <div className="qz">
+        {r.results_shown && r.score !== null ? (
+          <div className="score"><b data-testid="result-score">{Number(r.score)}</b><span className="t-h3">out of {Number(r.max_score)}</span></div>
+        ) : null}
+        <h1 className="t-title" style={{ marginTop: 12 }}>
+          {r.results_shown && r.is_passed !== null ? (r.is_passed ? `You passed the ${r.title}` : 'Not quite there yet') : `${r.title} submitted`}
+        </h1>
         {r.results_shown && r.score !== null ? (
           <>
-            <p className="sr-only" data-testid="result-detail">{pct}% · {r.correct} correct · {r.incorrect} wrong · {r.unattempted} unanswered</p>
-            <dl className="mt-7 grid grid-cols-3 justify-start border-y-2 border-fg" aria-hidden="true">
-              {[[`${pct}%`, 'Score'], [String(r.correct), 'Correct'], [String(r.incorrect), 'Wrong']].map(([v, l], n) => (
-                <div key={l} className={`py-[18px] ${n < 2 ? 'border-r border-border pr-4 max-sm:pr-3' : ''} ${n > 0 ? 'pl-5 max-sm:pl-3' : ''}`}>
-                  <dt className="font-heading text-[32px] font-bold tracking-[-0.04em]">{v}</dt><dd className="text-sm text-mute">{l}</dd>
-                </div>
-              ))}
-            </dl>
+            <p className="t-lead" style={{ marginTop: 8 }}>{sentence}</p>
+            <p className="sr" data-testid="result-detail">{pct}% · {r.correct} correct · {r.incorrect} wrong · {r.unattempted} unanswered</p>
           </>
-        ) : <p className="mt-4 max-w-lg text-lg text-grey">Your answers are recorded. Your result will be shown when the academy publishes it.</p>}
-        {failed && <p className="mt-5 text-[17px] text-grey">Read the review below, then try again.</p>}
-        <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-3.5">
-          {failed
-            ? <Link href={`/learn/${slug}/${lessonId}`} className={`${buttonLg} max-sm:w-full`}>Try again</Link>
-            : next
-              ? <Link href={`/learn/${slug}/${next.id}`} className={`${buttonLg} max-sm:w-full`}>Next: {next.title} <span aria-hidden="true">→</span></Link>
-              : <Link href={`/learn/${slug}/${lessonId}`} className={`${buttonLg} max-sm:w-full`}>Back to the lesson</Link>}
-          <Link href={`/learn/${slug}`} className={`${buttonLine} max-sm:w-full`}>Course home</Link>
+        ) : <p className="t-lead" style={{ marginTop: 8 }}>Your answers are recorded. Your result will be shown when the academy publishes it.</p>}
+        {failed && items.length > 0 && <p className="t-body" style={{ marginTop: 8 }}>Read your answers below, then try again.</p>}
+
+        <div className="acts">
+          {failed && retry
+            ? <>
+                <Link href={forward.href} className="btn btn-line btn-sm">{forward.label}</Link>
+                <Link href={`/learn/${slug}/${lessonId}`} className="btn">{retry}</Link>
+              </>
+            : <>
+                {retry ? <Link href={`/learn/${slug}/${lessonId}`} className="btn btn-line btn-sm">{retry}</Link> : <Link href={`/learn/${slug}/${lessonId}`} className="link link-s">Back to the quiz</Link>}
+                <Link href={forward.href} className="btn">{forward.label}</Link>
+              </>}
         </div>
 
-        {r.review && (
-          <section className="mt-14">
-            <h2 className="font-heading text-[22px] font-bold tracking-[-0.02em]">Review</h2>
-            <ol className="mt-3.5 border-t-2 border-fg">
-              {r.review.map((q, n) => (
-                <li key={q.id} className="border-b border-border py-7" data-testid="review-item">
-                  <p className="text-sm text-mute" data-testid="review-verdict">
-                    {q.is_correct === true ? <b className="text-ok-ink">Correct</b> : q.selected == null || (Array.isArray(q.selected) && !q.selected.length) ? <b className="text-grey">Not answered</b> : <b className="text-danger-ink">Not correct</b>}
-                    <span> · question {n + 1} · {Number(q.marks ?? 0)} of {Number(q.max_marks)}</span>
-                  </p>
-                  <p className="mt-1 whitespace-pre-line font-heading text-2xl font-bold leading-tight tracking-[-0.03em]">{q.text}</p>
-                  <ul className="mt-5 grid max-w-[640px] gap-3">
-                    {q.options.map((o, k) => {
-                      const right = q.correct.includes(o.id)
-                      const mine = chosen(q, o.id)
-                      const tone = right ? 'border-success bg-ok-bg' : mine ? 'border-danger bg-danger-bg' : 'border-border bg-white'
-                      const key = right ? 'border-success bg-success text-white' : mine ? 'border-danger bg-danger text-white' : 'border-field'
-                      return (
-                        <li key={o.id} className={`flex items-center gap-4 rounded-2xl border-2 px-5 py-4 text-lg font-medium leading-snug ${tone}`}>
-                          <span aria-hidden="true" className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 text-sm font-bold ${key}`}>{'ABCDEFGHIJKL'[k]}</span>
-                          <span>{o.content?.text}</span>
-                          <em className="ml-auto whitespace-nowrap text-sm font-semibold not-italic">{[mine ? 'Your answer' : null, right ? 'Correct answer' : null].filter(Boolean).join(' · ')}</em>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                  {q.explanation && <div className="mt-4 max-w-[640px] rounded-[14px] bg-tint-2 px-5 py-4 text-base leading-snug"><b className="mb-1 block">Explanation</b>{q.explanation}</div>}
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-      </article>
+        {items.length > 0 && <ReviewList items={items} />}
+      </div>
     </LearnerShell>
   )
 }

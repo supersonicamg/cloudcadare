@@ -1,128 +1,137 @@
 import Link from 'next/link'
-import { Icon } from '@educore/ui/marks'
 import { dateShort, timeShort } from '@/lib/format'
-import { calendarLink, dayOfMonth, isOpenNow, joinOpensAt, monthName, weekday, type ClassSession } from '@/lib/live'
+import { calendarLink, dayNum, dayWord, isOpenNow, joinOpensAt, monthName, monthYear, weekday, weekdayLong, type ClassSession } from '@/lib/live'
 import type { MaterialLesson } from '@/lib/material'
-import { buttonLg, buttonOutline } from '@/lib/ui'
+import { Ic } from './v11'
+import './home-live.css'
 
 // Live classes, as shown on Home and on the Live classes page: the next class, the list after it, and class recordings.
 
-const External = () => (
-  <svg className="lx-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" /></svg>
-)
+/** "8 pm to 10 pm" */
+const range = (s: ClassSession) => `${timeShort(s.startsAt)} to ${timeShort(s.endsAt)}`
 
-export function DateBlock({ iso, soft = false }: { iso: string; soft?: boolean }) {
-  return (
-    <span className={`lx-date${soft ? ' soft' : ''}`}>
-      <b>{dayOfMonth(iso)}</b>
-      <span>{weekday(iso)} · {monthName(iso)}</span>
-    </span>
-  )
+/** "1 h 52 min", "47 min". */
+export function duration(seconds: number) {
+  const m = Math.max(1, Math.round(seconds / 60))
+  return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? `${m % 60} min` : ''}`.trim() : `${m} min`
 }
 
-/** Later classes: weekday and date, title, time. */
-export function ClassList({ sessions }: { sessions: ClassSession[] }) {
+/** Later classes: weekday and date, title, time. `rows` draws the heavy top rule (a list on its own, not inside a card). */
+export function ClassList({ sessions, rows = false }: { sessions: ClassSession[]; rows?: boolean }) {
   return (
-    <ol className="lx-sched">
+    <ol className={`sched${rows ? ' rows flush' : ''}`}>
       {sessions.map((s) => (
         <li key={s.id}>
           <span className="dy">{weekday(s.startsAt)}<span>{dateShort(s.startsAt)}</span></span>
-          <span><b>{s.title}</b><span className="by">{timeShort(s.startsAt)} to {timeShort(s.endsAt)}</span></span>
+          <span><b className="t-card">{s.title}</b><br /><span className="t-label">{range(s)}</span></span>
+          <span />
         </li>
       ))}
     </ol>
   )
 }
 
-/** What to do about a class: join while it is open (the one filled button), otherwise add it to a calendar. */
-function ClassAction({ s, now, filled }: { s: ClassSession; now: number; filled: boolean }) {
+/**
+ * What to do about a class. While it is open the one filled button is "Join" (it goes through /api/live/[id]/join, which
+ * opens the link only inside the class window and records attendance). Before that the only action is the calendar link,
+ * with a line that says exactly when Join appears.
+ */
+export function ClassAction({ s, now, full = false }: { s: ClassSession; now: number; full?: boolean }) {
   const open = isOpenNow(s, now)
   const label = s.teams ? 'Join on Teams' : 'Join class'
+  if (open) {
+    return (
+      <>
+        <a href={`/api/live/${s.id}/join`} target="_blank" rel="noopener noreferrer" className={`btn${full ? ' btn-full' : ''}`}>{label}</a>
+        <p className="t-label">{s.teams ? 'Opens Microsoft Teams in a new tab.' : 'Opens in a new tab.'} Your attendance is noted.</p>
+      </>
+    )
+  }
   return (
     <>
-      {open ? (
-        <a href={`/api/live/${s.id}/join`} target="_blank" rel="noopener noreferrer" className={filled ? `${buttonLg} max-[720px]:w-full` : `${buttonOutline} max-[720px]:w-full`}>{label}<External /></a>
-      ) : (
-        <a href={calendarLink(s)} target="_blank" rel="noopener noreferrer" className={`${buttonOutline} max-[720px]:w-full`}><Icon name="calendar" className="lx-i" />Add to calendar</a>
-      )}
-      <span className="hint">{open ? (s.teams ? 'Opens Microsoft Teams in a new tab.' : 'Opens in a new tab.') : `The “${label}” button appears here at ${joinOpensAt(s)}.`}</span>
+      <a href={calendarLink(s)} target="_blank" rel="noopener noreferrer" className={`btn btn-line btn-sm${full ? ' btn-full' : ''}`}><Ic n="cal" />Add to calendar</a>
+      <p className="t-label">The “{label}” button appears here at {joinOpensAt(s)}.</p>
     </>
   )
 }
 
-/** The big card on the Live classes page: the next class and what to do about it. */
+/** The next class on the Live classes page: the day as a numeral, then the title, then what to do. */
 export function NextClassHero({ s, now }: { s: ClassSession; now: number }) {
   const open = isOpenNow(s, now)
+  const word = dayWord(s.startsAt, now)
   return (
-    <article className={`lx-hero${open ? ' on' : ''}`} aria-label={open ? 'Class on now' : 'Next class'}>
-      <DateBlock iso={s.startsAt} />
-      <div className="min-w-0">
-        <span className="lx-k">{open ? 'On now' : 'Next class'}</span>
-        <h2>{s.title}</h2>
-        <p className="when"><Icon name="clock" className="lx-i" />{weekday(s.startsAt)} {dateShort(s.startsAt)}, {timeShort(s.startsAt)} to {timeShort(s.endsAt)}</p>
+    <article className="nxt" aria-labelledby="nxt-h">
+      <div className="cal">
+        <span className="mo">{monthYear(s.startsAt)}</span>
+        <span className="d">{dayNum(s.startsAt)}</span>
+        <span className="t-label">{weekdayLong(s.startsAt)}</span>
       </div>
-      <div className="act"><ClassAction s={s} now={now} filled /></div>
+      <div className="mid">
+        {open ? <p className="on-now"><i />On now</p> : <p className="t-label">Next class{word ? ` · ${word}` : ''}</p>}
+        <h3 className="t-h3" id="nxt-h">{s.title}</h3>
+        <p className="t-small">{range(s)}{s.teams ? ' · Microsoft Teams' : ''}</p>
+      </div>
+      <div className="act"><ClassAction s={s} now={now} /></div>
     </article>
   )
 }
 
-/** The small card on Home. */
-export function NextClassCard({ s, now, filled }: { s: ClassSession; now: number; filled: boolean }) {
+/** The next-class card on Home. */
+export function NextClassCard({ s, now }: { s: ClassSession; now: number }) {
   const open = isOpenNow(s, now)
+  const word = dayWord(s.startsAt, now)
+  const day = word ? `${word[0]!.toUpperCase()}${word.slice(1)}` : `${weekday(s.startsAt)} ${dateShort(s.startsAt)}`
   return (
-    <section className={`lx-card lx-class${open ? ' on' : ''}`} aria-label={open ? 'Class on now' : 'Next live class'}>
-      <div>
-        <p className="lx-k">{open ? 'Class on now' : 'Next live class'}</p>
-        <div className="lx-class-body">
-          <DateBlock iso={s.startsAt} />
-          <div className="min-w-0">
-            <h2>{s.title}</h2>
-            <p className="when"><Icon name="clock" className="lx-i" />{timeShort(s.startsAt)} to {timeShort(s.endsAt)}</p>
-          </div>
+    <section className="card ncls" aria-labelledby="ncls-k">
+      {open ? <p className="on-now" id="ncls-k"><i />Class on now</p> : <p className="t-label" id="ncls-k">Next live class</p>}
+      <div className="ncls-row">
+        <span className={`dblk${open ? ' on' : ''}`} aria-hidden="true"><b>{dayNum(s.startsAt)}</b><span>{weekday(s.startsAt)} · {monthName(s.startsAt)}</span></span>
+        <div>
+          <h2 className="t-card">{s.title}</h2>
+          <p className="t-small">{day}, {range(s)}{s.teams ? ' · Microsoft Teams' : ''}</p>
         </div>
       </div>
-      <div className="grid gap-2.5"><ClassAction s={s} now={now} filled={filled} /></div>
+      <div className="foot"><ClassAction s={s} now={now} full /></div>
     </section>
   )
 }
 
+/** One recording: the picture is the date (you remember a class by its day), the line is the learner's own state. */
 export function RecordingCard({ slug, lesson: l, at }: { slug: string; lesson: MaterialLesson; at: string | null }) {
   const link = l.recording === 'link'
   const ready = l.recording !== 'none'
-  const minutes = l.durationSeconds ? Math.max(1, Math.round(l.durationSeconds / 60)) : null
-  const notes = l.noteCount ? <span><Icon name="note" className="lx-i" />{l.noteCount} {l.noteCount === 1 ? 'note' : 'notes'}</span> : null
-  const state = !ready ? <span>Recording on its way</span>
-    : link ? <span><External />Opens in Microsoft Teams</span>
-    : l.done ? <><span className="ok"><Icon name="check" className="lx-i" />Watched</span>{notes}</>
-    : <><span>{l.pct > 0 ? `${l.pct}% watched` : l.isNew ? 'New' : 'Not watched yet'}</span>{notes}</>
+  const notes = l.noteCount ? ` · ${l.noteCount} ${l.noteCount === 1 ? 'note' : 'notes'}` : ''
+  const when = at ? <span className="t-label">{weekdayLong(at)}</span> : null
+  const state = !ready ? <span className="t-label">Recording on its way</span>
+    : link ? <span className="t-label">Opens in Microsoft Teams</span>
+    : l.done ? <span className="st"><Ic n="check" />Watched{notes}</span>
+    : l.pct > 0 ? <span className="t-label"><b>{l.pct}% watched</b>{notes}</span>
+    : l.isNew ? <span className="t-label"><b>New</b>{notes}</span>
+    : <span className="t-label">Not watched yet{notes}</span>
   const body = (
     <>
-      <span className={`lx-thumb${link || !ready ? ' soft' : ''}`}>
-        {at && <span className="when" aria-hidden="true"><b>{dayOfMonth(at)}</b><span>{monthName(at)}</span></span>}
-        {link && <span className="src"><External />Teams link</span>}
-        {ready && !link && <span className="play"><Icon name="play" /></span>}
-        {minutes && <span className="dur">{minutes} min</span>}
-        {!link && l.pct > 0 && !l.done && <span className="wp"><i style={{ width: `${l.pct}%` }} /></span>}
+      <span className={`rth${link || !ready ? ' soft' : ''}`}>
+        {at && <span className="d"><b>{dayNum(at)}</b><span>{monthName(at)}</span></span>}
+        {link && <span className="src"><Ic n="ext" s />Teams link</span>}
+        {ready && !link && <span className="pl"><Ic n="play" /></span>}
+        {ready && !link && l.durationSeconds ? <span className="du">{duration(l.durationSeconds)}</span> : null}
+        {ready && !link && l.pct > 0 && !l.done && <span className="wp"><i style={{ width: `${l.pct}%` }} /></span>}
       </span>
-      <span className="tx">
-        {at && <span className="d">{weekday(at)} {dateShort(at)}</span>}
-        <b>{l.title}</b>
-        <span className="p">{state}</span>
-      </span>
+      <span className="tx">{when}<b className="t-card">{l.title}</b>{state}</span>
     </>
   )
-  if (!ready) return <div className="lx-rec">{body}</div>
+  if (!ready) return <div className="rec">{body}</div>
   return link
-    ? <a className="lx-rec" href={`/api/recording/${l.id}`} target="_blank" rel="noopener noreferrer">{body}</a>
-    : <Link className="lx-rec" href={`/learn/${slug}/${l.id}`}>{body}</Link>
+    ? <a className="rec" href={`/api/recording/${l.id}`} target="_blank" rel="noopener noreferrer">{body}</a>
+    : <Link className="rec" href={`/learn/${slug}/${l.id}`}>{body}</Link>
 }
 
 /** A held class whose recording has no lesson yet. */
 export function PendingRecording({ session }: { session: ClassSession }) {
   return (
-    <div className="lx-rec">
-      <span className="lx-thumb soft"><span className="when" aria-hidden="true"><b>{dayOfMonth(session.startsAt)}</b><span>{monthName(session.startsAt)}</span></span></span>
-      <span className="tx"><span className="d">{weekday(session.startsAt)} {dateShort(session.startsAt)}</span><b>{session.title}</b><span className="p">Recording on its way. It is usually up the same night.</span></span>
+    <div className="rec">
+      <span className="rth soft"><span className="d"><b>{dayNum(session.startsAt)}</b><span>{monthName(session.startsAt)}</span></span></span>
+      <span className="tx"><span className="t-label">{weekdayLong(session.startsAt)}</span><b className="t-card">{session.title}</b><span className="t-label">Recording on its way. It is usually up the same night.</span></span>
     </div>
   )
 }

@@ -100,7 +100,7 @@ test.describe.serial('quizzes', () => {
       for (const name of pick) await page.getByRole(pick.length > 1 || q.startsWith('Pick') ? 'checkbox' : 'radio', { name, exact: true }).check()
     }
     await answer('Which service stores objects?', ['S3'])
-    await page.getByRole('button', { name: 'Next', exact: true }).click()
+    await page.getByRole('button', { name: 'Next question', exact: true }).click()
     await answer('Pick the compute services', ['EC2'])   // incomplete: Lambda missing, so wrong
     await expect(page.getByText('Saved', { exact: true })).toBeVisible()
 
@@ -109,7 +109,7 @@ test.describe.serial('quizzes', () => {
     await expect(page.getByTestId('quiz-progress')).toContainText('Question 3 of 3 · 2 answered') // resumes at the first unanswered question
     await page.getByRole('button', { name: 'Previous' }).click()
     await expect(page.getByRole('checkbox', { name: 'EC2', exact: true })).toBeChecked()
-    await page.getByRole('button', { name: 'Next', exact: true }).click()
+    await page.getByRole('button', { name: 'Next question', exact: true }).click()
     await page.getByRole('radio', { name: 'True', exact: true }).check()
     await page.getByRole('button', { name: 'Finish the quiz' }).click()
     await expect(page.getByRole('alertdialog')).toContainText('Submit your answers?')

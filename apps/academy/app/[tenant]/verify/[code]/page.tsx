@@ -1,47 +1,54 @@
 import type { Metadata } from 'next'
 import { getCertificateByCode } from '@educore/core/catalog'
-import { Icon } from '@educore/ui/marks'
 import { getShell } from '@/lib/shell'
-import { h1s } from '@/lib/ui'
+import { Ic, V11Frame } from '../../_components/v11'
+import { SiteBar } from '../../_components/v11-bars'
+import '../../account/account.css'
 import { CodeForm } from './code-form'
 
 export const metadata: Metadata = { title: 'Verify a certificate', robots: { index: false, follow: false } }
 
-/** Public: anyone with the code (printed on the certificate) can check it. */
+/** Public: anyone with the code (printed on the certificate) can check it. A plain facts page: the answer first, then the facts. */
 export default async function Verify({ params }: PageProps<'/[tenant]/verify/[code]'>) {
   const { code } = await params
-  const { bundle, theme, brand, nav, account, site } = await getShell()
+  const { bundle, brand } = await getShell()
   // A mistyped code is a normal case here: answer "not found" with the form, not a 404.
-  const c = /^[A-Za-z0-9]{12}$/.test(code) ? await getCertificateByCode(bundle.tenant.id, code.toUpperCase()) : null
-
-  const fmt = c && new Date(c.issuedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
-  const band = 'flex items-center gap-4 rounded-[18px] px-[22px] py-5 text-[22px] font-bold tracking-[-0.02em]'
+  const valid = /^[A-Za-z0-9]{12}$/.test(code)
+  const c = valid ? await getCertificateByCode(bundle.tenant.id, code.toUpperCase()) : null
+  const fmt = c && new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(c.issuedAt))
 
   return (
-    <theme.SiteLayout brand={brand} nav={nav} account={account} site={site}>
-      <section className="mx-auto max-w-[760px] px-5 pb-20 pt-8 md:pt-10">
-        <h1 className={h1s}>Certificate check</h1>
+    <V11Frame shell="site" header={<SiteBar brand={brand} />}>
+      <div className="vpg">
+        <h1 className="t-title">Certificate check</h1>
+        {valid && <p className="t-lead" style={{ marginTop: 8 }}>Code <b className="tnum">{code.toUpperCase()}</b></p>}
+
         {!c ? (
-          <div className="mt-6">
-            <p className={`${band} bg-[#ECE8DD]`} data-testid="verify-result"><Icon name="info" className="h-[34px] w-[34px] shrink-0" />No certificate found for this code.</p>
-            <p className="mt-6 text-[17px] text-grey">No certificate with this code was issued by {brand.name}. Check the code and try again.</p>
-            <CodeForm />
+          <div className="vres no">
+            <span className="ti lg"><Ic n="info" /></span>
+            <div>
+              <p className="t-h3" data-testid="verify-result">No certificate has this code.</p>
+              <p className="t-small">Check each letter and number, then try again.</p>
+            </div>
           </div>
         ) : (
-          <div className="mt-6">
-            <p className={`${band} ${c.revoked ? 'bg-danger-bg text-danger-ink' : 'bg-ok-bg text-ok-ink'}`} data-testid="verify-result">
-              <Icon name={c.revoked ? 'info' : 'shield'} className="h-[34px] w-[34px] shrink-0" strokeWidth={2.4} />{c.revoked ? 'This certificate has been revoked.' : 'This certificate is genuine.'}
-            </p>
-            <dl className="mt-7 grid gap-x-5 gap-y-0.5 border-t-2 border-fg pt-6 text-[17px] sm:grid-cols-[9rem_1fr] sm:gap-y-3">
-              <dt className="text-mute">Awarded to</dt><dd className="mb-3 font-semibold sm:mb-0">{c.recipientName}</dd>
-              <dt className="text-mute">For</dt><dd className="mb-3 font-semibold sm:mb-0">{c.title}</dd>
-              <dt className="text-mute">Issued by</dt><dd className="mb-3 font-semibold sm:mb-0">{c.academy}</dd>
-              <dt className="text-mute">Issued on</dt><dd className="mb-3 font-semibold sm:mb-0">{fmt}</dd>
-              <dt className="text-mute">Number</dt><dd className="font-semibold">{c.serialNo}</dd>
+          <>
+            <div className={`vres${c.revoked ? ' no' : ''}`}>
+              <span className={`ti lg${c.revoked ? '' : ' done'}`}><Ic n={c.revoked ? 'info' : 'shield'} /></span>
+              <p className="t-h3" data-testid="verify-result">{c.revoked ? 'This certificate was withdrawn.' : 'This certificate is genuine.'}</p>
+            </div>
+            <dl className="facts">
+              <div><dt>Awarded to</dt><dd>{c.recipientName}</dd><span /></div>
+              <div><dt>For</dt><dd>{c.title}</dd><span /></div>
+              <div><dt>Issued by</dt><dd>{c.academy}</dd><span /></div>
+              <div><dt>Issued on</dt><dd>{fmt}</dd><span /></div>
+              <div><dt>Number</dt><dd className="tnum">{c.serialNo}</dd><span /></div>
             </dl>
-          </div>
+          </>
         )}
-      </section>
-    </theme.SiteLayout>
+
+        <CodeForm />
+      </div>
+    </V11Frame>
   )
 }

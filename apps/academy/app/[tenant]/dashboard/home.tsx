@@ -1,15 +1,12 @@
 import Link from 'next/link'
-import { Icon, type IconName } from '@educore/ui/marks'
 import type { Enrolled } from '@/lib/dashboard'
 import { KIND } from '@/lib/dashboard'
-import { courseAbbr } from '@/lib/format'
+import { courseAbbr, dateShort } from '@/lib/format'
 import type { MyEnrollment } from '@/lib/learn'
 import { isOpenNow } from '@/lib/live'
-import { buttonLg, buttonOutline } from '@/lib/ui'
 import { NextClassCard } from '../_components/live'
-import { MonthClimb, type ClimbLesson, type ClimbMonth } from './month-climb'
-
-const ICON: Record<string, IconName> = { video: 'video', live: 'live', pdf: 'doc', document: 'doc', image: 'image', article: 'book', quiz: 'quiz', test: 'quiz', download: 'down', external_link: 'link', lab: 'lab' }
+import { Dg, Ic, diagramOfMonth, type IconName } from '../_components/v11'
+import { LESSON_ICON, MonthCards, type MonthCardData } from './parts'
 
 /** "Good morning" for a clock in India. */
 function greeting(now: number) {
@@ -17,29 +14,36 @@ function greeting(now: number) {
   return h < 5 ? 'Hello' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Hello'
 }
 
-/** What the climb shows for each month: the next few lessons, in reading order, open ones first. */
-function climbMonths(d: Enrolled): ClimbMonth[] {
-  return d.m.months.map((mo, i) => {
-    const info = d.months[i]!
-    const todo = mo.lessons.filter((l) => !l.done)
-    const ordered = [...todo.filter((l) => !l.lock), ...todo.filter((l) => l.lock)]
-    const next = ordered.slice(0, 4).map<ClimbLesson>((l) => ({
-      id: l.id, title: l.title, icon: ICON[l.type] ?? 'doc', kind: KIND[l.type] ?? 'Lesson',
-      state: l.lock ? 'locked' : l.pct > 0 ? 'half' : 'todo',
-      fact: l.lock ? (l.lock.unlocksAt ? `Opens ${new Date(l.lock.unlocksAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : 'Finish earlier ones') : l.pct > 0 ? `${l.pct}% done` : l.isNew ? 'New' : l.durationSeconds ? `${Math.max(1, Math.round(l.durationSeconds / 60))} min` : '',
-    }))
-    return { id: mo.id, number: info.number, title: info.title, done: info.done, total: info.total, state: info.state, opensOn: info.opensOn, next, more: Math.max(0, mo.lessons.length - next.length) }
-  })
+const minutes = (seconds: number) => Math.max(1, Math.round(seconds / 60))
+
+/** What the "Next in Month N" list shows: the next few lessons of the month you are in, open ones first. */
+function nextIn(d: Enrolled) {
+  const mo = d.m.months[d.currentMonth]
+  if (!mo) return null
+  const todo = mo.lessons.filter((l) => !l.done)
+  const ordered = [...todo.filter((l) => !l.lock), ...todo.filter((l) => l.lock)].slice(0, 3)
+  return ordered.length ? { month: mo, info: d.months[d.currentMonth]!, lessons: ordered } : null
+}
+
+/** The four months as cards: your own progress on each. */
+function monthCards(d: Enrolled, slug: string): MonthCardData[] {
+  return d.months.map((m) => ({
+    id: m.id, title: m.title, state: m.state,
+    href: `/learn/${slug}/material?month=${m.id}`,
+    note: m.state === 'done' ? 'finished' : m.state === 'now' ? 'you are here' : m.state === 'locked' ? (m.opensOn ? `opens ${m.opensOn}` : 'not open yet') : undefined,
+    pct: m.total ? Math.round((m.done / m.total) * 100) : 0,
+    line: m.state === 'done' ? `All ${m.total} lessons done` : m.state === 'locked' ? `${m.total} ${m.total === 1 ? 'lesson' : 'lessons'}` : `${m.done} of ${m.total} done`,
+  }))
 }
 
 /**
  * Home, for a learner whose batch is running. It answers three questions, in this order, and nothing else:
- *   1. What do I do now?        -> the Continue card (the one filled button; "Join" takes over while a class is open)
- *   2. When is my next class?   -> the next live class
- *   3. Where am I in the course? -> the climb: four months, the one I am in open, what is next in it
+ *   1. What do I do now?         -> the Continue block (the one filled button; "Join" takes over while a class is open)
+ *   2. When is my next class?    -> the next live class
+ *   3. Where am I in the course? -> your months, and what is next in the one you are in
  * Everything else (every lesson, class recordings, notes) is one tap away in the menu.
  */
-export function EnrolledHome({ d, lead, first, joined, others, goal }: { d: Enrolled; lead: MyEnrollment; first: string; joined: boolean; others: MyEnrollment[]; goal?: string }) {
+export function EnrolledHome({ d, lead, first, joined, others }: { d: Enrolled; lead: MyEnrollment; first: string; joined: boolean; others: MyEnrollment[] }) {
   const { resume, upcoming, months } = d
   const base = `/learn/${lead.course.slug}`
   const finished = lead.status === 'completed'
@@ -49,75 +53,119 @@ export function EnrolledHome({ d, lead, first, joined, others, goal }: { d: Enro
   const pct = Math.round(lead.progressPct)
   const behind = d.released === null ? null : d.released - lead.lessonsCompleted
   const minutesLeft = resume?.durationSeconds && resume.pct > 0 ? Math.max(1, Math.round((resume.durationSeconds * (1 - resume.pct / 100)) / 60)) : null
-  const resumeIcon: IconName = resume ? (resume.type === 'video' || resume.type === 'live' ? 'play' : ICON[resume.type] ?? 'doc') : 'play'
+  const resumeIcon: IconName = resume ? (resume.type === 'video' || resume.type === 'live' ? 'play' : LESSON_ICON[resume.type] ?? 'doc') : 'play'
   const resumeMonth = resume ? d.m.months.findIndex((mo) => mo.lessons.some((l) => l.id === resume.id)) : -1
+  const upNext = nextIn(d)
 
   return (
     <>
-      <header className="lx-head">
+      <div className="pg-h">
         <div>
-          <h1 className="lx-h1">{joined ? 'Welcome' : greeting(d.now)}, {first}</h1>
-          <p className="lx-lede">{[d.batch?.name ?? lead.course.title, months.length ? `Month ${d.currentMonth + 1} of ${months.length}` : null].filter(Boolean).join(' · ')}</p>
+          <h1 className="t-title">{joined ? 'Welcome' : greeting(d.now)}, {first}</h1>
+          <p className="t-lead">{[d.batch?.name ?? lead.course.title, months.length ? `Month ${d.currentMonth + 1} of ${months.length}` : null].filter(Boolean).join(' · ')}</p>
         </div>
-      </header>
+      </div>
 
       {joined && (
-        <p role="status" className="lx-note good"><Icon name="check" /><span><b>You&apos;re in{d.batch ? ` the ${d.batch.name}` : ''}.</b> Your lessons and class recordings are open. There is nothing to pay.</span></p>
+        <p role="status" className="note-l top"><Ic n="check" /><span><b>You&apos;re in{d.batch ? ` the ${d.batch.name}` : ''}.</b> Your lessons and class recordings are open. There is nothing to pay.</span></p>
       )}
 
-      <div className="lx-two">
+      <div className="home-top">
         {resume ? (
-          <section className="lx-cont" aria-labelledby="resume-h">
-            <div className={`lx-cont-pic${resume.type === 'video' || resume.type === 'live' ? ' play' : ''}`} aria-hidden="true">
-              <span className="m">{resumeMonth >= 0 ? `Month ${resumeMonth + 1}` : 'Lesson'}</span>
-              <span className="b"><Icon name={resumeIcon} className={resumeIcon === 'play' ? 'fill' : undefined} /></span>
-              {resume.pct > 0 && !resume.done && <span className="w"><i style={{ width: `${resume.pct}%` }} /></span>}
+          <section className="cont dark" aria-labelledby="cont-k">
+            <div className="cont-pic">
+              <Dg id={diagramOfMonth((resumeMonth >= 0 ? resumeMonth : d.currentMonth) + 1)} label={false} />
+              <span className="play" aria-hidden="true"><Ic n={resumeIcon} /></span>
+              {resume.pct > 0 && !resume.done && <span className="wp" aria-hidden="true"><i style={{ width: `${resume.pct}%` }} /></span>}
             </div>
-            <div className="lx-cont-body">
-              <p className="lx-k" id="resume-h">{finished ? 'Review' : started ? 'Continue where you left off' : 'Start here'}</p>
-              <h2>{resume.title}</h2>
-              <p className="lx-meta">{[KIND[resume.type] ?? 'Lesson', minutesLeft ? `${minutesLeft} min left` : resume.durationSeconds ? `${Math.max(1, Math.round(resume.durationSeconds / 60))} min` : null].filter(Boolean).join(' · ')}</p>
+            <div className="cont-b">
+              <p className="t-label" id="cont-k">{finished ? 'Review' : started ? 'Continue where you left off' : 'Start here'}</p>
+              <h2 className="t-h3">{resume.title}</h2>
+              <p className="t-small">{[KIND[resume.type] ?? 'Lesson', minutesLeft ? `${minutesLeft} min left` : resume.durationSeconds ? `${minutes(resume.durationSeconds)} min` : null, resumeMonth >= 0 ? `Month ${resumeMonth + 1}` : null].filter(Boolean).join(' · ')}</p>
               {behind !== null && !finished && (
-                <p className="lx-pacechip">
-                  {behind <= 2 ? <><Icon name="check" className="lx-i" />You are on track with your batch.</> : <><Icon name="info" className="lx-i" />You are {behind} lessons behind your batch. This one helps you catch up.</>}
+                <p className="pace">
+                  {behind <= 2 ? <><Ic n="check" s />You are on track with your batch.</> : <><Ic n="info" s />You are {behind} lessons behind your batch. This one helps you catch up.</>}
                 </p>
               )}
-              <Link href={`${base}/${resume.id}`} className={`${classOn ? buttonOutline : buttonLg} max-[720px]:w-full`}>{finished ? 'Review from the start' : started ? 'Resume lesson' : 'Start learning'}<Icon name="chev" className="lx-i" /></Link>
+              <div className="acts-c">
+                <Link href={`${base}/${resume.id}`} className={classOn ? 'btn btn-line' : 'btn'}>{finished ? 'Review from the start' : started ? 'Resume lesson' : 'Start learning'}</Link>
+              </div>
             </div>
           </section>
         ) : (
-          <section className="lx-empty"><b>Lessons are on their way</b><p>They appear here as soon as they are published.</p></section>
+          <section className="card nada" aria-labelledby="cont-k">
+            <p className="t-card" id="cont-k">Lessons are on their way</p>
+            <p className="t-small">They appear here as soon as they are published.</p>
+          </section>
         )}
-        {next ? <NextClassCard s={next} now={d.now} filled={classOn} /> : (
-          <section className="lx-card lx-class" aria-label="Live classes">
-            <div><p className="lx-k">Next live class</p><p className="lx-lede">No class is scheduled right now. New classes show up here as soon as they are set up.</p></div>
-            <Link href={`${base}/live`} className={`${buttonOutline} max-[720px]:w-full`}>See recorded classes</Link>
+        {next ? <NextClassCard s={next} now={d.now} /> : (
+          <section className="card ncls" aria-labelledby="ncls-k">
+            <p className="t-label" id="ncls-k">Next live class</p>
+            <p className="t-small">No class is scheduled right now. New classes show up here as soon as they are set up.</p>
+            <div className="foot"><Link className="btn btn-line btn-sm btn-full" href={`${base}/live`}>See recorded classes</Link></div>
           </section>
         )}
       </div>
 
       {months.length > 0 && (
-        <section className="lx-sec" aria-labelledby="climb-h">
-          <div className="lx-sec-h">
-            <h2 className="lx-h2" id="climb-h">Your {months.length} months</h2>
-            <span className="lx-meta"><b>{pct}%</b> of {courseAbbr(lead.course.title)} done · {lead.lessonsCompleted} of {lead.lessonsTotal} lessons</span>
+        <section className="blk" aria-labelledby="mo-h">
+          <div className="blk-h">
+            <h2 className="t-h3" id="mo-h">Your {months.length} months</h2>
+            <p className="t-small"><b>{pct}%</b> of {courseAbbr(lead.course.title)} done · {lead.lessonsCompleted} of {lead.lessonsTotal} lessons</p>
           </div>
-          <MonthClimb months={climbMonths(d)} slug={lead.course.slug} goal={goal} label="Months of the program" />
+          <MonthCards months={monthCards(d, lead.course.slug)} />
+
+          {upNext && (
+            <div className="nextin">
+              <div className="blk-h">
+                <h3 className="t-card">Next in Month {d.currentMonth + 1}</h3>
+                <Link className="link link-s" href={`${base}/material?month=${upNext.month.id}`}>See all {upNext.info.total} lessons</Link>
+              </div>
+              <ul className="rows">
+                {upNext.lessons.map((l) => {
+                  const kind = [KIND[l.type] ?? 'Lesson', l.durationSeconds ? `${minutes(l.durationSeconds)} min` : null].filter(Boolean).join(' · ')
+                  const icon = LESSON_ICON[l.type] ?? 'doc'
+                  if (l.lock) {
+                    return (
+                      <li key={l.id}>
+                        <div className="row locked">
+                          <span className="ti lock"><Ic n="lock" /></span>
+                          <span className="tx"><b>{l.title}</b><span>{kind}</span></span>
+                          <span className="rt">{l.lock.unlocksAt ? `Opens ${dateShort(l.lock.unlocksAt)}` : 'Finish earlier ones'}</span>
+                        </div>
+                      </li>
+                    )
+                  }
+                  return (
+                    <li key={l.id}>
+                      <Link className="row" href={`${base}/${l.id}`}>
+                        <span className={`ti${l.pct > 0 ? ' half' : ''}`}><Ic n={icon} /></span>
+                        <span className="tx"><b>{l.title}</b><span>{kind}</span></span>
+                        <span className="rt">{l.pct > 0 ? <b>{l.pct}% done</b> : l.isNew ? <b>New</b> : null}<Ic n="chev" className="go" /></span>
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
         </section>
       )}
 
       {others.length > 0 && (
-        <section className="lx-sec" aria-labelledby="other-h">
-          <h2 className="lx-h2" id="other-h">Your other courses</h2>
-          <div className="lx-rows">
+        <section className="blk" aria-labelledby="other-h">
+          <div className="blk-h"><h2 className="t-h3" id="other-h">Your other courses</h2></div>
+          <ul className="rows">
             {others.map((e) => (
-              <Link key={e.id} href={`/learn/${e.course.slug}/material`}>
-                <span className="lx-ico"><Icon name="book" /></span>
-                <span><b>{e.course.title}</b><span className="lx-meta">{e.status === 'completed' ? 'Completed' : `${e.lessonsCompleted} of ${e.lessonsTotal} lessons`}</span></span>
-                <Icon name="chev" className="lx-i" />
-              </Link>
+              <li key={e.id}>
+                <Link className="row" href={`/learn/${e.course.slug}/material`}>
+                  <span className="ti"><Ic n="book" /></span>
+                  <span className="tx"><b>{e.course.title}</b><span>{e.status === 'completed' ? 'Completed' : `${e.lessonsCompleted} of ${e.lessonsTotal} lessons`}</span></span>
+                  <span className="rt"><Ic n="chev" className="go" /></span>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
     </>

@@ -67,11 +67,11 @@ test('UPI QR checkout: settings, QR for the exact amount, "I have paid", waiting
   // Upload: a text file renamed .png is refused by what is inside it; a real picture is accepted with a reference.
   await l.getByText('Or upload it here instead').click()
   await l.locator('#proof-file').setInputFiles({ name: 'fake.png', mimeType: 'image/png', buffer: Buffer.from('this is not a picture') })
-  await l.getByRole('button', { name: 'Send it to us' }).click()
+  await l.getByRole('button', { name: 'Upload', exact: true }).click()
   await expect(l.getByText('That file is not a picture or PDF, or it is over 5 MB.')).toBeVisible()
   await l.locator('#proof-file').setInputFiles({ name: 'paid.png', mimeType: 'image/png', buffer: PNG })
   await l.locator('#proof-utr').fill('4012 3456 7890')
-  await l.getByRole('button', { name: 'Send it to us' }).click()
+  await l.getByRole('button', { name: 'Upload', exact: true }).click()
   await expect(l.getByText('Received. We will check it.')).toBeVisible()
   await l.reload()
   await expect(l.getByRole('heading', { name: 'We have your screenshot' })).toBeVisible()

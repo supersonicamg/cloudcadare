@@ -73,7 +73,7 @@ test.describe.serial('progress, certificates and email', () => {
     await page.getByRole('link', { name: 'View' }).first().click()
     await expect(page.getByTestId('cert-title')).toHaveText(title)
     await expect(page.getByTestId('cert-name')).not.toBeEmpty()
-    const verifyLine = await page.getByText(/^Verify at /).innerText()
+    const verifyLine = await page.getByText(/^Check it at /).innerText()
     code = verifyLine.match(/\/verify\/([A-Z0-9]{12})/)![1]!
   })
 
@@ -86,7 +86,7 @@ test.describe.serial('progress, certificates and email', () => {
     await p.goto(`/verify/${code.toLowerCase()}`)
     await expect(p.getByTestId('verify-result')).toHaveText('This certificate is genuine.')
     await p.goto('/verify/AAAAAAAAAAAA')
-    await expect(p.getByTestId('verify-result')).toContainText('No certificate found for this code')
+    await expect(p.getByTestId('verify-result')).toContainText('No certificate has this code')
     expect((await p.goto('/verify/short'))?.status()).toBe(404)
     // the page shows what a verifier needs, not the learner's email
     await p.goto(`/verify/${code}`)
@@ -110,7 +110,7 @@ test.describe.serial('progress, certificates and email', () => {
     const anon = await browser.newContext({ baseURL })
     const p = await anon.newPage()
     await p.goto(`/verify/${code}`)
-    await expect(p.getByTestId('verify-result')).toHaveText('This certificate has been revoked.')
+    await expect(p.getByTestId('verify-result')).toHaveText('This certificate was withdrawn.')
     await anon.close()
   })
 })

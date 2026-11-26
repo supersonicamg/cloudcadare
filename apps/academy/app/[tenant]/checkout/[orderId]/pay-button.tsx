@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { buttonLg } from '@/lib/ui'
+import { Ic } from '../../_components/v11'
 
 interface RazorpayResponse { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
 declare global {
@@ -55,10 +55,12 @@ export function PayButton(p: {
   }
 
   return (
-    <div data-gateway-order={p.gatewayOrderId}>
-      <button className={`${buttonLg} w-full`} onClick={pay} disabled={busy}>{busy ? 'Processing…' : `Pay ${p.amountLabel}`}</button>
-      {p.fake && <p className="mt-3 text-sm text-mute">Test gateway: no real money moves.</p>}
-      {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
-    </div>
+    <>
+      <div className="form-act pay-act" data-gateway-order={p.gatewayOrderId}>
+        <button className="btn" onClick={pay} disabled={busy}>{busy ? 'Processing…' : `Pay ${p.amountLabel}`}</button>
+      </div>
+      {p.fake && <p className="t-label">Test gateway: no real money moves.</p>}
+      {error && <p role="alert" className="ferr"><Ic n="info" s />{error}</p>}
+    </>
   )
 }

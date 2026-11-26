@@ -2,8 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Icon } from '@educore/ui/marks'
-import { buttonOutline, inputSm } from '@/lib/ui'
+import { Ic } from '../../../_components/v11'
 import { finishProofUpload, prepareProofUpload } from './actions'
 
 /** The secondary way to send the screenshot: straight to private storage, then recorded on this payment. Folded away by default. */
@@ -11,6 +10,7 @@ export function ProofUpload({ orderId, hasFile, utr, open }: { orderId: string; 
   const router = useRouter()
   const input = useRef<HTMLInputElement>(null)
   const [ref, setRef] = useState(utr ?? '')
+  const [picked, setPicked] = useState('')
   const [state, setState] = useState<{ busy?: boolean; error?: string; done?: boolean }>({})
 
   async function send() {
@@ -32,6 +32,7 @@ export function ProofUpload({ orderId, hasFile, utr, open }: { orderId: string; 
       if (res.error) { setState({ error: res.error }); return }
       setState({ done: true })
       if (input.current) input.current.value = ''
+      setPicked('')
       router.refresh()
     } catch {
       setState({ error: 'The upload did not go through. Try again.' })
@@ -39,27 +40,27 @@ export function ProofUpload({ orderId, hasFile, utr, open }: { orderId: string; 
   }
 
   return (
-    <details className="group border-t border-border pt-4" open={open || undefined}>
-      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2.5 t-btn-sm !font-bold text-fg">
-        <Icon name="down" className="h-5 w-5 rotate-180 text-primary" />Or upload it here instead
-      </summary>
-      <div className="grid gap-4 pt-3">
-        <div className="grid gap-2">
-          <label htmlFor="proof-file" className="t-label !text-fg">Screenshot or PDF</label>
-          <input id="proof-file" ref={input} type="file" accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf" className="t-label" />
-          <p className="t-small">JPG, PNG or PDF, up to 5 MB.</p>
-        </div>
-        <div className="grid gap-2">
-          <label htmlFor="proof-utr" className="t-label !text-fg">UPI reference <span className="font-normal text-mute">(optional)</span></label>
-          <input id="proof-utr" value={ref} onChange={(e) => setRef(e.target.value)} inputMode="numeric" autoComplete="off" maxLength={14} className={`${inputSm} max-w-xs tnum`} aria-describedby="utr-hint" />
-          <p id="utr-hint" className="t-small">12 numbers, in the payment details of your UPI app.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-4">
-          <button type="button" className={buttonOutline} disabled={state.busy} onClick={send}>{state.busy ? 'Sending…' : 'Send it to us'}</button>
-          {(state.done || hasFile) && <p role="status" className="t-label flex items-center gap-2 !text-deep"><Icon name="check" className="h-5 w-5" />{state.done ? 'Received. We will check it.' : 'We have your upload.'}</p>}
-        </div>
-        {state.error && <p role="alert" className="t-label flex items-start gap-2 !text-fg"><Icon name="info" className="mt-px h-5 w-5 shrink-0 text-primary" />{state.error}</p>}
+    <details open={open || undefined}>
+      <summary className="link link-s">Or upload it here instead</summary>
+      <div className="drop">
+        <Ic n="up" />
+        <p className="t-card">{picked || 'Choose the screenshot'}</p>
+        <p className="t-label">JPG, PNG or PDF, up to 5 MB</p>
+        <input id="proof-file" ref={input} type="file" accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf"
+          onChange={(e) => setPicked(e.target.files?.[0]?.name ?? '')} />
+        <label htmlFor="proof-file" className="btn btn-line btn-sm">Choose file</label>
       </div>
+      <div className="fld">
+        <label htmlFor="proof-utr">UPI reference number <small>(optional, 12 digits)</small></label>
+        <input id="proof-utr" className="in" value={ref} onChange={(e) => setRef(e.target.value)} inputMode="numeric" autoComplete="off" maxLength={14}
+          aria-describedby="utr-hint" placeholder="e.g. 432198765012" style={{ maxWidth: 320 }} />
+        <p id="utr-hint" className="hint">12 numbers, in the payment details of your UPI app.</p>
+      </div>
+      <div className="form-act">
+        <button type="button" className="btn btn-line btn-sm" disabled={state.busy} onClick={send}>{state.busy ? 'Sending…' : 'Upload'}</button>
+        {(state.done || hasFile) && <p role="status" className="ok-line"><Ic n="check" s />{state.done ? 'Received. We will check it.' : 'We have your upload.'}</p>}
+      </div>
+      {state.error && <p role="alert" className="ferr"><Ic n="info" s />{state.error}</p>}
     </details>
   )
 }

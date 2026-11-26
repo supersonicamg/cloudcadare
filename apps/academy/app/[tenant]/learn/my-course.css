@@ -1,0 +1,23 @@
+/*
+ * Small additions for My course, My notes and the lesson list beside a lesson. Everything else comes from v11.css.
+ * Every selector sits under .v11, uses the v11 tokens, 3px radius, weights 400 and 600.
+ */
+.v11 .empty-b{display:grid;gap:8px;justify-items:start;padding:24px;background:var(--paper);border-radius:3px}
+.v11 .empty-b .t-body{max-width:52ch}
+.v11 .mon-none{padding:0 0 24px}
+.v11 .ngroup-h .tx{display:grid;gap:2px;min-width:0}
+.v11 .nrow p{overflow-wrap:anywhere;white-space:pre-line}
+.v11 .nrow .at{white-space:nowrap}
+.v11 .find .kind-form{display:contents}
+.v11 .kind-form .btn-line{justify-self:start}
+
+/* the lesson list beside a lesson: one month per <details>, the lessons use .lrow from v11.css */
+.v11 .llist details + details{border-top:1px solid var(--rule)}
+.v11 .llist summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:8px 16px;cursor:pointer;list-style:none}
+.v11 .llist summary::-webkit-details-marker{display:none}
+.v11 .llist summary .tx{display:grid;gap:1px;min-width:0}
+.v11 .llist summary .end{display:inline-flex;align-items:center;gap:8px;flex:none}
+.v11 .llist summary .chv{color:var(--ink);transition:transform .2s}
+.v11 .llist details[open] > summary .chv{transform:rotate(90deg)}
+.v11 .llist ol{list-style:none;margin:0}
+.v11 .lrow.locked{cursor:default}

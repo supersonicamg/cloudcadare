@@ -148,7 +148,7 @@ test.describe.serial('files, previews, ordering and unlock rules', () => {
 
     // the PDF lesson shows the file; the download lesson offers it
     await page.goto(`/learn/${slug}/${ids.Slides}`)
-    await expect(page.locator('.lx-pdf, .lx-pdf-fallback')).toBeVisible()
+    await expect(page.locator('.pdfr, .pdfr-fallback')).toBeVisible()
     await page.goto(`/learn/${slug}/${ids.Handout}`)
     const dl = page.getByTestId('download-link')
     await expect(dl).toContainText('cheatsheet.txt')

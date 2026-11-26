@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import { Icon } from '@educore/ui/marks'
 import { istDate, type Enrolled } from '@/lib/dashboard'
-import { courseAbbr, dateShort, timeShort } from '@/lib/format'
+import { courseAbbr, dateShort } from '@/lib/format'
 import type { MyEnrollment } from '@/lib/learn'
-import { dayOfMonth, monthName, weekday } from '@/lib/live'
-import { buttonLg } from '@/lib/ui'
 import { ClassList } from '../_components/live'
+import { Ic, Wa } from '../_components/v11'
+import { Cal, MonthCards, Week, type MonthCardData } from './parts'
 
 const TEAMS_DOWNLOAD = 'https://www.microsoft.com/microsoft-teams/download-app'
 
@@ -21,76 +20,68 @@ export function UpcomingHome({ d, lead, first }: { d: Enrolled; lead: MyEnrollme
   const teams = d.sessions.some((s) => s.teams)
   const items = [
     { key: 'name', check: Boolean(d.certificateName), title: 'Confirm the name on your certificate', detail: d.certificateName ?? 'It is printed exactly as you type it', href: '/account', action: d.certificateName ? 'Change' : 'Add' },
-    ...(orientation ? [{ key: 'orient', check: orientation.done, title: `Watch “${orientation.title}”`, detail: orientation.durationSeconds ? `${Math.max(1, Math.round(orientation.durationSeconds / 60))} min` : 'Free preview', href: `/learn/${lead.course.slug}/${orientation.id}`, action: 'Open' }] : []),
+    ...(orientation ? [{ key: 'orient', check: orientation.done, title: `Watch “${orientation.title}”`, detail: orientation.durationSeconds ? `Free lesson · ${Math.max(1, Math.round(orientation.durationSeconds / 60))} min` : 'Free lesson', href: `/learn/${lead.course.slug}/${orientation.id}`, action: 'Open' }] : []),
     ...(d.batch!.whatsappGroup ? [{ key: 'wa', check: null, title: 'Join your batch WhatsApp group', detail: 'Class links and reminders go here', href: d.batch!.whatsappGroup, action: 'Join' }] : []),
     ...(teams ? [{ key: 'teams', check: null, title: 'Install Microsoft Teams and sign in', detail: 'Phone or laptop. Classes run on Teams', href: TEAMS_DOWNLOAD, action: 'Get it' }] : []),
   ]
   const checkable = items.filter((i) => i.check !== null)
   const done = checkable.filter((i) => i.check).length
+  const labs = (i: number) => d.m.months[i]?.lessons.filter((l) => l.type === 'lab').length ?? 0
+  const months: MonthCardData[] = d.months.map((m, i) => ({
+    id: m.id, title: m.title, state: 'open',
+    note: m.opensOn ? `opens ${m.opensOn}` : undefined,
+    line: `${m.total} ${m.total === 1 ? 'lesson' : 'lessons'}${labs(i) ? ` · ${labs(i)} ${labs(i) === 1 ? 'lab' : 'labs'}` : ''}`,
+  }))
 
   return (
     <>
-      <header className="lx-head">
+      <div className="pg-h">
         <div>
-          <h1 className="lx-h1">You&apos;re in, {first}. See you on <em>{dateShort(start)}</em>.</h1>
-          <p className="lx-lede">{courseAbbr(lead.course.title)} · {d.batch!.name}</p>
+          <h1 className="t-title">You&apos;re in, {first}. See you on {dateShort(start)}.</h1>
+          <p className="t-lead">{courseAbbr(lead.course.title)} · {d.batch!.name}</p>
         </div>
-        {orientation && !orientation.done && <Link href={`/learn/${lead.course.slug}/${orientation.id}`} className={`${buttonLg} max-[720px]:w-full`}>Watch the orientation<Icon name="chev" className="lx-i" /></Link>}
-      </header>
+        {orientation && !orientation.done && <Link href={`/learn/${lead.course.slug}/${orientation.id}`} className="btn">Watch the orientation</Link>}
+      </div>
 
-      <section className="lx-card lx-hero" aria-label="Countdown" style={{ gridTemplateColumns: '96px minmax(0, 1fr)' }}>
-        <span className="lx-date"><b>{dayOfMonth(start)}</b><span>{weekday(start)} · {monthName(start)}</span></span>
-        <div>
-          <h2>{d.startsIn} {d.startsIn === 1 ? 'day' : 'days'} to go</h2>
-          <p className="when">{classes[0] ? `First class at ${timeShort(classes[0].startsAt)}${teams ? ' on Teams' : ''}. ` : ''}{d.batch!.schedule ? `Classes ${d.batch!.schedule}.` : ''}</p>
+      <div className="band">
+        <div className={`ticket${d.batch!.days.length ? ' two' : ''}`}>
+          <Cal start={start} foot={<><b>{d.startsIn} {d.startsIn === 1 ? 'day' : 'days'}</b> to go</>} />
+          <Week batch={d.batch!} teams={teams} />
         </div>
-      </section>
+      </div>
 
-      <div className={classes.length ? 'lx-two even' : 'grid'}>
-        <section className="lx-card" aria-labelledby="ready-h">
-          <div className="lx-sec-h" style={{ paddingBottom: 12 }}>
-            <h2 className="lx-h2" id="ready-h">Before {dateShort(start)}</h2>
-            <span className="lx-meta">{done} of {checkable.length} done</span>
-          </div>
-          <ul className="lx-todo">
-            {items.map((i) => (
-              <li key={i.key} className={i.check ? 'dn' : undefined}>
-                {i.check === null
-                  ? <span className="lx-st link"><Icon name="link" /></span>
-                  : <span className={`lx-st${i.check ? ' ok' : ''}`}>{i.check && <Icon name="check" />}<span className="sr-only">{i.check ? 'Done' : 'To do'}</span></span>}
-                <span><b>{i.title}</b><span className="d">{i.detail}</span></span>
-                {i.href.startsWith('/')
-                  ? <Link href={i.href} className="lx-link" aria-label={`${i.action}: ${i.title}`}>{i.action}</Link>
-                  : <a href={i.href} target="_blank" rel="noopener noreferrer" className="lx-link" aria-label={`${i.action}: ${i.title}`}>{i.action}</a>}
-              </li>
-            ))}
+      <div className={`${classes.length ? 'two ' : ''}blk`}>
+        <section aria-labelledby="ready-h">
+          <div className="blk-h"><h2 className="t-h3" id="ready-h">Before {dateShort(start)}</h2><p className="t-small"><b>{done} of {checkable.length}</b> done</p></div>
+          <ul className="todo rows">
+            {items.map((i) => {
+              const label = `${i.action}: ${i.title}`
+              return (
+                <li key={i.key}>
+                  {i.check === null
+                    ? <span className="ck lnk">{i.key === 'wa' ? <Wa /> : <Ic n="live" s />}</span>
+                    : <span className={`ck${i.check ? ' on' : ''}`}>{i.check && <Ic n="check" s />}<span className="sr">{i.check ? 'Done' : 'To do'}</span></span>}
+                  <span className="tx"><b className="t-card">{i.title}</b><span>{i.detail}</span></span>
+                  {i.href.startsWith('/')
+                    ? <Link href={i.href} className="link link-s" aria-label={label}>{i.action}</Link>
+                    : <a href={i.href} target="_blank" rel="noopener noreferrer" className="link link-s" aria-label={label}>{i.action}</a>}
+                </li>
+              )
+            })}
           </ul>
         </section>
         {classes.length > 0 && (
-          <section className="lx-card" aria-labelledby="first-h">
-            <div className="lx-sec-h" style={{ paddingBottom: 6 }}>
-              <h2 className="lx-h2" id="first-h">First classes</h2>
-              <span className="lx-meta">{teams ? 'On Microsoft Teams' : ''}</span>
-            </div>
-            <ClassList sessions={classes} />
+          <section aria-labelledby="first-h">
+            <div className="blk-h"><h2 className="t-h3" id="first-h">First classes</h2>{teams && <p className="t-small">On Microsoft Teams</p>}</div>
+            <ClassList sessions={classes} rows />
           </section>
         )}
       </div>
 
-      {d.months.length > 0 && (
-        <section className="lx-sec" aria-labelledby="months-h">
-          <div className="lx-sec-h"><h2 className="lx-h2" id="months-h">Your {d.months.length} months</h2><span className="lx-meta">Month 1 opens on {dateShort(start)}</span></div>
-          <ol className="lx-card stone lx-months" aria-label="Months of the program">
-            {d.months.map((mo) => (
-              <li key={mo.id}>
-                <div className="row">
-                  <span className="n">{mo.number}</span>
-                  <span className="t">{mo.title}</span>
-                  <span className="c">{mo.opensOn ? `Opens ${mo.opensOn}` : `${mo.total} lessons`}</span>
-                </div>
-              </li>
-            ))}
-          </ol>
+      {months.length > 0 && (
+        <section className="blk" aria-labelledby="mo2-h">
+          <div className="blk-h"><h2 className="t-h3" id="mo2-h">Your {months.length} months</h2><p className="t-small">Month 1 opens on {dateShort(start)}</p></div>
+          <MonthCards months={months} />
         </section>
       )}
     </>

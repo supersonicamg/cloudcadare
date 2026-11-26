@@ -30,10 +30,12 @@ function loadYouTube(): Promise<YTApi> {
   return ytReady
 }
 
-export function VideoPlayer({ playback, lessonId, startAt, completed, title, tracked = true }: {
+export function VideoPlayer({ playback, lessonId, startAt, completed, title, tracked = true, framed = false }: {
   playback: Playable; lessonId: string; startAt: number; completed: boolean; title: string
   /** False on public free previews: nothing is reported until the person enrols. */
   tracked?: boolean
+  /** Inside the lesson page's `.player` frame (v11): the frame sets the size and the look. Off for the public preview page. */
+  framed?: boolean
 }) {
   const tracker = useProgressTracker(lessonId, completed, tracked)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -142,10 +144,10 @@ export function VideoPlayer({ playback, lessonId, startAt, completed, title, tra
   }, [playback, startAt, tracker, register, setDuration])
 
   if (playback.kind === 'youtube') {
-    return <div ref={ytRef} className="aspect-video w-full overflow-hidden rounded-[18px] bg-deep [&_iframe]:size-full" aria-label={title} />
+    return <div ref={ytRef} className={framed ? undefined : 'aspect-video w-full overflow-hidden rounded-[18px] bg-deep [&_iframe]:size-full'} aria-label={title} />
   }
   return (
     <video ref={videoRef} controls playsInline preload="metadata" aria-label={title}
-      className="aspect-video w-full rounded-[18px] bg-deep" />
+      className={framed ? undefined : 'aspect-video w-full rounded-[18px] bg-deep'} />
   )
 }

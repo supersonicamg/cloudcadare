@@ -1,0 +1,11 @@
+/* Sign in, sign up and email code (guide §15). Extra rules for the v11 split screen; the base classes are in _components/v11.css. */
+.v11 .auth.no-ph{grid-template-columns:1fr}
+.v11 .auth.no-ph .auth-top .logo{display:flex;color:var(--ink)}
+.v11 .auth .btn:disabled,.v11 .co .btn:disabled,.v11 .pst .btn:disabled{opacity:.6;cursor:not-allowed}
+.v11 .auth .link:disabled,.v11 .co .link:disabled{color:var(--muted);text-decoration:none;cursor:not-allowed}
+.v11 .ferr{display:flex;gap:8px;align-items:flex-start;font-size:var(--t-label);font-weight:600;color:var(--ink)}
+.v11 .ferr .ic{margin-top:1px}
+.v11 .in[aria-invalid="true"],.v11 .code input[aria-invalid="true"]{border:2px solid var(--ink)}
+.v11 .in[aria-invalid="true"]{padding:0 13px}
+.v11 .pw .in[aria-invalid="true"]{padding-right:75px}
+.v11 .auth-box > form{display:grid;gap:20px}

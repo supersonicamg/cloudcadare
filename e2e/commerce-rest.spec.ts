@@ -2,9 +2,9 @@ import { createHmac } from 'node:crypto'
 import { expect, test, type Page } from '@playwright/test'
 import { createPaidCourse, ownerWithMfa, signIn, waitForMail } from './helpers'
 
-/** The coupon field sits behind a "Have a coupon?" link; open it if it is closed. */
+/** The coupon field sits behind a "Have a coupon code?" link; open it if it is closed. */
 async function openCoupon(page: import('@playwright/test').Page) {
-  const d = page.locator('details', { hasText: 'Have a coupon?' })
+  const d = page.locator('details', { hasText: 'Have a coupon code?' })
   if (!(await d.evaluate((e) => (e as HTMLDetailsElement).open))) await d.locator('summary').click()
 }
 
@@ -57,11 +57,11 @@ test.describe.serial('coupons, receipts and refunds', () => {
   test('a coupon lowers the total; a wrong code is refused; the receipt shows the discount', async ({ page }) => {
     await openCheckout(page, buyer)
     await openCoupon(page)
-    await page.getByLabel('Have a coupon code?').fill('NOTACODE')
+    await page.getByLabel('Coupon code').fill('NOTACODE')
     await page.getByRole('button', { name: 'Apply' }).click()
     await expect(page.getByText('That code does not work for this order.')).toBeVisible()
     await openCoupon(page)
-    await page.getByLabel('Have a coupon code?').fill(CODE10.toLowerCase())
+    await page.getByLabel('Coupon code').fill(CODE10.toLowerCase())
     await page.getByRole('button', { name: 'Apply' }).click()
     await expect(page.getByTestId('order-discount')).toHaveText('−₹118')
     await expect(page.getByTestId('order-total')).toHaveText('₹1,062')
@@ -69,7 +69,7 @@ test.describe.serial('coupons, receipts and refunds', () => {
     await page.getByRole('button', { name: 'Remove' }).click()
     await expect(page.getByTestId('order-total')).toHaveText('₹1,180')
     await openCoupon(page)
-    await page.getByLabel('Have a coupon code?').fill(CODE10)
+    await page.getByLabel('Coupon code').fill(CODE10)
     await page.getByRole('button', { name: 'Apply' }).click()
     await expect(page.getByTestId('order-total')).toHaveText('₹1,062')
 
@@ -98,7 +98,7 @@ test.describe.serial('coupons, receipts and refunds', () => {
   test('a 100% coupon enrols without payment', async ({ page }) => {
     await openCheckout(page, `promo-free-${stamp}@example.com`)
     await openCoupon(page)
-    await page.getByLabel('Have a coupon code?').fill(CODEFREE)
+    await page.getByLabel('Coupon code').fill(CODEFREE)
     await page.getByRole('button', { name: 'Apply' }).click()
     await expect(page.getByTestId('order-total')).toHaveText('₹0')
     await expect(page.getByRole('button', { name: /^Pay/ })).toHaveCount(0)

@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Icon } from '@educore/ui/marks'
 import { clock } from '@/lib/clock'
-import { buttonOutline } from '@/lib/ui'
+import { Ic } from '../../_components/v11'
 import { useStage } from './stage'
 
 /**
@@ -46,25 +45,26 @@ export function QuickNote() {
 
   const where = mode === 'time' ? `at ${clock(stamp ?? now)}` : mode === 'page' ? `on page ${page}` : 'on this lesson'
   return (
-    <section className="lx-qn" aria-label="Write a note" data-filled={text ? 'true' : undefined}>
-      <div className="lx-qn-head">
-        <label htmlFor="note-box"><Icon name="pen" />Write a note {where}</label>
-        {mode === 'time' && <span className="k">Press <kbd>N</kbd> while watching</span>}
+    <section className="qn">
+      <div className="qn-h">
+        <label htmlFor="note-box"><Ic n="pen" s />Write a note {where}</label>
+        {mode === 'time' && <span className="t-label kbd-hint">Press <kbd>N</kbd> while watching</span>}
       </div>
-      <textarea id="note-box" ref={setBox} rows={1} value={text} maxLength={4000} placeholder={mode === 'time' ? 'Write a note about this moment' : mode === 'page' ? 'Write a note about this page' : 'Write a note about this lesson'}
+      <textarea id="note-box" ref={setBox} className="in" rows={2} value={text} maxLength={4000}
+        placeholder={mode === 'time' ? 'What do you want to remember from this minute?' : mode === 'page' ? 'What do you want to remember from this page?' : 'What do you want to remember from this lesson?'}
         onFocus={() => { if (mode === 'time') setStamp(Math.floor(time())) }}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit() } }} />
-      <div className="lx-qn-act">
-        <button type="button" onClick={submit} disabled={busy} className={buttonOutline}>Save note</button>
+      <div className="qn-act">
+        <button type="button" onClick={submit} disabled={busy} className="btn btn-line btn-sm">Save note</button>
         {mode === 'page' && (
-          <button type="button" onClick={() => void save('bookmark', text.trim())} disabled={busy} className="lx-qn-mark">
-            <Icon name="bookmark" />Bookmark this page
-          </button>
+          <button type="button" onClick={() => void save('bookmark', text.trim())} disabled={busy} className="link link-s"><Ic n="bookmark" s />Bookmark this page</button>
         )}
-        {saved && <span className="lx-qn-ok" role="status"><Icon name="check" className="lx-i" />Saved. Find it under My notes.</span>}
+        {saved
+          ? <span className="ok-line" role="status"><Ic n="check" s />Saved. Find it under My notes.</span>
+          : <span className="t-label"><span className="kbd-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> saves too. </span>Only you can see your notes.</span>}
       </div>
-      {error && <p role="alert" className="lx-qn-err">{error}</p>}
+      {error && <p role="alert" className="note-l"><Ic n="info" s />{error}</p>}
     </section>
   )
 }

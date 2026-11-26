@@ -98,7 +98,7 @@ test('password: wrong current password is refused, a new one works and old sessi
 
   await page.getByLabel('Current password').fill('not-the-password')
   await page.getByLabel('New password', { exact: true }).fill('a-new-password-1')
-  await page.getByLabel('Repeat new password').fill('a-new-password-1')
+  await page.getByLabel('Type it again').fill('a-new-password-1')
   await page.getByRole('button', { name: 'Update password' }).click()
   await expect(page.getByText('That is not your current password.')).toBeVisible()
 
@@ -115,7 +115,7 @@ test('password: wrong current password is refused, a new one works and old sessi
 
   await page.getByLabel('Current password').fill(PASSWORD)
   await page.getByLabel('New password', { exact: true }).fill('a-new-password-1')
-  await page.getByLabel('Repeat new password').fill('a-new-password-1')
+  await page.getByLabel('Type it again').fill('a-new-password-1')
   await page.getByRole('button', { name: 'Update password' }).click()
   await expect(page.getByText('Password updated.')).toBeVisible()
 

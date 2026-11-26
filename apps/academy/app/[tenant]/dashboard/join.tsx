@@ -1,65 +1,93 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { Icon, type IconName } from '@educore/ui/marks'
 import { istDate, type BatchInfo, type JoinState } from '@/lib/dashboard'
-import { courseAbbr, dateLong, dateShort, timeShort } from '@/lib/format'
-import { dayOfMonth, monthName, weekday } from '@/lib/live'
+import { courseAbbr, dateShort, timeShort } from '@/lib/format'
+import { dayNum, monthName } from '@/lib/live'
 import { money } from '@/lib/money'
-import { buttonLg, buttonOutline } from '@/lib/ui'
 import { startCheckout } from '../checkout/actions'
+import { Dg, Ic, Wa, diagramOfMonth } from '../_components/v11'
 import { joinListedBatch } from './actions'
-import { Climb } from './climb'
+import { Cal, MonthCards, Week, type MonthCardData } from './parts'
 
-const Arrow = () => <span aria-hidden="true">→</span>
-const Facts = ({ items }: { items: Array<[IconName, ReactNode] | null> }) => (
-  <ul className="ld-facts">{items.filter((i) => i !== null).map(([icon, text], n) => <li key={n}><Icon name={icon} className="h-[18px] w-[18px] shrink-0 text-primary" /><span>{text}</span></li>)}</ul>
-)
+export interface JoinProps { s: JoinState; first: string; whatsapp: string | null; checkout: boolean; syllabusHref?: string }
 
-export interface JoinProps { s: JoinState; first: string; whatsapp: string | null; checkout: boolean; syllabusHref?: string; goal?: string }
-
-const courseFacts = (s: JoinState, batch: BatchInfo | null): Array<[IconName, ReactNode] | null> => [
-  batch?.schedule ? ['calendar', batch.schedule] : null,
-  s.course?.lessonCount ? ['book', `${s.course.lessonCount} lessons`] : null,
-  ['live', 'Live classes, with recordings'],
-]
+type Sections = NonNullable<JoinState['course']>['sections']
+const lessonsOf = (sections: Sections) => sections.flatMap((m) => [...m.lessons, ...m.children.flatMap((c) => c.lessons)])
+const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`
+const waLink = (p: JoinProps, text: string) => (p.whatsapp ? `${p.whatsapp.split('?')[0]}?text=${encodeURIComponent(text)}` : null)
 
 /** The way to buy: the real checkout when a product sells the course, otherwise the course page. */
 function Buy({ p, filled, label }: { p: JoinProps; filled: boolean; label: string }) {
   const { course } = p.s
-  const cls = `${filled ? buttonLg : `${buttonOutline} !h-14`} w-full`
+  const cls = `btn${filled ? '' : ' btn-line'}`
   if (!course) return p.whatsapp ? <a href={p.whatsapp} target="_blank" rel="noopener noreferrer" className={cls}>Ask us on WhatsApp</a> : null
   if (course.offer && p.checkout) {
-    return <form action={startCheckout.bind(null, course.offer.productId, course.offer.priceId, course.slug)}><button type="submit" className={cls}>{label} {filled && <Arrow />}</button></form>
+    return <form action={startCheckout.bind(null, course.offer.productId, course.offer.priceId, course.slug)}><button type="submit" className={cls}>{label}</button></form>
   }
-  return <Link href={`/courses/${course.slug}`} className={cls}>See the program {filled && <Arrow />}</Link>
+  return <Link href={`/courses/${course.slug}`} className={cls}>See the program</Link>
 }
 
 function Price({ s }: { s: JoinState }) {
   const o = s.course?.offer
   if (!o) return null
-  return <p className="ld-price"><b>{money(o.amountMinor, o.currency)}</b><span>{o.taxIncluded && o.taxLabel ? `incl. ${o.taxLabel}` : 'one payment'}</span></p>
+  return <span className="t-num">{money(o.amountMinor, o.currency)}<small>{o.taxIncluded && o.taxLabel ? `incl. ${o.taxLabel}` : 'one payment'}</small></span>
 }
 
-function NextBadge({ batch, soft }: { batch: BatchInfo | null; soft?: boolean }) {
-  if (!batch?.startDate) return <span className={`ld-date${soft ? ' soft' : ''}`}><Icon name="calendar" className="h-8 w-8" /></span>
-  const d = istDate(batch.startDate)
-  return <span className={`ld-date${soft ? ' soft' : ''}`}><b>{dayOfMonth(d)}</b><span>{weekday(d)} · {monthName(d)}</span></span>
-}
-
-function Program({ s, title, lead, syllabusHref, goal }: { s: JoinState; title: string; lead: string; syllabusHref?: string; goal?: string }) {
+/** The program's months before you join: title, how many lessons, how many labs. */
+function Program({ s, title, lead }: { s: JoinState; title: string; lead?: string }) {
   const sections = s.course?.sections ?? []
   if (!sections.length) return null
+  const months: MonthCardData[] = sections.map((m) => {
+    const lessons = [...m.lessons, ...m.children.flatMap((c) => c.lessons)]
+    const labs = lessons.filter((l) => l.type === 'lab').length
+    return { id: m.id, title: m.title, state: 'open', line: `${plural(lessons.length, 'lesson')}${labs ? ` · ${plural(labs, 'lab')}` : ''}` }
+  })
   return (
-    <section aria-labelledby="prog-h" className="ld-panel mist ld-s">
-      <div className="ld-wrap">
-        <div className="ld-head"><div><h2 id="prog-h" className="ld-h2">{title}</h2><p>{lead}</p></div>{syllabusHref && <a href={syllabusHref} className="ld-link"><Icon name="down" className="h-4 w-4" />Download the syllabus</a>}</div>
-        <Climb label="Months of the program" goal={goal} steps={sections.map((m, i) => {
-          const lessons = [...m.lessons, ...m.children.flatMap((c) => c.lessons)]
-          const labs = lessons.filter((l) => l.type === 'lab').length
-          return { key: m.id, number: String(i + 1).padStart(2, '0'), title: m.title, state: 'open', detail: `${lessons.length} ${lessons.length === 1 ? 'lesson' : 'lessons'}${labs ? ` · ${labs} labs` : ''}` }
-        })} />
-      </div>
+    <section className="blk" aria-labelledby="prog-h">
+      <div className="blk-h"><h2 className="t-h3" id="prog-h">{title}</h2>{lead && <p className="t-small">{lead}</p>}</div>
+      <MonthCards months={months} />
     </section>
+  )
+}
+
+/** The lessons anyone can open, as picture + title + line. */
+function FreeLessons({ s, max, title, lead }: { s: JoinState; max: number; title: (n: number) => string; lead: string }) {
+  const course = s.course
+  if (!course) return null
+  const free = course.sections.flatMap((m, i) => lessonsOf([m]).filter((l) => l.isPreview).map((l) => ({ l, month: i + 1 }))).slice(0, max)
+  if (!free.length) return null
+  return (
+    <section className="blk" aria-labelledby="free-h">
+      <div className="blk-h"><h2 className="t-h3" id="free-h">{title(free.length)}</h2><p className="t-small">{lead}</p></div>
+      <ul className="previews">
+        {free.map(({ l, month }) => (
+          <li key={l.id}>
+            <Link className="pv card" href={`/courses/${course.slug}/preview/${l.id}`}>
+              <Dg id={diagramOfMonth(month)} />
+              <span className="tx">
+                <b className="t-card">{l.title}</b>
+                <span className="t-label">{[l.type === 'video' || l.type === 'live' ? 'Video' : 'Reading', l.durationSeconds ? `${Math.max(1, Math.round(l.durationSeconds / 60))} min` : null, `Month ${month}`].filter(Boolean).join(' · ')}</span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+const Note = ({ children }: { children: ReactNode }) => <p className="note-l top"><Ic n="info" /><span>{children}</span></p>
+
+/** The batch ticket with the way in on the right: the price and "Join the 12 Jan batch", or "Join my batch now". */
+function Ticket({ cal, week, children }: { cal: ReactNode; week?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="band">
+      <div className={`ticket${week ? '' : ' two'}`}>
+        {cal}
+        {week}
+        <div className="fee">{children}</div>
+      </div>
+    </div>
   )
 }
 
@@ -68,84 +96,83 @@ function Listed(p: JoinProps) {
   const { s } = p
   const listed = s.listed!
   const abbr = courseAbbr(listed.courseTitle)
-  const wa = p.whatsapp ? `${p.whatsapp.split('?')[0]}?text=${encodeURIComponent(`My email ${listed.email} is on the learner list but the batch looks wrong.`)}` : null
+  const wa = waLink(p, `My email ${listed.email} is on the learner list but the batch looks wrong.`)
+  const start = listed.batchStart ? istDate(listed.batchStart) : null
+  const next = s.next
   return (
     <>
-      <section aria-labelledby="dash-h" className="ld-s tight">
-        <div className="ld-wrap ld-hi">
-          <h1 id="dash-h" className="ld-h1">Hi {p.first}, which batch are you in?</h1>
-          <p className="ld-meta">Pick your batch and we&apos;ll open the right material.</p>
+      <div className="pg-h">
+        <div>
+          <h1 className="t-title">Hi {p.first}, which batch are you in?</h1>
+          <p className="t-lead">Pick your batch and we&apos;ll open the right material.</p>
         </div>
-      </section>
-      <section aria-label="Choose your batch" className="ld-panel ld-s">
-        <div className="ld-wrap">
-          <div className={s.next ? 'ld-choice' : 'grid max-w-[640px]'}>
-            <article className="ld-opt pick" aria-labelledby="o-cur">
-              <span className="match"><Icon name="check" className="h-3.5 w-3.5" />Matches your email</span>
-              <div className="oh"><span className="ld-date"><Icon name="check" className="h-9 w-9 text-accent" /></span><div><h2 id="o-cur">{listed.running ? 'You seem to be in the current batch' : 'Your email is on our learner list'}</h2><p>{[listed.batchName ?? abbr, listed.batchStart ? `${listed.running ? 'started' : 'starts'} ${dateShort(istDate(listed.batchStart))}` : null].filter(Boolean).join(' · ')}</p></div></div>
-              <p className="email"><Icon name="user" className="h-[18px] w-[18px] shrink-0 text-primary" /><span><b>{listed.email}</b> is on the list for {abbr}</span></p>
-              <Facts items={[['check', "No payment, you're already registered"], listed.running ? ['live', 'Class recordings open as soon as you join'] : null]} />
-              <div className="foot">
-                <form action={joinListedBatch}><button type="submit" className={`${buttonLg} w-full`}>Join my batch now <Arrow /></button></form>
-                {wa && <p className="ld-small">Not you, or the wrong batch? <a href={wa} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline underline-offset-4">Tell us on WhatsApp</a></p>}
-              </div>
-            </article>
-            {s.next && (
-              <article className="ld-opt" aria-labelledby="o-next">
-                <div className="oh"><NextBadge batch={s.next} soft /><div><h2 id="o-next">Join the next batch</h2><p>{s.next.name}{s.next.startDate ? ` · starts ${dateShort(istDate(s.next.startDate))}` : ''}</p></div></div>
-                <Facts items={courseFacts(s, s.next)} />
-                <div className="foot"><Price s={s} /><Buy p={p} filled={false} label="Join the next batch instead" /></div>
-              </article>
-            )}
+      </div>
+      <Ticket cal={<Cal start={start} foot={listed.batchName ?? abbr} />}>
+        <p className="t-label"><b>Matches your email</b></p>
+        <span className="t-card">{listed.running ? 'You seem to be in the current batch' : 'Your email is on our learner list'}</span>
+        <p className="t-small"><b>{listed.email}</b> is on the list for {abbr}. No payment, you&apos;re already registered.{listed.running ? ' Class recordings open as soon as you join.' : ''}</p>
+        <form action={joinListedBatch}><button type="submit" className="btn">Join my batch now</button></form>
+        {wa && <a className="link" href={wa} target="_blank" rel="noopener noreferrer"><Wa />Not you? Tell us on WhatsApp</a>}
+      </Ticket>
+      {next && (
+        <section className="blk" aria-labelledby="o-next">
+          <div className="card soft-next">
+            <Cal2 batch={next} />
+            <div>
+              <h2 className="t-card" id="o-next">Join the next batch instead</h2>
+              <p className="t-small">{next.name}{next.startDate ? ` · starts ${dateShort(istDate(next.startDate))}` : ''}{next.schedule ? ` · ${next.schedule}` : ''}</p>
+            </div>
+            <div className="acts-r"><div className="fx"><Price s={s} /></div><Buy p={p} filled={false} label="Join the next batch" /></div>
           </div>
-        </div>
-      </section>
-      <Program s={s} title={`${abbr} at a glance`} lead="Each month builds on the last." syllabusHref={p.syllabusHref} goal={p.goal} />
+        </section>
+      )}
+      <Program s={s} title={`${abbr} at a glance`} lead="Each month builds on the last." />
     </>
   )
+}
+
+/** The small date block of a batch that starts later. */
+function Cal2({ batch }: { batch: BatchInfo }) {
+  if (!batch.startDate) return <span className="dblk" aria-hidden="true"><Ic n="cal" /></span>
+  const d = istDate(batch.startDate)
+  return <span className="dblk" aria-hidden="true"><b>{dayNum(d)}</b><span>{monthName(d)}</span></span>
 }
 
 /** E6: paid by UPI, staff are checking. No filled button: there is nothing to do but wait. */
 function Checking(p: JoinProps) {
   const { s } = p
   const order = s.order!
-  const lessons = (s.course?.sections ?? []).flatMap((m) => [...m.lessons, ...m.children.flatMap((c) => c.lessons)])
-  const free = lessons.filter((l) => l.isPreview).slice(0, 3)
   const placed = order.placed_at ? `${dateShort(order.placed_at)}, ${timeShort(order.placed_at)}` : ''
   const sent = Boolean(s.proof?.file_path)
-  const wa = p.whatsapp ? `${p.whatsapp.split('?')[0]}?text=${encodeURIComponent(`Payment screenshot for order ${order.order_no}`)}` : null
+  const wa = waLink(p, `Payment screenshot for order ${order.order_no}`)
+  const steps: Array<{ title: string; detail: string; on: boolean; now?: boolean }> = [
+    { title: 'Order placed', detail: placed, on: true },
+    { title: 'You paid by UPI', detail: s.proof ? dateShort(s.proof.submitted_at) : '', on: true },
+    { title: 'We verify it', detail: 'We check it with our bank', on: false, now: true },
+    { title: 'Seat confirmed', detail: 'We tell you at once', on: false },
+  ]
   return (
     <>
-      <section aria-labelledby="dash-h" className="ld-s tight">
-        <div className="ld-wrap grid gap-7">
-          <div className="ld-hi">
-            <h1 id="dash-h" className="ld-h1">Thanks {p.first}, we&apos;re checking your payment</h1>
-            <p className="ld-meta">Order {order.order_no} · {money(order.total_minor, order.currency)}</p>
-          </div>
-          <ol className="ld-track" aria-label="Order progress">
-            <li><span className="n">01<Icon name="check" /></span><b>Order placed</b><span className="d">{placed}</span></li>
-            <li><span className="n">02<Icon name="check" /></span><b>You paid by UPI</b><span className="d">{s.proof ? dateShort(s.proof.submitted_at) : ''}</span></li>
-            <li className="now" aria-current="step"><span className="n">03</span><b>We verify it</b><span className="d">We check it with our bank</span></li>
-            <li className="todo"><span className="n">04</span><b>Seat confirmed</b><span className="d">We tell you at once</span></li>
-          </ol>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {!sent && wa && <a href={wa} target="_blank" rel="noopener noreferrer" className={buttonOutline}>Send the screenshot on WhatsApp</a>}
-            <Link href={`/checkout/${order.id}/pending`} className="ld-link">See where it stands <Arrow /></Link>
-          </div>
+      <div className="pg-h">
+        <div>
+          <h1 className="t-title">Thanks {p.first}, we&apos;re checking your payment</h1>
+          <p className="t-lead">Order {order.order_no} · {money(order.total_minor, order.currency)}</p>
         </div>
-      </section>
-      {free.length > 0 && (
-        <section aria-labelledby="free-h" className="ld-panel ld-s">
-          <div className="ld-wrap">
-            <div className="ld-head"><div><h2 id="free-h" className="ld-h2">Open while you wait</h2><p>Free preview lessons.</p></div></div>
-            <div className="ld-rows max-w-[760px]">
-              {free.map((l) => (
-                <Link key={l.id} href={`/courses/${s.course!.slug}/preview/${l.id}`} className="ld-row"><span className="ti"><Icon name={l.type === 'video' || l.type === 'live' ? 'play' : 'doc'} className="h-5 w-5" /></span><span><b>{l.title}</b><span className="s">{l.durationSeconds ? `${Math.max(1, Math.round(l.durationSeconds / 60))} min · ` : ''}Free preview</span></span><span className="tag">Open</span></Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      </div>
+      <ol className="todo rows" aria-label="Order progress">
+        {steps.map((t) => (
+          <li key={t.title} aria-current={t.now ? 'step' : undefined}>
+            <span className={`ck${t.on ? ' on' : ''}`}>{t.on && <Ic n="check" s />}<span className="sr">{t.on ? 'Done' : t.now ? 'Now' : 'To do'}</span></span>
+            <span className="tx"><b className="t-card">{t.title}</b>{t.detail && <span>{t.detail}</span>}</span>
+            <span />
+          </li>
+        ))}
+      </ol>
+      <div className="acts-r gap-t">
+        {!sent && wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="btn btn-line">Send the screenshot on WhatsApp</a>}
+        <Link href={`/checkout/${order.id}/pending`} className="link">See where it stands</Link>
+      </div>
+      <FreeLessons s={s} max={3} title={() => 'Open while you wait'} lead="Free preview lessons" />
     </>
   )
 }
@@ -157,49 +184,46 @@ function Join(p: JoinProps) {
   const rejected = s.order && s.proof?.state === 'rejected'
   const unpaid = s.order && !rejected
   const batch = s.next
+  const start = batch?.startDate ? istDate(batch.startDate) : null
+  const months = s.course?.sections.length ?? 0
+  const wa = waLink(p, `I have a question about ${abbr}.`)
+  const alreadyWa = waLink(p, `I am already a student. Please add my course to ${s.email}.`)
   return (
     <>
-      <section aria-labelledby="dash-h" className="ld-s tight">
-        <div className="ld-wrap ld-stack">
-          <div className="ld-hi">
-            <h1 id="dash-h" className="ld-h1">
-              {rejected ? <>Hi {p.first}, we could not match your payment</>
-                : unpaid ? <>Hi {p.first}, your order is waiting for payment</>
-                : <>Hi {p.first}, your seat in {abbr} is <em>one step away</em></>}
-            </h1>
-            <p className="ld-meta">{unpaid || rejected ? `Order ${s.order!.order_no} · ${money(s.order!.total_minor, s.order!.currency)}`
-              : batch?.startDate ? `${s.runningBatch ? 'The current batch is running. ' : ''}The next one starts on ${dateShort(istDate(batch.startDate))}.` : 'Next batch dates are coming soon.'}</p>
-          </div>
-          {!s.verified && s.codeRequired && <p className="ld-note"><Icon name="info" className="mt-0.5 h-5 w-5 shrink-0" /><span><b>Already one of our students?</b> <Link href="/signup/confirm?next=%2Fdashboard">Confirm your email</Link> so we can check the learner list.</span></p>}
-          {!s.verified && !s.codeRequired && p.whatsapp && <p className="ld-note"><Icon name="info" className="mt-0.5 h-5 w-5 shrink-0" /><span><b>Already one of our students?</b> <a href={`${p.whatsapp}?text=${encodeURIComponent(`I am already a student. Please add my course to ${s.email}.`)}`} target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a> and we will add your course.</span></p>}
-          {(unpaid || rejected) && (
-            <div><Link href={rejected ? `/checkout/${s.order!.id}/pending` : `/checkout/${s.order!.id}`} className={`${buttonLg} max-[820px]:w-full`}>{rejected ? 'Fix the payment' : 'Pay now'} <Arrow /></Link></div>
-          )}
+      <div className="pg-h">
+        <div>
+          <h1 className="t-title">
+            {rejected ? <>Hi {p.first}, we could not match your payment</>
+              : unpaid ? <>Hi {p.first}, your order is waiting for payment</>
+              : <>Welcome, {p.first}</>}
+          </h1>
+          <p className="t-lead">{unpaid || rejected ? `Order ${s.order!.order_no} · ${money(s.order!.total_minor, s.order!.currency)}` : 'Your account is ready. Join a batch to open the lessons and live classes.'}</p>
         </div>
-      </section>
+        {(unpaid || rejected) && <Link href={rejected ? `/checkout/${s.order!.id}/pending` : `/checkout/${s.order!.id}`} className="btn">{rejected ? 'Fix the payment' : 'Pay now'}</Link>}
+      </div>
+
+      {!s.verified && s.codeRequired && <Note><b>Already one of our students?</b> <Link className="link link-s" href="/signup/confirm?next=%2Fdashboard">Confirm your email</Link> so we can check the learner list.</Note>}
+      {!s.verified && !s.codeRequired && alreadyWa && <Note><b>Already one of our students?</b> <a className="link link-s" href={alreadyWa} target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a> and we will add your course.</Note>}
+
       {!(unpaid || rejected) && (
-        <section aria-labelledby="next-h" className="ld-panel ld-s">
-          <div className="ld-wrap">
-            <article className="ld-opt">
-              <div className="ld-wide2">
-                <div className="grid gap-[18px]">
-                  <div className="oh"><NextBadge batch={batch} /><div><h2 id="next-h">{batch?.name ?? s.course?.title ?? 'Our next batch'}</h2><p>{batch?.startDate ? `${s.daysToNext && s.daysToNext > 0 ? `Starts in ${s.daysToNext} days` : `Starts ${dateLong(istDate(batch.startDate))}`}` : 'Dates coming soon'}</p></div></div>
-                  <Facts items={courseFacts(s, batch)} />
-                </div>
-                <div className="ld-buy">
-                  <Price s={s} />
-                  <Buy p={p} filled label={batch ? 'Join the next batch' : 'Join the program'} />
-                  {p.syllabusHref && <a href={p.syllabusHref} className="ld-link"><Icon name="down" className="h-4 w-4" />Download the syllabus</a>}
-                </div>
-              </div>
-            </article>
-            {s.verified && s.runningBatch && (
-              <p className="ld-note mt-5"><Icon name="info" className="mt-0.5 h-5 w-5 shrink-0" /><span><b>Already in the {s.runningBatch}?</b> We could not find {s.email} on its list. Log in with the email you gave at admission{p.whatsapp ? <>, or <a href={`${p.whatsapp.split('?')[0]}?text=${encodeURIComponent(`I am in the ${s.runningBatch}, please add my email ${s.email}`)}`} target="_blank" rel="noopener noreferrer">message us on WhatsApp</a> and we will add it</> : ''}.</span></p>
-            )}
-          </div>
-        </section>
+        <>
+          <Ticket cal={<Cal start={start} foot={months ? `${plural(months, 'month')}, live online` : 'Live online'} />} week={batch ? <Week batch={batch} /> : undefined}>
+            <p className="t-label"><b>Fee</b></p>
+            <Price s={s} />
+            {batch && <p className="t-small">{batch.name}{s.daysToNext && s.daysToNext > 0 ? ` · starts in ${plural(s.daysToNext, 'day')}` : ''}</p>}
+            <Buy p={p} filled label={start ? `Join the ${dateShort(start)} batch` : 'Join the program'} />
+            {wa && <a className="link" href={wa} target="_blank" rel="noopener noreferrer"><Wa />Ask on WhatsApp</a>}
+            {p.syllabusHref && <a className="link" href={p.syllabusHref}><Ic n="down" />Download the syllabus</a>}
+          </Ticket>
+          {s.verified && s.runningBatch && (
+            <div className="gap-t">
+              <Note><b>Already in the {s.runningBatch}?</b> We could not find {s.email} on its list. Log in with the email you gave at admission{p.whatsapp ? <>, or <a className="link link-s" href={waLink(p, `I am in the ${s.runningBatch}, please add my email ${s.email}`)!} target="_blank" rel="noopener noreferrer">message us on WhatsApp</a> and we will add it</> : ''}.</Note>
+            </div>
+          )}
+          <FreeLessons s={s} max={4} title={(n) => `Try ${plural(n, 'free lesson')} first`} lead="No payment needed" />
+        </>
       )}
-      <Program s={s} title="What you will learn" lead="Month by month." syllabusHref={p.syllabusHref} goal={p.goal} />
+      <Program s={s} title="What you will learn" lead="Month by month" />
     </>
   )
 }

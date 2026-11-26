@@ -1,8 +1,8 @@
 'use client'
 
-import { Icon } from '@educore/ui/marks'
-import { buttonLine } from '@/lib/ui'
+import { Ic, type IconName } from '../../_components/v11'
 
-export function PrintButton() {
-  return <button type="button" className={buttonLine} onClick={() => window.print()}><Icon name="print" />Print or save as PDF</button>
+/** Opens the browser's print dialog: "Print" or "Save as PDF". Hidden when printing by the page that uses it. */
+export function PrintButton({ label = 'Print or save as PDF', icon, className = 'btn btn-line' }: { label?: string; icon?: IconName; className?: string }) {
+  return <button type="button" className={className} onClick={() => window.print()}>{icon && <Ic n={icon} />}{label}</button>
 }

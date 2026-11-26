@@ -1,0 +1,26 @@
+/* Checkout and payment status (guide §15). Extra rules on top of _components/v11.css; every selector is scoped under .v11.
+   The error line (.ferr) and disabled buttons come from login/auth.css, which these pages import too. */
+/* payment methods: a real radio (hidden) inside the label, so the keyboard and screen readers get a radio group */
+.v11 label.method:has(input:focus-visible){outline:3px solid #F2B33D;outline-offset:3px}
+/* coupon */
+.v11 .cpn summary{list-style:none;cursor:pointer}
+.v11 .cpn summary::-webkit-details-marker{display:none}
+.v11 .cpn .coup{margin-top:6px}
+.v11 .coup .btn-sm{min-height:52px}
+.v11 .coup-on{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px}
+/* "I have paid" / "Pay ₹" stays in reach on a phone: sticky to the bottom edge of the payment column */
+.v11 .pay-act{margin-top:0}
+/* the screenshot upload on the payment status page */
+.v11 .drop{position:relative}
+.v11 .drop input[type="file"]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.v11 .drop input[type="file"]:focus-visible + label{outline:3px solid #F2B33D;outline-offset:3px}
+.v11 .drop label.btn{cursor:pointer}
+.v11 .send details > .fld{margin-top:16px}
+.v11 .send details > .form-act{margin-top:12px}
+.v11 .send details > .ferr{margin-top:12px}
+@container stage (max-width:560px){
+  /* a flex column, not a grid: a sticky grid item can only move inside its own cell, a flex item inside the whole column */
+  .v11 .co-main{display:flex;flex-direction:column}
+  .v11 .pay-act{position:sticky;bottom:0;z-index:30;margin-inline:calc(var(--gutter) * -1);padding:12px var(--gutter) calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--rule)}
+  .v11 .pay-act .t-label{display:none}
+}

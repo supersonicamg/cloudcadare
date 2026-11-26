@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { buttonLg, buttonQuiet } from '@/lib/ui'
+import { Ic } from '../../../../../_components/v11'
 import { saveAnswer, submitAttempt } from '../../../../quiz-actions'
 
 export interface PaperQuestion {
@@ -16,8 +15,10 @@ export interface Paper {
 type Selected = string | string[] | null
 
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+const isAnswered = (v: Selected | undefined) => v != null && !(Array.isArray(v) && v.length === 0)
 
-export function QuizRunner({ paper, resultHref, exitHref }: { paper: Paper; resultHref: string; exitHref: string }) {
+/** One question per screen, the answers as big rows you can tap anywhere. Every pick is saved as it is made. */
+export function QuizRunner({ paper, resultHref }: { paper: Paper; resultHref: string }) {
   const router = useRouter()
   const qs = paper.questions
   // coming back to an open attempt lands on the first question that has no answer yet
@@ -85,85 +86,77 @@ export function QuizRunner({ paper, resultHref, exitHref }: { paper: Paper; resu
     setFlagged((m) => ({ ...m, [q.id]: f }))
     if (answers[q.id] != null) save(q.id, answers[q.id] ?? null, f)
   }
+  function go(n: number) { setI(n); setConfirming(false) }
 
-  const answered = qs.filter((x) => answers[x.id] != null && !(Array.isArray(answers[x.id]) && (answers[x.id] as string[]).length === 0)).length
+  const answered = qs.filter((x) => isAnswered(answers[x.id])).length
+  const last = i === qs.length - 1
+  const unanswered = qs.length - answered
 
   const letters = 'ABCDEFGHIJKL'
   return (
-    <div className="flex min-h-screen flex-col">
-      <div className="flex h-16 items-center gap-4 border-b border-border bg-white px-[clamp(16px,2.4vw,32px)]">
-        <div className="min-w-0 flex-1 truncate font-semibold">
-          <small className="block text-[13px] font-medium text-mute">Quiz · {qs.length} {qs.length === 1 ? 'question' : 'questions'}</small>
-          {paper.test.title}
-        </div>
-        <Link href={exitHref} className="text-base font-semibold text-primary">Save and exit</Link>
+    <div className="qz">
+      <h1 className="t-label">
+        <b>{paper.test.title}</b> · <span data-testid="quiz-progress">Question {i + 1} of {qs.length} · {answered} answered</span> ·{' '}
+        {left !== null ? <><b className="tnum" data-testid="quiz-timer" role="timer">{clock(left)}</b> left</> : 'no time limit'}
+      </h1>
+      <div className="qsteps" aria-hidden="true" style={{ gridTemplateColumns: `repeat(${qs.length}, minmax(0, 1fr))` }}>
+        {qs.map((x, n) => <i key={x.id} className={n === i ? 'c' : isAnswered(answers[x.id]) ? 'd' : undefined} />)}
       </div>
-      <div className="grid flex-1 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="p-[clamp(24px,3.4vw,56px)]">
-          <p className="text-[15px] font-semibold text-primary" data-testid="quiz-progress">Question {i + 1} of {qs.length} · {answered} answered</p>
-          <div key={q.id}>
-            <h1 className="mt-2.5 max-w-[30em] whitespace-pre-line font-heading text-[clamp(24px,2.4vw,32px)] font-bold leading-tight tracking-[-0.03em]" data-testid="quiz-question">{q.stem.text}</h1>
-            <p className="mt-2 text-[15px] text-mute">{multi ? 'Choose all that apply.' : 'Choose one.'} {q.marks} {q.marks === 1 ? 'mark' : 'marks'}</p>
-            <ul className="mt-7 grid max-w-[640px] gap-3" role={multi ? 'group' : 'radiogroup'} aria-label="Options">
-              {q.options.map((o, n) => {
-                const on = picked(o.id)
-                return (
-                  <li key={o.id}>
-                    <label className={`relative flex cursor-pointer items-center gap-4 rounded-2xl border-2 px-5 py-[18px] text-lg font-medium leading-snug focus-within:ring-4 focus-within:ring-accent/55 ${on ? 'border-primary bg-tint-1' : 'border-border bg-white hover:border-field'}`}>
-                      <input type={multi ? 'checkbox' : 'radio'} name={`q-${q.id}`} checked={on} onChange={() => choose(o.id)} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
-                      <span aria-hidden="true" className={`grid h-8 w-8 shrink-0 place-items-center border-2 text-sm font-bold ${multi ? 'rounded-lg' : 'rounded-full'} ${on ? 'border-primary bg-primary text-primary-fg' : 'border-field'}`}>{letters[n]}</span>
-                      <span>{o.content?.text}</span>
-                    </label>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3.5">
-            {i < qs.length - 1 && <button type="button" className={buttonLg} onClick={() => setI(i + 1)}>Next <span aria-hidden="true">→</span></button>}
-            {!confirming ? (
-              <button type="button" className={i === qs.length - 1 ? buttonLg : buttonQuiet} onClick={() => setConfirming(true)} disabled={submitting}>Finish the quiz</button>
-            ) : (
-              <div className="flex flex-wrap items-center gap-3" role="alertdialog" aria-label="Finish the quiz">
-                <span className="text-base font-medium">{answered < qs.length ? `${qs.length - answered} unanswered. ` : ''}Submit your answers?</span>
-                <button type="button" className={buttonLg} onClick={() => void finish()} disabled={submitting}>{submitting ? 'Submitting…' : 'Yes, submit'}</button>
-                <button type="button" className={buttonQuiet} onClick={() => setConfirming(false)} disabled={submitting}>Keep going</button>
-              </div>
-            )}
-            <button type="button" onClick={flag} className="text-base font-semibold text-primary" aria-pressed={Boolean(flagged[q.id])}>{flagged[q.id] ? 'Remove the flag' : 'Flag to review later'}</button>
-            <button type="button" className="text-base font-semibold text-grey disabled:opacity-40" disabled={i === 0} onClick={() => setI(i - 1)}>Previous</button>
-          </div>
-          {failed && <p role="alert" className="mt-5 text-[15px] font-semibold text-danger">Something did not save. Your last answer may not be recorded; pick it again.</p>}
-        </div>
 
-        <aside className="border-t border-border bg-white px-6 py-7 lg:border-l lg:border-t-0">
-          <div className="mb-5 flex items-baseline justify-between border-b-2 border-fg pb-[18px]">
-            {left !== null
-              ? <b className={`font-heading text-4xl tabular-nums tracking-[-0.04em] ${left <= 60 ? 'text-danger' : ''}`} data-testid="quiz-timer" role="timer">{clock(left)}</b>
-              : <b className="font-heading text-2xl tracking-[-0.03em]">No time limit</b>}
-            <span className="text-sm text-mute" aria-live="polite">{failed ? 'Could not save. Check your connection.' : saving > 0 ? 'Saving…' : 'Saved'}</span>
+      <fieldset key={q.id}>
+        <legend className="t-h3" data-testid="quiz-question" style={{ whiteSpace: 'pre-line' }}>{q.stem.text}</legend>
+        <p className="t-label" style={{ marginTop: 8 }}>{multi ? 'Choose all that apply.' : 'Choose one.'} {q.marks} {q.marks === 1 ? 'mark' : 'marks'}</p>
+        <div className="opts">
+          {q.options.map((o, n) => (
+            <label key={o.id} className="opt">
+              <input type={multi ? 'checkbox' : 'radio'} name={`q-${q.id}`} checked={picked(o.id)} onChange={() => choose(o.id)} />
+              <span className="lt" aria-hidden="true">{letters[n]}</span>
+              <span>{o.content?.text}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <div className="acts">
+        <div className="lft">
+          {i > 0 && <button type="button" className="link link-s" onClick={() => go(i - 1)}>Previous question</button>}
+          <span className="t-label">
+            <span aria-live="polite">{failed ? 'Could not save. Check your connection.' : saving > 0 ? 'Saving…' : 'Saved'}</span>
+            {' '}· Answers save as you go. You can leave and come back.
+          </span>
+        </div>
+        {confirming ? (
+          <div className="qconfirm" role="alertdialog" aria-label="Finish the quiz">
+            <p className="t-card">{unanswered > 0 ? `${unanswered} unanswered. ` : ''}Submit your answers?</p>
+            <div>
+              <button type="button" className="btn" onClick={() => void finish()} disabled={submitting}>{submitting ? 'Submitting…' : 'Yes, submit'}</button>
+              <button type="button" className="link link-s" onClick={() => setConfirming(false)} disabled={submitting}>Keep going</button>
+            </div>
           </div>
-          <nav aria-label="Questions">
-            <h2 className="mb-3.5 text-[15px] font-semibold">Questions</h2>
-            <ol className="grid grid-cols-5 gap-2">
-              {qs.map((x, n) => {
-                const done = answers[x.id] != null
-                return (
-                  <li key={x.id}>
-                    <button type="button" onClick={() => setI(n)} aria-label={`Question ${n + 1}${done ? ', answered' : ''}${flagged[x.id] ? ', flagged' : ''}`} aria-current={n === i ? 'step' : undefined}
-                      className={`grid h-11 w-full place-items-center rounded-[10px] border-2 text-[15px] font-semibold ${n === i ? 'border-fg bg-accent' : done ? 'border-tint-1 bg-tint-1' : 'border-border'} ${flagged[x.id] ? 'shadow-[inset_0_-5px_0_var(--color-primary)]' : ''}`}>{n + 1}</button>
-                  </li>
-                )
-              })}
-            </ol>
-          </nav>
-          <div className="mt-[18px] grid gap-2 text-sm text-grey">
-            <span className="flex items-center gap-2.5"><i className="h-[18px] w-[18px] rounded-[5px] border-2 border-tint-1 bg-tint-1" />Answered</span>
-            <span className="flex items-center gap-2.5"><i className="h-[18px] w-[18px] rounded-[5px] border-2 border-fg bg-accent" />You are here</span>
-            <span className="flex items-center gap-2.5"><i className="h-[18px] w-[18px] rounded-[5px] border-2 border-border shadow-[inset_0_-5px_0_var(--color-primary)]" />Flagged to review</span>
-            <span className="flex items-center gap-2.5"><i className="h-[18px] w-[18px] rounded-[5px] border-2 border-border" />Not answered</span>
-          </div>
-        </aside>
+        ) : last ? (
+          <button type="button" className="btn" onClick={() => setConfirming(true)} disabled={submitting}>Finish the quiz</button>
+        ) : (
+          <button type="button" className="btn" onClick={() => go(i + 1)}>Next question</button>
+        )}
+      </div>
+
+      {failed && <p role="alert" className="note-l qfail"><Ic n="info" s /><span>Something did not save. Your last answer may not be recorded; pick it again.</span></p>}
+
+      <div className="qtools">
+        <button type="button" className="link link-s" onClick={flag} aria-pressed={Boolean(flagged[q.id])}>{flagged[q.id] ? 'Remove the flag' : 'Flag to review later'}</button>
+        {!last && !confirming && <button type="button" className="link link-s" onClick={() => setConfirming(true)} disabled={submitting}>Finish the quiz</button>}
+        <details className="qnav">
+          <summary className="link link-s">All questions</summary>
+          <ol className="qgrid">
+            {qs.map((x, n) => (
+              <li key={x.id}>
+                <button type="button" onClick={() => go(n)} aria-current={n === i ? 'step' : undefined} data-done={isAnswered(answers[x.id]) ? 'true' : undefined} data-flag={flagged[x.id] ? 'true' : undefined}
+                  aria-label={`Question ${n + 1}${isAnswered(answers[x.id]) ? ', answered' : ', not answered'}${flagged[x.id] ? ', flagged' : ''}`}>{n + 1}</button>
+              </li>
+            ))}
+          </ol>
+          <p className="t-label">Dark: answered. Underlined: flagged to review.</p>
+        </details>
       </div>
     </div>
   )

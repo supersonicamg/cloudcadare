@@ -4,13 +4,13 @@ import { loadGateway } from '@educore/core/commerce'
 import { readUpiSettings, upiPayLink, upiQrSvg, whatsappScreenshotLink } from '@educore/core/commerce/upi'
 import { isEnabled } from '@educore/features'
 import { FAKE_KEYS, hmacHex } from '@educore/integrations/payments'
-import { Icon, Logo, platformFor } from '@educore/ui/marks'
 import { requireMember } from '@/lib/dal'
 import { emailCodeRequired } from '@/lib/email-code'
 import { money } from '@/lib/money'
 import { paymentsOff } from '@/lib/online-payments'
 import { getShell } from '@/lib/shell'
-import { buttonLg, h1s, lead } from '@/lib/ui'
+import { Dg, Ic, V11Frame, Wa } from '../../_components/v11'
+import { CheckoutBar } from '../../_components/v11-bars'
 import { completeFree } from '../actions'
 import { CouponForm } from '../coupon-form'
 import { submitUpiPayment } from '../upi-actions'
@@ -18,27 +18,29 @@ import { CopyRow } from './copy-row'
 import { LockedPayments } from './locked-payments'
 import { MethodPicker, type Method } from './method-picker'
 import { PayButton } from './pay-button'
+import '../../login/auth.css'
+import '../checkout.css'
 
 export const metadata = { title: 'Checkout' }
 
 /*
- * A5 · Checkout (UPI live, Razorpay "coming soon").
+ * Checkout (UPI live, Razorpay "coming soon").
  * 1. One job: pay the exact amount and tell us it is done.
- * 2. One main action: "I have paid" (the only filled button; on phones it is pinned to the bottom of the screen).
+ * 2. One main action: "I have paid" (the only filled button; on phones it sticks to the bottom of the screen).
  * 3. Reading order: "Pay ₹49,999" -> method list (UPI chosen, Razorpay greyed) -> the QR panel (dominant: the biggest
- *    block, on stone) with three numbered steps -> UPI ID and note to copy -> "I have paid". The order summary sits
- *    beside it on desktop and is secondary (smaller, no fill): the total is the one big numeral.
+ *    block, on paper) with three numbered steps -> UPI ID and note to copy -> "I have paid". The order summary sits
+ *    beside it as facts, with the total as the one big number.
  *
  * Online payment switched off (lib/online-payments): the job is "enter your coupon code". "Apply code" is the one filled
- * button; the payment methods sit under it, greyed, with a blurred stand-in. No real UPI ID or QR reaches the page.
+ * button; the payment methods sit under it as locked rows. No real UPI ID or QR reaches the page.
  */
 export default async function Checkout({ params }: PageProps<'/[tenant]/checkout/[orderId]'>) {
   const { orderId } = await params
   if (!z.uuid().safeParse(orderId).success) notFound()
   const a = await requireMember(`/checkout/${orderId}`)
-  const [{ theme, brand, site }, order, items, gwPay, payments, proof, settings, { data: me }, codeRequired] = await Promise.all([
+  const [{ brand, site }, order, items, gwPay, payments, proof, settings, { data: me }, codeRequired] = await Promise.all([
     getShell(),
-    a.db.from('orders').select('id, order_no, status, total_minor, tax_minor, discount_minor, coupon_id, currency').eq('id', orderId).eq('member_id', a.memberId).maybeSingle(),
+    a.db.from('orders').select('id, order_no, status, total_minor, subtotal_minor, tax_minor, discount_minor, coupon_id, currency').eq('id', orderId).eq('member_id', a.memberId).maybeSingle(),
     a.db.from('order_items').select('title_snapshot').eq('order_id', orderId),
     a.db.from('payments').select('gateway_order_id, failure_reason').eq('order_id', orderId).eq('status', 'created').neq('gateway', 'upi_manual').not('gateway_order_id', 'is', null).limit(1).maybeSingle(),
     a.db.from('payments').select('amount_minor, status').eq('order_id', orderId),
@@ -64,7 +66,6 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   const free = o.status === 'awaiting_payment' && o.total_minor === 0
   const razorpayReady = Boolean(open && !free && gw && gwPay.data?.gateway_order_id)
   const couponsOn = isEnabled(a.bundle.features, 'commerce.coupons') && o.status === 'awaiting_payment' && paid === 0
-  const logo = platformFor(title)
   const wa = whatsappScreenshotLink(upi.whatsappNumber || brand.contact?.whatsapp || '', o.order_no, undefined)
   // With payment off the UPI settings are not real yet, so their WhatsApp number is not offered either.
   const help = (brand.contact?.whatsapp ?? (paused ? '' : upi.whatsappNumber)).replace(/\D/g, '')
@@ -82,46 +83,37 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   const upiOn = !paused && open && !free && upi.enabled && balance > 0
   const link = upiOn ? upiPayLink({ vpa: upi.vpa, payeeName: upi.payeeName || brand.name, amountMinor: balance, note: o.order_no }) : null
   const qr = link ? await upiQrSvg(link) : null
+  const due = money(balance, o.currency)
   const upiPanel = link && qr && (
-    <div className="grid gap-5">
-      <section aria-labelledby="qr-h" className="grid gap-6 rounded-[clamp(22px,2.6vw,32px)] bg-muted p-5 sm:p-7 md:grid-cols-[236px_minmax(0,1fr)] md:items-center">
-        <div className="grid justify-items-center gap-2 md:justify-items-start">
+    <>
+      <section aria-labelledby="qr-h" className="upi">
+        <h2 id="qr-h" className="sr">Pay with the QR code</h2>
+        <div className="qr">
           {/* The SVG is drawn by our own code from a link we built: no user input reaches the markup. */}
-          <div role="img" aria-label={`QR code to pay ${money(balance, o.currency)} to ${upi.vpa}`} className="w-[212px] rounded-2xl bg-white p-3 [&>svg]:block [&>svg]:h-auto [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} />
-          <p className="t-small tnum text-center md:text-left">{money(balance, o.currency)} is filled in for you</p>
-        </div>
-        <div className="grid gap-4">
-          <h2 id="qr-h" className="sr-only">Pay with the QR code</h2>
-          <ol className="grid gap-3.5">
-            {[
-              [<><b className="font-bold text-fg">Scan the code</b> with any UPI app.</>],
-              [<><b className="font-bold text-fg tnum">Pay {money(balance, o.currency)}.</b> Do not change the amount or the note.</>],
-              [<><b className="font-bold text-fg">Take a screenshot</b> of the success screen. You send it next.</>],
-            ].map(([text], i) => (
-              <li key={i} className="t-body flex items-start gap-3.5">
-                <span aria-hidden="true" className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-fg t-label !text-white tnum">{i + 1}</span>
-                <span>{text}</span>
-              </li>
-            ))}
-          </ol>
+          <div role="img" aria-label={`QR code to pay ${due} to ${upi.vpa}`} dangerouslySetInnerHTML={{ __html: qr }} />
+          <p className="t-label tnum">{due} is filled in for you</p>
           {/* On a phone the learner cannot scan their own screen: the same link opens their UPI app. */}
-          <a href={link} className="inline-flex min-h-11 w-fit items-center rounded-[10px] border-2 border-fg px-[18px] t-btn-sm hover:bg-white md:hidden">Open UPI app</a>
+          <a className="btn btn-line btn-sm upi-app" href={link}>Open UPI app</a>
         </div>
+        <ol className="steps">
+          <li><span className="n" aria-hidden="true">1</span><span className="t-body"><b>Scan the code</b> with any UPI app.</span></li>
+          <li><span className="n" aria-hidden="true">2</span><span className="t-body"><b className="tnum">Pay {due}.</b> Do not change the amount or the note.</span></li>
+          <li><span className="n" aria-hidden="true">3</span><span className="t-body"><b>Take a screenshot</b> of the success screen. You send it next.</span></li>
+        </ol>
       </section>
-      <div className="grid gap-2.5">
+      <dl className="copies">
         <CopyRow label="UPI ID" value={upi.vpa} />
-        <CopyRow label="Note" value={o.order_no} />
-      </div>
-      {/* Pinned to the bottom edge on phones so the one action never scrolls away. */}
-      <form action={submitUpiPayment.bind(null, o.id)}
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg px-5 py-3 md:static md:z-auto md:border-0 md:bg-transparent md:p-0">
-        <button className={`${buttonLg} w-full sm:w-auto`}>I have paid <span aria-hidden="true">→</span></button>
+        <CopyRow label="Note" value={o.order_no} tnum />
+      </dl>
+      <form action={submitUpiPayment.bind(null, o.id)} className="form-act pay-act">
+        <button className="btn">I have paid</button>
+        <span className="t-label">Next, you send us the screenshot.</span>
       </form>
-    </div>
+    </>
   )
 
   const methods: Method[] = []
-  if (upiOn && upiPanel) methods.push({ id: 'upi', title: 'UPI QR code', sub: 'Scan with GPay, PhonePe, Paytm or any UPI app', panel: upiPanel })
+  if (upiOn && upiPanel) methods.push({ id: 'upi', title: 'UPI QR code', sub: 'GPay, PhonePe, Paytm or any UPI app', panel: upiPanel })
   if (razorpayReady) {
     methods.push({
       id: 'razorpay', title: 'Card, net banking, wallets', sub: 'Pay online with Razorpay',
@@ -135,28 +127,29 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
   const couponOnly = paused && open && !free
 
   return (
-    <theme.FocusLayout brand={brand} bar={{ title: 'Checkout', note: 'Secure checkout', exit: { label: 'Leave checkout', href: '/courses' } }}>
-      <div className="mx-auto grid max-w-[1180px] items-start gap-10 px-[clamp(16px,5vw,72px)] pb-28 pt-8 md:pb-20 md:pt-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14">
-        <div className="grid min-w-0 gap-6">
-          <div className="grid gap-3">
-            <h1 className={h1s}>{free ? 'Your order is free' : couponOnly ? 'Join with a coupon code' : `Pay ${money(balance > 0 ? balance : o.total_minor, o.currency)}`}</h1>
-            <p className={lead}>
-              {couponOnly ? 'Online payment is switched off for now. You can join only with a coupon code that we give you.'
-                : paid > 0 ? `You have paid ${money(paid, o.currency)}. This is the rest.` : free ? 'The coupon covers the whole price. Enrol to start.' : 'Pay by UPI, then tell us it is done. We unlock your course once we see the payment.'}
+    <V11Frame shell="focus" header={<CheckoutBar brand={brand} middle="secure" exit={{ href: '/courses', label: 'Leave checkout' }} />}>
+      <div className="co">
+        <div className="co-main">
+          <div>
+            <p className="t-label tnum">Order {o.order_no}</p>
+            <h1 className="t-title" style={{ marginTop: 4 }}>{free ? 'Your order is free' : couponOnly ? 'Join with a coupon code' : `Pay ${money(balance > 0 ? balance : o.total_minor, o.currency)}`}</h1>
+            <p className="t-lead" style={{ marginTop: 8 }}>
+              {couponOnly ? 'Online payment is switched off for now. Enter the code we gave you.'
+                : paid > 0 ? `You have paid ${money(paid, o.currency)}. This is the rest.` : free ? 'The coupon covers the whole price. Enrol to start.' : 'Pay by UPI, then tell us it is done. We open your course as soon as we see the payment.'}
             </p>
           </div>
 
           {free ? (
-            <form action={completeFree.bind(null, o.id)}><button className={`${buttonLg} w-full sm:w-auto`}>Enrol for free</button></form>
+            <form action={completeFree.bind(null, o.id)} className="form-act"><button className="btn">Enrol for free</button></form>
           ) : couponOnly ? (
             <>
               {couponsOn ? (
-                <div className="grid gap-3">
-                  {o.coupon_id && <p role="status" className="t-body !text-fg">This code does not cover the full price. Remove it and enter the code we gave you.</p>}
+                <>
+                  {o.coupon_id && <p role="status" className="note-l"><Ic n="info" /><span>This code does not cover the full price. Remove it and enter the code we gave you.</span></p>}
                   <CouponForm orderId={o.id} applied={Boolean(o.coupon_id)} main />
-                </div>
+                </>
               ) : (
-                <p className="t-body rounded-2xl bg-muted p-5 !text-fg">A coupon cannot be added to this order. Please contact us.</p>
+                <p className="note-l"><Ic n="info" /><span>A coupon cannot be added to this order. Please contact us.</span></p>
               )}
               <LockedPayments />
             </>
@@ -164,45 +157,45 @@ export default async function Checkout({ params }: PageProps<'/[tenant]/checkout
             <>
               <MethodPicker methods={methods} initial={initial} />
               {gwPay.data?.failure_reason && razorpayReady && (
-                <p role="alert" className="t-label flex items-start gap-2 !text-fg"><Icon name="info" className="mt-px h-5 w-5 shrink-0 text-primary" />Your last card payment did not go through: {gwPay.data.failure_reason} You can try again.</p>
+                <p role="alert" className="ferr"><Ic n="info" s />Your last card payment did not go through: {gwPay.data.failure_reason} You can try again.</p>
               )}
             </>
           ) : (
-            <div className="grid gap-4 rounded-2xl bg-muted p-5">
-              <p className="t-body !text-fg">{open ? 'Online payment is not set up yet, so we will take your payment on WhatsApp.' : 'This order can no longer be paid.'}</p>
-              {open && helpHref && <a href={helpHref} target="_blank" rel="noopener noreferrer" className={`${buttonLg} w-fit`}>Message us to pay</a>}
+            <div className="stack">
+              <p className="note-l"><Ic n="info" /><span>{open ? 'Online payment is not set up yet, so we will take your payment on WhatsApp.' : 'This order can no longer be paid.'}</span></p>
+              {open && helpHref && <div className="form-act"><a href={helpHref} target="_blank" rel="noopener noreferrer" className="btn">Message us to pay</a></div>}
             </div>
-          )}
-
-          {helpHref && !free && (
-            <p className="t-small flex items-center gap-2.5">
-              <svg className="h-5 w-5 fill-[#25D366]" viewBox="0 0 24 24" aria-hidden="true"><use href="#lg-whatsapp" /></svg>
-              <span>{couponOnly ? 'Need a code?' : 'Payment stuck?'} <a href={helpHref} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline underline-offset-4">Message us on WhatsApp</a></span>
-            </p>
           )}
           {wa === null && upiOn && <p className="t-small">The academy has not added a WhatsApp number for screenshots yet. You will be able to upload it on the next page.</p>}
         </div>
 
-        <aside aria-labelledby="sum-h" className="grid gap-4 lg:sticky lg:top-8">
-          <h2 id="sum-h" className="sr-only">Order summary</h2>
-          <div className="grid gap-4 rounded-[24px] border border-border p-5 sm:p-6">
-            <div className="flex items-center gap-4">
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-muted">
-                {logo ? <Logo name={logo} className="h-9 w-9" /> : <Icon name="book" className="h-7 w-7" />}
-              </span>
-              <div className="min-w-0"><p className="t-card">{title}</p><p className="t-small tnum">Order {o.order_no}</p></div>
-            </div>
-            <div className="grid gap-1.5 border-t border-border pt-4">
-              {o.discount_minor > 0 && <p className="t-label flex items-baseline justify-between"><span>Coupon discount</span><span className="tnum !text-deep" data-testid="order-discount">&minus;{money(o.discount_minor, o.currency)}</span></p>}
-              {paid > 0 && <p className="t-label flex items-baseline justify-between"><span>Paid so far</span><span className="tnum">{money(paid, o.currency)}</span></p>}
-              <p className="flex items-baseline justify-between gap-4"><span className="t-label !text-fg">{paid > 0 ? 'Balance' : 'Total'}</span><span className="t-num !text-fg" data-testid="order-total">{money(paid > 0 ? balance : o.total_minor, o.currency)}</span></p>
-              {o.tax_minor > 0 && <p className="t-small text-right tnum">Includes {money(o.tax_minor, o.currency)} GST</p>}
-            </div>
+        <aside className="osum" aria-label="Order summary">
+          <div className="prod">
+            <Dg id="dg1" label={false} />
+            <span><b className="t-card">{title}</b></span>
           </div>
+          {(o.tax_minor > 0 || o.discount_minor > 0 || paid > 0) && (
+            <dl>
+              {o.discount_minor > 0 && <div><dt>Coupon discount</dt><dd className="tnum" data-testid="order-discount">&minus;{money(o.discount_minor, o.currency)}</dd></div>}
+              {o.tax_minor > 0 && <div><dt>{o.discount_minor > 0 ? 'Fee after coupon' : 'Fee'}</dt><dd className="tnum">{money(o.subtotal_minor, o.currency)}</dd></div>}
+              {o.tax_minor > 0 && <div><dt>GST</dt><dd className="tnum">{money(o.tax_minor, o.currency)}</dd></div>}
+              {paid > 0 && <div><dt>Paid so far</dt><dd className="tnum">{money(paid, o.currency)}</dd></div>}
+            </dl>
+          )}
+          <p className="tot">
+            <span className="t-small"><b>{paid > 0 ? 'Balance' : 'Total'}</b></span>
+            <span className="t-num tnum" data-testid="order-total">{money(paid > 0 ? balance : o.total_minor, o.currency)}</span>
+          </p>
           {couponsOn && !couponOnly && <CouponForm orderId={o.id} applied={Boolean(o.coupon_id)} />}
-          {refunds && <p className="t-small flex items-start gap-2"><Icon name="shield" className="mt-px h-5 w-5 shrink-0 text-primary" /><span>Questions about refunds? Read the <a href={refunds.href} className="font-semibold text-primary underline underline-offset-4">refund policy</a>.</span></p>}
+          {(helpHref || refunds) && (
+            <div className="help">
+              <span className="t-label">{couponOnly ? 'Need a code?' : 'Stuck, or need a code?'}</span>
+              {helpHref && <a className="link link-s" href={helpHref} target="_blank" rel="noopener noreferrer"><Wa />Ask on WhatsApp</a>}
+              {refunds && <a className="t-label" href={refunds.href}>Refund policy</a>}
+            </div>
+          )}
         </aside>
       </div>
-    </theme.FocusLayout>
+    </V11Frame>
   )
 }

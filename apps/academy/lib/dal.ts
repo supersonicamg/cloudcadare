@@ -1,5 +1,6 @@
 import 'server-only'
 import { cache } from 'react'
+import { io } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { createServerDb, getPlane } from '@educore/auth'
@@ -23,9 +24,16 @@ export interface Access {
 }
 
 // cookies() is awaited before getPlane() on purpose: `next build` stops there, so building needs no Supabase credentials.
-async function build(bundle: TenantBundle): Promise<Access | null> {
+// io() keeps the Supabase client out of prefetch prerenders, where cookies() does resolve: a new client reads the clock
+// to check the session's expiry, which Next.js rejects while prerendering. During a real request io() does nothing.
+async function sessionDb(bundle: TenantBundle) {
   const jar = await cookies()
-  const db = createServerDb(getPlane(bundle.tenant.planeId), jar)
+  await io()
+  return createServerDb(getPlane(bundle.tenant.planeId), jar)
+}
+
+async function build(bundle: TenantBundle): Promise<Access | null> {
+  const db = await sessionDb(bundle)
   const { data } = await db.auth.getClaims()
   if (!data?.claims) return null
   const { data: raw } = await db.rpc('my_access', { p_tenant_id: bundle.tenant.id })
@@ -52,8 +60,7 @@ async function tenantFromHost(): Promise<TenantBundle | null> {
 /** Signed in or not, nothing else. Cheap (JWT verified locally), safe for chrome such as the header link. */
 export const getViewer = cache(async () => {
   const bundle = await requireTenantBundle()
-  const jar = await cookies()
-  const db = createServerDb(getPlane(bundle.tenant.planeId), jar)
+  const db = await sessionDb(bundle)
   const { data } = await db.auth.getClaims()
   const meta = (data?.claims?.user_metadata ?? {}) as { full_name?: string }
   return { signedIn: Boolean(data?.claims), email: data?.claims?.email, fullName: meta.full_name }
